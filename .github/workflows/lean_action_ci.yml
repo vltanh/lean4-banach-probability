@@ -30,3 +30,7 @@ jobs:
           | sed 's/^public import //' | sort)
       - name: Audit axioms
         run: lake env lean scripts/Audit.lean
+      - name: Check that the documents' links to the code are current
+        run: python3 scripts/linkify_docs.py --check
+      - name: Check the Markdown tables
+        run: python3 scripts/check_md_tables.py README.md docs/SHORTER_PROOFS.md

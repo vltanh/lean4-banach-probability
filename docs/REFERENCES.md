@@ -12,7 +12,7 @@ Works cited in the README, in [SHORTER_PROOFS.md](SHORTER_PROOFS.md) and in the 
 - J. Bourgain, *Some remarks on Banach spaces in which martingale difference sequences are
   unconditional*, Ark. Mat. 21 (1983) 163–168. https://doi.org/10.1007/BF02384306
 - J.-C. Bourin, T. Zhang, *Matrix triangle inequalities: past, present, and future*,
-  arXiv:2610.30538 (2026).
+  [arXiv:2610.30538](https://arxiv.org/abs/2610.30538) (2026).
 - A. Buchholz, *Operator Khintchine inequality in non-commutative probability*, Math. Ann. 319 (2001)
   1–16. https://doi.org/10.1007/PL00004425; *Optimal constants in Khintchine type inequalities for
   fermions, Rademachers and q-Gaussian operators*, Bull. Pol. Acad. Sci. Math. 53 (2005) 315–321.
@@ -33,7 +33,7 @@ Works cited in the README, in [SHORTER_PROOFS.md](SHORTER_PROOFS.md) and in the 
 - E. Carlen, *Trace inequalities and quantum entropy: an introductory course*, Contemp. Math. 529
   (2010) 73–140. https://doi.org/10.1090/conm/529/10428
 - C. Y. Chuah, Z.-C. Liu, T. Mei, *Sharp operator Khintchine inequality and Z_2 property*,
-  arXiv:2503.03187 (preprint).
+  [arXiv:2503.03187](https://arxiv.org/abs/2503.03187) (preprint).
 - S. Cox, M. Veraar, *Some remarks on tangent martingale difference sequences in `L¹`-spaces*,
   Electron. Commun. Probab. 12 (2007) 421–433. https://doi.org/10.1214/ECP.v12-1328
 - I. Cuculescu, *Martingales on von Neumann algebras*, J. Multivariate Anal. 1 (1971) 17–27.
@@ -52,27 +52,27 @@ Works cited in the README, in [SHORTER_PROOFS.md](SHORTER_PROOFS.md) and in the 
 - S. Janson, *Gaussian Hilbert Spaces*, Cambridge University Press (1997).
   https://doi.org/10.1017/CBO9780511526169
 - J.-P. Kahane, *Sur les sommes vectorielles `Σ ±u_n`*, C. R. Acad. Sci. Paris 259 (1964) 2577–2580.
-  Zbl 0127.35504
+  [Zbl 0127.35504](https://zbmath.org/?q=an:0127.35504)
 - R. Latała, K. Oleszkiewicz, *On the best constant in the Khinchin–Kahane inequality*, Studia Math.
-  109 (1994) 101–104. Zbl 0812.60010
+  109 (1994) 101–104. [Zbl 0812.60010](https://zbmath.org/?q=an:0812.60010)
 - E. Lorist, J. van Neerven, *The bounds `ħ_{p,X} ≲ (β_{p,X})²` and `β_{p,X} ≲ (ħ_{p,X})²` are sharp*,
-  arXiv:2609.10444 (2026, preprint).
+  [arXiv:2609.10444](https://arxiv.org/abs/2609.10444) (2026, preprint).
 - F. Lust-Piquard, *Inégalités de Khintchine dans `C_p` (`1 < p < ∞`)*, C. R. Acad. Sci. Paris 303
-  (1986) 289–292. Zbl 0592.47038
+  (1986) 289–292. [Zbl 0592.47038](https://zbmath.org/?q=an:0592.47038)
 - F. Lust-Piquard, G. Pisier, *Non commutative Khintchine and Paley inequalities*, Ark. Mat. 29 (1991)
   241–260. https://doi.org/10.1007/BF02384340
 - L. Mackey, M. I. Jordan, R. Y. Chen, B. Farrell, J. A. Tropp, *Matrix concentration inequalities via
   the method of exchangeable pairs*, Ann. Probab. 42 (2014) 906–945.
-  https://doi.org/10.1214/13-AOP892, arXiv:1201.6002
+  https://doi.org/10.1214/13-AOP892, [arXiv:1201.6002](https://arxiv.org/abs/1201.6002)
 - J. Marcinkiewicz, *Sur l'interpolation d'opérations*, C. R. Acad. Sci. Paris 208 (1939) 1272–1273.
-  Zbl 0021.01601
+  [Zbl 0021.01601](https://zbmath.org/?q=an:0021.01601)
 - B. Maurey, *Système de Haar*, Séminaire Maurey–Schwartz 1974–1975, exposés 1 and 2.
   http://www.numdam.org/item?id=SAF_1974-1975____A1_0
 - B. Maurey, G. Pisier, *Séries de variables aléatoires vectorielles indépendantes et propriétés
   géométriques des espaces de Banach*, Studia Math. 58 (1976) 45–90.
   https://doi.org/10.4064/sm-58-1-45-90
 - T. R. McConnell, *Decoupling and stochastic integration in UMD Banach spaces*, Probab. Math. Statist.
-  10 (1989) 283–295. Zbl 0718.60050
+  10 (1989) 283–295. [Zbl 0718.60050](https://zbmath.org/?q=an:0718.60050)
 - S. Montgomery-Smith, *Concrete representation of martingales*, Electron. J. Probab. 3 (1998).
   https://doi.org/10.1214/EJP.v3-37
 - R. O'Donnell, *Analysis of Boolean Functions*, Cambridge University Press (2014).
@@ -90,7 +90,7 @@ Works cited in the README, in [SHORTER_PROOFS.md](SHORTER_PROOFS.md) and in the 
 - G. Pisier, Q. Xu, *Non-commutative `L^p`-spaces*, Handbook of the Geometry of Banach Spaces 2 (2003)
   1459–1517. https://doi.org/10.1016/s1874-5849(03)80041-4
 - N. Randrianantoanina, *Non-commutative martingale transforms*, J. Funct. Anal. 194 (2002) 181–212.
-  https://doi.org/10.1006/jfan.2002.3952, arXiv:math/0111264
+  https://doi.org/10.1006/jfan.2002.3952, [arXiv:math/0111264](https://arxiv.org/abs/math/0111264)
 - N. Tomczak-Jaegermann, *The moduli of smoothness and convexity and the Rademacher averages of trace
   classes `S_p`*, Studia Math. 50 (1974) 163–182.
 - I. Yaroslavtsev, *Even Fourier multipliers and martingale transforms in infinite dimensions*, Indag.
