@@ -8,6 +8,8 @@ public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
 public import Mathlib.Analysis.Convex.SpecificFunctions.Basic
 public import Mathlib.Analysis.Calculus.Deriv.MeanValue
+public import Mathlib.Analysis.Convex.Deriv
+public import Mathlib.Analysis.InnerProductSpace.Calculus
 
 /-!
 # Burkholder's inequality and square function inequality for Hilbert-space-valued martingales
@@ -41,11 +43,22 @@ argument.
    `U (x + h, y + k) ≤ U (x, y) + ⟨U_x (x, y), h⟩ + ⟨U_y (x, y), k⟩` with
    `U_x (x, y) = (∂_s U (|x|, |y|) / |x|) x` (`0` if `x = 0`) and similarly `U_y`, because
    `t ↦ U (x + t h, y + t k)` is concave. For `p ≥ 2`, `U = α ψ (|x|, |y|)` with
-   `ψ (s, r) = (s − (p − 1) r)(s + r)^{p−1}`; for `p ≤ 2`, `U = −α (p − 1)⁻¹ ψ (|y|, |x|)`. Along
-   a curve, `(ψ (S, R))'' = p (S + R)^{p−3} (−(p − 1)(p − 2) R (S' + R')² − (p − 2)(S + R)² S'' −
-   (p − 1)(S + R)(K − H))`, `H = S'² + S S''`, `K = R'² + R R''` (`psi_hasDerivAt_two`), which is
-   `≤ 0` if `p ≥ 2`, `H ≤ K` and `≥ 0` if `p ≤ 2`, `K ≤ H` (`psi_line`); along a line,
-   `H = |h|²`, `K = |k|²` (`psi_zigzag`).
+   `ψ (s, r) = (s − (p − 1) r)(s + r)^{p−1}`; for `p ≤ 2`, `U = −α (p − 1)⁻¹ ψ (|y|, |x|)`. Let
+   `G (t) = ψ (S (t), R (t))`, `S (t) = |x + t h|`, `R (t) = |y + t k|`. Off the (at most two)
+   kinks `t₁`, `t₂` (`x + t₁ h = 0 ≠ h`, `y + t₂ k = 0 ≠ k`), `G` is twice differentiable with
+   `G'' = p (S + R)^{p−3} (−(p − 1)(p − 2) R (S' + R')² − (p − 2)(S + R)² S'' −
+   (p − 1)(S + R)(K − H))`, `H = S'² + S S'' = |h|²`, `K = R'² + R R'' = |k|²`, `S'' ≥ 0`
+   (`psi_hasDerivAt_two`, `line_facts`), which is `≤ 0` if `p ≥ 2`, `|h| ≤ |k|` and `≥ 0` if
+   `p ≤ 2`, `|k| ≤ |h|` (`psi_two_sign`, `psi_line_smooth`): `G` is concave (resp. convex) on
+   each of the at most three closed intervals cut out by `t₁`, `t₂`. At `t₁`, where
+   `S (t) = |h| |t − t₁|`, the one-sided derivatives are `G'(t₁±) = ±ψ_s (0, R) |h| + ψ_r (0, R) R'`
+   with `ψ_s (0, r) = −p (p − 2) r^{p−1}`, so `G'(t₁−) − G'(t₁+) = 2 p (p − 2) R^{p−1} |h|`, which
+   is `≥ 0` for `p ≥ 2` and `≤ 0` for `p ≤ 2`; at `t₂`, `ψ_r (s, 0) = 0` and `G` is
+   differentiable; if `t₁ = t₂`, `G (t) = |t − t₁|^p ψ (|h|, |k|)` and both one-sided derivatives
+   vanish there (`psi_line_oneSided`). So the pieces glue into a function concave (resp. convex)
+   on `ℝ` (`bkh_concaveOn_glue`, `psi_line`), and `G (1) − G (0) ≤ G'(0+) ≤ (G'(0−) + G'(0+)) / 2`
+   (resp. `≥`), where the average is `ψ_s (|x|, |y|) ⟨x, h⟩ / |x| + ψ_r (|x|, |y|) ⟨y, k⟩ / |y|`
+   (`psi_zigzag`).
 3. `E U (X_{k+1}, Y_{k+1}) ≤ E U (X_k, Y_k)` (`method_step`): integrate the concavity property at
    `(X_k, Y_k)` with increments `(dX_{k+1}, dY_{k+1})`; the linear terms
    `E ⟨U_x (X_k, Y_k), dX_{k+1}⟩` vanish by the pull-out property of `E [· | ℱ_k]`
@@ -63,14 +76,11 @@ argument.
 
 The method is Burkholder's standard special-function argument: `U ≥ V`, the zig-zag concavity of
 `U`, the integration of the concavity along the martingale, and, for the square function, the
-`ℓ²(H)`-valued martingale; the proof here follows it step by step.
-Two points of mechanics:
-* the non-smooth points of `t ↦ U (x + t h, y + t k)` (where `x + t h = 0` or `y + t k = 0`): the
-  norms `|z|` are replaced by `√(|z|² + ε²)`, for which the second derivative has the required
-  sign everywhere, and `ε → 0` in the tangent inequality (`psi_zigzag_eps`, `psi_zigzag`), instead
-  of gluing the concave pieces at the kinks through one-sided derivatives;
-* the square function: the finite-dimensional `H^{n+1}` replaces `ℓ²(H)` (`n` is fixed), the same
-  argument.
+`ℓ²(H)`-valued martingale; the proof here follows it step by step, including the kinks of
+`t ↦ U (x + t h, y + t k)` (where `x + t h = 0 ≠ h` or `y + t k = 0 ≠ k`), at which the concave
+pieces are glued through their one-sided derivatives (`bkh_concaveOn_glue`, `psi_line`). One
+point of mechanics: for the square function, the finite-dimensional `H^{n+1}` replaces `ℓ²(H)`
+(`n` is fixed), the same argument.
 -/
 
 @[expose] public section
@@ -79,6 +89,92 @@ open MeasureTheory Filter Set
 open scoped Topology ENNReal InnerProductSpace RealInnerProductSpace
 
 namespace BanachProbability.Burkholder
+
+/-! ### Gluing concave functions through one-sided derivatives -/
+
+/-- **Gluing concave functions through one-sided derivatives.** If `f : ℝ → ℝ` is concave on the
+two parts `s ∩ Iic a` and `s ∩ Ici a` of a convex set `s`, and its left derivative `dl` and right
+derivative `dr` at `a` satisfy `dr ≤ dl`, then `f` is concave on `s`. (With `s = univ`: concave on
+`Iic a` and on `Ici a`. The convex case follows by applying this to `-f`.) -/
+theorem bkh_concaveOn_glue {s : Set ℝ} {f : ℝ → ℝ} {a dl dr : ℝ} (hs : Convex ℝ s)
+    (hl : ConcaveOn ℝ (s ∩ Iic a) f) (hr : ConcaveOn ℝ (s ∩ Ici a) f)
+    (hdl : HasDerivWithinAt f dl (Iic a) a) (hdr : HasDerivWithinAt f dr (Ici a) a)
+    (hd : dr ≤ dl) : ConcaveOn ℝ s f := by
+  refine concaveOn_of_slope_anti_adjacent hs ?_
+  intro x y z hx hz hxy hyz
+  rcases le_or_gt z a with hza | haz
+  · exact hl.slope_anti_adjacent ⟨hx, (hxy.trans hyz).le.trans hza⟩ ⟨hz, hza⟩ hxy hyz
+  rcases le_or_gt a x with hax | hxa
+  · exact hr.slope_anti_adjacent ⟨hx, hax⟩ ⟨hz, hax.trans (hxy.trans hyz).le⟩ hxy hyz
+  -- `x < a < z`: the slopes of chords ending at `a` are `≥ dl`, those starting at `a` are `≤ dr`
+  have ha : a ∈ s := hs.ordConnected.out hx hz ⟨hxa.le, haz.le⟩
+  have hL : ∀ u ∈ s, u < a → dl * (a - u) ≤ f a - f u := fun u hu hua => by
+    have := hl.le_slope_of_hasDerivWithinAt_Iio ⟨hu, hua.le⟩ ⟨ha, self_mem_Iic⟩ hua
+      (hdl.mono Iio_subset_Iic_self)
+    rwa [slope_def_field, le_div_iff₀ (sub_pos.2 hua)] at this
+  have hR : ∀ v ∈ s, a < v → f v - f a ≤ dr * (v - a) := fun v hv hav => by
+    have := hr.slope_le_of_hasDerivWithinAt_Ioi ⟨ha, self_mem_Ici⟩ ⟨hv, hav.le⟩ hav
+      (hdr.mono Ioi_subset_Ici_self)
+    rwa [slope_def_field, div_le_iff₀ (sub_pos.2 hav)] at this
+  rcases lt_trichotomy y a with hya | rfl | hay
+  · -- `x < y < a < z`
+    have h1 := hl.slope_anti_adjacent ⟨hx, hxa.le⟩ ⟨ha, self_mem_Iic⟩ hxy hya
+    have h2 := hL y (hs.ordConnected.out hx ha ⟨hxy.le, hya.le⟩) hya
+    have h3 := hR z hz haz
+    refine le_trans ?_ h1
+    rw [div_le_div_iff₀ (sub_pos.2 hyz) (sub_pos.2 hya)]
+    nlinarith [mul_le_mul_of_nonneg_right h3 (sub_pos.2 hya).le,
+      mul_le_mul_of_nonneg_right hd (mul_pos (sub_pos.2 haz) (sub_pos.2 hya)).le,
+      mul_le_mul_of_nonneg_right h2 (sub_pos.2 haz).le]
+  · -- `y = a`
+    have h2 := hL x hx hxa
+    have h3 := hR z hz haz
+    rw [div_le_div_iff₀ (sub_pos.2 hyz) (sub_pos.2 hxa)]
+    nlinarith [mul_le_mul_of_nonneg_right h3 (sub_pos.2 hxa).le,
+      mul_le_mul_of_nonneg_right hd (mul_pos (sub_pos.2 hyz) (sub_pos.2 hxa)).le,
+      mul_le_mul_of_nonneg_right h2 (sub_pos.2 hyz).le]
+  · -- `x < a < y < z`
+    have h1 := hr.slope_anti_adjacent ⟨ha, self_mem_Ici⟩ ⟨hz, haz.le⟩ hay hyz
+    have h2 := hL x hx hxa
+    have h3 := hR y (hs.ordConnected.out ha hz ⟨hay.le, hyz.le⟩) hay
+    refine h1.trans ?_
+    rw [div_le_div_iff₀ (sub_pos.2 hay) (sub_pos.2 hxy)]
+    nlinarith [mul_le_mul_of_nonneg_right h3 (sub_pos.2 hxa).le,
+      mul_le_mul_of_nonneg_right hd (mul_pos (sub_pos.2 hay) (sub_pos.2 hxa)).le,
+      mul_le_mul_of_nonneg_right h2 (sub_pos.2 hay).le]
+
+/-- A continuous `f : ℝ → ℝ` that is twice differentiable with `f'' ≤ 0` off two points `a`, `b`,
+and whose left derivative at `a` and at `b` is at least its right derivative there, is concave:
+for `a ≤ b`, it is concave on `Iic a`, `Icc a b` and `Ici b` (`f'' ≤ 0` on their interiors), and
+these pieces glue at `b`, then at `a` (`bkh_concaveOn_glue`). -/
+private theorem concaveOn_univ_of_kinks {f f' : ℝ → ℝ} {a b : ℝ} (hf : Continuous f)
+    (hd : ∀ t, t ≠ a → t ≠ b → HasDerivAt f (f' t) t ∧ ∃ c, HasDerivAt f' c t ∧ c ≤ 0)
+    (hk : ∀ t₀, t₀ = a ∨ t₀ = b → ∃ dl dr, HasDerivWithinAt f dl (Iic t₀) t₀ ∧
+      HasDerivWithinAt f dr (Ici t₀) t₀ ∧ dr ≤ dl) :
+    ConcaveOn ℝ univ f := by
+  wlog hab : a ≤ b generalizing a b
+  · exact this (fun t h1 h2 => hd t h2 h1) (fun t₀ ht => hk t₀ ht.symm) (not_le.1 hab).le
+  have piece : ∀ D : Set ℝ, Convex ℝ D → (∀ t ∈ interior D, t ≠ a ∧ t ≠ b) →
+      ConcaveOn ℝ D f := by
+    intro D hD hint
+    refine concaveOn_of_hasDerivWithinAt2_nonpos (f' := f') (f'' := deriv f') hD hf.continuousOn
+      (fun t ht => (hd t (hint t ht).1 (hint t ht).2).1.hasDerivWithinAt) (fun t ht => ?_)
+      (fun t ht => ?_)
+    · obtain ⟨c, hc, -⟩ := (hd t (hint t ht).1 (hint t ht).2).2
+      rw [hc.deriv]; exact hc.hasDerivWithinAt
+    · obtain ⟨c, hc, hc0⟩ := (hd t (hint t ht).1 (hint t ht).2).2
+      rwa [hc.deriv]
+  have h1 := piece (Iic a) (convex_Iic a) (by
+    rw [interior_Iic]; exact fun t ht => ⟨ht.ne, (ht.trans_le hab).ne⟩)
+  have h2 := piece (Icc a b) (convex_Icc a b) (by
+    rw [interior_Icc]; exact fun t ht => ⟨ht.1.ne', ht.2.ne⟩)
+  have h3 := piece (Ici b) (convex_Ici b) (by
+    rw [interior_Ici]; exact fun t ht => ⟨(hab.trans_lt ht).ne', ht.ne'⟩)
+  obtain ⟨dla, dra, hla, hra, hda⟩ := hk a (Or.inl rfl)
+  obtain ⟨dlb, drb, hlb, hrb, hdb⟩ := hk b (Or.inr rfl)
+  have h23 : ConcaveOn ℝ (Ici a) f := bkh_concaveOn_glue (convex_Ici a)
+    (by rwa [Ici_inter_Iic]) (by rwa [Ici_inter_Ici, sup_eq_right.2 hab]) hlb hrb hdb
+  exact bkh_concaveOn_glue convex_univ (by rwa [univ_inter]) (by rwa [univ_inter]) hla hra hda
 
 /-! ### The function `ψ (s, r) = (s − (p − 1) r) (s + r)^{p−1}` and its derivatives -/
 
@@ -92,10 +188,11 @@ private noncomputable def psiS (p s r : ℝ) : ℝ := p * (s + r) ^ (p - 2) * (s
 /-- `∂ψ/∂r = −p (p − 1) r (s + r)^{p−2}`. -/
 private noncomputable def psiR (p s r : ℝ) : ℝ := -(p * (p - 1)) * r * (s + r) ^ (p - 2)
 
-private theorem psi_hasDerivAt {p : ℝ} {S R : ℝ → ℝ} {S1 R1 t : ℝ}
-    (hS : HasDerivAt S S1 t) (hR : HasDerivAt R R1 t) (hpos : 0 < S t + R t) :
-    HasDerivAt (fun u => psi p (S u) (R u))
-      (psiS p (S t) (R t) * S1 + psiR p (S t) (R t) * R1) t := by
+/-- The (one-sided) derivative of `ψ` along a curve `(S, R)`: `ψ_s S' + ψ_r R'`. -/
+private theorem psi_hasDerivWithinAt {p : ℝ} {S R : ℝ → ℝ} {S1 R1 t : ℝ} {s : Set ℝ}
+    (hS : HasDerivWithinAt S S1 s t) (hR : HasDerivWithinAt R R1 s t) (hpos : 0 < S t + R t) :
+    HasDerivWithinAt (fun u => psi p (S u) (R u))
+      (psiS p (S t) (R t) * S1 + psiR p (S t) (R t) * R1) s t := by
   have h := (hS.sub (hR.const_mul (p - 1))).mul
     ((hS.add hR).rpow_const (p := p - 1) (Or.inl hpos.ne'))
   have e : (S t + R t) ^ (p - 1) = (S t + R t) ^ (p - 2) * (S t + R t) := by
@@ -105,6 +202,13 @@ private theorem psi_hasDerivAt {p : ℝ} {S R : ℝ → ℝ} {S1 R1 t : ℝ}
   convert h using 1
   simp only [Pi.add_apply, Pi.sub_apply]
   rw [e2, e]; ring
+
+private theorem psi_hasDerivAt {p : ℝ} {S R : ℝ → ℝ} {S1 R1 t : ℝ}
+    (hS : HasDerivAt S S1 t) (hR : HasDerivAt R R1 t) (hpos : 0 < S t + R t) :
+    HasDerivAt (fun u => psi p (S u) (R u))
+      (psiS p (S t) (R t) * S1 + psiR p (S t) (R t) * R1) t := by
+  rw [← hasDerivWithinAt_univ] at *
+  exact psi_hasDerivWithinAt hS hR hpos
 
 /-- The second derivative of `ψ` along a curve `(S, R)`:
 `p (S + R)^{p−3} (−(p − 1)(p − 2) R (S' + R')² − (p − 2)(S + R)² S'' − (p − 1)(S + R)(K − H))`
@@ -128,116 +232,51 @@ private theorem psi_hasDerivAt_two {p : ℝ} {S R S1 R1 : ℝ → ℝ} {S2 R2 t 
   simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply]
   rw [e2, e]; ring
 
-/-- Along a curve `(S, R)` with `S, R > 0`, `S'' ≥ 0`: if `p ≥ 2` and `S'² + S S'' ≤ R'² + R R''`,
-then `t ↦ ψ (S t, R t)` is concave, so it lies below its tangent at `0`; if `p ≤ 2` and the
-reverse inequality holds, it is convex and lies above its tangent. -/
-private theorem psi_line {p : ℝ} (hp : 1 < p) {S R S1 R1 S2 R2 : ℝ → ℝ}
-    (hSpos : ∀ t, 0 < S t) (hRpos : ∀ t, 0 < R t)
-    (dS : ∀ t, HasDerivAt S (S1 t) t) (dR : ∀ t, HasDerivAt R (R1 t) t)
-    (dS1 : ∀ t, HasDerivAt S1 (S2 t) t) (dR1 : ∀ t, HasDerivAt R1 (R2 t) t)
-    (hS2 : ∀ t, 0 ≤ S2 t) :
-    ((2 ≤ p ∧ ∀ t, S1 t ^ 2 + S t * S2 t ≤ R1 t ^ 2 + R t * R2 t) →
-      psi p (S 1) (R 1) ≤
-        psi p (S 0) (R 0) + (psiS p (S 0) (R 0) * S1 0 + psiR p (S 0) (R 0) * R1 0)) ∧
-    ((p ≤ 2 ∧ ∀ t, R1 t ^ 2 + R t * R2 t ≤ S1 t ^ 2 + S t * S2 t) →
-      psi p (S 0) (R 0) + (psiS p (S 0) (R 0) * S1 0 + psiR p (S 0) (R 0) * R1 0) ≤
-        psi p (S 1) (R 1)) := by
-  set G1 : ℝ → ℝ := fun u => psiS p (S u) (R u) * S1 u + psiR p (S u) (R u) * R1 u with hG1
-  set G2 : ℝ → ℝ := fun t => p * (S t + R t) ^ (p - 3) * (-(p - 1) * (p - 2) * R t *
-      (S1 t + R1 t) ^ 2 - (p - 2) * (S t + R t) ^ 2 * S2 t
-        - (p - 1) * (S t + R t) * ((R1 t ^ 2 + R t * R2 t) - (S1 t ^ 2 + S t * S2 t))) with hG2
-  have hpos : ∀ t, 0 < S t + R t := fun t => add_pos (hSpos t) (hRpos t)
-  have dG : ∀ t, HasDerivAt (fun u => psi p (S u) (R u)) (G1 t) t :=
-    fun t => psi_hasDerivAt (dS t) (dR t) (hpos t)
-  have dG1 : ∀ t, HasDerivAt G1 (G2 t) t :=
-    fun t => psi_hasDerivAt_two (dS t) (dR t) (dS1 t) (dR1 t) (hpos t)
-  obtain ⟨c, hc, hceq⟩ := exists_hasDerivAt_eq_slope (fun u => psi p (S u) (R u)) G1
-    zero_lt_one (fun t _ => (dG t).continuousAt.continuousWithinAt) (fun t _ => dG t)
-  simp only [sub_zero, div_one] at hceq
+/-- The sign of the second derivative of `ψ` along a curve (`psi_hasDerivAt_two`): with
+`S, R ≥ 0`, `S'' ≥ 0`, `H = S'² + S S''` and `K = R'² + R R''`, it is `≤ 0` if `p ≥ 2` and `H ≤ K`,
+and `≥ 0` if `p ≤ 2` and `K ≤ H`. -/
+private theorem psi_two_sign {p S R S1 R1 S2 R2 : ℝ} (hp : 1 < p) (hS : 0 ≤ S) (hR : 0 ≤ R)
+    (hS2 : 0 ≤ S2) :
+    ((2 ≤ p ∧ S1 ^ 2 + S * S2 ≤ R1 ^ 2 + R * R2) →
+      p * (S + R) ^ (p - 3) * (-(p - 1) * (p - 2) * R * (S1 + R1) ^ 2
+        - (p - 2) * (S + R) ^ 2 * S2 - (p - 1) * (S + R) * ((R1 ^ 2 + R * R2) - (S1 ^ 2 + S * S2)))
+        ≤ 0) ∧
+    ((p ≤ 2 ∧ R1 ^ 2 + R * R2 ≤ S1 ^ 2 + S * S2) →
+      0 ≤ p * (S + R) ^ (p - 3) * (-(p - 1) * (p - 2) * R * (S1 + R1) ^ 2
+        - (p - 2) * (S + R) ^ 2 * S2 - (p - 1) * (S + R) * ((R1 ^ 2 + R * R2) - (S1 ^ 2 + S * S2))))
+    := by
   have hp1 : 0 ≤ p - 1 := by linarith
-  have hpow : ∀ t, 0 ≤ p * (S t + R t) ^ (p - 3) :=
-    fun t => mul_nonneg (by linarith) (Real.rpow_nonneg (hpos t).le _)
-  refine ⟨fun ⟨hp2, hHK⟩ => ?_, fun ⟨hp2, hHK⟩ => ?_⟩
-  · have hanti : Antitone G1 := antitone_of_hasDerivAt_nonpos dG1 fun t => by
-      have h2 : 0 ≤ p - 2 := by linarith
-      have hb : -(p - 1) * (p - 2) * R t * (S1 t + R1 t) ^ 2 - (p - 2) * (S t + R t) ^ 2 * S2 t
-          - (p - 1) * (S t + R t) * ((R1 t ^ 2 + R t * R2 t) - (S1 t ^ 2 + S t * S2 t)) ≤ 0 := by
-        have := mul_nonneg (mul_nonneg (mul_nonneg hp1 h2) (hRpos t).le) (sq_nonneg (S1 t + R1 t))
-        have := mul_nonneg (mul_nonneg h2 (sq_nonneg (S t + R t))) (hS2 t)
-        have := mul_nonneg (mul_nonneg hp1 (hpos t).le) (sub_nonneg.2 (hHK t))
-        nlinarith
-      exact mul_nonpos_of_nonneg_of_nonpos (hpow t) hb
-    have := hanti hc.1.le
-    linarith
-  · have hmono : Monotone G1 := monotone_of_hasDerivAt_nonneg dG1 fun t => by
-      have h2 : 0 ≤ 2 - p := by linarith
-      have hb : 0 ≤ -(p - 1) * (p - 2) * R t * (S1 t + R1 t) ^ 2
-          - (p - 2) * (S t + R t) ^ 2 * S2 t
-          - (p - 1) * (S t + R t) * ((R1 t ^ 2 + R t * R2 t) - (S1 t ^ 2 + S t * S2 t)) := by
-        have := mul_nonneg (mul_nonneg (mul_nonneg hp1 h2) (hRpos t).le) (sq_nonneg (S1 t + R1 t))
-        have := mul_nonneg (mul_nonneg h2 (sq_nonneg (S t + R t))) (hS2 t)
-        have := mul_nonneg (mul_nonneg hp1 (hpos t).le) (sub_nonneg.2 (hHK t))
-        nlinarith
-      exact mul_nonneg (hpow t) hb
-    have := hmono hc.1.le
-    linarith
-
-/-! ### Smoothed norms along a line: `t ↦ √(a₀ + 2 a₁ t + a₂ t²)` -/
-
-/-- `S (t) = √(a₀ + 2 a₁ t + a₂ t²)`; with `a₀ = |x|² + ε²`, `a₁ = ⟨x, h⟩`, `a₂ = |h|²` this is
-`√(|x + t h|² + ε²)`. -/
-private noncomputable def qS (a₀ a₁ a₂ t : ℝ) : ℝ := √(a₀ + 2 * a₁ * t + a₂ * t ^ 2)
-
-/-- `S' = (a₁ + a₂ t) / S`. -/
-private noncomputable def qS1 (a₀ a₁ a₂ t : ℝ) : ℝ := (a₁ + a₂ * t) / qS a₀ a₁ a₂ t
-
-/-- `S'' = (a₂ − S'²) / S`. -/
-private noncomputable def qS2 (a₀ a₁ a₂ t : ℝ) : ℝ := (a₂ - qS1 a₀ a₁ a₂ t ^ 2) / qS a₀ a₁ a₂ t
-
-private theorem q_facts {a₀ a₁ a₂ : ℝ} (hpos : ∀ t, 0 < a₀ + 2 * a₁ * t + a₂ * t ^ 2)
-    (hcs : a₁ ^ 2 ≤ a₀ * a₂) :
-    (∀ t, 0 < qS a₀ a₁ a₂ t) ∧ (∀ t, HasDerivAt (qS a₀ a₁ a₂) (qS1 a₀ a₁ a₂ t) t) ∧
-    (∀ t, HasDerivAt (qS1 a₀ a₁ a₂) (qS2 a₀ a₁ a₂ t) t) ∧ (∀ t, 0 ≤ qS2 a₀ a₁ a₂ t) ∧
-    (∀ t, qS1 a₀ a₁ a₂ t ^ 2 + qS a₀ a₁ a₂ t * qS2 a₀ a₁ a₂ t = a₂) := by
-  have hSpos : ∀ t, 0 < qS a₀ a₁ a₂ t := fun t => Real.sqrt_pos.2 (hpos t)
-  have hSsq : ∀ t, qS a₀ a₁ a₂ t ^ 2 = a₀ + 2 * a₁ * t + a₂ * t ^ 2 :=
-    fun t => Real.sq_sqrt (hpos t).le
-  have dS : ∀ t, HasDerivAt (qS a₀ a₁ a₂) (qS1 a₀ a₁ a₂ t) t := by
-    intro t
-    have hσ := ((((hasDerivAt_id' (x := t)).const_mul (2 * a₁)).const_add a₀).add
-      ((hasDerivAt_pow 2 t).const_mul a₂)).sqrt (hpos t).ne'
-    convert hσ using 1
-    · funext u; simp only [qS, Pi.add_apply]
-    have := (hSpos t).ne'
-    change (a₁ + a₂ * t) / qS a₀ a₁ a₂ t = (2 * a₁ * 1 + a₂ * (((2 : ℕ) : ℝ) * t ^ (2 - 1))) /
-      (2 * qS a₀ a₁ a₂ t)
-    norm_num
-    field_simp
-  have dS1 : ∀ t, HasDerivAt (qS1 a₀ a₁ a₂) (qS2 a₀ a₁ a₂ t) t := by
-    intro t
-    have h := (((hasDerivAt_id' (x := t)).const_mul a₂).const_add a₁).fun_div (dS t)
-      (hSpos t).ne'
-    convert h using 1
-    · funext u; rfl
-    have := (hSpos t).ne'
-    unfold qS2 qS1
-    field_simp
-  have hS1le : ∀ t, qS1 a₀ a₁ a₂ t ^ 2 ≤ a₂ := by
-    intro t
-    unfold qS1
-    rw [div_pow, hSsq, div_le_iff₀ (hpos t)]
+  have hW : 0 ≤ S + R := add_nonneg hS hR
+  have hpow : 0 ≤ p * (S + R) ^ (p - 3) := mul_nonneg (by linarith) (Real.rpow_nonneg hW _)
+  refine ⟨fun ⟨hp2, hHK⟩ => mul_nonpos_of_nonneg_of_nonpos hpow ?_,
+    fun ⟨hp2, hHK⟩ => mul_nonneg hpow ?_⟩
+  · have h2 : 0 ≤ p - 2 := by linarith
+    have := mul_nonneg (mul_nonneg (mul_nonneg hp1 h2) hR) (sq_nonneg (S1 + R1))
+    have := mul_nonneg (mul_nonneg h2 (sq_nonneg (S + R))) hS2
+    have := mul_nonneg (mul_nonneg hp1 hW) (sub_nonneg.2 hHK)
     nlinarith
-  refine ⟨hSpos, dS, dS1, fun t => div_nonneg (sub_nonneg.2 (hS1le t)) (hSpos t).le, fun t => ?_⟩
-  unfold qS2
-  have := (hSpos t).ne'
-  field_simp
+  · have h2 : 0 ≤ 2 - p := by linarith
+    have := mul_nonneg (mul_nonneg (mul_nonneg hp1 h2) hR) (sq_nonneg (S1 + R1))
+    have := mul_nonneg (mul_nonneg h2 (sq_nonneg (S + R))) hS2
+    have := mul_nonneg (mul_nonneg hp1 hW) (sub_nonneg.2 hHK)
+    nlinarith
+
+/-- `∂ψ/∂s (0, r) = −p (p − 2) r^{p−1}`: `≤ 0` for `p ≥ 2`, `≥ 0` for `p ≤ 2`. -/
+private theorem psiS_zero_sign {p r : ℝ} (hp : 1 < p) (hr : 0 ≤ r) :
+    (2 ≤ p → psiS p 0 r ≤ 0) ∧ (p ≤ 2 → 0 ≤ psiS p 0 r) := by
+  unfold psiS
+  rw [zero_add, zero_sub]
+  have h0 : 0 ≤ p * r ^ (p - 2) := mul_nonneg (by linarith) (Real.rpow_nonneg hr _)
+  exact ⟨fun hp2 => mul_nonpos_of_nonneg_of_nonpos h0 (by nlinarith),
+    fun hp2 => mul_nonneg h0 (by nlinarith)⟩
+
+/-- `ψ` is homogeneous of degree `p`. -/
+private theorem psi_mul {p c s r : ℝ} (hp : 1 < p) (hc : 0 ≤ c) (hsr : 0 ≤ s + r) :
+    psi p (c * s) (c * r) = c ^ p * psi p s r := by
+  unfold psi
+  rw [show c * s + c * r = c * (s + r) by ring, Real.mul_rpow hc hsr,
+    show c ^ p = c ^ (1 + (p - 1)) by ring_nf, Real.rpow_add' hc (by linarith), Real.rpow_one]
   ring
-
-private theorem qS_zero (a₀ a₁ a₂ : ℝ) : qS a₀ a₁ a₂ 0 = √a₀ := by simp [qS]
-
-private theorem qS1_zero (a₀ a₁ a₂ : ℝ) : qS1 a₀ a₁ a₂ 0 = a₁ / √a₀ := by simp [qS1, qS]
-
-private theorem qS_one (a₀ a₁ a₂ : ℝ) : qS a₀ a₁ a₂ 1 = √(a₀ + 2 * a₁ + a₂) := by simp [qS]
 
 /-! ### The concavity property of `ψ` along lines in a Hilbert space -/
 
@@ -245,101 +284,261 @@ section Hilbert
 
 variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℝ H]
 
-private theorem quad_pos (x h : H) {ε : ℝ} (hε : 0 < ε) (t : ℝ) :
-    0 < ‖x‖ ^ 2 + ε ^ 2 + 2 * ⟪x, h⟫ * t + ‖h‖ ^ 2 * t ^ 2 := by
-  have e := norm_add_sq_real x (t • h)
-  rw [real_inner_smul_right, norm_smul, Real.norm_eq_abs, mul_pow, sq_abs] at e
-  have := sq_nonneg ‖x + t • h‖
-  have := pow_pos hε 2
-  nlinarith
+/-- `S' (t) = ⟨x + t h, h⟩ / |x + t h|`, the derivative of `S (t) = |x + t h|` where
+`x + t h ≠ 0`. -/
+private noncomputable def lineD (x h : H) (t : ℝ) : ℝ := ⟪x + t • h, h⟫ / ‖x + t • h‖
 
-private theorem inner_sq_le (x h : H) {ε : ℝ} :
-    ⟪x, h⟫ ^ 2 ≤ (‖x‖ ^ 2 + ε ^ 2) * ‖h‖ ^ 2 := by
-  have h1 := abs_real_inner_le_norm x h
-  have h2 : ⟪x, h⟫ ^ 2 ≤ (‖x‖ * ‖h‖) ^ 2 := by
-    rw [← sq_abs]; exact pow_le_pow_left₀ (abs_nonneg _) h1 2
-  nlinarith [sq_nonneg ε, sq_nonneg ‖h‖]
+/-- `S'' (t) = (|h|² − S' (t)²) / S (t)`. -/
+private noncomputable def lineD2 (x h : H) (t : ℝ) : ℝ :=
+  (‖h‖ ^ 2 - lineD x h t ^ 2) / ‖x + t • h‖
 
-/-- The smoothed inequality: `ψ` evaluated at `√(|·|² + ε²)` along the segment. -/
-private theorem psi_zigzag_eps {p : ℝ} (hp : 1 < p) (x y h k : H) {ε : ℝ} (hε : 0 < ε) :
-    ((2 ≤ p ∧ ‖h‖ ≤ ‖k‖) →
-      psi p √(‖x + h‖ ^ 2 + ε ^ 2) √(‖y + k‖ ^ 2 + ε ^ 2) ≤
-        psi p √(‖x‖ ^ 2 + ε ^ 2) √(‖y‖ ^ 2 + ε ^ 2) +
-          (psiS p √(‖x‖ ^ 2 + ε ^ 2) √(‖y‖ ^ 2 + ε ^ 2) * (⟪x, h⟫ / √(‖x‖ ^ 2 + ε ^ 2)) +
-            psiR p √(‖x‖ ^ 2 + ε ^ 2) √(‖y‖ ^ 2 + ε ^ 2) * (⟪y, k⟫ / √(‖y‖ ^ 2 + ε ^ 2)))) ∧
-    ((p ≤ 2 ∧ ‖k‖ ≤ ‖h‖) →
-      psi p √(‖x‖ ^ 2 + ε ^ 2) √(‖y‖ ^ 2 + ε ^ 2) +
-          (psiS p √(‖x‖ ^ 2 + ε ^ 2) √(‖y‖ ^ 2 + ε ^ 2) * (⟪x, h⟫ / √(‖x‖ ^ 2 + ε ^ 2)) +
-            psiR p √(‖x‖ ^ 2 + ε ^ 2) √(‖y‖ ^ 2 + ε ^ 2) * (⟪y, k⟫ / √(‖y‖ ^ 2 + ε ^ 2))) ≤
-        psi p √(‖x + h‖ ^ 2 + ε ^ 2) √(‖y + k‖ ^ 2 + ε ^ 2)) := by
-  obtain ⟨hSpos, dS, dS1, hS2, hSH⟩ := q_facts (quad_pos x h hε) (inner_sq_le x h)
-  obtain ⟨hRpos, dR, dR1, -, hRK⟩ := q_facts (quad_pos y k hε) (inner_sq_le y k)
-  have L := psi_line hp hSpos hRpos dS dR dS1 dR1 hS2
-  have ex : ‖x‖ ^ 2 + ε ^ 2 + 2 * ⟪x, h⟫ + ‖h‖ ^ 2 = ‖x + h‖ ^ 2 + ε ^ 2 := by
-    rw [norm_add_sq_real]; ring
-  have ey : ‖y‖ ^ 2 + ε ^ 2 + 2 * ⟪y, k⟫ + ‖k‖ ^ 2 = ‖y + k‖ ^ 2 + ε ^ 2 := by
-    rw [norm_add_sq_real]; ring
-  simp only [qS_zero, qS1_zero, qS_one, ex, ey] at L
-  refine ⟨fun ⟨hp2, hhk⟩ => L.1 ⟨hp2, fun t => ?_⟩, fun ⟨hp2, hhk⟩ => L.2 ⟨hp2, fun t => ?_⟩⟩
-  · rw [hSH, hRK]; exact pow_le_pow_left₀ (norm_nonneg _) hhk 2
-  · rw [hSH, hRK]; exact pow_le_pow_left₀ (norm_nonneg _) hhk 2
+/-- `S (t) = |x + t h|` is smooth where `x + t h ≠ 0` (and constant if `h = 0`), with `S'' ≥ 0` and
+`S'² + S S'' = |h|²`. -/
+private theorem line_facts (x h : H) {t : ℝ} (ht : x + t • h ≠ 0 ∨ h = 0) :
+    HasDerivAt (fun u : ℝ => ‖x + u • h‖) (lineD x h t) t ∧
+      HasDerivAt (lineD x h) (lineD2 x h t) t ∧ 0 ≤ lineD2 x h t ∧
+      lineD x h t ^ 2 + ‖x + t • h‖ * lineD2 x h t = ‖h‖ ^ 2 := by
+  rcases ht with ht | rfl
+  · have hN : 0 < ‖x + t • h‖ := norm_pos_iff.2 ht
+    have hlin : HasDerivAt (fun u : ℝ => x + u • h) h t := by
+      simpa using ((hasDerivAt_id' t).smul_const h).const_add x
+    have dS : HasDerivAt (fun u : ℝ => ‖x + u • h‖) (lineD x h t) t := by
+      have h3 := hlin.norm_sq.sqrt (pow_pos hN 2).ne'
+      simp only [Real.sqrt_sq_eq_abs, abs_norm] at h3
+      convert h3 using 1
+      unfold lineD; field_simp
+    have dN : HasDerivAt (fun u : ℝ => ⟪x + u • h, h⟫) (‖h‖ ^ 2) t := by
+      have e : ∀ u : ℝ, ⟪x + u • h, h⟫ = ⟪x, h⟫ + u * ‖h‖ ^ 2 := fun u => by
+        rw [inner_add_left, real_inner_smul_left, real_inner_self_eq_norm_sq]
+      simp only [e]
+      simpa using ((hasDerivAt_id' t).mul_const (‖h‖ ^ 2)).const_add ⟪x, h⟫
+    have hcs : lineD x h t ^ 2 ≤ ‖h‖ ^ 2 := by
+      unfold lineD
+      rw [div_pow, div_le_iff₀ (by positivity)]
+      have h1 := abs_real_inner_le_norm (x + t • h) h
+      have h2 : ⟪x + t • h, h⟫ ^ 2 ≤ (‖x + t • h‖ * ‖h‖) ^ 2 := by
+        rw [← sq_abs]; exact pow_le_pow_left₀ (abs_nonneg _) h1 2
+      nlinarith
+    refine ⟨dS, ?_, div_nonneg (sub_nonneg.2 hcs) hN.le, ?_⟩
+    · convert dN.div dS hN.ne' using 1
+      · funext u; simp [lineD]
+      · unfold lineD2 lineD
+        field_simp
+    · unfold lineD2; field_simp; ring
+  · have e1 : (fun u : ℝ => ‖x + u • (0 : H)‖) = fun _ => ‖x‖ := by funext u; simp
+    have e2 : lineD x (0 : H) = fun _ => 0 := by funext u; simp [lineD]
+    have e3 : lineD2 x (0 : H) t = 0 := by simp [lineD2, lineD]
+    rw [e1, e2, e3]
+    exact ⟨hasDerivAt_const _ _, hasDerivAt_const _ _, le_rfl, by simp⟩
 
-omit [InnerProductSpace ℝ H] in
-private theorem tendsto_sqrt_sq_add (z : H) :
-    Tendsto (fun ε : ℝ => √(‖z‖ ^ 2 + ε ^ 2)) (𝓝[>] 0) (𝓝 ‖z‖) := by
-  have hc : Continuous (fun ε : ℝ => √(‖z‖ ^ 2 + ε ^ 2)) := by fun_prop
-  have := (hc.tendsto 0).mono_left (nhdsWithin_le_nhds (s := Set.Ioi 0))
-  simpa [Real.sqrt_sq (norm_nonneg z)] using this
+/-- The kink of `t ↦ |x + t h|`: at most one `t₁` with `x + t₁ h = 0` if `h ≠ 0`. -/
+private theorem exists_kink (x h : H) : ∃ t₁ : ℝ, ∀ t : ℝ, x + t • h = 0 → h ≠ 0 → t = t₁ := by
+  by_cases hk : ∃ t₁ : ℝ, x + t₁ • h = 0 ∧ h ≠ 0
+  · obtain ⟨t₁, e₁, hh⟩ := hk
+    refine ⟨t₁, fun t e _ => ?_⟩
+    have : (t - t₁) • h = 0 := by
+      rw [sub_smul, show t • h - t₁ • h = (x + t • h) - (x + t₁ • h) by abel, e, e₁, sub_zero]
+    exact sub_eq_zero.1 ((smul_eq_zero.1 this).resolve_right hh)
+  · exact ⟨0, fun t e hh => absurd ⟨t, e, hh⟩ hk⟩
 
-private theorem tendsto_psi {p : ℝ} (hp : 1 < p) {l : Filter ℝ} {f g : ℝ → ℝ} {a b : ℝ}
-    (hf : Tendsto f l (𝓝 a)) (hg : Tendsto g l (𝓝 b)) :
-    Tendsto (fun ε => psi p (f ε) (g ε)) l (𝓝 (psi p a b)) := by
-  unfold psi
-  exact (hf.sub (hg.const_mul _)).mul ((hf.add hg).rpow_const (Or.inr (by linarith)))
+/-- At a kink `t₀` of `t ↦ |x + t h|`, `x + u h = (u − t₀) h`. -/
+private theorem line_eq_of_kink {x h : H} {t₀ : ℝ} (hz : x + t₀ • h = 0) (u : ℝ) :
+    x + u • h = (u - t₀) • h := by
+  rw [sub_smul, ← sub_eq_zero, show x + u • h - (u • h - t₀ • h) = x + t₀ • h by abel, hz]
 
-private theorem tendsto_psiS_mul {p : ℝ} {l : Filter ℝ} {f g : ℝ → ℝ} {a b c : ℝ}
-    (hf : Tendsto f l (𝓝 a)) (hg : Tendsto g l (𝓝 b)) (ha : c ≠ 0 → 0 < a) (hb : 0 ≤ b) :
-    Tendsto (fun ε => psiS p (f ε) (g ε) * (c / f ε)) l (𝓝 (psiS p a b * (c / a))) := by
-  rcases eq_or_ne c 0 with rfl | hc
-  · simpa using tendsto_const_nhds
-  have ha := ha hc
-  unfold psiS
-  exact ((tendsto_const_nhds.mul ((hf.add hg).rpow_const
-    (Or.inl (add_pos_of_pos_of_nonneg ha hb).ne'))).mul (hf.sub (hg.const_mul _))).mul
-    (tendsto_const_nhds.div hf ha.ne')
+/-- One-sided derivatives of `S (t) = |x + t h|` at any `t₀`: `S' (t₀) ∓ e`, `e ≥ 0`, with
+`e = |h|` at a kink (`x + t₀ h = 0`, where `S' (t₀) = 0`) and `e = 0` elsewhere. -/
+private theorem norm_line_oneSided (x h : H) (t₀ : ℝ) :
+    ∃ e : ℝ, 0 ≤ e ∧ (x + t₀ • h ≠ 0 → e = 0) ∧
+      HasDerivWithinAt (fun u : ℝ => ‖x + u • h‖) (lineD x h t₀ - e) (Iic t₀) t₀ ∧
+      HasDerivWithinAt (fun u : ℝ => ‖x + u • h‖) (lineD x h t₀ + e) (Ici t₀) t₀ := by
+  by_cases hz : x + t₀ • h = 0
+  · have hS : ∀ u : ℝ, ‖x + u • h‖ = |u - t₀| * ‖h‖ := fun u => by
+      rw [line_eq_of_kink hz u, norm_smul, Real.norm_eq_abs]
+    have hD : lineD x h t₀ = 0 := by simp [lineD, hz]
+    refine ⟨‖h‖, norm_nonneg _, fun h' => absurd hz h', ?_, ?_⟩
+    · rw [hD, zero_sub]
+      have hd : HasDerivAt (fun u : ℝ => (t₀ - u) * ‖h‖) (-‖h‖) t₀ := by
+        simpa using ((hasDerivAt_id' t₀).const_sub t₀).mul_const ‖h‖
+      refine hd.hasDerivWithinAt.congr (fun u hu => ?_) (by simp [hS])
+      rw [hS, abs_of_nonpos (sub_nonpos.2 hu), neg_sub]
+    · rw [hD, zero_add]
+      have hd : HasDerivAt (fun u : ℝ => (u - t₀) * ‖h‖) ‖h‖ t₀ := by
+        simpa using ((hasDerivAt_id' t₀).sub_const t₀).mul_const ‖h‖
+      refine hd.hasDerivWithinAt.congr (fun u hu => ?_) (by simp [hS])
+      rw [hS, abs_of_nonneg (sub_nonneg.2 hu)]
+  · have hd := (line_facts x h (Or.inl hz)).1
+    exact ⟨0, le_rfl, fun _ => rfl, by rw [sub_zero]; exact hd.hasDerivWithinAt,
+      by rw [add_zero]; exact hd.hasDerivWithinAt⟩
 
-private theorem tendsto_psiR_mul {p : ℝ} {l : Filter ℝ} {f g : ℝ → ℝ} {a b c : ℝ}
-    (hf : Tendsto f l (𝓝 a)) (hg : Tendsto g l (𝓝 b)) (ha : 0 ≤ a) (hb : c ≠ 0 → 0 < b) :
-    Tendsto (fun ε => psiR p (f ε) (g ε) * (c / g ε)) l (𝓝 (psiR p a b * (c / b))) := by
-  rcases eq_or_ne c 0 with rfl | hc
-  · simpa using tendsto_const_nhds
-  have hb := hb hc
-  unfold psiR
-  exact ((tendsto_const_nhds.mul hg).mul ((hf.add hg).rpow_const
-    (Or.inl (add_pos_of_nonneg_of_pos ha hb).ne'))).mul (tendsto_const_nhds.div hg hb.ne')
+/-- `G (t) = ψ (|x + t h|, |y + t k|)`, `ψ` along the line through `(x, y)` with direction
+`(h, k)`. -/
+private noncomputable def psiLine (p : ℝ) (x y h k : H) (t : ℝ) : ℝ :=
+  psi p ‖x + t • h‖ ‖y + t • k‖
+
+/-- `G' (t) = ψ_s S' + ψ_r R'`, the derivative of `G` away from the kinks. -/
+private noncomputable def psiLineD (p : ℝ) (x y h k : H) (t : ℝ) : ℝ :=
+  psiS p ‖x + t • h‖ ‖y + t • k‖ * lineD x h t + psiR p ‖x + t • h‖ ‖y + t • k‖ * lineD y k t
+
+/-- Off the kinks (where `x + t h = 0` with `h ≠ 0`, or `y + t k = 0` with `k ≠ 0`), `G` is twice
+differentiable, with `G'' ≤ 0` if `p ≥ 2`, `|h| ≤ |k|`, and `G'' ≥ 0` if `p ≤ 2`, `|k| ≤ |h|`
+(`psi_hasDerivAt_two`, `psi_two_sign`, with `H = |h|²`, `K = |k|²`). -/
+private theorem psi_line_smooth {p : ℝ} (hp : 1 < p) (x y h k : H) {t : ℝ}
+    (hx : x + t • h ≠ 0 ∨ h = 0) (hy : y + t • k ≠ 0 ∨ k = 0)
+    (hW : 0 < ‖x + t • h‖ + ‖y + t • k‖) :
+    HasDerivAt (psiLine p x y h k) (psiLineD p x y h k t) t ∧
+      ∃ c, HasDerivAt (psiLineD p x y h k) c t ∧ ((2 ≤ p ∧ ‖h‖ ≤ ‖k‖) → c ≤ 0) ∧
+        ((p ≤ 2 ∧ ‖k‖ ≤ ‖h‖) → 0 ≤ c) := by
+  obtain ⟨dS, dS1, hS2, hH⟩ := line_facts x h hx
+  obtain ⟨dR, dR1, -, hK⟩ := line_facts y k hy
+  have hsign := psi_two_sign hp (norm_nonneg (x + t • h)) (norm_nonneg (y + t • k)) hS2
+    (S1 := lineD x h t) (R1 := lineD y k t) (R2 := lineD2 y k t)
+  refine ⟨psi_hasDerivAt dS dR hW, _, psi_hasDerivAt_two (p := p) dS dR dS1 dR1 hW,
+    fun ⟨hp2, hhk⟩ => hsign.1 ⟨hp2, ?_⟩, fun ⟨hp2, hhk⟩ => hsign.2 ⟨hp2, ?_⟩⟩
+  · rw [hH, hK]; exact pow_le_pow_left₀ (norm_nonneg _) hhk 2
+  · rw [hH, hK]; exact pow_le_pow_left₀ (norm_nonneg _) hhk 2
+
+/-- **The one-sided derivatives of `G` at any point `t₀`** are `G' (t₀) ∓ e` (left, right), with
+`e ≤ 0` if `p ≥ 2` and `e ≥ 0` if `p ≤ 2`: so `G' (t₀−) ≥ G' (t₀+)` for `p ≥ 2` and
+`G' (t₀−) ≤ G' (t₀+)` for `p ≤ 2`, and their average is `G' (t₀) = ψ_s S' + ψ_r R'` (`psiLineD`,
+with `S' (t₀) = 0` at a kink of `S`). At a kink of `S = |x + t h|` only, where
+`S (t) = |h| |t − t₀|`, `e = ψ_s (0, R) |h|` with `ψ_s (0, r) = −p (p − 2) r^{p−1}`; at a kink of
+`R = |y + t k|` only, `e = 0` since `ψ_r (s, 0) = 0`; at a common kink,
+`G (t) = |t − t₀|^p ψ (|h|, |k|)` has both one-sided derivatives `0 = G' (t₀)`; elsewhere `G` is
+differentiable. -/
+private theorem psi_line_oneSided {p : ℝ} (hp : 1 < p) (x y h k : H) (t₀ : ℝ) :
+    ∃ e : ℝ, HasDerivWithinAt (psiLine p x y h k) (psiLineD p x y h k t₀ - e) (Iic t₀) t₀ ∧
+      HasDerivWithinAt (psiLine p x y h k) (psiLineD p x y h k t₀ + e) (Ici t₀) t₀ ∧
+      (2 ≤ p → e ≤ 0) ∧ (p ≤ 2 → 0 ≤ e) := by
+  by_cases h0 : x + t₀ • h = 0 ∧ y + t₀ • k = 0
+  · -- both kinks at `t₀`: `G (t) = |t − t₀|^p ψ (|h|, |k|)`, whose one-sided derivatives are `0`
+    have hG : ∀ u, psiLine p x y h k u = |u - t₀| ^ p * psi p ‖h‖ ‖k‖ := fun u => by
+      rw [psiLine, line_eq_of_kink h0.1, line_eq_of_kink h0.2, norm_smul, norm_smul,
+        Real.norm_eq_abs, psi_mul hp (abs_nonneg _) (by positivity)]
+    have hD : psiLineD p x y h k t₀ = 0 := by simp [psiLineD, lineD, h0.1, h0.2]
+    have hz : (0 : ℝ) ^ (p - 1) = 0 := Real.zero_rpow (sub_pos.2 hp).ne'
+    refine ⟨0, ?_, ?_, fun _ => le_rfl, fun _ => le_rfl⟩ <;> rw [hD]
+    · have hd : HasDerivAt (fun u : ℝ => (t₀ - u) ^ p * psi p ‖h‖ ‖k‖) (0 - 0) t₀ := by
+        convert (((hasDerivAt_id' t₀).const_sub t₀).rpow_const (p := p)
+          (Or.inr hp.le)).mul_const (psi p ‖h‖ ‖k‖) using 1
+        simp [hz]
+      refine hd.hasDerivWithinAt.congr (fun u hu => ?_) (by simp [hG])
+      rw [hG, abs_of_nonpos (sub_nonpos.2 hu), neg_sub]
+    · have hd : HasDerivAt (fun u : ℝ => (u - t₀) ^ p * psi p ‖h‖ ‖k‖) (0 + 0) t₀ := by
+        convert (((hasDerivAt_id' t₀).sub_const t₀).rpow_const (p := p)
+          (Or.inr hp.le)).mul_const (psi p ‖h‖ ‖k‖) using 1
+        simp [hz]
+      refine hd.hasDerivWithinAt.congr (fun u hu => ?_) (by simp [hG])
+      rw [hG, abs_of_nonneg (sub_nonneg.2 hu)]
+  · have hW : 0 < ‖x + t₀ • h‖ + ‖y + t₀ • k‖ := by
+      rcases not_and_or.1 h0 with h1 | h1
+      · exact add_pos_of_pos_of_nonneg (norm_pos_iff.2 h1) (norm_nonneg _)
+      · exact add_pos_of_nonneg_of_pos (norm_nonneg _) (norm_pos_iff.2 h1)
+    obtain ⟨ex, hex, hex0, hSl, hSr⟩ := norm_line_oneSided x h t₀
+    obtain ⟨ey, -, hey0, hRl, hRr⟩ := norm_line_oneSided y k t₀
+    -- `ψ_r (s, 0) = 0`: no jump at a kink of `|y + t k|`
+    have hRe : psiR p ‖x + t₀ • h‖ ‖y + t₀ • k‖ * ey = 0 := by
+      by_cases hy0 : y + t₀ • k = 0
+      · simp [psiR, hy0]
+      · rw [hey0 hy0, mul_zero]
+    -- the jump `2 ψ_s (0, r) |h|` at a kink of `|x + t h|`
+    have hSe : (2 ≤ p → psiS p ‖x + t₀ • h‖ ‖y + t₀ • k‖ * ex ≤ 0) ∧
+        (p ≤ 2 → 0 ≤ psiS p ‖x + t₀ • h‖ ‖y + t₀ • k‖ * ex) := by
+      by_cases hx0 : x + t₀ • h = 0
+      · rw [hx0, norm_zero]
+        have := psiS_zero_sign hp (norm_nonneg (y + t₀ • k))
+        exact ⟨fun hp2 => mul_nonpos_of_nonpos_of_nonneg (this.1 hp2) hex,
+          fun hp2 => mul_nonneg (this.2 hp2) hex⟩
+      · rw [hex0 hx0, mul_zero]; exact ⟨fun _ => le_rfl, fun _ => le_rfl⟩
+    refine ⟨psiS p ‖x + t₀ • h‖ ‖y + t₀ • k‖ * ex + psiR p ‖x + t₀ • h‖ ‖y + t₀ • k‖ * ey,
+      ?_, ?_, fun hp2 => by rw [hRe, add_zero]; exact hSe.1 hp2,
+      fun hp2 => by rw [hRe, add_zero]; exact hSe.2 hp2⟩
+    · convert psi_hasDerivWithinAt (p := p) hSl hRl hW using 1
+      · rfl
+      · unfold psiLineD; ring
+    · convert psi_hasDerivWithinAt (p := p) hSr hRr hW using 1
+      · rfl
+      · unfold psiLineD; ring
+
+/-- **Concavity of `ψ` along lines** (Burkholder's method): `G (t) = ψ (|x + t h|, |y + t k|)` is
+concave on `ℝ` if `p ≥ 2` and `|h| ≤ |k|`, and convex if `p ≤ 2` and `|k| ≤ |h|`. `G` is concave
+(resp. convex) on each of the at most three intervals cut out by the kinks of `|x + t h|` and
+`|y + t k|` (`psi_line_smooth`), and these pieces glue since the left derivative of `G` is at least
+(resp. at most) its right derivative at the kinks (`psi_line_oneSided`,
+`concaveOn_univ_of_kinks`). If `h = k = 0`, `G` is constant. -/
+private theorem psi_line {p : ℝ} (hp : 1 < p) (x y h k : H) :
+    ((2 ≤ p ∧ ‖h‖ ≤ ‖k‖) → ConcaveOn ℝ univ (psiLine p x y h k)) ∧
+      ((p ≤ 2 ∧ ‖k‖ ≤ ‖h‖) → ConvexOn ℝ univ (psiLine p x y h k)) := by
+  by_cases h0 : h = 0 ∧ k = 0
+  · obtain ⟨rfl, rfl⟩ := h0
+    have e : psiLine p x y (0 : H) 0 = fun _ => psi p ‖x‖ ‖y‖ := by funext t; simp [psiLine]
+    rw [e]
+    exact ⟨fun _ => concaveOn_const _ convex_univ, fun _ => convexOn_const _ convex_univ⟩
+  have hcont : Continuous (psiLine p x y h k) := by
+    have h1 : Continuous fun t : ℝ => ‖x + t • h‖ := by fun_prop
+    have h2 : Continuous fun t : ℝ => ‖y + t • k‖ := by fun_prop
+    unfold psiLine psi
+    exact (h1.sub (h2.const_mul _)).mul ((h1.add h2).rpow_const fun _ => Or.inr (by linarith))
+  obtain ⟨t₁, ht₁⟩ := exists_kink x h
+  obtain ⟨t₂, ht₂⟩ := exists_kink y k
+  have off : ∀ t, t ≠ t₁ → t ≠ t₂ → (x + t • h ≠ 0 ∨ h = 0) ∧ (y + t • k ≠ 0 ∨ k = 0) ∧
+      0 < ‖x + t • h‖ + ‖y + t • k‖ := fun t h1 h2 => by
+    have hx : x + t • h ≠ 0 ∨ h = 0 := by
+      by_cases hh : h = 0
+      · exact Or.inr hh
+      · exact Or.inl fun e => h1 (ht₁ t e hh)
+    have hy : y + t • k ≠ 0 ∨ k = 0 := by
+      by_cases hk : k = 0
+      · exact Or.inr hk
+      · exact Or.inl fun e => h2 (ht₂ t e hk)
+    refine ⟨hx, hy, ?_⟩
+    rcases not_and_or.1 h0 with hh | hk
+    · exact add_pos_of_pos_of_nonneg (norm_pos_iff.2 (hx.resolve_right hh)) (norm_nonneg _)
+    · exact add_pos_of_nonneg_of_pos (norm_nonneg _) (norm_pos_iff.2 (hy.resolve_right hk))
+  refine ⟨fun hA => concaveOn_univ_of_kinks (f' := psiLineD p x y h k) (a := t₁) (b := t₂) hcont
+    (fun t h1 h2 => ?_) (fun t₀ _ => ?_), fun hB => ?_⟩
+  · obtain ⟨hx, hy, hW⟩ := off t h1 h2
+    obtain ⟨hd, c, hc, hc0, -⟩ := psi_line_smooth hp x y h k hx hy hW
+    exact ⟨hd, c, hc, hc0 hA⟩
+  · obtain ⟨e, hl, hr, he, -⟩ := psi_line_oneSided hp x y h k t₀
+    exact ⟨_, _, hl, hr, by linarith [he hA.1]⟩
+  · rw [← neg_concaveOn_iff]
+    refine concaveOn_univ_of_kinks (f' := -psiLineD p x y h k) (a := t₁) (b := t₂) hcont.neg
+      (fun t h1 h2 => ?_) (fun t₀ _ => ?_)
+    · obtain ⟨hx, hy, hW⟩ := off t h1 h2
+      obtain ⟨hd, c, hc, -, hc0⟩ := psi_line_smooth hp x y h k hx hy hW
+      exact ⟨hd.neg, -c, hc.neg, by linarith [hc0 hB]⟩
+    · obtain ⟨e, hl, hr, -, he⟩ := psi_line_oneSided hp x y h k t₀
+      exact ⟨_, _, hl.neg, hr.neg, by linarith [he hB.1]⟩
 
 /-- **The concavity property of Burkholder's function along lines** (for `ψ`), with the
 "gradient" `(ψ_s (|x|, |y|) x / |x|, ψ_r (|x|, |y|) y / |y|)` (`0` where `x = 0`, resp. `y = 0`):
 for `p ≥ 2` and `|h| ≤ |k|`, `ψ (|x + h|, |y + k|) ≤ ψ (|x|, |y|) + ⟨∇ψ, (h, k)⟩`; for `p ≤ 2` and
-`|k| ≤ |h|`, the reverse inequality. The non-smooth points `x = 0`, `y = 0` are handled by
-replacing `|z|` by `√(|z|² + ε²)` and letting `ε → 0`. -/
+`|k| ≤ |h|`, the reverse inequality. `G (t) = ψ (|x + t h|, |y + t k|)` is concave (resp. convex)
+on `ℝ`, glued from its smooth pieces at the kinks (`psi_line`), so
+`G (1) − G (0) ≤ G' (0+) ≤ (G' (0−) + G' (0+)) / 2` (resp. `≥`), and the average of the one-sided
+derivatives at `0` is `⟨∇ψ, (h, k)⟩` (`psi_line_oneSided`). -/
 private theorem psi_zigzag {p : ℝ} (hp : 1 < p) (x y h k : H) :
     ((2 ≤ p ∧ ‖h‖ ≤ ‖k‖) → psi p ‖x + h‖ ‖y + k‖ ≤
         psi p ‖x‖ ‖y‖ + (psiS p ‖x‖ ‖y‖ * (⟪x, h⟫ / ‖x‖) + psiR p ‖x‖ ‖y‖ * (⟪y, k⟫ / ‖y‖))) ∧
     ((p ≤ 2 ∧ ‖k‖ ≤ ‖h‖) → psi p ‖x‖ ‖y‖ + (psiS p ‖x‖ ‖y‖ * (⟪x, h⟫ / ‖x‖) +
         psiR p ‖x‖ ‖y‖ * (⟪y, k⟫ / ‖y‖)) ≤ psi p ‖x + h‖ ‖y + k‖) := by
-  have hx := tendsto_sqrt_sq_add x
-  have hy := tendsto_sqrt_sq_add y
-  have hL := tendsto_psi hp (tendsto_sqrt_sq_add (x + h)) (tendsto_sqrt_sq_add (y + k))
-  have hR := (tendsto_psi hp hx hy).add
-    ((tendsto_psiS_mul (p := p) (c := ⟪x, h⟫) hx hy
-      (fun hc => norm_pos_iff.2 fun hx0 => hc (by simp [hx0])) (norm_nonneg y)).add
-    (tendsto_psiR_mul (p := p) (c := ⟪y, k⟫) hx hy (norm_nonneg x)
-      (fun hc => norm_pos_iff.2 fun hy0 => hc (by simp [hy0]))))
-  refine ⟨fun hA => le_of_tendsto_of_tendsto hL hR (eventually_nhdsWithin_of_forall
-    fun ε hε => (psi_zigzag_eps hp x y h k (Set.mem_Ioi.1 hε)).1 hA), fun hB =>
-    le_of_tendsto_of_tendsto hR hL (eventually_nhdsWithin_of_forall
-    fun ε hε => (psi_zigzag_eps hp x y h k (Set.mem_Ioi.1 hε)).2 hB)⟩
+  have e0 : psiLine p x y h k 0 = psi p ‖x‖ ‖y‖ := by simp [psiLine]
+  have e1 : psiLine p x y h k 1 = psi p ‖x + h‖ ‖y + k‖ := by simp [psiLine]
+  have eL : psiLineD p x y h k 0 =
+      psiS p ‖x‖ ‖y‖ * (⟪x, h⟫ / ‖x‖) + psiR p ‖x‖ ‖y‖ * (⟪y, k⟫ / ‖y‖) := by
+    simp [psiLineD, lineD]
+  obtain ⟨e, -, hr, he1, he2⟩ := psi_line_oneSided hp x y h k 0
+  have hr' := hr.mono Ioi_subset_Ici_self
+  refine ⟨fun hA => ?_, fun hB => ?_⟩
+  · have := ((psi_line hp x y h k).1 hA).slope_le_of_hasDerivWithinAt_Ioi (mem_univ 0)
+      (mem_univ 1) zero_lt_one hr'
+    rw [slope_def_field, e0, e1, eL, sub_zero, div_one] at this
+    linarith [he1 hA.1]
+  · have := ((psi_line hp x y h k).2 hB).le_slope_of_hasDerivWithinAt_Ioi (mem_univ 0)
+      (mem_univ 1) zero_lt_one hr'
+    rw [slope_def_field, e0, e1, eL, sub_zero, div_one] at this
+    linarith [he2 hB.1]
 
 end Hilbert
 
@@ -1038,16 +1237,13 @@ Proved by Burkholder's method, as in Osękowski's proof: Burkholder's function
 `U (x, y) = p (1 − 1/p*)^{p−1} (|x| − (p* − 1)|y|)(|x| + |y|)^{p−1}` (`burkholderU`) majorizes
 `V (x, y) = |x|^p − (p* − 1)^p |y|^p` (`burkholderU_ge`), and satisfies
 `U (x + h, y + k) ≤ U (x, y) + ⟨U_x (x, y), h⟩ + ⟨U_y (x, y), k⟩` whenever `|h| ≤ |k|`, because
-`t ↦ U (x + t h, y + t k)` is concave (computed through `ψ`, at the non-smooth points `x = 0`,
-`y = 0` by smoothing the norms and passing to the limit). Taking expectations and conditioning on
+`t ↦ U (x + t h, y + t k)` is concave (computed through `ψ`: concave between the at most two
+kinks, where `x + t h = 0 ≠ h` or `y + t k = 0 ≠ k`, by the sign of its second derivative, and the
+pieces glue into a concave function at the kinks, where the left derivative is at least the right
+derivative). Taking expectations and conditioning on
 `ℱ_{n−1}` (pull-out property) gives `E U (X_n, Y_n) ≤ E U (X_{n−1}, Y_{n−1}) ≤ … ≤ U (0, 0) = 0`,
 hence `E V (X_n, Y_n) ≤ 0`. If `‖Y_n‖_p = ∞` the right side is `∞`; otherwise every `Y_k`, `X_k`
-(`k ≤ n`) is in `L^p`, which makes every term integrable.
-
-Mechanics of one step: at the points where
-`U (x + t h, y + t k)` is not differentiable in `t`, the concavity is obtained by smoothing the
-norms (`√(|z|² + ε²)`) and letting `ε → 0`, instead of gluing concave pieces at the kinks, for
-which Mathlib has no lemma. The separability of `H` is not used. -/
+(`k ≤ n`) is in `L^p`, which makes every term integrable. The separability of `H` is not used. -/
 theorem inequality {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
     {ℱ : Filtration ℕ mΩ} {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℝ H]
     [CompleteSpace H] [TopologicalSpace.SeparableSpace H] {X Y : ℕ → Ω → H} {p : ℝ} (hp : 1 < p)
