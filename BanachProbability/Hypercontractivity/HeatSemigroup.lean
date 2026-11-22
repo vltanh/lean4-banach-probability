@@ -226,7 +226,8 @@ private theorem bonami_of_two_le {p q : ℝ} (hp : 2 ≤ p) (hpq : p ≤ q) (x y
 
 /-- **Lemma 6.2.3** (HNVW II, p. 20–21) for real `x`, `y` and `θ = √((p − 1) / (q − 1))`: the two
 cases above and, for `p < 2 < q`, `‖T (t)‖_{L^p → L^q} ≤ ‖T (t_1)‖_{L² → L^q} ‖T (t_2)‖_{L^p → L²}`
-with `e^{−t_2} = √(p − 1)`, `e^{−t_1} = √(1 / (q − 1))`. -/
+with `e^{−t_2} = √(p − 1)`, `e^{−t_1} = √(1 / (q − 1))` (the book has the misprint
+`√(1 / (q − 2))`). -/
 private theorem bonami_real {p q : ℝ} (hp : 1 < p) (hpq : p ≤ q) (x y : ℝ) :
     hsNorm q x (√((p - 1) / (q - 1)) * y) ≤ hsNorm p x y := by
   rcases le_total q 2 with hq | hq
