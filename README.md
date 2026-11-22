@@ -30,8 +30,7 @@ algebras and non-scalar multipliers in the noncommutative martingale results.
 
 **Planned extensions.** Kahane–Khintchine for Rademacher sums on a probability space; the
 noncommutative Khintchine inequality for rectangular and complex matrices (a proof of it along the route
-of Lust-Piquard and Pisier is in the package `VectorValuedHarmonicAnalysis`, *placeholder: not published
-yet*); Randrianantoanina's Theorem 3.1 for general semifinite von Neumann algebras and non-scalar
+of Lust-Piquard and Pisier is in preparation in [lean4-harmonic-analysis](https://github.com/vltanh/lean4-harmonic-analysis)); Randrianantoanina's Theorem 3.1 for general semifinite von Neumann algebras and non-scalar
 multipliers.
 
 ## Results
@@ -138,8 +137,8 @@ or completes that source.
 - **Noncommutative Khintchine.** Exchangeable pairs (Mackey–Jordan–Chen–Farrell–Tropp) for symmetric
   matrices, then the Hermitian dilation. For `2 < q < 3` their Remark 7.2 needs a variant of their
   Lemma 3.4 that they do not prove; it is proved here ([`trace_mean_value`](BanachProbability/Schatten/Trace.lean#L364)). This is a shorter proof
-  than the original one (Lust-Piquard; Lust-Piquard and Pisier), which is followed in the package
-  `VectorValuedHarmonicAnalysis`.
+  than the original one (Lust-Piquard; Lust-Piquard and Pisier), which is to be followed in
+  [lean4-harmonic-analysis](https://github.com/vltanh/lean4-harmonic-analysis) (in preparation).
 - **Type 2 and K-convexity.** Tomczak-Jaegermann: for even `q` the trace is expanded and compared, singular
   value by singular value, with the scalar Khintchine inequality, by the general Horn inequality; the other
   exponents by the three lines theorem for analytic families of matrices. Type 2 gives K-convexity by HNVW
