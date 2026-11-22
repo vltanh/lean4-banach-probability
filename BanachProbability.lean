@@ -16,6 +16,7 @@ public import BanachProbability.Martingale.Osekowski.Moment
 public import BanachProbability.Martingale.Osekowski.Sharpness
 public import BanachProbability.Martingale.Osekowski.SimpleFunctions
 public import BanachProbability.Martingale.Transform
+public import BanachProbability.Noncommutative.ComplexSchattenUMD
 public import BanachProbability.Noncommutative.CondExp
 public import BanachProbability.Noncommutative.Cuculescu
 public import BanachProbability.Noncommutative.Distribution

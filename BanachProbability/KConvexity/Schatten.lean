@@ -3,18 +3,22 @@ module
 public import BanachProbability.KConvexity.Basic
 public import BanachProbability.TypeTwo.Schatten
 public import BanachProbability.Schatten.CubeDuality
+import BanachProbability.Schatten.Block
 
 /-!
 # The Rademacher projection on `L^q (Ω; S_q)`
 
-For `q ≥ 2` the Rademacher projection is bounded on `L^q (Ω; S_q)`, real matrices, with norm at most
-`√(π/2) √(q + 1)`, uniformly in the size (`lpNorm_rademacherProj_schattenNorm_le`), and, by duality,
-with the same norm on `L^{q'} (Ω; S_{q'})` for symmetric matrices
-(`lpNorm_rademacherProj_schattenNorm_conj_le`). The proof is G. Pisier's, *Non-commutative
-vector valued `L_p`-spaces and completely `p`-summing maps*, Astérisque 247 (1998), p. 106: by
-averaging, the norm on `L_q (X)` is at most `K (L_q (X))`, the K-convexity constant of `L_q (X)`;
-for `X = S_q` this is `K (S_q)`, because `ℓ_q (S_q)` embeds isometrically in `S_q` (block diagonal
-matrices); and `K (S_q)` is at most the type 2 constant (here up to the factor `√(π/2)`).
+For `q ≥ 2` the Rademacher projection (real signs) is bounded on `L^q (Ω; S_q)`, real square
+matrices, with norm at most `√(π/2) √(q + 1)`, uniformly in the size
+(`lpNorm_rademacherProj_schattenNorm_le`), and, by duality, with the same bound on
+`L^{q'} (Ω; S_{q'})` for functions with symmetric values
+(`lpNorm_rademacherProj_schattenNorm_conj_le`). The proof is G. Pisier's, *Non-commutative vector
+valued `L_p`-spaces and completely `p`-summing maps*, Astérisque 247 (1998), p. 106, for the
+projection `P_1 ⊗ I_X`, `X = S_q`: by averaging, its norm on `L_q (X)` is at most `K (L_q (X))`, the
+K-convexity constant of `L_q (X)`; this is `K (S_q)`, because `ℓ_q (S_q)` embeds isometrically in
+`S_q` (block diagonal matrices); and `K (S_q)` is dominated by the type 2 constant (here up to the
+factor `√(π/2)`). The second statement is implicit there: Pisier uses the duality only with (8.4.4),
+the noncommutative Khintchine inequality for `1 ≤ p ≤ 2`, to get the inequality for `p ≥ 2`.
 -/
 
 @[expose] public section
@@ -27,49 +31,14 @@ open SignCube
 
 variable {N : ℕ} {n : Type*} [Fintype n] [DecidableEq n]
 
-/-- Block diagonal matrices: `‖diag (A_1, …, A_k)‖_{S_q}^q = Σ ‖A_i‖_{S_q}^q`. -/
-theorem schattenNorm_blockDiagonal_rpow {ι : Type*} [Fintype ι] [DecidableEq ι] {q : ℝ}
-    (hq : 0 < q) (A : ι → Matrix n n ℝ) :
-    schattenNorm (ENNReal.ofReal q) (Matrix.blockDiagonal A) ^ q =
-      ∑ i, schattenNorm (ENNReal.ofReal q) (A i) ^ q := by
-  have hA : ∀ i, ((A i)ᴴ * A i).IsHermitian := fun i =>
-    Matrix.isHermitian_conjTranspose_mul_self (A i)
-  -- diagonalise each block
-  set U : Matrix (n × ι) (n × ι) ℝ :=
-    Matrix.blockDiagonal fun i => ((hA i).eigenvectorUnitary : Matrix n n ℝ) with hU
-  have hUs : star U =
-      Matrix.blockDiagonal fun i => star ((hA i).eigenvectorUnitary : Matrix n n ℝ) := by
-    simp only [hU, Matrix.star_eq_conjTranspose, Matrix.blockDiagonal_conjTranspose]
-  have hUU : U ∈ Matrix.unitaryGroup (n × ι) ℝ := by
-    rw [Matrix.mem_unitaryGroup_iff, hUs, hU, ← Matrix.blockDiagonal_mul]
-    simp only [Unitary.mul_star_self_of_mem (hA _).eigenvectorUnitary.2]
-    exact Matrix.blockDiagonal_one
-  set μ : n × ι → ℝ := fun x => (hA x.2).eigenvalues x.1 with hμ
-  have hdiag : Matrix.diagonal μ =
-      Matrix.blockDiagonal fun i => Matrix.diagonal (hA i).eigenvalues := by
-    rw [Matrix.blockDiagonal_diagonal]
-  have h : (Matrix.blockDiagonal A)ᴴ * Matrix.blockDiagonal A =
-      (⟨U, hUU⟩ : Matrix.unitaryGroup (n × ι) ℝ) * Matrix.diagonal μ *
-        star ((⟨U, hUU⟩ : Matrix.unitaryGroup (n × ι) ℝ) : Matrix (n × ι) (n × ι) ℝ) := by
-    change _ = U * Matrix.diagonal μ * star U
-    rw [hUs, hdiag, hU, ← Matrix.blockDiagonal_mul, ← Matrix.blockDiagonal_mul,
-      Matrix.blockDiagonal_conjTranspose, ← Matrix.blockDiagonal_mul]
-    congr 1
-    funext i
-    exact eq_eigenvectorUnitary_mul_diagonal_mul_star (hA i)
-  have h1 := sum_comp_eq_of_map_eq (map_eigenvalues_eq_of_eq_mul_diagonal_mul_star
-    (Matrix.isHermitian_conjTranspose_mul_self (Matrix.blockDiagonal A)) ⟨U, hUU⟩ μ h)
-    fun x => √x ^ q
-  rw [schattenNorm_ofReal_rpow hq]
-  simp only [schattenNorm_ofReal_rpow hq, singularValue]
-  rw [h1, Fintype.sum_prod_type_right]
-
+/-- The product of sign vectors is commutative. -/
 private theorem kcs_mul_comm (ε η : Fin N → Bool) : mul ε η = mul η ε := by
   funext k
   simp only [mul]
   cases ε k <;> cases η k <;> rfl
 
-/-- The expectation `E_ω ε_k (ω) f (ω η) = η_k E (ε_k f)`, by translation invariance. -/
+/-- `E_ω ω_k f (ω η) = η_k E_ω ω_k f (ω)`, by translation invariance (stated for the sums over the
+cube). -/
 private theorem kcs_sum_translate {V : Type*} [AddCommGroup V] [Module ℝ V]
     (f : (Fin N → Bool) → V) (η : Fin N → Bool) (k : Fin N) :
     ∑ ω, coin (ω k) • f (mul ω η) = coin (η k) • ∑ ω, coin (ω k) • f ω := by
@@ -79,11 +48,11 @@ private theorem kcs_sum_translate {V : Type*} [AddCommGroup V] [Module ℝ V]
   change _ = coin (η k) • coin (mul η ω k) • f (mul η ω)
   rw [coin_mul_apply, smul_smul, ← mul_assoc, coin_mul_self, one_mul, kcs_mul_comm]
 
-/-- **The Rademacher projection on `L^q (Ω; S_q)`**, `q ≥ 2` (Pisier (1998), p. 106). -/
+/-- **The Rademacher projection on `L^q (Ω; S_q)`**, `q ≥ 2` (Pisier (1998), p. 106): its norm is at
+most `√(π/2) √(q + 1)`. -/
 theorem lpNorm_rademacherProj_schattenNorm_le {q : ℝ} (hq : 2 ≤ q)
     (f : (Fin N → Bool) → Matrix n n ℝ) :
-    SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
-        (fun ε => ∑ k, coin (ε k) • ((2 : ℝ) ^ N)⁻¹ • ∑ η, coin (η k) • f η) ≤
+    SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q (rademacherProj f) ≤
       √(Real.pi / 2) * √(q + 1) * SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q f := by
   have hq0 : 0 < q := by linarith
   have : Fact (1 ≤ ENNReal.ofReal q) := ⟨ENNReal.one_le_ofReal.2 (by linarith)⟩
@@ -117,8 +86,8 @@ theorem lpNorm_rademacherProj_schattenNorm_le {q : ℝ} (hq : 2 ≤ q)
       rw [avg_const, one_div 2, Real.rpow_rpow_inv (mul_nonneg (by positivity)
         (lpNorm_nonneg hs0 _ _)) two_ne_zero]
   -- the Rademacher projection of the block diagonal of the translates
-  have hP : rademacherProj (fun ω => B fun η => f (mul ω η)) = fun ω => B fun η =>
-      ∑ k, coin (mul ω η k) • ((2 : ℝ) ^ N)⁻¹ • ∑ η', coin (η' k) • f η' := by
+  have hP : rademacherProj (fun ω => B fun η => f (mul ω η)) =
+      fun ω => B fun η => rademacherProj f (mul ω η) := by
     funext ω
     simp only [rademacherProj, rademacherCoeff, ← map_smul, ← map_sum]
     congr 1
@@ -126,49 +95,49 @@ theorem lpNorm_rademacherProj_schattenNorm_le {q : ℝ} (hq : 2 ≤ q)
     simp only [Finset.sum_apply, Pi.smul_apply]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [kcs_sum_translate, coin_mul_apply, smul_comm ((2 : ℝ) ^ N)⁻¹ (coin (η k)), smul_smul]
-  have hK := (isTypeTwoBound_schattenSpace (n := n × (Fin N → Bool)) hq).isKConvexBound
-    (Real.sqrt_nonneg _) N fun ω => B fun η => f (mul ω η)
-  rw [hP, hL2 f, hL2 fun ε => ∑ k, coin (ε k) • ((2 : ℝ) ^ N)⁻¹ • ∑ η, coin (η k) • f η,
-    mul_left_comm] at hK
+  have hK := (isTypeTwoBound_schattenSpace (n := n × (Fin N → Bool)) hq).isKConvexBound N
+    fun ω => B fun η => f (mul ω η)
+  rw [hP, hL2 f, hL2 (rademacherProj f), mul_left_comm] at hK
   exact le_of_mul_le_mul_left hK (by positivity)
 
 omit [DecidableEq n] in
-/-- For the self-adjointness of the Rademacher projection:
-`E tr ((Σ_k ε_k c_k) Y) = Σ_k tr (c_k E (ε_k Y))`. -/
-private theorem kcs_avg_trace (c : Fin N → Matrix n n ℝ) (Y : (Fin N → Bool) → Matrix n n ℝ) :
+/-- `E tr ((Σ_k ε_k c_k) Y) = Σ_k tr (c_k E (ε_k Y))`. -/
+theorem avg_trace_sum_coin_smul_mul (c : Fin N → Matrix n n ℝ)
+    (Y : (Fin N → Bool) → Matrix n n ℝ) :
     (avg fun ε => ((∑ k, coin (ε k) • c k) * Y ε).trace) =
-      ∑ k, (c k * (((2 : ℝ) ^ N)⁻¹ • ∑ η, coin (η k) • Y η)).trace := by
-  simp only [avg, Finset.sum_mul, Matrix.trace_sum, Matrix.smul_mul, Matrix.mul_smul,
-    Matrix.trace_smul, Finset.mul_sum, smul_eq_mul, div_eq_inv_mul]
+      ∑ k, (c k * rademacherCoeff Y k).trace := by
+  simp only [rademacherCoeff, avg, Finset.sum_mul, Matrix.trace_sum, Matrix.smul_mul,
+    Matrix.mul_smul, Matrix.trace_smul, Finset.mul_sum, smul_eq_mul, div_eq_inv_mul]
   exact Finset.sum_comm
 
-/-- The Rademacher projection on `L^{q'} (Ω; S_{q'})`, `q ≥ 2`, by duality (Pisier (1998), p. 106).
--/
+omit [DecidableEq n] in
+/-- The Rademacher projection is self-adjoint for the trace duality:
+`E tr ((π_N f) Y) = E tr (f (π_N Y))`. -/
+private theorem kcs_avg_trace_comm (f Y : (Fin N → Bool) → Matrix n n ℝ) :
+    (avg fun ε => (rademacherProj f ε * Y ε).trace) =
+      avg fun ε => (f ε * rademacherProj Y ε).trace := by
+  simp only [Matrix.trace_mul_comm (f _)]
+  refine (avg_trace_sum_coin_smul_mul (rademacherCoeff f) Y).trans
+    (Eq.trans ?_ (avg_trace_sum_coin_smul_mul (rademacherCoeff Y) f).symm)
+  exact Finset.sum_congr rfl fun k _ => Matrix.trace_mul_comm _ _
+
+/-- The Rademacher projection on `L^{q'} (Ω; S_{q'})`, `q ≥ 2`, for symmetric `f`, by duality. It is
+implicit in Pisier (1998), p. 106, where the duality is used only with (8.4.4). -/
 theorem lpNorm_rademacherProj_schattenNorm_conj_le {q q' : ℝ} (hq : 2 ≤ q)
     (hqq' : q.HolderConjugate q') (f : (Fin N → Bool) → Matrix n n ℝ)
     (hf : ∀ ε, (f ε).IsHermitian) :
-    SignCube.lpNorm (schattenNorm (ENNReal.ofReal q')) q'
-        (fun ε => ∑ k, coin (ε k) • ((2 : ℝ) ^ N)⁻¹ • ∑ η, coin (η k) • f η) ≤
+    SignCube.lpNorm (schattenNorm (ENNReal.ofReal q')) q' (rademacherProj f) ≤
       √(Real.pi / 2) * √(q + 1) * SignCube.lpNorm (schattenNorm (ENNReal.ofReal q')) q' f := by
-  have hPf : ∀ ε : Fin N → Bool,
-      (∑ k, coin (ε k) • ((2 : ℝ) ^ N)⁻¹ • ∑ η, coin (η k) • f η).IsHermitian := fun ε => by
+  have hPf : ∀ ε, (rademacherProj f ε).IsHermitian := fun ε => by
     have : ∀ ε, (f ε)ᴴ = f ε := hf
-    simp only [Matrix.IsHermitian, Matrix.conjTranspose_sum, Matrix.conjTranspose_smul, this,
-      star_trivial]
+    simp only [rademacherProj, rademacherCoeff, Matrix.IsHermitian, Matrix.conjTranspose_sum,
+      Matrix.conjTranspose_smul, this, star_trivial]
   obtain ⟨Y, -, hY, hY'⟩ := exists_avg_trace_mul_eq_lpNorm hqq'.symm _ hPf
-  rw [← hY', kcs_avg_trace]
-  have h1 : ∑ k, ((((2 : ℝ) ^ N)⁻¹ • ∑ η, coin (η k) • f η) *
-      (((2 : ℝ) ^ N)⁻¹ • ∑ η, coin (η k) • Y η)).trace =
-      avg fun ε => (f ε * ∑ k, coin (ε k) • ((2 : ℝ) ^ N)⁻¹ • ∑ η, coin (η k) • Y η).trace := by
-    simp only [Matrix.trace_mul_comm (f _)]
-    rw [kcs_avg_trace]
-    exact Finset.sum_congr rfl fun k _ => Matrix.trace_mul_comm _ _
-  rw [h1]
+  rw [← hY', kcs_avg_trace_comm]
   have h0 := lpNorm_nonneg (fun A : Matrix n n ℝ => schattenNorm_nonneg (ENNReal.ofReal q') A) q' f
-  calc (avg fun ε => (f ε * ∑ k, coin (ε k) • ((2 : ℝ) ^ N)⁻¹ • ∑ η, coin (η k) • Y η).trace)
+  calc (avg fun ε => (f ε * rademacherProj Y ε).trace)
       ≤ SignCube.lpNorm (schattenNorm (ENNReal.ofReal q')) q' f *
-          SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
-            (fun ε => ∑ k, coin (ε k) • ((2 : ℝ) ^ N)⁻¹ • ∑ η, coin (η k) • Y η) :=
+          SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q (rademacherProj Y) :=
         (le_abs_self _).trans (abs_avg_trace_mul_le hqq'.symm _ _)
     _ ≤ SignCube.lpNorm (schattenNorm (ENNReal.ofReal q')) q' f *
           (√(Real.pi / 2) * √(q + 1) * 1) := by

@@ -2,7 +2,6 @@ module
 
 public import BanachProbability.Schatten.Horn
 public import BanachProbability.Schatten.Space
-public import BanachProbability.Noncommutative.SchattenUMD
 
 /-!
 # Schatten norms of complex matrices
@@ -14,8 +13,8 @@ as in the real case (`schattenNorm`). With the *realification*
 occurs twice, so `‖A‖_{S_q} = 2^{−1/q} ‖realify A‖_{S_q}` (`complexSchattenNorm_eq_realify`), and
 the facts about real Schatten norms carry over: norm axioms, adjoints,
 `‖Aᴴ A‖_{S_{q/2}} = ‖A‖_{S_q}²`, Hölder's inequality. `ComplexSchattenSpace q m n` is the resulting
-complex normed space; as a real space it embeds isometrically in `SchattenSpace q (m ⊕ m) (n ⊕ n)`,
-so its UMD constants are at most those of the real space (`umdConst_complexSchattenSpace_le`).
+complex normed space; as a real space it embeds isometrically in `SchattenSpace q (m ⊕ m) (n ⊕ n)`
+(see `BanachProbability.Noncommutative.ComplexSchattenUMD` for its UMD constants).
 -/
 
 @[expose] public section
@@ -33,24 +32,29 @@ def realify (A : Matrix m n ℂ) : Matrix (m ⊕ m) (n ⊕ n) ℝ :=
   Matrix.fromBlocks (A.map Complex.re) (-A.map Complex.im) (A.map Complex.im) (A.map Complex.re)
 
 omit [Fintype m] [Fintype n] in
+/-- The realification is additive. -/
 theorem realify_add (A B : Matrix m n ℂ) : realify (A + B) = realify A + realify B := by
   ext (i | i) (j | j) <;> simp [realify, add_comm]
 
 omit [Fintype m] [Fintype n] in
+/-- The realification is homogeneous, for real scalars. -/
 theorem realify_smul (c : ℝ) (A : Matrix m n ℂ) : realify (c • A) = c • realify A := by
   ext (i | i) (j | j) <;> simp [realify]
 
 omit [Fintype l] [Fintype n] in
+/-- The realification is multiplicative. -/
 theorem realify_mul (A : Matrix l m ℂ) (B : Matrix m n ℂ) :
     realify (A * B) = realify A * realify B := by
   ext (i | i) (j | j) <;>
     simp [realify, Matrix.mul_apply, Finset.sum_add_distrib, sub_eq_add_neg, add_comm]
 
 omit [Fintype m] [Fintype n] in
+/-- The realification of the adjoint is the transpose of the realification. -/
 theorem realify_conjTranspose (A : Matrix m n ℂ) : realify Aᴴ = (realify A)ᵀ := by
   ext (i | i) (j | j) <;> simp [realify]
 
 omit [Fintype m] [Fintype n] in
+/-- The realification is injective. -/
 theorem realify_injective : Function.Injective (realify : Matrix m n ℂ → _) := by
   intro A B h
   ext i j
@@ -59,6 +63,7 @@ theorem realify_injective : Function.Injective (realify : Matrix m n ℂ → _) 
   · simpa [realify] using congrFun (congrFun h (Sum.inr i)) (Sum.inl j)
 
 omit [Fintype n] in
+/-- The realification of the unit matrix is the unit matrix. -/
 theorem realify_one [DecidableEq n] : realify (1 : Matrix n n ℂ) = 1 := by
   ext (i | i) (j | j) <;> simp [realify, Matrix.one_apply, apply_ite]
 
@@ -92,8 +97,9 @@ private theorem complexSingularValue_nonneg (A : Matrix m n ℂ) (i : n) :
     0 ≤ complexSingularValue A i :=
   Real.sqrt_nonneg _
 
-/-- The spectral theorem for a complex Hermitian matrix: `A = U diag (λ) Uᴴ`. -/
-private theorem eq_eigenvectorUnitary_mul_diagonal_mul_conjTranspose {A : Matrix n n ℂ}
+/-- The spectral theorem for a complex Hermitian matrix: `A = U diag (λ) Uᴴ`, as
+`eq_eigenvectorUnitary_mul_diagonal_mul_star` for real symmetric matrices. -/
+theorem eq_eigenvectorUnitary_mul_diagonal_mul_conjTranspose {A : Matrix n n ℂ}
     (hA : A.IsHermitian) :
     A = (hA.eigenvectorUnitary : Matrix n n ℂ) *
       Matrix.diagonal (fun i => (hA.eigenvalues i : ℂ)) *
@@ -102,8 +108,9 @@ private theorem eq_eigenvectorUnitary_mul_diagonal_mul_conjTranspose {A : Matrix
   simp only [Unitary.conjStarAlgAut_apply]
   rfl
 
-/-- The eigenvalues of `B = U diag (μ) Uᴴ`, `U` unitary, are the `μ_i` up to order. -/
-private theorem map_eigenvalues_eq_of_eq_mul_diagonal_mul_conjTranspose {B : Matrix n n ℂ}
+/-- The eigenvalues of a complex matrix `B = U diag (μ) Uᴴ`, `U` unitary and `μ` real, are the `μ_i`
+up to order, as `map_eigenvalues_eq_of_eq_mul_diagonal_mul_star` for real matrices. -/
+theorem map_eigenvalues_eq_of_eq_mul_diagonal_mul_conjTranspose {B : Matrix n n ℂ}
     (hB : B.IsHermitian) {U : Matrix n n ℂ} (hU : Uᴴ * U = 1) (μ : n → ℝ)
     (h : B = U * Matrix.diagonal (fun i => (μ i : ℂ)) * Uᴴ) :
     Multiset.map hB.eigenvalues Finset.univ.val = Multiset.map μ Finset.univ.val := by
@@ -220,6 +227,7 @@ theorem complexSchattenNorm_map_ofReal {q : ℝ≥0∞} (hq : q ≠ 0) (A : Matr
   exact complexSchattenNorm_eq_of_filter_map_eq hq (singularValue_nonneg A)
     (congrArg (Multiset.filter (· ≠ 0)) (map_complexSingularValue hV _ h))
 
+/-- The Schatten norms are nonnegative. -/
 theorem complexSchattenNorm_nonneg (q : ℝ≥0∞) (A : Matrix m n ℂ) : 0 ≤ complexSchattenNorm q A := by
   unfold complexSchattenNorm
   split_ifs
@@ -227,6 +235,7 @@ theorem complexSchattenNorm_nonneg (q : ℝ≥0∞) (A : Matrix m n ℂ) : 0 ≤
   · exact Real.rpow_nonneg
       (Finset.sum_nonneg fun i _ => Real.rpow_nonneg (complexSingularValue_nonneg A i) _) _
 
+/-- The Schatten norms are definite. -/
 theorem complexSchattenNorm_eq_zero_iff {q : ℝ≥0∞} (hq : q ≠ 0) {A : Matrix m n ℂ} :
     complexSchattenNorm q A = 0 ↔ A = 0 := by
   have h0 : realify (0 : Matrix m n ℂ) = 0 := by
@@ -235,6 +244,7 @@ theorem complexSchattenNorm_eq_zero_iff {q : ℝ≥0∞} (hq : q ≠ 0) {A : Mat
     realify_injective.eq_iff]
   exact or_iff_right (Real.rpow_pos_of_pos two_pos _).ne'
 
+/-- The Schatten norms are homogeneous, for complex scalars. -/
 theorem complexSchattenNorm_smul {q : ℝ≥0∞} (hq : q ≠ 0) (c : ℂ) (A : Matrix m n ℂ) :
     complexSchattenNorm q (c • A) = ‖c‖ * complexSchattenNorm q A := by
   -- `(c A)ᴴ (c A) = |c|² Aᴴ A = (|c| A)ᴴ (|c| A)`
@@ -250,6 +260,7 @@ theorem complexSchattenNorm_smul {q : ℝ≥0∞} (hq : q ≠ 0) (c : ℂ) (A : 
       (congrArg (fun M => Polynomial.X ^ 0 * M.charpoly) h) q, schattenNorm_smul hq,
     abs_norm, mul_left_comm]
 
+/-- The triangle inequality for the Schatten norms, `1 ≤ q ≤ ∞`. -/
 theorem complexSchattenNorm_add_le {q : ℝ≥0∞} (hq : 1 ≤ q) (A B : Matrix m n ℂ) :
     complexSchattenNorm q (A + B) ≤ complexSchattenNorm q A + complexSchattenNorm q B := by
   have hq0 : q ≠ 0 := (zero_lt_one.trans_le hq).ne'
@@ -257,6 +268,7 @@ theorem complexSchattenNorm_add_le {q : ℝ≥0∞} (hq : 1 ≤ q) (A B : Matrix
     complexSchattenNorm_eq_realify hq0, realify_add, ← mul_add]
   exact mul_le_mul_of_nonneg_left (schattenNorm_add_le hq _ _) (Real.rpow_nonneg zero_le_two _)
 
+/-- `‖Aᴴ‖_{S_q} = ‖A‖_{S_q}`. -/
 theorem complexSchattenNorm_conjTranspose [DecidableEq m] (q : ℝ≥0∞) (A : Matrix m n ℂ) :
     complexSchattenNorm q Aᴴ = complexSchattenNorm q A := by
   rcases eq_or_ne q 0 with rfl | hq
@@ -281,8 +293,8 @@ theorem complexSchattenNorm_mul_conjTranspose_self [DecidableEq m] {q : ℝ≥0�
   rw [← complexSchattenNorm_conjTranspose q A, ← complexSchattenNorm_conjTranspose_mul_self hq,
     Matrix.conjTranspose_conjTranspose]
 
-/-- **Hölder's inequality** (HNVW I, Corollary D.2.4): `‖A B‖_{S_p} ≤ ‖A‖_{S_q} ‖B‖_{S_r}`,
-`1/p = 1/q + 1/r`. -/
+/-- **Hölder's inequality**, `schattenNorm_mul_le` for complex matrices, from the real case by
+realification: `‖A B‖_{S_p} ≤ ‖A‖_{S_q} ‖B‖_{S_r}`, `1/p = 1/q + 1/r`. -/
 theorem complexSchattenNorm_mul_le [DecidableEq m] {p q r : ℝ} (hq : 0 < q) (hr : 0 < r)
     (hpqr : 1 / p = 1 / q + 1 / r) (A : Matrix l m ℂ) (B : Matrix m n ℂ) :
     complexSchattenNorm (ENNReal.ofReal p) (A * B) ≤
@@ -296,7 +308,8 @@ theorem complexSchattenNorm_mul_le [DecidableEq m] {p q r : ℝ} (hq : 0 < q) (h
   exact mul_le_mul_of_nonneg_left (schattenNorm_mul_le hq hr hpqr _ _)
     (Real.rpow_nonneg zero_le_two _)
 
-/-- `|tr (A B)| ≤ ‖A‖_{S_q} ‖B‖_{S_{q'}}`, `1/q + 1/q' = 1`. -/
+/-- `|tr (A B)| ≤ ‖A‖_{S_q} ‖B‖_{S_{q'}}`, `1/q + 1/q' = 1`, that is, `abs_trace_mul_le` for complex
+matrices, from the real case by realification. -/
 theorem norm_trace_mul_le [DecidableEq m] {q q' : ℝ} (hq : q.HolderConjugate q')
     (A : Matrix n m ℂ) (B : Matrix m n ℂ) :
     ‖(A * B).trace‖ ≤
@@ -357,6 +370,7 @@ theorem complexSchattenNorm_rpow_of_isHermitian {A : Matrix n n ℂ} (hA : A.IsH
     Real.rpow_one]
   simp only [Complex.norm_real, Real.norm_eq_abs]
 
+/-- The Schatten norms are continuous functions of the entries, `1 ≤ q ≤ ∞`. -/
 theorem continuous_complexSchattenNorm {q : ℝ≥0∞} (hq : 1 ≤ q) :
     Continuous (complexSchattenNorm q : Matrix m n ℂ → ℝ) := by
   have : Fact (1 ≤ q) := ⟨hq⟩
@@ -383,29 +397,36 @@ namespace ComplexSchattenSpace
 
 variable {q : ℝ≥0∞}
 
+/-- The vector space structure is that of the matrices. -/
 instance {m n : Type*} : AddCommGroup (ComplexSchattenSpace q m n) :=
   inferInstanceAs (AddCommGroup (Matrix m n ℂ))
 
+/-- The vector space structure is that of the matrices. -/
 instance {m n : Type*} : Module ℂ (ComplexSchattenSpace q m n) :=
   inferInstanceAs (Module ℂ (Matrix m n ℂ))
 
 /-- The identity map `Matrix m n ℂ → ComplexSchattenSpace q m n`, as a linear equivalence. -/
 def ofMatrix {m n : Type*} : Matrix m n ℂ ≃ₗ[ℂ] ComplexSchattenSpace q m n := LinearEquiv.refl ℂ _
 
+/-- The space of complex matrices of a given size is finite-dimensional. -/
 instance {m n : Type*} [Finite m] [Finite n] : FiniteDimensional ℂ (ComplexSchattenSpace q m n) :=
   inferInstanceAs (FiniteDimensional ℂ (Matrix m n ℂ))
 
 variable [DecidableEq n]
 
+/-- The norm is the Schatten `q`-norm. -/
 noncomputable instance : Norm (ComplexSchattenSpace q m n) :=
   ⟨fun A => complexSchattenNorm q (ofMatrix.symm A)⟩
 
+/-- The norm of `ComplexSchattenSpace` is the Schatten `q`-norm, by definition. -/
 theorem norm_def (A : ComplexSchattenSpace q m n) : ‖A‖ = complexSchattenNorm q (ofMatrix.symm A) :=
   rfl
 
+/-- The norm of a matrix in `ComplexSchattenSpace` is its Schatten `q`-norm. -/
 @[simp] theorem norm_ofMatrix (A : Matrix m n ℂ) :
     ‖(ofMatrix A : ComplexSchattenSpace q m n)‖ = complexSchattenNorm q A := rfl
 
+/-- The axioms of a normed space, for `1 ≤ q ≤ ∞`. -/
 theorem normedSpaceCore [hq : Fact (1 ≤ q)] :
     NormedSpace.Core ℂ (ComplexSchattenSpace q m n) where
   norm_nonneg A := complexSchattenNorm_nonneg q _
@@ -418,45 +439,18 @@ theorem normedSpaceCore [hq : Fact (1 ≤ q)] :
     rw [norm_def, complexSchattenNorm_eq_zero_iff (zero_lt_one.trans_le hq.out).ne',
       LinearEquiv.map_eq_zero_iff]
 
+/-- The Schatten `q`-norm is a norm, `1 ≤ q ≤ ∞`. -/
 noncomputable instance [Fact (1 ≤ q)] : NormedAddCommGroup (ComplexSchattenSpace q m n) :=
   NormedAddCommGroup.ofCore normedSpaceCore
 
+/-- The complex normed space of the Schatten `q`-norm, `1 ≤ q ≤ ∞`. -/
 noncomputable instance [Fact (1 ≤ q)] : NormedSpace ℂ (ComplexSchattenSpace q m n) :=
   NormedSpace.ofCore normedSpaceCore
 
+/-- The space is complete, as it is finite-dimensional. -/
 instance [Fact (1 ≤ q)] : CompleteSpace (ComplexSchattenSpace q m n) :=
   FiniteDimensional.complete ℂ _
 
 end ComplexSchattenSpace
-
-/-- The complex Schatten space embeds isometrically, over `ℝ`, in the real Schatten space of twice
-the size (`A ↦ 2^{−1/q} realify A`), so its UMD constants are at most those of the real space. -/
-theorem umdConst_complexSchattenSpace_le (q : ℝ≥0∞) [Fact (1 ≤ q)] (n : Type*) [Fintype n]
-    [DecidableEq n] (p : ℝ) :
-    umdConst (ComplexSchattenSpace q n n) p ≤ umdConst (SchattenSpace q (n ⊕ n) (n ⊕ n)) p := by
-  have hq : q ≠ 0 := (zero_lt_one.trans_le (Fact.out : 1 ≤ q)).ne'
-  refine umdConst_le_of_linearIsometry
-    { toFun := fun A => SchattenSpace.ofMatrix
-        ((2 : ℝ) ^ (-(1 / q.toReal)) • realify (ComplexSchattenSpace.ofMatrix.symm A))
-      map_add' := fun A B => ?_
-      map_smul' := fun c A => ?_
-      norm_map' := fun A => ?_ } p
-  · rw [map_add, realify_add, smul_add, map_add]
-  · have h : ComplexSchattenSpace.ofMatrix.symm (c • A) =
-        c • ComplexSchattenSpace.ofMatrix.symm A := rfl
-    rw [h, realify_smul, smul_comm, map_smul, RingHom.id_apply]
-  · rw [ComplexSchattenSpace.norm_def, complexSchattenNorm_eq_realify hq,
-      ← abs_of_nonneg (Real.rpow_nonneg zero_le_two (-(1 / q.toReal))), ← schattenNorm_smul hq,
-      abs_of_nonneg (Real.rpow_nonneg zero_le_two _)]
-    exact SchattenSpace.norm_ofMatrix _
-
-/-- **`UMD₂` of the complex Schatten classes**: there is `C` such that
-`UMD₂ (S_q) ≤ C (q* − 1)` for all `1 < q < ∞` and all sizes. -/
-theorem umdConst_two_complexSchattenSpace_le : ∃ C : ℝ, 0 < C ∧
-    ∀ (q : ℝ≥0∞) [Fact (1 ≤ q)], 1 < q → q ≠ ⊤ → ∀ (n : Type) [Fintype n] [DecidableEq n],
-      umdConst (ComplexSchattenSpace q n n) 2 ≤ ENNReal.ofReal (C * (pStar q.toReal - 1)) := by
-  obtain ⟨C, hC, h⟩ := umdConst_two_schattenSpace_le
-  exact ⟨C, hC, fun q _ hq1 hqt n _ _ =>
-    (umdConst_complexSchattenSpace_le q n 2).trans (h q hq1 hqt (n ⊕ n))⟩
 
 end BanachProbability

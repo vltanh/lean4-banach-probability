@@ -1,7 +1,7 @@
 module
 
-public import BanachProbability.Schatten.Dilation
-public import BanachProbability.Schatten.Holder
+public import BanachProbability.Schatten.Spectral
+public import Mathlib.Analysis.InnerProductSpace.SingularValues
 import Mathlib.Order.Monotone.Extension
 
 /-!
@@ -11,11 +11,17 @@ For real matrices `A`, `B` with singular values in decreasing order,
 `Π_{k < N} s_k (A B) ≤ Π_{k < N} s_k (A) s_k (B)` for every `N` (`prod_sortedSingularValue_mul_le`,
 Horn's inequality), and hence **Hölder's inequality**
 `‖A B‖_{S_p} ≤ ‖A‖_{S_q} ‖B‖_{S_r}`, `1/p = 1/q + 1/r` (`schattenNorm_mul_le`), for all
-`0 < q, r < ∞`; also `|tr A| ≤ ‖A‖_{S_1}` and `|tr (A B)| ≤ ‖A‖_{S_q} ‖B‖_{S_{q'}}`.
+`0 < q, r < ∞`; also `|tr A| ≤ ‖A‖_{S_1}` (`abs_trace_le_schattenNorm_one`) and
+`|tr (A B)| ≤ ‖A‖_{S_q} ‖B‖_{S_{q'}}` (`abs_trace_mul_le`).
 
 The proofs are those of Hytönen–van Neerven–Veraar–Weis (HNVW), *Analysis in Banach spaces I*
-(2016), Appendix D: Lemma D.1.4 (pp. 567–568), Lemmas D.2.1–D.2.2 (p. 570), Proposition D.2.3 (p.
-571), Corollary D.2.4 and Proposition D.2.5 (p. 572).
+(2016), Appendix D: Lemma D.1.1 and (D.3) (p. 566), Lemma D.1.4 (pp. 567–568), Lemmas D.2.1–D.2.2
+(pp. 570–571), Proposition D.2.3 (p. 571), Corollary D.2.4 and Proposition D.2.5 (p. 572), and the
+first line of the proof of Theorem D.2.6 (p. 573). Two remarks on Corollary D.2.4. The proof in the
+book takes the logarithms of Horn's inequality; where some singular values vanish, this is completed
+here by the restriction to the positive singular values of `A B`. The book states it for exponents
+`p, q, r ≥ 1`; its proof, by Horn's inequality, gives it for all positive exponents, and it is
+stated for these.
 -/
 
 @[expose] public section
@@ -26,12 +32,15 @@ namespace BanachProbability
 
 variable {l m n : Type*} [Fintype l] [Fintype m] [Fintype n] [DecidableEq m] [DecidableEq n]
 
-/-- The singular values of `A` in decreasing order, `s_0 ≥ s_1 ≥ …`, extended by `0`. -/
+/-- The singular values of `A` in decreasing order, `s_0 ≥ s_1 ≥ …`, extended by `0`. They are
+Mathlib's singular values (`LinearMap.singularValues`) of the linear map of `A` between Euclidean
+spaces: `singularValues_toEuclideanLin`. -/
 noncomputable def sortedSingularValue (A : Matrix m n ℝ) (k : ℕ) : ℝ :=
   if h : k < Fintype.card n then
     √((Matrix.isHermitian_conjTranspose_mul_self A).eigenvalues₀ ⟨k, h⟩) else 0
 
 omit [DecidableEq m] in
+/-- The singular values are nonnegative. -/
 theorem sortedSingularValue_nonneg (A : Matrix m n ℝ) (k : ℕ) : 0 ≤ sortedSingularValue A k := by
   unfold sortedSingularValue
   split_ifs
@@ -39,6 +48,7 @@ theorem sortedSingularValue_nonneg (A : Matrix m n ℝ) (k : ℕ) : 0 ≤ sorted
   · exact le_rfl
 
 omit [DecidableEq m] in
+/-- The sorted singular values are nonincreasing. -/
 theorem antitone_sortedSingularValue (A : Matrix m n ℝ) : Antitone (sortedSingularValue A) := by
   intro j k hjk
   by_cases hk : k < Fintype.card n
@@ -87,6 +97,20 @@ private theorem det_transpose_mul_self_eq_prod (M : Matrix m n ℝ) :
   refine Finset.prod_congr rfl fun i _ => ?_
   rw [← singularValue_eq_sortedSingularValue, singularValue_sq]
   rfl
+
+omit [DecidableEq m] in
+/-- The sorted singular values are Mathlib's singular values of the linear map of `A` between
+Euclidean spaces. -/
+theorem singularValues_toEuclideanLin (A : Matrix m n ℝ) (k : ℕ) :
+    (Matrix.toEuclideanLin A).singularValues k = sortedSingularValue A k := by
+  classical
+  rcases lt_or_ge k (Fintype.card n) with hk | hk
+  · rw [LinearMap.singularValues_of_lt _ finrank_euclideanSpace hk, sortedSingularValue,
+      dite_eq_left hk, Matrix.IsHermitian.eigenvalues₀]
+    congr
+    rw [← Matrix.toEuclideanLin_conjTranspose_eq_adjoint, ← Matrix.toLpLin_mul_same]
+  · rw [LinearMap.singularValues_of_finrank_le _ (by rwa [finrank_euclideanSpace]),
+      sortedSingularValue_eq_zero A hk]
 
 /-! ### The sorted eigenbasis of `Aᵀ A` -/
 
@@ -148,10 +172,12 @@ private theorem norm_toEuclideanLin_sq (A : Matrix m n ℝ) (v : EuclideanSpace 
   ring
 
 omit [DecidableEq m] in
-/-- If the columns of `Q` are orthonormal, then `s_k (A Q) ≤ s_k (A)` (HNVW I, (D.3)). The proof is
-the dimension count of HNVW I, Lemma D.1.1: there is a `v ≠ 0` in the span of the first `k + 1`
-right singular vectors of `A Q` such that `Q v` is orthogonal to the first `k` right singular
-vectors of `A`, and then `s_k (A Q) ‖v‖ ≤ ‖A Q v‖ ≤ s_k (A) ‖Q v‖ = s_k (A) ‖v‖`. -/
+/-- If the columns of `Q` are orthonormal, then `s_k (A Q) ≤ s_k (A)` (HNVW I, (D.3), p. 566, for
+which the book identifies the singular values with the approximation numbers, Lemma D.1.1). The
+proof is the dimension count of Lemma D.1.1, without the approximation numbers: there is a `v ≠ 0`
+in the span of the first `k + 1` right singular vectors of `A Q` such that `Q v` is orthogonal to
+the first `k` right singular vectors of `A`, and then
+`s_k (A Q) ‖v‖ ≤ ‖A Q v‖ ≤ s_k (A) ‖Q v‖ = s_k (A) ‖v‖`. -/
 private theorem sortedSingularValue_mul_le_of_transpose_mul_self_eq_one {p : Type*} [Fintype p]
     [DecidableEq p] (A : Matrix m n ℝ) {Q : Matrix n p ℝ} (hQ : Qᵀ * Q = 1) (k : ℕ) :
     sortedSingularValue (A * Q) k ≤ sortedSingularValue A k := by
@@ -243,8 +269,9 @@ private theorem exists_eq_mul_of_det_ne_zero {N : ℕ} {Φ : Matrix n (Fin N) �
   · rw [Matrix.mul_assoc, Matrix.nonsing_inv_mul _ hCu, Matrix.mul_one]
 
 omit [DecidableEq m] in
-/-- (HNVW I, Lemma D.2.2) `det (Φᵀ Aᵀ A Φ) ≤ Π_{k < N} s_k (A)² · det (Φᵀ Φ)` for every `Φ` with `N`
-columns. -/
+/-- (HNVW I, Lemma D.2.2, pp. 570–571) `det (Φᵀ Aᵀ A Φ) ≤ Π_{k < N} s_k (A)² · det (Φᵀ Φ)` for every
+`Φ` with `N` columns. Linearly dependent columns, for which both sides are zero, are treated
+separately; otherwise the columns are orthonormalized, as in the book. -/
 theorem det_conj_transpose_mul_self_le (A : Matrix m n ℝ) {N : ℕ} (Φ : Matrix n (Fin N) ℝ) :
     ((A * Φ)ᵀ * (A * Φ)).det ≤
       (∏ k ∈ Finset.range N, sortedSingularValue A k ^ 2) * (Φᵀ * Φ).det := by
@@ -297,7 +324,7 @@ private theorem exists_det_transpose_mul_self_eq (A : Matrix m n ℝ) {N : ℕ}
     simp only [Matrix.toLpLin_apply, Matrix.mulVec, dotProduct] at h
     simpa [Matrix.mul_apply, Matrix.diagonal_apply, e, mul_comm, Fin.ext_iff] using h
 
-/-- **Horn's inequality** (HNVW I, Proposition D.2.3):
+/-- **Horn's inequality** (HNVW I, Proposition D.2.3, p. 571):
 `Π_{k<N} s_k (A B) ≤ Π_{k<N} s_k (A) s_k (B)`. -/
 theorem prod_sortedSingularValue_mul_le (A : Matrix l m ℝ) (B : Matrix m n ℝ) (N : ℕ) :
     ∏ k ∈ Finset.range N, sortedSingularValue (A * B) k ≤
@@ -356,8 +383,9 @@ private theorem sum_mul_nonneg_of_antitone {c d : ℕ → ℝ} (hc : Antitone c)
   rw [Finset.mem_range] at hj
   exact mul_nonpos_of_nonpos_of_nonneg (sub_nonpos.2 (hc j.le_succ)) (hd _ (by omega))
 
-/-- (HNVW I, Lemma D.1.4) If `a`, `b` are nonincreasing with `Σ_{j<k} a_j ≤ Σ_{j<k} b_j` for all
-`k ≤ N`, then `Σ_{j<N} f (a_j) ≤ Σ_{j<N} f (b_j)` for every convex nondecreasing `f`. -/
+/-- (HNVW I, Lemma D.1.4, pp. 567–568) If `a`, `b` are nonincreasing with
+`Σ_{j<k} a_j ≤ Σ_{j<k} b_j` for all `k ≤ N`, then `Σ_{j<N} f (a_j) ≤ Σ_{j<N} f (b_j)` for every
+convex nondecreasing `f`. -/
 theorem sum_le_sum_of_weak_majorization {f : ℝ → ℝ} (hf : ConvexOn ℝ Set.univ f) (hfm : Monotone f)
     {a b : ℕ → ℝ} (N : ℕ) (ha : ∀ i j, i ≤ j → j < N → a j ≤ a i)
     (hb : ∀ i j, i ≤ j → j < N → b j ≤ b i)
@@ -409,7 +437,8 @@ private theorem rpow_sum_sortedSingularValue_le {q : ℝ} (hq : 0 < q) (A : Matr
 
 /-- (HNVW I, Corollary D.2.4, first step) `Σ_{k < K} s_k (A B)^p ≤ Σ_{k < K} (s_k (A) s_k (B))^p` if
 the first `K` singular values of `A B` are positive: the logarithms of Horn's inequality and
-Lemma D.1.4 with `f (t) = e^{p t}`. -/
+Lemma D.1.4 with `f (t) = e^{p t}`. (The book takes the logarithms without a restriction on the
+singular values.) -/
 private theorem sum_sortedSingularValue_mul_rpow_le {p : ℝ} (hp : 0 < p) (A : Matrix l m ℝ)
     (B : Matrix m n ℝ) {K : ℕ} (hK : ∀ k < K, 0 < sortedSingularValue (A * B) k) :
     ∑ k ∈ Finset.range K, sortedSingularValue (A * B) k ^ p ≤
@@ -446,8 +475,8 @@ private theorem sum_sortedSingularValue_mul_rpow_le {p : ℝ} (hp : 0 < p) (A : 
   · rw [Real.rpow_def_of_pos (hK k (Finset.mem_range.1 hk)), mul_comm]
   · rw [Real.rpow_def_of_pos (hAB k (Finset.mem_range.1 hk)), mul_comm]
 
-/-- **Hölder's inequality** for Schatten norms (HNVW I, Corollary D.2.4):
-`‖A B‖_{S_p} ≤ ‖A‖_{S_q} ‖B‖_{S_r}`, `1/p = 1/q + 1/r`. -/
+/-- **Hölder's inequality** for Schatten norms (HNVW I, Corollary D.2.4, p. 572, there for exponents
+`p, q, r ≥ 1`): `‖A B‖_{S_p} ≤ ‖A‖_{S_q} ‖B‖_{S_r}`, `1/p = 1/q + 1/r`, for all `0 < q, r < ∞`. -/
 theorem schattenNorm_mul_le {p q r : ℝ} (hq : 0 < q) (hr : 0 < r) (hpqr : 1 / p = 1 / q + 1 / r)
     (A : Matrix l m ℝ) (B : Matrix m n ℝ) :
     schattenNorm (ENNReal.ofReal p) (A * B) ≤
@@ -566,7 +595,7 @@ private theorem abs_trace_transpose_mul_le (V W : Matrix m n ℝ) :
   rw [ht]
   exact abs_le_of_sq_le_sq h (mul_nonneg (schattenNorm_nonneg _ _) (schattenNorm_nonneg _ _))
 
-/-- (HNVW I, Proposition D.2.5) The trace is contractive on `S_1`. -/
+/-- (HNVW I, Proposition D.2.5, p. 572) The trace is contractive on `S_1`. -/
 theorem abs_trace_le_schattenNorm_one (A : Matrix n n ℝ) : |A.trace| ≤ schattenNorm 1 A := by
   obtain ⟨V, W, hA, hV, hW⟩ := exists_eq_transpose_mul A
   have h1 : schattenNorm 1 A = ∑ k, singularValue A k := by
@@ -579,7 +608,9 @@ theorem abs_trace_le_schattenNorm_one (A : Matrix n n ℝ) : |A.trace| ≤ schat
             (hV.trans hW.symm)
         rw [hVW, ← sq, hW, h1]
 
-/-- `|tr (A B)| ≤ ‖A‖_{S_q} ‖B‖_{S_{q'}}`, `1/q + 1/q' = 1`, for rectangular matrices. -/
+/-- `|tr (A B)| ≤ ‖A B‖_{S_1} ≤ ‖A‖_{S_q} ‖B‖_{S_{q'}}`, `1/q + 1/q' = 1`, for rectangular matrices
+(HNVW I, the first line of the proof of Theorem D.2.6, p. 573). For symmetric matrices see also
+`abs_trace_mul_le_of_isHermitian`, which is proved without Horn's inequality. -/
 theorem abs_trace_mul_le {q q' : ℝ} (hq : q.HolderConjugate q') (A : Matrix n m ℝ)
     (B : Matrix m n ℝ) :
     |(A * B).trace| ≤ schattenNorm (ENNReal.ofReal q) A * schattenNorm (ENNReal.ofReal q') B := by

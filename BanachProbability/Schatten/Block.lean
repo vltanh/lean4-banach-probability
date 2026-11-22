@@ -4,7 +4,7 @@ public import BanachProbability.Schatten.Complex
 public import BanachProbability.SignCube.LpSeminorm
 
 /-!
-# Block rows and block columns: row and column square functions
+# Block rows, block columns and block diagonal matrices
 
 For matrices `a_1, …, a_K`, `blockRow a = (a_1 … a_K)` and `blockCol a = (a_1; …; a_K)`. Their
 Schatten norms are the row and column square functions:
@@ -16,6 +16,9 @@ Paley inequalities*, Ark. Mat. 29 (1991), (I.2), p. 245; `‖blockCol a‖_{S_q}
 a block row times a block column is their (I.3), p. 246; and for `q ≥ 2` the square functions are
 dominated by the Rademacher sums, (I.5)–(I.7), pp. 246–247:
 `‖blockCol a‖_{S_q}² ≤ E ‖Σ ε_k a_k‖_{S_q}²`.
+
+For real block diagonal matrices, `‖diag (A_i)‖_{S_q}^q = Σ ‖A_i‖_{S_q}^q`
+(`schattenNorm_blockDiagonal_rpow`).
 -/
 
 @[expose] public section
@@ -40,32 +43,38 @@ section Algebra
 
 variable [CommRing 𝕜] [StarRing 𝕜]
 
+/-- The adjoint of a block row is the block column of the adjoints. -/
 theorem conjTranspose_blockRow (a : Fin K → Matrix m n 𝕜) :
     (blockRow a)ᴴ = blockCol fun k => (a k)ᴴ :=
   rfl
 
 omit [StarRing 𝕜] in
+/-- A block row times a block column: `(a_1 … a_K) (b_1; …; b_K) = Σ a_k b_k`. -/
 theorem blockRow_mul_blockCol [Fintype m] (a : Fin K → Matrix l m 𝕜) (b : Fin K → Matrix m n 𝕜) :
     blockRow a * blockCol b = ∑ k, a k * b k := by
   ext i j
   simp [blockRow, blockCol, Matrix.mul_apply, Fintype.sum_prod_type, Matrix.sum_apply]
 
+/-- `(a_1; …; a_K)ᴴ (b_1; …; b_K) = Σ a_kᴴ b_k`. -/
 theorem conjTranspose_blockCol_mul_blockCol [Fintype m] (a b : Fin K → Matrix m n 𝕜) :
     (blockCol a)ᴴ * blockCol b = ∑ k, (a k)ᴴ * b k := by
   ext i j
   simp [blockCol, Matrix.mul_apply, Fintype.sum_prod_type, Matrix.sum_apply]
 
+/-- `(a_1 … a_K) (b_1 … b_K)ᴴ = Σ a_k b_kᴴ`. -/
 theorem blockRow_mul_conjTranspose_blockRow [Fintype n] (a b : Fin K → Matrix m n 𝕜) :
     blockRow a * (blockRow b)ᴴ = ∑ k, a k * (b k)ᴴ := by
   rw [conjTranspose_blockRow, blockRow_mul_blockCol]
 
 omit [StarRing 𝕜] in
+/-- `x (a_1 … a_K) = (x a_1 … x a_K)`. -/
 theorem mul_blockRow [Fintype m] (x : Matrix l m 𝕜) (a : Fin K → Matrix m n 𝕜) :
     x * blockRow a = blockRow fun k => x * a k := by
   ext i j
   simp [blockRow, Matrix.mul_apply]
 
 omit [StarRing 𝕜] in
+/-- `(a_1; …; a_K) x = (a_1 x; …; a_K x)`. -/
 theorem blockCol_mul [Fintype n] (a : Fin K → Matrix m n 𝕜) {o : Type*} (x : Matrix n o 𝕜) :
     blockCol a * x = blockCol fun k => a k * x := by
   ext i j
@@ -86,6 +95,7 @@ theorem complexSchattenNorm_blockRow_sq [DecidableEq m] {q : ℝ≥0∞} (hq : q
     complexSchattenNorm q (blockRow a) ^ 2 = complexSchattenNorm (q / 2) (∑ k, a k * (a k)ᴴ) := by
   rw [← complexSchattenNorm_mul_conjTranspose_self hq, blockRow_mul_conjTranspose_blockRow]
 
+/-- `‖blockRow (a_1ᴴ, …, a_Kᴴ)‖_{S_q} = ‖blockCol a‖_{S_q}`. -/
 theorem complexSchattenNorm_blockRow_conjTranspose [DecidableEq m] (q : ℝ≥0∞)
     (a : Fin K → Matrix m n ℂ) :
     complexSchattenNorm q (blockRow fun k => (a k)ᴴ) = complexSchattenNorm q (blockCol a) := by
@@ -190,5 +200,45 @@ theorem complexSchattenNorm_blockRow_sq_le_avg {q : ℝ} (hq : 2 ≤ q) (a : Fin
   funext ε
   rw [← complexSchattenNorm_conjTranspose _ (∑ k, coin (ε k) • a k), Matrix.conjTranspose_sum]
   simp only [Matrix.conjTranspose_smul, star_trivial]
+
+/-! ### Block diagonal matrices -/
+
+/-- Real block diagonal matrices: `‖diag (A_i)‖_{S_q}^q = Σ ‖A_i‖_{S_q}^q`; in other words,
+`ℓ^q (S_q)` embeds isometrically in `S_q`. -/
+theorem schattenNorm_blockDiagonal_rpow {ι : Type*} [Fintype ι] [DecidableEq ι] {q : ℝ}
+    (hq : 0 < q) (A : ι → Matrix n n ℝ) :
+    schattenNorm (ENNReal.ofReal q) (Matrix.blockDiagonal A) ^ q =
+      ∑ i, schattenNorm (ENNReal.ofReal q) (A i) ^ q := by
+  have hA : ∀ i, ((A i)ᴴ * A i).IsHermitian := fun i =>
+    Matrix.isHermitian_conjTranspose_mul_self (A i)
+  -- diagonalise each block
+  set U : Matrix (n × ι) (n × ι) ℝ :=
+    Matrix.blockDiagonal fun i => ((hA i).eigenvectorUnitary : Matrix n n ℝ) with hU
+  have hUs : star U =
+      Matrix.blockDiagonal fun i => star ((hA i).eigenvectorUnitary : Matrix n n ℝ) := by
+    simp only [hU, Matrix.star_eq_conjTranspose, Matrix.blockDiagonal_conjTranspose]
+  have hUU : U ∈ Matrix.unitaryGroup (n × ι) ℝ := by
+    rw [Matrix.mem_unitaryGroup_iff, hUs, hU, ← Matrix.blockDiagonal_mul]
+    simp only [Unitary.mul_star_self_of_mem (hA _).eigenvectorUnitary.2]
+    exact Matrix.blockDiagonal_one
+  set μ : n × ι → ℝ := fun x => (hA x.2).eigenvalues x.1 with hμ
+  have hdiag : Matrix.diagonal μ =
+      Matrix.blockDiagonal fun i => Matrix.diagonal (hA i).eigenvalues := by
+    rw [Matrix.blockDiagonal_diagonal]
+  have h : (Matrix.blockDiagonal A)ᴴ * Matrix.blockDiagonal A =
+      (⟨U, hUU⟩ : Matrix.unitaryGroup (n × ι) ℝ) * Matrix.diagonal μ *
+        star ((⟨U, hUU⟩ : Matrix.unitaryGroup (n × ι) ℝ) : Matrix (n × ι) (n × ι) ℝ) := by
+    change _ = U * Matrix.diagonal μ * star U
+    rw [hUs, hdiag, hU, ← Matrix.blockDiagonal_mul, ← Matrix.blockDiagonal_mul,
+      Matrix.blockDiagonal_conjTranspose, ← Matrix.blockDiagonal_mul]
+    congr 1
+    funext i
+    exact eq_eigenvectorUnitary_mul_diagonal_mul_star (hA i)
+  have h1 := sum_comp_eq_of_map_eq (map_eigenvalues_eq_of_eq_mul_diagonal_mul_star
+    (Matrix.isHermitian_conjTranspose_mul_self (Matrix.blockDiagonal A)) ⟨U, hUU⟩ μ h)
+    fun x => √x ^ q
+  rw [schattenNorm_ofReal_rpow hq]
+  simp only [schattenNorm_ofReal_rpow hq, singularValue]
+  rw [h1, Fintype.sum_prod_type_right]
 
 end BanachProbability
