@@ -7,7 +7,7 @@ public import BanachProbability.UMD.Incremental
 
 For a complex Banach space `X` and `p ∈ (1, ∞)`,
 `UMD_p (X) ≤ UMD_{ℂ,p} (X) ≤ (π / 2) UMD_p (X)` (Hytönen–van Neerven–Veraar–Weis, *Analysis in
-Banach Spaces I* (2016), Proposition 4.2.10, p. 285–286, for the constants with deterministic
+Banach Spaces I* (2016), Proposition 4.2.10, p. 286, for the constants with deterministic
 multipliers; quoted by Yaroslavtsev, *Even Fourier multipliers and martingale transforms in
 infinite dimensions*, Indag. Math. 29 (2018), Lemma 3.2), for general filtrations.
 
