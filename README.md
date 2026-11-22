@@ -41,7 +41,7 @@ martingales; `p* = max (p, p / (p − 1))`.
 | Hilbert spaces: `UMD_p (H) ≤ p* − 1` | `umdConst_le_of_innerProductSpace` | Burkholder (1984) | proved |
 | Maurey: `UMD_p^Δ (X) = UMD_p (X)` | `dyadicUMDConst_eq_umdConst` | Maurey (1975); HNVW I, Thm 4.2.5 | proved |
 | Extrapolation: `UMD_p < ∞` for all `p` once for one; `UMD₂ ≤ 200 UMD_p`, `UMD_p ≤ 100 p* UMD₂` | `umdConst_lt_top_of_lt_top`, `umdConst_two_le_mul`, `umdConst_le_mul_umdConst_two` | HNVW I, Thm 4.2.7; Burkholder's good-λ method (1973, 1981) | proved |
-| Decoupling: `UMD_p⁻¹ ‖Ỹ_n‖_p ≤ ‖Y_n‖_p ≤ UMD_p ‖Ỹ_n‖_p` for Paley–Walsh martingales | `decoupling`, `decoupling_dyadic` | HNVW I, Prop 4.2.3; McConnell (1989), Hitczenko (1988); Cox–Veraar (2007) | proved |
+| Decoupling: `UMD_p⁻¹ ‖Ỹ_n‖_p ≤ ‖Y_n‖_p ≤ UMD_p ‖Ỹ_n‖_p` for Paley–Walsh martingales | `decoupling`, `decoupling_dyadic` | HNVW I, Prop 4.2.3; McConnell (1989), Hitczenko (unpublished manuscript); Cox–Veraar (2007) | proved |
 | Complex constants: `UMD_p ≤ UMD_{ℂ,p} ≤ (π/2) UMD_p` | `umdConst_le_complexUMDConst_le` | HNVW I, Prop 4.2.10; Yaroslavtsev (2018), Lemma 3.2 | proved |
 | `UMD_p (L^p (μ; B)) ≤ UMD_p (B)`; the complex `L^p (μ)` is UMD, any measure | `umdConst_Lp_le`, `umdConst_Lp_complex_lt_top` | Pisier (2016), Cor 5.22 | proved |
 | Weak type `(1, 1)` of noncommutative martingale transforms on `L^∞ (Ω) ⊗ M_n`, general filtrations: `λ τ (1_{(λ,∞)} (\|T_c x\|)) ≤ 52 ‖x‖_{L¹ (τ)}` | `weakType_one_one`, `weakType_one_one_of_posSemidef` | Randrianantoanina (2002), Thm 3.1 | proved |
@@ -79,8 +79,9 @@ The module docstrings describe each argument, name its source, and record where 
 completes its source.
 
 Some sources could not be consulted: HNVW I and II (Hytönen–van Neerven–Veraar–Weis), Bhatia's
-*Matrix Analysis*, Lust-Piquard (1986), Pisier–Xu (2003), and Burkholder (1973, 1981, 1984). The
-results they are cited for are proved by named arguments from accessible sources:
+*Matrix Analysis*, Lust-Piquard (1986), Pisier–Xu (2003), Burkholder (1973, 1981, 1984, 1988), and
+Osękowski (2012). The results they are cited for are proved by named arguments from accessible
+sources, and Burkholder's results by Burkholder's method in its standard form:
 
 | Source not consulted | Result | Argument used |
 | --- | --- | --- |
@@ -92,7 +93,7 @@ results they are cited for are proved by named arguments from accessible sources
 | HNVW II, Thm 6.2.4 | Kahane–Khintchine | hypercontractivity (Bonami (1970), Borell (1979); O'Donnell (2014), §10.1) |
 | Lust-Piquard (1986); Pisier–Xu (2003), Thm 6.1 | noncommutative Khintchine | exchangeable pairs (Mackey–Jordan–Chen–Farrell–Tropp (2014), Lemma 3.4, Cor 7.3, Rem 7.2, §8) |
 | Bhatia (1997) | Weyl's inequalities, the Schatten triangle and Hölder inequalities | Courant–Fischer dimension counts; doubly substochastic matrices; overlaps `⟨u_j, v_k⟩²` (Mackey et al. (2014), Prop 7.5) |
-| Burkholder (1984) | Burkholder's inequality, `UMD_p (H) ≤ p* − 1` | Burkholder's method as in Osękowski (2012), Thms 3.5, 8.6 |
+| Burkholder (1984, 1988); Osękowski (2012), Thms 3.5, 8.6 | Burkholder's inequality and function, the square function inequality, `UMD_p (H) ≤ p* − 1` | Burkholder's method: the majorization `U ≥ V`, the concavity of `U` along lines (its pieces glued through one-sided derivatives at the kinks), and the integration of the concavity along the martingale |
 
 ## References
 
@@ -103,13 +104,14 @@ results they are cited for are proved by named arguments from accessible sources
 - D. L. Burkholder, *Distribution function inequalities for martingales*, Ann. Probab. 1 (1973);
   *A geometrical characterization of Banach spaces in which martingale difference sequences are
   unconditional*, Ann. Probab. 9 (1981); *Boundary value problems and sharp inequalities for
-  martingale transforms*, Ann. Probab. 12 (1984).
+  martingale transforms*, Ann. Probab. 12 (1984); *Sharp inequalities for martingales and
+  stochastic integrals*, Astérisque 157–158 (1988).
 - R. Bhatia, *Matrix Analysis*, Springer (1997).
 - S. Cox, M. Veraar, *Some remarks on tangent martingale difference sequences in `L¹`-spaces*,
   Electron. Commun. Probab. 12 (2007).
 - I. Cuculescu, *Martingales on von Neumann algebras*, J. Multivariate Anal. 1 (1971).
-- P. Hitczenko, *Comparison of moments for tangent sequences of random variables*, Probab. Theory
-  Related Fields 78 (1988).
+- P. Hitczenko, *On tangent sequences of UMD-space valued random vectors*, unpublished manuscript
+  (Cox–Veraar (2007) cite it without a year).
 - T. Hytönen, J. van Neerven, M. Veraar, L. Weis (HNVW), *Analysis in Banach spaces I* (2016) and
   *II* (2017).
 - S. Janson, *Gaussian Hilbert Spaces*, Cambridge University Press (1997).
@@ -124,6 +126,7 @@ results they are cited for are proved by named arguments from accessible sources
 - B. Maurey, *Système de Haar*, Séminaire Maurey–Schwartz 1974–1975.
 - T. R. McConnell, *Decoupling and stochastic integration in UMD Banach spaces*, Probab. Math.
   Statist. 10 (1989).
+- S. Montgomery-Smith, *Concrete representation of martingales*, Electron. J. Probab. 3 (1998).
 - R. O'Donnell, *Analysis of Boolean Functions*, Cambridge University Press (2014).
 - A. Osękowski, *Sharp martingale and semimartingale inequalities*, Birkhäuser (2012).
 - G. Pisier, *Martingales in Banach spaces*, Cambridge University Press (2016); the lecture notes
