@@ -9,14 +9,15 @@ Randrianantoanina's theorem (N. Randrianantoanina, *Non-commutative martingale t
 J. Funct. Anal. 194 (2002), Theorem 3.1, with the constant `14√3/3 + 28`) for the von Neumann
 algebra `L^∞ (Ω, μ) ⊗ M_n (ℝ)` of a probability space with a filtration `ℱ` and predictable
 scalar multipliers `|c_k| ≤ 1` (the multipliers commuting with `N_{k+1}`, see `ncTransform`):
-`λ τ (1_{(λ, ∞)} (|T_c x|)) ≤ C ‖x‖_{L¹ (τ)}` for every symmetric `ℱ_N`-measurable `x ∈ L¹`, every
-`λ > 0` and every `N` (`weakType_one_one`).
+`λ τ (1_{(λ, ∞)} (|T_c x|)) ≤ C ‖x‖_{L¹ (τ)}` for every symmetric `x ∈ L¹`, every `λ > 0` and
+every `N` (`weakType_one_one`); `x` need not be `ℱ_N`-measurable, since `T_c x` involves only
+`E_0 x, …, E_N x`.
 
 The proof follows the source:
 
 * the Krickeberg decomposition (Randrianantoanina, Theorem 2.3), which is trivial in finite time:
-  `x = x⁺ − x⁻` pointwise (`posPart`, `negPart`), each part positive semidefinite, `ℱ_N`-measurable
-  and in `L¹`, with `‖x‖_{L¹ (τ)} = τ (x⁺) + τ (x⁻)` (`schattenNorm_one_eq_trace_posPart_add`);
+  `x = x⁺ − x⁻` pointwise (`posPart`, `negPart`), each part positive semidefinite and in `L¹`,
+  with `‖x‖_{L¹ (τ)} = τ (x⁺) + τ (x⁻)` (`schattenNorm_one_eq_trace_posPart_add`);
   the transform is additive almost everywhere and the distribution function is subadditive
   (`ncDistribution_add_add_le`);
 * Cuculescu's projections `q_k` at level `λ` of the martingale `x_k = E_k x` (`cuculescu`,
@@ -611,28 +612,31 @@ symmetric `x`: `λ τ (1_{(λ, ∞)} (|T_c x|)) ≤ 52 ‖x‖_{L¹ (τ)}`.
 From the positive case by the Krickeberg decomposition `x = x⁺ − x⁻` (Randrianantoanina,
 Theorem 2.3, trivial in finite time), with `‖x‖_{L¹ (τ)} = τ (x⁺) + τ (x⁻)` and
 `λ_λ (T_c x) ≤ λ_{λ/2} (T_c x⁺) + λ_{λ/2} (T_c x⁻)`: the constant is `52`, twice the constant `26`
-of `weakType_one_one_of_posSemidef` (the source's constant is `14√3/3 + 28`). -/
+of `weakType_one_one_of_posSemidef` (the source's constant is `14√3/3 + 28`). As in the positive
+case, `x` need not be `ℱ_N`-measurable. -/
 theorem weakType_one_one [IsProbabilityMeasure μ] {ℱ : Filtration ℕ mΩ} {N : ℕ}
-    {x : Ω → Matrix n n ℝ} (hxm : Measurable[ℱ N] x) (hxi : MatrixMemLp x 1 μ)
+    {x : Ω → Matrix n n ℝ} (hxi : MatrixMemLp x 1 μ)
     (hx : ∀ ω, (x ω).IsHermitian) {c : ℕ → Ω → ℝ} (hc : ∀ k, StronglyMeasurable[ℱ k] (c k))
     (hc1 : ∀ k ω, |c k ω| ≤ 1) {l : ℝ} (hl : 0 < l) :
     l * ncDistribution μ l (ncTransform ℱ μ c N x) ≤ 52 * ∫ ω, schattenNorm 1 (x ω) ∂μ := by
-  -- The Krickeberg decomposition `x = x⁺ − x⁻`: both parts are `ℱ_N`-measurable and in `L¹`.
-  have hpm : Measurable[ℱ N] (fun ω => posPart (x ω)) :=
-    (measurable_cfc_of_continuous (continuous_id.max continuous_const)).comp hxm
-  have hnm : Measurable[ℱ N] (fun ω => negPart (x ω)) :=
-    (measurable_cfc_of_continuous (continuous_neg.max continuous_const)).comp hxm
+  -- The Krickeberg decomposition `x = x⁺ − x⁻`: both parts are in `L¹`.
+  have hpm : AEMeasurable (fun ω => posPart (x ω)) μ :=
+    (measurable_cfc_of_continuous (continuous_id.max continuous_const)).comp_aemeasurable
+      hxi.aemeasurable
+  have hnm : AEMeasurable (fun ω => negPart (x ω)) μ :=
+    (measurable_cfc_of_continuous (continuous_neg.max continuous_const)).comp_aemeasurable
+      hxi.aemeasurable
   have hS1 := hxi.memLp_schattenNorm (q := 1) le_rfl
   have hpi : MatrixMemLp (fun ω => posPart (x ω)) 1 μ :=
-    matrixMemLp_of_memLp_schattenNorm (hpm.mono (ℱ.le N) le_rfl).aemeasurable one_ne_zero
-      (hS1.of_le ((measurable_schattenNorm 1).comp (hpm.mono (ℱ.le N) le_rfl)).aestronglyMeasurable
+    matrixMemLp_of_memLp_schattenNorm hpm one_ne_zero
+      (hS1.of_le ((measurable_schattenNorm 1).comp_aemeasurable hpm).aestronglyMeasurable
         (ae_of_all _ fun ω => by
           rw [Real.norm_of_nonneg (schattenNorm_nonneg _ _),
             Real.norm_of_nonneg (schattenNorm_nonneg _ _)]
           exact schattenNorm_one_posPart_le (hx ω)))
   have hni : MatrixMemLp (fun ω => negPart (x ω)) 1 μ :=
-    matrixMemLp_of_memLp_schattenNorm (hnm.mono (ℱ.le N) le_rfl).aemeasurable one_ne_zero
-      (hS1.of_le ((measurable_schattenNorm 1).comp (hnm.mono (ℱ.le N) le_rfl)).aestronglyMeasurable
+    matrixMemLp_of_memLp_schattenNorm hnm one_ne_zero
+      (hS1.of_le ((measurable_schattenNorm 1).comp_aemeasurable hnm).aestronglyMeasurable
         (ae_of_all _ fun ω => by
           rw [Real.norm_of_nonneg (schattenNorm_nonneg _ _),
             Real.norm_of_nonneg (schattenNorm_nonneg _ _)]

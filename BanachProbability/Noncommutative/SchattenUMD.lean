@@ -114,10 +114,10 @@ private theorem sumd_schattenNorm_two_sq (A : Matrix n n ℝ) :
 theorem isWeakTypeNC_one_ncTransform [IsProbabilityMeasure μ]
     (hc : ∀ k, StronglyMeasurable[ℱ k] (c k)) (hc1 : ∀ k ω, |c k ω| ≤ 1) :
     IsWeakTypeNC μ (ℱ N) (ncTransform (n := n) ℱ μ c N) 1 52 := by
-  intro x hxm hx hx1 s hs
+  intro x _ hx hx1 s hs
   rw [ENNReal.ofReal_one] at hx1 ⊢
   simp only [Real.rpow_one]
-  exact weakType_one_one hxm hx1 hx hc hc1 hs
+  exact weakType_one_one hx1 hx hc hc1 hs
 
 /-- Strong type `(2, 2)` with constant `1`: the `L²` contraction. -/
 theorem isStrongTypeNC_two_ncTransform [IsProbabilityMeasure μ]
