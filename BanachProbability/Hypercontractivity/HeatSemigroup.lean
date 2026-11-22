@@ -8,7 +8,7 @@ public import Mathlib.Analysis.SpecialFunctions.Exp
 
 Hytönen–van Neerven–Veraar–Weis (HNVW), *Analysis in Banach spaces II* (2017), §6.2.a, p. 18–21: on
 the cube `D^n = {−1, 1}^n` the discrete heat semigroup `T (t)`, `t ≥ 0`, multiplies the Walsh
-function `w_α = Π_{i ∈ α} ε_i` by `e^{−t #α}`, (6.6) (`heatSemigroup_walsh`), that is,
+function `w_α = Π_{i ∈ α} ε_i` by `e^{−t #α}`, (6.6) (`heatSemigroup_sum_walsh`), that is,
 `T (t) = Π_i T_i (t)`, (6.7), where `T_i (t) (x + ε_i y) = x + e^{−t} ε_i y` acts on the `i`-th
 sign. This product is the definition here (`heatSemigroup`): it is the operator `⊗ⁿ K̄` of
 `Hypercontractivity/Vector.lean` with `ρ = e^{−t}`. The values of the functions are in a real vector

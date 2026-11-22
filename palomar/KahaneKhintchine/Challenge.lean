@@ -27,7 +27,7 @@ in a seminormed space, the Kahane–Khintchine inequality, and Kahane's contract
 
 * [HNVW] T. Hytönen, J. van Neerven, M. Veraar, L. Weis, *Analysis in Banach Spaces, Volume II:
   Probabilistic Methods and Operator Theory*, Springer, 2017 (in the docstrings also HNVW II):
-  6.2.a, Lemma 6.2.3, Theorems 6.2.2 and 6.2.4;
+  Section 6.2.a, Lemma 6.2.3, Theorems 6.2.2 and 6.2.4;
 * [HNVW I] *Volume I: Martingales and Littlewood–Paley Theory*, 2016: Proposition 3.2.10;
 * [B] C. Borell, *On the integrability of Banach space valued Walsh polynomials*, Séminaire de
   Probabilités XIII, Lecture Notes in Math. 721 (1979), 1–3: (2.1).

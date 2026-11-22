@@ -30,7 +30,7 @@ The UMD property (unconditional martingale differences) of a Banach space `X` an
   Definition 4.2.1, Propositions 4.2.10 and 4.2.15, Theorems 4.2.5, 4.2.7, 4.2.25, 4.5.7, Corollary
   4.5.15;
 * [O] A. Osękowski, *Sharp Martingale and Semimartingale Inequalities*, Birkhäuser, 2012: Theorem
-  3.5, Remark 3.8, 3.11.2.
+  3.5, Remark 3.8, Section 3.11.2.
 
 ## Conventions
 
@@ -67,9 +67,9 @@ The UMD property (unconditional martingale differences) of a Banach space `X` an
 * `umdConst_Lp`, `complexUMDConst_Lp` ([HNVW, Proposition 4.2.15 (2)]):
   `UMD_p (L^p (μ; X)) ≤ UMD_p (X)`, with equality if there is a set of finite positive measure, over
   `ℝ` and `ℂ`.
-* `umdConst_hilbert` ([O, Theorem 3.5, Remark 3.8, 3.11.2]; [HNVW, Corollary 4.5.15], and Theorem
-  4.5.7 for `ℝ`; real scalars): `UMD_p (H) = p* − 1` for a real Hilbert space `H ≠ 0`, also for
-  dyadic martingales.
+* `umdConst_hilbert` ([O, Theorem 3.5, Remark 3.8, Section 3.11.2]; [HNVW, Corollary 4.5.15], and
+  Theorem 4.5.7 for `ℝ`; real scalars): `UMD_p (H) = p* − 1` for a real Hilbert space `H ≠ 0`, also
+  for dyadic martingales.
 
 The definitions are copied word for word from `BanachProbability/Defs.lean` (kept in sync by
 `scripts/sync_challenge_defs.py`); the theorems are proved in `palomar/UMD/Solution.lean`.
@@ -266,9 +266,10 @@ theorem umdConst_Lp {S : Type*} {mS : MeasurableSpace S} (μ : Measure S) [Compl
 
 end Real
 
-/-- **Hilbert spaces** ([O, Theorem 3.5, Remark 3.8, 3.11.2]; [HNVW, Corollary 4.5.15], and Theorem
-4.5.7 for `H = ℝ`; real scalars): `UMD_p (H) = p* − 1` for every real Hilbert space `H ≠ 0` and
-`1 < p < ∞`, and this is also the least constant for dyadic martingales and deterministic signs. -/
+/-- **Hilbert spaces** ([O, Theorem 3.5, Remark 3.8, Section 3.11.2]; [HNVW, Corollary 4.5.15], and
+Theorem 4.5.7 for `H = ℝ`; real scalars): `UMD_p (H) = p* − 1` for every real Hilbert space `H ≠ 0`
+and `1 < p < ∞`, and this is also the least constant for dyadic martingales and deterministic
+signs. -/
 theorem umdConst_hilbert {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℝ H]
     [CompleteSpace H] [Nontrivial H] {p : ℝ} (hp : 1 < p) :
     umdConst H p = ENNReal.ofReal (max p (p / (p - 1)) - 1) ∧

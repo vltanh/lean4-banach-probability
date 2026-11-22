@@ -39,7 +39,8 @@ conditional variance is `Δ_X = V = Σ_i A_i²`. With `h (t) = t |t|^{q−2}` an
   `E ‖Y‖_q^q`.
 
 The proof thus gives the source's constants: `1` for `q = 2`, `√(q − 1)` for `q ≥ 3`
-(Corollary 7.3, `ncKhintchine_symmetric_upper_of_three_le`) and `√(2 (q − 1))` for
+(Corollary 7.3, `ncKhintchine_symmetric_upper_of_three_le`; both together,
+`ncKhintchine_symmetric_upper_of_eq_two_or_three_le`) and `√(2 (q − 1))` for
 `2 < q < 3` (Remark 7.2); `ncKhintchine_symmetric_upper` records the largest of them,
 `√(2 (q − 1))`, for every `q ≥ 2`. The source does not prove the variant of the mean value trace
 inequality that Remark 7.2 requires; it is proved in `BanachProbability.Schatten.Trace`

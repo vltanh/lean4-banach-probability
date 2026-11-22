@@ -22,7 +22,10 @@ holds with the complex constant `UMD_{ℂ,p} (X)` (I. Yaroslavtsev, *Even Fourie
 martingale transforms in infinite dimensions*, Indag. Math. 29 (2018), Proposition 3.7). HNVW ask
 concavity only for the signs `‖ε‖ = 1` (`IsSignZigZagConcave`, Definition 4.5.3) and do not ask
 `U (0, 0) = 0`; the functions above satisfy more, and the bound for `UMD_p (X)` is proved from
-HNVW's hypotheses (`umdConst_le_of_isSignZigZagConcave`).
+HNVW's hypotheses (`umdConst_le_of_isSignZigZagConcave`). Yaroslavtsev asks concavity for all the
+multipliers of a set, here the closed unit ball of `ℝ` or `ℂ` (`IsBallZigZagConcave`), without
+`U (0, 0) = 0` (`umdConst_lt_top_iff_exists_isBallZigZagConcave`,
+`complexUMDConst_lt_top_iff_exists_isBallZigZagConcave`).
 
 The proof is HNVW's, p. 330–337, for `𝕜 = ℝ` and `ℂ` at once:
 
@@ -43,7 +46,8 @@ The proof is HNVW's, p. 330–337, for `𝕜 = ℝ` and `ℂ` at once:
 
 The assertions (1) `UMD_p (X) < ∞`, (2) `UMD_p^Δ (X) < ∞` (on sign cubes) and (3) are stated here
 for a fixed `p`. The final clause, that the least `β` is the UMD constant, is
-`isLeast_umdConst_isZigZagConcave`, and `isLeast_umdConst_isSignZigZagConcave` in HNVW's form. The
+`isLeast_umdConst_isZigZagConcave`, and `isLeast_umdConst_isSignZigZagConcave` in HNVW's form,
+`isLeast_umdConst_isBallZigZagConcave` in Yaroslavtsev's; the complex versions are likewise. The
 equality `UMD_p^Δ (X) = UMD_p (X)`, which this gives, is in `UMD/Maurey/Basic.lean`.
 -/
 

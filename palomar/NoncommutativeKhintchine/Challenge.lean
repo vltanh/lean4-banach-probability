@@ -29,7 +29,7 @@ formalized). After
 
 * [MJCFT] L. Mackey, M. I. Jordan, R. Y. Chen, B. Farrell, J. A. Tropp, *Matrix concentration
   inequalities via the method of exchangeable pairs*, Ann. Probab. 42 (2014), 906–945,
-  arXiv:1201.6002: Corollary 7.3 and Remark 7.2 (Hermitian matrices), 8 (the dilation);
+  arXiv:1201.6002: Corollary 7.3 and Remark 7.2 (Hermitian matrices), Section 8 (the dilation);
 * [PX] G. Pisier, Q. Xu, *Non-commutative `L^p`-spaces*, Handbook of the Geometry of Banach Spaces 2
   (2003), 1459–1517: Theorem 6.1 (i). The inequality is due to F. Lust-Piquard (*Inégalités de
   Khintchine dans `C_p` (`1 < p < ∞`)*, C. R. Acad. Sci. Paris 303 (1986), 289–292) and F.
@@ -55,7 +55,7 @@ formalized). After
   `m ≤ (E ‖Σ ε_i x_i‖_{S_q}^q)^{1/q} ≤ √(2 (q − 1)) m`. The upper bound is proved by the method of
   [MJCFT], not by those of Lust-Piquard and Pisier.
 * `khintchine_of_eq_two_or_three_le`: the upper bound with the constant `√(q − 1)` for `q = 2` and
-  `q ≥ 3`, from the next theorem and [MJCFT, 8].
+  `q ≥ 3`, from the next theorem and [MJCFT, Section 8].
 * `khintchine_symmetric` ([MJCFT, Corollary 7.3, (7.2)], real symmetric matrices, `q = 2p`): the
   constant `√(q − 1)` for `q = 2` and `q ≥ 3`.
 * `schattenNorm_transpose_mul_self`, `schattenNorm_two_sq`: checks of the definitions.
@@ -154,7 +154,7 @@ theorem khintchine {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (x : Fin k → Matrix n n 
   sorry
 
 /-- **The upper bound with the constant `√(q − 1)`** for `q = 2` and `q ≥ 3` ([MJCFT, Corollary 7.3,
-(7.2)] and the dilation of [MJCFT,  8], real square matrices): with `m` as in `khintchine`,
+(7.2)] and the dilation of [MJCFT, Section 8], real square matrices): with `m` as in `khintchine`,
 `(E ‖Σ ε_i x_i‖_{S_q}^q)^{1/q} ≤ √(q − 1) m`. -/
 theorem khintchine_of_eq_two_or_three_le {q : ℝ} (hq : q = 2 ∨ 3 ≤ q) {k : ℕ}
     (x : Fin k → Matrix n n ℝ) :
@@ -173,7 +173,7 @@ theorem khintchine_symmetric {q : ℝ} (hq : q = 2 ∨ 3 ≤ q) {k : ℕ} (A : F
       √(q - 1) * √(schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, A i * A i)) := by
   sorry
 
-/-- `‖Bᵀ B‖_{S_{q/2}} = ‖B‖_{S_q}²`. -/
+/-- `‖Bᵀ B‖_{S_{q/2}} = ‖B‖_{S_q}²`, `q ≠ 0`. -/
 theorem schattenNorm_transpose_mul_self {m : Type*} [Fintype m] {q : ℝ≥0∞} (hq : q ≠ 0)
     (B : Matrix m n ℝ) : schattenNorm (q / 2) (Bᵀ * B) = schattenNorm q B ^ 2 := by
   sorry

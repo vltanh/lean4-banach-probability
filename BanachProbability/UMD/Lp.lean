@@ -12,7 +12,8 @@ For any measure space `(S, μ)`, any Banach space `B` and `p ∈ (1, ∞)`,
 I* (2016), Proposition 4.2.15 (2)), with equality if there is a set of finite positive measure,
 since `B` embeds in `L^p (μ; B)`, and the same for the complex constants; in particular
 `UMD_p (L^p (μ; ℂ)) ≤ p* − 1` and the complex `L^p (μ)` is UMD (also G. Pisier, *Martingales in
-Banach spaces* (2016), Corollary 5.22, "by Fubini").
+Banach spaces (in connection with type and cotype)*, lecture notes (2011), Corollary 8.19, "by
+Fubini's theorem").
 
 The proof is the dyadic one, as in HNVW, which needs neither σ-finiteness nor joint measurability. A
 Paley–Walsh martingale with values in `L^p (μ; B)` takes finitely many values; for every `s` the
@@ -21,8 +22,9 @@ finitely many linear relations defining the Paley–Walsh sums and their transfo
 set (`ulp_coeFn_paleyWalsh`), so for almost every `s` the transform commutes with evaluation. The
 finite averages commute with the (lower) integral:
 `E_ε ‖F (ε)‖_{L^p}^p = ∫ E_ε ‖F (ε) (s)‖^p dμ (s)`, and the dyadic bound of `B` applied pointwise
-in `s` gives `UMD_p^Δ (L^p (μ; B)) ≤ UMD_p^Δ (B)` (`dyadicUMDConst_Lp_le`). Maurey's theorem gives
-the full constants.
+in `s` gives `UMD_p^Δ (L^p (μ; B)) ≤ UMD_p^Δ (B)` (`dyadicUMDConst_Lp_le`; with deterministic
+multipliers, real and complex, `IsDeterministicDyadicUMDBound.Lp`). Maurey's theorem gives the full
+constants (`umdConst_Lp_le`, `umdConst_Lp_eq`, `complexUMDConst_Lp_le`, `complexUMDConst_Lp_eq`).
 -/
 
 @[expose] public section
@@ -241,8 +243,8 @@ theorem umdConst_Lp_complex_le (p : ℝ≥0∞) [Fact (1 ≤ p)] (hp : 1 < p) (h
   (umdConst_Lp_le μ p hp hpt).trans
     (umdConst_le_of_innerProductSpace (H := ℂ) (ulp_one_lt_toReal hp hpt))
 
-/-- **`L^p` is UMD** (Pisier 2016, Corollary 5.22): for every measure space and `p ∈ (1, ∞)`, the
-complex `L^p (μ)` has `UMD_p (L^p (μ)) < ∞`. -/
+/-- **`L^p` is UMD** (Pisier's lecture notes of 2011, Corollary 8.19): for every measure space and
+`p ∈ (1, ∞)`, the complex `L^p (μ)` has `UMD_p (L^p (μ)) < ∞`. -/
 theorem umdConst_Lp_complex_lt_top (p : ℝ≥0∞) [Fact (1 ≤ p)] (hp : 1 < p) (hpt : p ≠ ⊤) :
     umdConst (Lp ℂ p μ) p.toReal < ⊤ :=
   (umdConst_Lp_complex_le μ p hp hpt).trans_lt ENNReal.ofReal_lt_top

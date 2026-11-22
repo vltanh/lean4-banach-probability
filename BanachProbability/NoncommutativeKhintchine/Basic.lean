@@ -15,6 +15,8 @@ For real `n × n` matrices `x_1, …, x_k`, `q ∈ [2, ∞)` and independent fai
   `D (x_i) = [[0, x_i], [x_iᵀ, 0]]` (Mackey–Jordan–Chen–Farrell–Tropp, Ann. Probab. 42 (2014),
   §8): `‖D (S)‖_q^q = 2 ‖S‖_q^q` and `Σ_i D (x_i)² = diag (Σ_i x_i x_iᵀ, Σ_i x_iᵀ x_i)`; with the
   lower bounds of `NoncommutativeKhintchine/Lower.lean`, the two-sided inequality (`ncKhintchine`);
+  with `√(q − 1)` in place of `√(2 (q − 1))` if `q = 2` or `q ≥ 3`
+  (`ncKhintchine_upper_of_eq_two_or_three_le`);
 * for normal `x_i` (`x_i x_iᵀ = x_iᵀ x_i`), both bounds together (`ncKhintchine_normal`):
   `‖(Σ_i x_i x_iᵀ)^{1/2}‖_{S_q} ≤ (E ‖Σ_i ε_i x_i‖_{S_q}^q)^{1/q} ≤
   √2 √q ‖(Σ_i x_i x_iᵀ)^{1/2}‖_{S_q}`; this is the noncommutative Khintchine inequality of
