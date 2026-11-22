@@ -162,7 +162,7 @@ theorem map_paleyWalsh {F : Type*} [AddCommGroup F] [Module ℝ F] (T : E →ₗ
     T (paleyWalsh ξ n ε) = paleyWalsh (fun k ε => T (ξ k ε)) n ε := by
   simp only [paleyWalsh, map_sum, map_smul]
 
-set_option linter.unusedSectionVars false in
+omit [Module ℝ E] in
 theorem IsPredictable.add {ξ ζ : Fin N → (Fin N → Bool) → E} (hξ : IsPredictable ξ)
     (hζ : IsPredictable ζ) : IsPredictable fun k ε => ξ k ε + ζ k ε := by
   intro k ε ε' h
@@ -336,7 +336,7 @@ theorem exists_paleyWalsh_of_isCubeMartingale {M : ℕ → (Fin N → Bool) → 
           rw [show ε = ε' from funext fun j => h j (lt_of_lt_of_le j.isLt (not_lt.mp hn))]
         rw [add_zero, ← ih, ← hC n, hid]
 
-set_option linter.unusedSectionVars false in
+omit [Module ℝ E] in
 /-- The family `ξ` cut off where a predictable event fails: if the event `A k` depends only on the
 signs `ε_j`, `j < k`, then `k ↦ 1_{A k} ξ_k` is predictable. -/
 theorem IsPredictable.indicator {ξ : Fin N → (Fin N → Bool) → E} (hξ : IsPredictable ξ)

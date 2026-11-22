@@ -154,7 +154,7 @@ private theorem mba_finite_gen {𝕜 : Type} [RCLike 𝕜] [NormedSpace 𝕜 X] 
   have hp0 : ENNReal.ofReal p ≠ 0 := by simp; linarith
   refine mba_le_mul (fun h0 => mba_eLpNorm_norm_transform_eq_zero hY hp0 h0 φ) fun η hη => ?_
   obtain ⟨μ', _, Y', hdy, hY', hY'0, h1, h2⟩ :=
-    exists_hasDyadicTransitions_approx_gen hY hY0 hφm hp n hη
+    exists_hasDyadicTransitions_approx_gen (φ := φ) hY hY0 hp n hη
   obtain ⟨M, ξ, s, hξ, hs, hsA, e1, e2⟩ :=
     exists_paleyWalsh_realization_gen hY' hY'0 hA hφA hφm hdy (p := p) (by linarith)
   have key := hβ M ξ s hξ hs hsA
