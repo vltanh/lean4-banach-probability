@@ -11,7 +11,10 @@ public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 For symmetric `P = Σ_j λ_j u_j u_jᵀ` and `Q = Σ_k μ_k v_k v_kᵀ` (orthonormal eigenbases), the
 overlaps `c_{jk} = ⟨u_j, v_k⟩²` form a doubly stochastic matrix (`sum_overlap_left`,
 `sum_overlap_right`), and for all functions `f`, `g`,
-`tr (f (P) g (Q)) = Σ_{j,k} c_{jk} f (λ_j) g (μ_k)` (`trace_cfc_mul_cfc`).
+`tr (f (P) g (Q)) = Σ_{j,k} c_{jk} f (λ_j) g (μ_k)` (`trace_cfc_mul_cfc`); the diagonal entries of
+`f (P)` in the eigenbasis of `Q` are the averages `⟨v_k, f (P) v_k⟩ = Σ_j c_{jk} f (λ_j)`
+(`sum_eigenvectorBasis_mul_cfc_mul`, used for Peierls's inequality in
+`BanachProbability.Schatten.Triangle`).
 
 Mean-value trace inequalities (Mackey–Jordan–Chen–Farrell–Tropp, *Matrix concentration
 inequalities via the method of exchangeable pairs*, Ann. Probab. 42 (2014), Lemma 3.4), with
@@ -98,6 +101,23 @@ theorem trace_cfc_mul_cfc {P Q : Matrix n n ℝ} (hP : P.IsHermitian) (hQ : Q.Is
   conv_lhs => rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun k _ =>
     Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => by ring
+
+/-- The diagonal entries of `f (P)` in the eigenbasis of `Q`:
+`⟨v_k, f (P) v_k⟩ = Σ_j ⟨u_j, v_k⟩² f (λ_j)`, an average of the `f (λ_j)` with the weights of
+column `k` of the overlap matrix. -/
+theorem sum_eigenvectorBasis_mul_cfc_mul {P Q : Matrix n n ℝ} (hP : P.IsHermitian)
+    (hQ : Q.IsHermitian) (f : ℝ → ℝ) (k : n) :
+    ∑ a, ∑ b, hQ.eigenvectorBasis k a * cfc f P a b * hQ.eigenvectorBasis k b =
+      ∑ j, overlap hP hQ j k * f (hP.eigenvalues j) := by
+  simp only [cfc_apply_eq_sum hP, overlap, inner_eigenvectorBasis hP hQ, sq, Finset.sum_mul,
+    Finset.mul_sum]
+  calc _ = ∑ a, ∑ j, ∑ b, hQ.eigenvectorBasis k a * (hP.eigenvectorBasis j a *
+        f (hP.eigenvalues j) * hP.eigenvectorBasis j b) * hQ.eigenvectorBasis k b :=
+        Finset.sum_congr rfl fun a _ => Finset.sum_comm
+    _ = _ := by
+        rw [Finset.sum_comm]
+        refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun a _ =>
+          Finset.sum_congr rfl fun b _ => by ring
 
 /-- The tangent-line bound for `t ↦ t^{p+1}`, `p ≥ 0`, on `[0, ∞)` (Bernoulli's inequality):
 `a^{p+1} − b^{p+1} ≤ (p + 1) a^p (a − b)` for `0 ≤ b ≤ a`. -/
@@ -258,7 +278,7 @@ private theorem hasDerivAt_mul_abs_rpow {s : ℝ} (hs : 0 < s) (t : ℝ) :
     ring
 
 /-- `t ↦ |t|^s` is convex for `s ≥ 1`. -/
-private theorem convexOn_abs_rpow {s : ℝ} (hs : 1 ≤ s) :
+theorem convexOn_abs_rpow {s : ℝ} (hs : 1 ≤ s) :
     ConvexOn ℝ Set.univ fun t : ℝ => |t| ^ s := by
   refine ⟨convex_univ, fun x _ y _ a b ha hb hab => ?_⟩
   simp only [smul_eq_mul]

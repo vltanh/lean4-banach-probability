@@ -1,17 +1,57 @@
 module
 
-public import BanachProbability.Schatten.Basic
-public import Mathlib.Analysis.MeanInequalitiesPow
+public import BanachProbability.Schatten.Dilation
+public import BanachProbability.Schatten.Trace
 
 /-!
 # The triangle inequality for Schatten norms
 
-For `q ∈ [1, ∞]`, `‖A + B‖_{S_q} ≤ ‖A‖_{S_q} + ‖B‖_{S_q}` (von Neumann; R. Bhatia, *Matrix
-Analysis* (1997), Chapter IV). The proof is the standard one through doubly substochastic
-matrices: write `W = A + B` with its singular vectors, `s_k (W) = ⟨ξ_k, A v_k⟩ + ⟨ξ_k, B v_k⟩`;
-for `A = Σ_j s_j x_j ⊗ y_j`, `|⟨ξ_k, A v_k⟩| ≤ Σ_j M_{kj} s_j (A)` with `M` doubly substochastic
-(`2|ab| ≤ a²/s + s b²` and Bessel's inequality), so that Jensen's inequality for `t ↦ t^q` gives
-`Σ_k |⟨ξ_k, A v_k⟩|^q ≤ Σ_j s_j (A)^q`; Minkowski's inequality in `ℓ^q` concludes.
+For `q ∈ [1, ∞]`, `‖A + B‖_{S_q} ≤ ‖A‖_{S_q} + ‖B‖_{S_q}` (`schattenNorm_add_le`). The usual
+reference, R. Bhatia, *Matrix Analysis* (1997), Chapter IV, was not accessible. The proof follows
+J.-C. Bourin and T. Zhang, *Matrix triangle inequalities: past, present, and future*,
+arXiv:2610.30538 (2026), Proposition 3.13, by the third proof of their Remark 3.14: the second
+part of the proof of Proposition 3.13, rerun on the Hermitian dilations `A₀ = [[0, A], [Aᵀ, 0]]`,
+`B₀ = [[0, B], [Bᵀ, 0]]` with the convex function `t ↦ |t|^p`, `p = q < ∞`.
+
+* **von Neumann's convexity inequality**, the source's (1.1) (`trace_cfc_smul_add_smul_le`). The
+  source states it at the midpoint, for `g` convex on an interval containing the spectra, quotes it
+  without proof, and uses it in the proof of Proposition 3.13 for a convex combination:
+  `Tr g (t X + (1 − t) Y) ≤ t Tr g (X) + (1 − t) Tr g (Y)`, `t ∈ [0, 1]`. That form is proved here
+  for `g` convex on all of `ℝ` (enough for `|·|^p`), by the standard argument of Peierls: in an
+  orthonormal eigenbasis `(w_k)` of `Z = t X + (1 − t) Y`,
+  `λ_k (Z) = ⟨w_k, Z w_k⟩ = t ⟨w_k, X w_k⟩ + (1 − t) ⟨w_k, Y w_k⟩`
+  (`eigenvalues_eq_sum_eigenvectorBasis_mul`), so the convexity of `g` gives
+  `Tr g (Z) ≤ t Σ_k g (⟨w_k, X w_k⟩) + (1 − t) Σ_k g (⟨w_k, Y w_k⟩)`; and
+  `Σ_k g (⟨w_k, X w_k⟩) ≤ Tr g (X)` (Peierls's inequality, `sum_apply_diag_le_sum_eigenvalues`):
+  `⟨w_k, X w_k⟩ = Σ_j ⟨u_j, w_k⟩² λ_j (X)` (`sum_eigenvectorBasis_mul_cfc_mul`), whose weights sum
+  to `1` over `j` and over `k` (`sum_overlap_left`, `sum_overlap_right`), and Jensen's inequality.
+  This Jensen step is written out, for `g = |·|^p`, in the proof of Theorem 7.1 of S. Fehr's
+  lecture notes *Quantum Information Theory* (2021), Chapter 7; the usual reference for Peierls's
+  inequality, E. Carlen's notes *Trace inequalities and quantum entropy* (2010), was not
+  accessible.
+* **The normalized case** (`schattenNorm_smul_add_smul_le_one`): if `‖A‖_{S_p} = ‖B‖_{S_p} = 1`
+  and `t ∈ [0, 1]`, then `‖t A + (1 − t) B‖_{S_p} ≤ 1`, as
+  `2 ‖t A + (1 − t) B‖_{S_p}^p = Tr |t A₀ + (1 − t) B₀|^p ≤ t Tr |A₀|^p + (1 − t) Tr |B₀|^p = 2`.
+  The source's "arguing as in" leaves implicit the three facts used here: the dilation `D` is linear
+  (`dilationLinearMap`), `‖D (C)‖_{S_p}^p = 2 ‖C‖_{S_p}^p` (`schattenNorm_dilation_rpow`), and
+  `‖X‖_{S_p}^p = Tr |X|^p` for a symmetric `X` (`schattenNorm_rpow_of_isHermitian`,
+  `trace_cfc_eq_sum`). The normalized matrices are `A` and `B`, so that `Tr |A₀|^p = 2`.
+* **The general case** (`schattenNorm_add_le`, `q < ∞`): for `A, B ≠ 0`, the normalized case for
+  `A / ‖A‖_{S_p}`, `B / ‖B‖_{S_p}` and `t = ‖A‖_{S_p} / (‖A‖_{S_p} + ‖B‖_{S_p})`. The source leaves
+  out `A = 0` or `B = 0`: if `‖A‖_{S_p} = 0`, then `A = 0` (`schattenNorm_eq_zero_iff`) and the
+  inequality is an equality, and likewise for `B`.
+* **`q = ∞`**, which the source calls well known and does not prove (`schattenNorm_top_add_le`):
+  `s_1 (A + B) ≤ s_1 (A) + s_1 (B)`, the first of Weyl's inequalities for singular values
+  (`countAbove_add_add_le`, by a Courant–Fischer dimension count) with `s = ‖A‖_{S_∞}` and
+  `t = ‖B‖_{S_∞}`. No singular value of `A` exceeds `s` and none of `B` exceeds `t`, so the
+  dimension count is vacuous and what remains is `‖(A + B) v‖ ≤ ‖A v‖ + ‖B v‖ ≤ (s + t) ‖v‖`, the
+  triangle inequality of the spectral norm as an operator norm.
+
+**Departure from the source.** Proposition 3.13 and (1.1) are about complex square matrices and
+complex Hermitian matrices; the statements here are about real `m × n` matrices and real
+symmetric ones. The argument is the same over `ℝ`: the eigenbases are real orthonormal bases, and
+the dilation of an `m × n` matrix is a symmetric matrix on `m ⊕ n` with
+`‖D (C)‖_{S_p}^p = 2 ‖C‖_{S_p}^p`. The complex statements are not formalized.
 -/
 
 @[expose] public section
@@ -20,321 +60,183 @@ open scoped ENNReal Matrix
 
 namespace BanachProbability
 
+/-! ### von Neumann's convexity inequality -/
+
+section Convexity
+
+variable {k : Type*} [Fintype k] [DecidableEq k]
+
+/-- The eigenvalues as diagonal entries: `λ_i (Q) = ⟨w_i, Q w_i⟩` for the orthonormal eigenbasis
+`(w_i)` of a symmetric `Q`. -/
+theorem eigenvalues_eq_sum_eigenvectorBasis_mul {Q : Matrix k k ℝ} (hQ : Q.IsHermitian) (i : k) :
+    hQ.eigenvalues i = ∑ a, ∑ b, hQ.eigenvectorBasis i a * Q a b * hQ.eigenvectorBasis i b := by
+  have h := sum_eigenvectorBasis_mul_cfc_mul hQ hQ id i
+  rw [cfc_id ℝ Q hQ.isSelfAdjoint] at h
+  rw [h]
+  have ho : ∀ j, overlap hQ hQ j i = if j = i then 1 else 0 := fun j => by
+    rw [overlap, orthonormal_iff_ite.mp hQ.eigenvectorBasis.orthonormal j i]
+    split_ifs <;> norm_num
+  simp [ho]
+
+/-- **Peierls's inequality** in the eigenbasis `(w_i)` of a symmetric `Q`: for a symmetric `P` and
+a convex `g`, `Σ_i g (⟨w_i, P w_i⟩) ≤ Σ_j g (λ_j (P)) = Tr g (P)`. With the eigenbasis `(u_j)` of
+`P`, `⟨w_i, P w_i⟩ = Σ_j ⟨u_j, w_i⟩² λ_j (P)`; Jensen's inequality for the weights `⟨u_j, w_i⟩²`,
+which sum to `1` over `j`, and the sum over `i`, where they sum to `1` again. -/
+theorem sum_apply_diag_le_sum_eigenvalues {P Q : Matrix k k ℝ} (hP : P.IsHermitian)
+    (hQ : Q.IsHermitian) {g : ℝ → ℝ} (hg : ConvexOn ℝ Set.univ g) :
+    ∑ i, g (∑ a, ∑ b, hQ.eigenvectorBasis i a * P a b * hQ.eigenvectorBasis i b) ≤
+      ∑ j, g (hP.eigenvalues j) := by
+  have hdiag : ∀ i, ∑ a, ∑ b, hQ.eigenvectorBasis i a * P a b * hQ.eigenvectorBasis i b =
+      ∑ j, overlap hP hQ j i * hP.eigenvalues j := fun i => by
+    have h := sum_eigenvectorBasis_mul_cfc_mul hP hQ id i
+    rw [cfc_id ℝ P hP.isSelfAdjoint] at h
+    simpa only [id] using h
+  calc ∑ i, g (∑ a, ∑ b, hQ.eigenvectorBasis i a * P a b * hQ.eigenvectorBasis i b)
+      ≤ ∑ i, ∑ j, overlap hP hQ j i * g (hP.eigenvalues j) := by
+        refine Finset.sum_le_sum fun i _ => ?_
+        rw [hdiag i]
+        simpa only [smul_eq_mul] using hg.map_sum_le (fun j _ => overlap_nonneg hP hQ j i)
+          (sum_overlap_left hP hQ i) (fun j _ => Set.mem_univ (hP.eigenvalues j))
+    _ = ∑ j, g (hP.eigenvalues j) := by
+        rw [Finset.sum_comm]
+        refine Finset.sum_congr rfl fun j _ => ?_
+        rw [← Finset.sum_mul, sum_overlap_right, one_mul]
+
+/-- **von Neumann's convexity inequality** (Bourin–Zhang, (1.1), for a convex combination, real
+symmetric matrices and `g` convex on `ℝ`): for symmetric `X`, `Y`, `t ∈ [0, 1]` and a convex `g`,
+`Tr g (t X + (1 − t) Y) ≤ t Tr g (X) + (1 − t) Tr g (Y)`. Peierls's argument: in the eigenbasis
+`(w_i)` of `Z = t X + (1 − t) Y`, `λ_i (Z) = t ⟨w_i, X w_i⟩ + (1 − t) ⟨w_i, Y w_i⟩`; the convexity
+of `g`, then Peierls's inequality for `X` and for `Y`. -/
+theorem trace_cfc_smul_add_smul_le {X Y : Matrix k k ℝ} (hX : X.IsHermitian) (hY : Y.IsHermitian)
+    {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) {g : ℝ → ℝ} (hg : ConvexOn ℝ Set.univ g) :
+    (cfc g (t • X + (1 - t) • Y)).trace ≤ t * (cfc g X).trace + (1 - t) * (cfc g Y).trace := by
+  have hZ : (t • X + (1 - t) • Y).IsHermitian :=
+    (hX.smul (IsSelfAdjoint.all t)).add (hY.smul (IsSelfAdjoint.all (1 - t)))
+  have ht1' : 0 ≤ 1 - t := by linarith
+  rw [trace_cfc_eq_sum hZ, trace_cfc_eq_sum hX, trace_cfc_eq_sum hY]
+  set w := hZ.eigenvectorBasis
+  have hlin : ∀ i, hZ.eigenvalues i = t * ∑ a, ∑ b, w i a * X a b * w i b +
+      (1 - t) * ∑ a, ∑ b, w i a * Y a b * w i b := fun i => by
+    rw [eigenvalues_eq_sum_eigenvectorBasis_mul hZ i]
+    simp only [Matrix.add_apply, Matrix.smul_apply, smul_eq_mul, Finset.mul_sum,
+      ← Finset.sum_add_distrib]
+    exact Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => by ring
+  calc ∑ i, g (hZ.eigenvalues i)
+      ≤ ∑ i, (t * g (∑ a, ∑ b, w i a * X a b * w i b) +
+          (1 - t) * g (∑ a, ∑ b, w i a * Y a b * w i b)) := by
+        refine Finset.sum_le_sum fun i _ => ?_
+        rw [hlin i]
+        simpa only [smul_eq_mul] using
+          hg.2 (Set.mem_univ _) (Set.mem_univ _) ht0 ht1' (by ring)
+    _ = t * ∑ i, g (∑ a, ∑ b, w i a * X a b * w i b) +
+          (1 - t) * ∑ i, g (∑ a, ∑ b, w i a * Y a b * w i b) := by
+        rw [Finset.sum_add_distrib, Finset.mul_sum, Finset.mul_sum]
+    _ ≤ t * ∑ j, g (hX.eigenvalues j) + (1 - t) * ∑ j, g (hY.eigenvalues j) :=
+        add_le_add (mul_le_mul_of_nonneg_left (sum_apply_diag_le_sum_eigenvalues hX hZ hg) ht0)
+          (mul_le_mul_of_nonneg_left (sum_apply_diag_le_sum_eigenvalues hY hZ hg) ht1')
+
+end Convexity
+
+/-! ### The triangle inequality -/
+
+section Triangle
+
 variable {m n : Type*} [Fintype m] [Fintype n] [DecidableEq n]
 
-/-- Bessel's inequality for a family of orthogonal columns `Y_j` with `‖Y_j‖² = λ_j`:
-`Σ_j ⟨w, Y_j⟩² / λ_j ≤ ‖w‖²` (a term with `λ_j = 0` is `0`). -/
-private theorem sum_sq_dotProduct_div_le (Y : Matrix m n ℝ) (lam : n → ℝ)
-    (hY : ∀ j l, ∑ i, Y i j * Y i l = if j = l then lam j else 0) (w : m → ℝ) :
-    ∑ j, (∑ i, w i * Y i j) ^ 2 / lam j ≤ ∑ i, w i ^ 2 := by
-  set a : n → ℝ := fun j => ∑ i, w i * Y i j with ha
-  set c : n → ℝ := fun j => a j / lam j with hc
-  set z : m → ℝ := fun i => ∑ j, c j * Y i j with hz
-  have h1 : ∑ i, w i * z i = ∑ j, a j ^ 2 / lam j := by
-    have e : ∀ j, a j ^ 2 / lam j = c j * ∑ i, w i * Y i j := fun j => by
-      simp only [hc, ha]; ring
-    simp_rw [e]
-    simp only [hz, Finset.mul_sum]
-    rw [Finset.sum_comm]
-    exact Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun i _ => by ring
-  have h2 : ∑ i, z i ^ 2 = ∑ j, a j ^ 2 / lam j := by
-    have e1 : ∑ i, z i ^ 2 = ∑ j, ∑ l, c j * c l * ∑ i, Y i j * Y i l := by
-      have : ∀ i, z i ^ 2 = ∑ j, ∑ l, c j * c l * (Y i j * Y i l) := fun i => by
-        simp only [hz, sq, Finset.sum_mul, Finset.mul_sum]
-        exact Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun l _ => by ring
-      simp_rw [this, Finset.mul_sum]
-      rw [Finset.sum_comm]
-      refine Finset.sum_congr rfl fun j _ => ?_
-      rw [Finset.sum_comm]
-    rw [e1]
-    simp only [hY, mul_ite, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, ite_true]
-    refine Finset.sum_congr rfl fun j _ => ?_
-    simp only [hc]
-    by_cases h : lam j = 0
-    · simp [h]
-    · field_simp
-  set S := ∑ j, a j ^ 2 / lam j
-  have hS0 : 0 ≤ S := h2 ▸ Finset.sum_nonneg fun i _ => sq_nonneg _
-  have hcs := Finset.sum_mul_sq_le_sq_mul_sq Finset.univ w z
-  rw [h1, h2] at hcs
-  have hw0 : 0 ≤ ∑ i, w i ^ 2 := Finset.sum_nonneg fun i _ => sq_nonneg _
+/-- **The normalized case** (Bourin–Zhang, Remark 3.14, with the second part of the proof of
+Proposition 3.13): if `‖A‖_{S_p} = ‖B‖_{S_p} = 1`, `p ≥ 1` and `t ∈ [0, 1]`, then
+`‖t A + (1 − t) B‖_{S_p} ≤ 1`. With the dilations `A₀ = D (A)`, `B₀ = D (B)`,
+`2 ‖t A + (1 − t) B‖_{S_p}^p = ‖t A₀ + (1 − t) B₀‖_{S_p}^p = Tr |t A₀ + (1 − t) B₀|^p
+≤ t Tr |A₀|^p + (1 − t) Tr |B₀|^p = 2`, by von Neumann's convexity inequality for `|·|^p`. -/
+theorem schattenNorm_smul_add_smul_le_one {p : ℝ} (hp : 1 ≤ p)
+    {A B : Matrix m n ℝ} (hA : schattenNorm (ENNReal.ofReal p) A = 1)
+    (hB : schattenNorm (ENNReal.ofReal p) B = 1) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) :
+    schattenNorm (ENNReal.ofReal p) (t • A + (1 - t) • B) ≤ 1 := by
+  classical
+  have hp0 : 0 < p := by linarith
+  have hD : dilation (t • A + (1 - t) • B) = t • dilation A + (1 - t) • dilation B := by
+    change dilationLinearMap (t • A + (1 - t) • B) = _
+    rw [map_add, map_smul, map_smul]
+    rfl
+  -- `‖X‖_{S_p}^p = Tr |X|^p` for a symmetric `X`
+  have htr : ∀ {X : Matrix (m ⊕ n) (m ⊕ n) ℝ} (hX : X.IsHermitian),
+      schattenNorm (ENNReal.ofReal p) X ^ p = (cfc (fun x : ℝ => |x| ^ p) X).trace :=
+    fun hX => by rw [schattenNorm_rpow_of_isHermitian hX hp0, trace_cfc_eq_sum hX]
+  have hZ : (t • dilation A + (1 - t) • dilation B).IsHermitian :=
+    hD ▸ dilation_isHermitian (t • A + (1 - t) • B)
+  have key : 2 * schattenNorm (ENNReal.ofReal p) (t • A + (1 - t) • B) ^ p ≤ 2 := by
+    rw [← schattenNorm_dilation_rpow hp0, hD, htr hZ]
+    calc (cfc (fun x : ℝ => |x| ^ p) (t • dilation A + (1 - t) • dilation B)).trace
+        ≤ t * (cfc (fun x : ℝ => |x| ^ p) (dilation A)).trace +
+            (1 - t) * (cfc (fun x : ℝ => |x| ^ p) (dilation B)).trace :=
+          trace_cfc_smul_add_smul_le (dilation_isHermitian A) (dilation_isHermitian B) ht0 ht1
+            (convexOn_abs_rpow hp)
+      _ = 2 := by
+          rw [← htr (dilation_isHermitian A), ← htr (dilation_isHermitian B),
+            schattenNorm_dilation_rpow hp0, schattenNorm_dilation_rpow hp0, hA, hB,
+            Real.one_rpow]
+          ring
+  have h1 : schattenNorm (ENNReal.ofReal p) (t • A + (1 - t) • B) ^ p ≤ 1 := by linarith
   by_contra hlt
-  push Not at hlt
-  have hSpos : 0 < S := lt_of_le_of_lt hw0 hlt
-  nlinarith
+  linarith [Real.one_lt_rpow (not_le.mp hlt) hp0]
 
-/-- Jensen's inequality for `t ↦ t^q`, `q ≥ 1`, with weights of total mass at most one:
-`(Σ w_i t_i)^q ≤ Σ w_i t_i^q`. -/
-private theorem rpow_sum_mul_le_sum_mul_rpow {ι : Type*} (s : Finset ι) {w t : ι → ℝ}
-    (hw : ∀ i ∈ s, 0 ≤ w i) (hW : ∑ i ∈ s, w i ≤ 1) (ht : ∀ i ∈ s, 0 ≤ t i) {q : ℝ} (hq : 1 ≤ q) :
-    (∑ i ∈ s, w i * t i) ^ q ≤ ∑ i ∈ s, w i * t i ^ q := by
-  set W := ∑ i ∈ s, w i with hWdef
-  have hW0 : 0 ≤ W := Finset.sum_nonneg hw
-  rcases hW0.eq_or_lt with h0 | hpos
-  · have hz : ∀ i ∈ s, w i = 0 := (Finset.sum_eq_zero_iff_of_nonneg hw).1 h0.symm
-    rw [Finset.sum_eq_zero fun i hi => by rw [hz i hi, zero_mul],
-      Finset.sum_eq_zero fun i hi => by rw [hz i hi, zero_mul], Real.zero_rpow (by linarith)]
-  · have hw' : ∑ i ∈ s, w i / W = 1 := by rw [← Finset.sum_div, div_self hpos.ne']
-    have hJ := Real.rpow_arith_mean_le_arith_mean_rpow s (fun i => w i / W) t
-      (fun i hi => div_nonneg (hw i hi) hW0) hw' ht hq
-    have e1 : ∑ i ∈ s, w i * t i = W * ∑ i ∈ s, w i / W * t i := by
-      rw [Finset.mul_sum]
-      refine Finset.sum_congr rfl fun i _ => ?_
-      field_simp
-    have e2 : ∑ i ∈ s, w i * t i ^ q = W * ∑ i ∈ s, w i / W * t i ^ q := by
-      rw [Finset.mul_sum]
-      refine Finset.sum_congr rfl fun i _ => ?_
-      field_simp
-    have hsum0 : 0 ≤ ∑ i ∈ s, w i / W * t i :=
-      Finset.sum_nonneg fun i hi => mul_nonneg (div_nonneg (hw i hi) hW0) (ht i hi)
-    have hsumq0 : 0 ≤ ∑ i ∈ s, w i / W * t i ^ q := Finset.sum_nonneg fun i hi =>
-      mul_nonneg (div_nonneg (hw i hi) hW0) (Real.rpow_nonneg (ht i hi) _)
-    rw [e1, e2, Real.mul_rpow hW0 hsum0]
-    calc W ^ q * (∑ i ∈ s, w i / W * t i) ^ q ≤ W ^ q * ∑ i ∈ s, w i / W * t i ^ q :=
-          mul_le_mul_of_nonneg_left hJ (Real.rpow_nonneg hW0 _)
-      _ ≤ W * ∑ i ∈ s, w i / W * t i ^ q := by
-          refine mul_le_mul_of_nonneg_right ?_ hsumq0
-          calc W ^ q ≤ W ^ (1 : ℝ) := Real.rpow_le_rpow_of_exponent_ge hpos hW hq
-            _ = W := Real.rpow_one W
+/-- `q = ∞`, which the source calls well known: `s_1 (A + B) ≤ s_1 (A) + s_1 (B)`, the first of
+Weyl's inequalities for singular values (`countAbove_add_add_le`): no singular value of `A` exceeds
+`‖A‖_{S_∞}` and none of `B` exceeds `‖B‖_{S_∞}`, hence none of `A + B` exceeds their sum. -/
+theorem schattenNorm_top_add_le (A B : Matrix m n ℝ) :
+    schattenNorm ⊤ (A + B) ≤ schattenNorm ⊤ A + schattenNorm ⊤ B := by
+  simp only [schattenNorm, ite_true]
+  rcases isEmpty_or_nonempty n with hn | hn
+  · simp only [Real.iSup_of_isEmpty, add_zero, le_refl]
+  set s := ⨆ i, singularValue A i
+  set t := ⨆ i, singularValue B i
+  have hA : countAbove s A = 0 := by
+    rw [countAbove, Finset.card_eq_zero, Finset.filter_eq_empty_iff]
+    exact fun i _ => not_lt.2 (le_ciSup (Set.finite_range _).bddAbove i)
+  have hB : countAbove t B = 0 := by
+    rw [countAbove, Finset.card_eq_zero, Finset.filter_eq_empty_iff]
+    exact fun i _ => not_lt.2 (le_ciSup (Set.finite_range _).bddAbove i)
+  have h := countAbove_add_add_le s t A B
+  rw [hA, hB] at h
+  have h0 : countAbove (s + t) (A + B) = 0 := by omega
+  rw [countAbove, Finset.card_eq_zero, Finset.filter_eq_empty_iff] at h0
+  exact ciSup_le fun i => not_lt.1 (h0 (Finset.mem_univ i))
 
-/-- The right singular vectors of `A`: the orthogonal matrix of eigenvectors of `AᵀA`. -/
-private noncomputable def rightSingularMatrix (A : Matrix m n ℝ) : Matrix n n ℝ :=
-  ((Matrix.isHermitian_conjTranspose_mul_self A).eigenvectorUnitary : Matrix n n ℝ)
-
-private theorem rightSingularMatrix_transpose_mul (A : Matrix m n ℝ) :
-    (rightSingularMatrix A)ᵀ * rightSingularMatrix A = 1 := by
-  have :=
-    Unitary.coe_star_mul_self (Matrix.isHermitian_conjTranspose_mul_self A).eigenvectorUnitary
-  simp only [Matrix.star_eq_conjTranspose, Matrix.conjTranspose_eq_transpose_of_trivial] at this
-  exact this
-
-private theorem rightSingularMatrix_mul_transpose (A : Matrix m n ℝ) :
-    rightSingularMatrix A * (rightSingularMatrix A)ᵀ = 1 := by
-  have :=
-    Unitary.coe_mul_star_self (Matrix.isHermitian_conjTranspose_mul_self A).eigenvectorUnitary
-  simp only [Unitary.coe_star, Matrix.star_eq_conjTranspose,
-    Matrix.conjTranspose_eq_transpose_of_trivial] at this
-  exact this
-
-/-- The columns `A y_j` of `A V` (`V = rightSingularMatrix A`) are orthogonal, with
-`‖A y_j‖² = s_j²`. -/
-private theorem gram_mul_rightSingularMatrix (A : Matrix m n ℝ) (j l : n) :
-    ∑ i, (A * rightSingularMatrix A) i j * (A * rightSingularMatrix A) i l =
-      if j = l then (Matrix.isHermitian_conjTranspose_mul_self A).eigenvalues j else 0 := by
-  set U := rightSingularMatrix A
-  have h1 : Aᵀ * A =
-      U * Matrix.diagonal (Matrix.isHermitian_conjTranspose_mul_self A).eigenvalues * Uᵀ := by
-    have :=
-      eq_eigenvectorUnitary_mul_diagonal_mul_star (Matrix.isHermitian_conjTranspose_mul_self A)
-    simp only [Matrix.star_eq_conjTranspose, Matrix.conjTranspose_eq_transpose_of_trivial] at this
-    exact this
-  have hYY : (A * U)ᵀ * (A * U) =
-      Matrix.diagonal (Matrix.isHermitian_conjTranspose_mul_self A).eigenvalues := by
-    rw [Matrix.transpose_mul]
-    calc Uᵀ * Aᵀ * (A * U) = Uᵀ * (Aᵀ * A) * U := by simp only [Matrix.mul_assoc]
-      _ = Uᵀ * U * Matrix.diagonal (Matrix.isHermitian_conjTranspose_mul_self A).eigenvalues *
-            (Uᵀ * U) := by rw [h1]; simp only [Matrix.mul_assoc]
-      _ = _ := by rw [rightSingularMatrix_transpose_mul, Matrix.one_mul, Matrix.mul_one]
-  have := congrFun (congrFun hYY j) l
-  rw [Matrix.mul_apply, Matrix.diagonal_apply] at this
-  simpa only [Matrix.transpose_apply] using this
-
-/-- For orthogonal `O`, the squares of the entries of each column sum to `1`. -/
-private theorem sum_sq_col_of_transpose_mul_eq_one {O : Matrix n n ℝ} (hO : Oᵀ * O = 1)
-    (k : n) : ∑ j, O j k ^ 2 = 1 := by
-  have := congrFun (congrFun hO k) k
-  simpa [Matrix.mul_apply, Matrix.transpose_apply, sq] using this
-
-/-- **The substochastic domination.** For `A ∈ ℝ^{m×n}`, an orthogonal `V` and an `X` whose
-columns have norm at most one and satisfy Bessel's inequality, the diagonal entries of `XᵀAV` are
-dominated by a doubly substochastic average of the singular values of `A`. -/
-private theorem exists_substochastic (A : Matrix m n ℝ) {V : Matrix n n ℝ}
-    (hV1 : Vᵀ * V = 1) (hV2 : V * Vᵀ = 1) {X : Matrix m n ℝ}
-    (hX1 : ∀ k, ∑ i, X i k ^ 2 ≤ 1)
-    (hX2 : ∀ w : m → ℝ, ∑ k, (∑ i, w i * X i k) ^ 2 ≤ ∑ i, w i ^ 2) :
-    ∃ M : n → n → ℝ, (∀ k j, 0 ≤ M k j) ∧ (∀ k, ∑ j, M k j ≤ 1) ∧
-      (∀ j, ∑ k, M k j ≤ 1) ∧ ∀ k, |(Xᵀ * A * V) k k| ≤ ∑ j, M k j * singularValue A j := by
-  have hY := gram_mul_rightSingularMatrix A
-  have hlam : ∀ j, 0 ≤ (Matrix.isHermitian_conjTranspose_mul_self A).eigenvalues j :=
-    Matrix.eigenvalues_conjTranspose_mul_self_nonneg A
-  have hs2 : ∀ j,
-      singularValue A j ^ 2 = (Matrix.isHermitian_conjTranspose_mul_self A).eigenvalues j :=
-    singularValue_sq A
-  set U := rightSingularMatrix A
-  set lam := (Matrix.isHermitian_conjTranspose_mul_self A).eigenvalues
-  set Y := A * U
-  set P := Xᵀ * Y
-  set O := Uᵀ * V
-  have hT : Xᵀ * A * V = P * O := by
-    calc Xᵀ * A * V = Xᵀ * (A * (U * Uᵀ)) * V := by
-          rw [rightSingularMatrix_mul_transpose, Matrix.mul_one]
-      _ = _ := by simp only [P, O, Y, Matrix.mul_assoc]
-  have hOO : Oᵀ * O = 1 := by
-    calc Oᵀ * O = Vᵀ * (U * Uᵀ) * V := by simp only [O, Matrix.transpose_mul,
-          Matrix.transpose_transpose, Matrix.mul_assoc]
-      _ = 1 := by rw [rightSingularMatrix_mul_transpose, Matrix.mul_one, hV1]
-  have hOOt : Oᵀᵀ * Oᵀ = 1 := by
-    calc Oᵀᵀ * Oᵀ = Uᵀ * (V * Vᵀ) * U := by simp only [O, Matrix.transpose_mul,
-          Matrix.transpose_transpose, Matrix.mul_assoc]
-      _ = 1 := by rw [hV2, Matrix.mul_one, rightSingularMatrix_transpose_mul]
-  have hP : ∀ k j, P k j = ∑ i, X i k * Y i j := fun k j => by
-    simp only [P, Matrix.mul_apply, Matrix.transpose_apply]
-  refine ⟨fun k j => (P k j ^ 2 / lam j + O j k ^ 2) / 2, fun k j => ?_, fun k => ?_,
-    fun j => ?_, fun k => ?_⟩
-  · exact div_nonneg (add_nonneg (div_nonneg (sq_nonneg _) (hlam j)) (sq_nonneg _)) zero_le_two
-  · -- row sums: Bessel's inequality for the columns of `Y`, and `Σ_j O_{jk}² = 1`
-    have hb := sum_sq_dotProduct_div_le Y lam hY (fun i => X i k)
-    have hO := sum_sq_col_of_transpose_mul_eq_one hOO k
-    simp only [← hP] at hb
-    rw [← Finset.sum_div, Finset.sum_add_distrib, hO]
-    linarith [hX1 k]
-  · -- column sums: Bessel's inequality for `X`, and `Σ_k O_{jk}² = 1`
-    have hb := hX2 (fun i => Y i j)
-    have hO := sum_sq_col_of_transpose_mul_eq_one hOOt j
-    simp only [Matrix.transpose_apply] at hO
-    have hPs : ∑ k, P k j ^ 2 = ∑ k, (∑ i, Y i j * X i k) ^ 2 := by
-      refine Finset.sum_congr rfl fun k _ => ?_
-      rw [hP]; congr 1; exact Finset.sum_congr rfl fun i _ => mul_comm _ _
-    have hYj : ∑ i, Y i j ^ 2 = lam j := by
-      have := hY j j
-      simp only [ite_true] at this
-      rw [← this]; exact Finset.sum_congr rfl fun i _ => sq _
-    have hc : ∑ k, P k j ^ 2 / lam j ≤ 1 := by
-      rw [← Finset.sum_div, hPs]
-      calc (∑ k, (∑ i, Y i j * X i k) ^ 2) / lam j ≤ lam j / lam j :=
-            div_le_div_of_nonneg_right (hYj ▸ hb) (hlam j)
-        _ ≤ 1 := div_self_le_one _
-    rw [← Finset.sum_div, Finset.sum_add_distrib, hO]
-    linarith
-  · rw [hT, Matrix.mul_apply]
-    refine (Finset.abs_sum_le_sum_abs _ _).trans (Finset.sum_le_sum fun j _ => ?_)
-    beta_reduce
-    have hs2 := hs2 j
-    set s := singularValue A j
-    have hs0 : 0 ≤ s := singularValue_nonneg A j
-    rcases (hlam j).eq_or_lt with h0 | hpos
-    · -- `λ_j = 0`: the column `Y_j` vanishes, so `P_{kj} = 0`
-      have hYj : ∀ i, Y i j = 0 := by
-        have := hY j j
-        simp only [ite_true, ← h0] at this
-        intro i
-        have h := (Finset.sum_eq_zero_iff_of_nonneg (fun i _ => mul_self_nonneg (Y i j))).1 this
-          i (Finset.mem_univ i)
-        exact mul_self_eq_zero.1 h
-      have : P k j = 0 := by rw [hP]; simp [hYj]
-      rw [this, zero_mul, abs_zero]
-      exact mul_nonneg (div_nonneg (add_nonneg (div_nonneg (sq_nonneg _) (hlam j))
-        (sq_nonneg _)) zero_le_two) hs0
-    · have hspos : 0 < s := by
-        rcases hs0.eq_or_lt with h | h
-        · rw [← h] at hs2; linarith [hs2]
-        · exact h
-      rw [← hs2, abs_mul]
-      have key : ((P k j ^ 2 / s ^ 2 + O j k ^ 2) / 2) * s - |P k j| * |O j k| =
-          (|P k j| - s * |O j k|) ^ 2 / (2 * s) := by
-        rw [← sq_abs (P k j), ← sq_abs (O j k)]
-        field_simp
-        ring
-      have : 0 ≤ (|P k j| - s * |O j k|) ^ 2 / (2 * s) := by positivity
-      linarith
-
-/-- `Σ_k |(XᵀAV)_{kk}|^q ≤ Σ_j s_j (A)^q` for `q ≥ 1`. -/
-private theorem sum_abs_diag_rpow_le (A : Matrix m n ℝ) {V : Matrix n n ℝ}
-    (hV1 : Vᵀ * V = 1) (hV2 : V * Vᵀ = 1) {X : Matrix m n ℝ}
-    (hX1 : ∀ k, ∑ i, X i k ^ 2 ≤ 1)
-    (hX2 : ∀ w : m → ℝ, ∑ k, (∑ i, w i * X i k) ^ 2 ≤ ∑ i, w i ^ 2) {q : ℝ} (hq : 1 ≤ q) :
-    ∑ k, |(Xᵀ * A * V) k k| ^ q ≤ ∑ j, singularValue A j ^ q := by
-  obtain ⟨M, hM0, hrow, hcol, hle⟩ := exists_substochastic A hV1 hV2 hX1 hX2
-  calc ∑ k, |(Xᵀ * A * V) k k| ^ q ≤ ∑ k, (∑ j, M k j * singularValue A j) ^ q :=
-        Finset.sum_le_sum fun k _ => Real.rpow_le_rpow (abs_nonneg _) (hle k) (by linarith)
-    _ ≤ ∑ k, ∑ j, M k j * singularValue A j ^ q :=
-        Finset.sum_le_sum fun k _ => rpow_sum_mul_le_sum_mul_rpow _ (fun j _ => hM0 k j) (hrow k)
-          (fun j _ => singularValue_nonneg A j) hq
-    _ = ∑ j, (∑ k, M k j) * singularValue A j ^ q := by
-        rw [Finset.sum_comm]; simp only [Finset.sum_mul]
-    _ ≤ ∑ j, singularValue A j ^ q := Finset.sum_le_sum fun j _ =>
-        mul_le_of_le_one_left (Real.rpow_nonneg (singularValue_nonneg A j) q) (hcol j)
-
-/-- `|(XᵀAV)_{kk}| ≤ max_j s_j (A)`. -/
-private theorem abs_diag_le_iSup (A : Matrix m n ℝ) {V : Matrix n n ℝ}
-    (hV1 : Vᵀ * V = 1) (hV2 : V * Vᵀ = 1) {X : Matrix m n ℝ}
-    (hX1 : ∀ k, ∑ i, X i k ^ 2 ≤ 1)
-    (hX2 : ∀ w : m → ℝ, ∑ k, (∑ i, w i * X i k) ^ 2 ≤ ∑ i, w i ^ 2) (k : n) :
-    |(Xᵀ * A * V) k k| ≤ ⨆ j, singularValue A j := by
-  obtain ⟨M, hM0, hrow, hcol, hle⟩ := exists_substochastic A hV1 hV2 hX1 hX2
-  calc |(Xᵀ * A * V) k k| ≤ ∑ j, M k j * singularValue A j := hle k
-    _ ≤ ∑ j, M k j * ⨆ j, singularValue A j := Finset.sum_le_sum fun j _ =>
-        mul_le_mul_of_nonneg_left (le_ciSup (Set.finite_range _).bddAbove j) (hM0 k j)
-    _ = (∑ j, M k j) * ⨆ j, singularValue A j := by rw [Finset.sum_mul]
-    _ ≤ ⨆ j, singularValue A j :=
-        mul_le_of_le_one_left (Real.iSup_nonneg (singularValue_nonneg A)) (hrow k)
-
-/-- **The triangle inequality for Schatten norms**, `q ≥ 1`. -/
+/-- **The triangle inequality for Schatten norms**, `q ∈ [1, ∞]` (Bourin–Zhang, Proposition 3.13,
+by Remark 3.14). For `q < ∞` and `A, B ≠ 0`, the normalized case for `A / ‖A‖_{S_q}`,
+`B / ‖B‖_{S_q}` and `t = ‖A‖_{S_q} / (‖A‖_{S_q} + ‖B‖_{S_q})`, for which
+`t A / ‖A‖_{S_q} + (1 − t) B / ‖B‖_{S_q} = (A + B) / (‖A‖_{S_q} + ‖B‖_{S_q})`; if `A = 0` or
+`B = 0` the inequality is an equality; `q = ∞` by Weyl's inequality. -/
 theorem schattenNorm_add_le {q : ℝ≥0∞} (hq : 1 ≤ q) (A B : Matrix m n ℝ) :
     schattenNorm q (A + B) ≤ schattenNorm q A + schattenNorm q B := by
-  set W := A + B with hWdef
-  have hV1 : (rightSingularMatrix W)ᵀ * rightSingularMatrix W = 1 :=
-    rightSingularMatrix_transpose_mul W
-  have hV2 : rightSingularMatrix W * (rightSingularMatrix W)ᵀ = 1 :=
-    rightSingularMatrix_mul_transpose W
-  have hY := gram_mul_rightSingularMatrix W
-  have hs2 : ∀ k,
-      singularValue W k ^ 2 = (Matrix.isHermitian_conjTranspose_mul_self W).eigenvalues k :=
-    singularValue_sq W
-  set V := rightSingularMatrix W
-  set lam := (Matrix.isHermitian_conjTranspose_mul_self W).eigenvalues
-  set Y := W * V
-  have hYk : ∀ k, ∑ i, Y i k ^ 2 = lam k := fun k => by
-    have := hY k k
-    simp only [ite_true] at this
-    rw [← this]; exact Finset.sum_congr rfl fun i _ => sq _
-  set X : Matrix m n ℝ := Matrix.of fun i k => Y i k / singularValue W k with hX
-  have hX1 : ∀ k, ∑ i, X i k ^ 2 ≤ 1 := fun k => by
-    simp only [X, Matrix.of_apply, div_pow]
-    rw [← Finset.sum_div, hYk, hs2]
-    exact div_self_le_one _
-  have hX2 : ∀ w : m → ℝ, ∑ k, (∑ i, w i * X i k) ^ 2 ≤ ∑ i, w i ^ 2 := fun w => by
-    have e : ∀ k, (∑ i, w i * X i k) ^ 2 = (∑ i, w i * Y i k) ^ 2 / lam k := fun k => by
-      simp only [X, Matrix.of_apply, mul_div_assoc', ← Finset.sum_div, div_pow, hs2]
-    simp_rw [e]
-    exact sum_sq_dotProduct_div_le Y lam hY w
-  have hdiag : ∀ k, singularValue W k = (Xᵀ * A * V) k k + (Xᵀ * B * V) k k := fun k => by
-    rw [← Matrix.add_apply, ← Matrix.add_mul, ← Matrix.mul_add, ← hWdef, Matrix.mul_assoc,
-      Matrix.mul_apply]
-    simp only [Matrix.transpose_apply, X, Matrix.of_apply]
-    have : ∑ i, Y i k / singularValue W k * Y i k = lam k / singularValue W k := by
-      rw [← hYk, Finset.sum_div]
-      exact Finset.sum_congr rfl fun i _ => by ring
-    rw [this, ← hs2]
-    rcases eq_or_ne (singularValue W k) 0 with h | h
-    · rw [h]; simp
-    · field_simp
-  unfold schattenNorm
-  split_ifs with ht
-  · rcases isEmpty_or_nonempty n with hm | hm
-    · simp only [Real.iSup_of_isEmpty, add_zero, le_refl]
-    · refine ciSup_le fun k => ?_
-      rw [hdiag k]
-      have h1 := abs_diag_le_iSup A hV1 hV2 hX1 hX2 k
-      have h2 := abs_diag_le_iSup B hV1 hV2 hX1 hX2 k
-      linarith [le_abs_self ((Xᵀ * A * V) k k), le_abs_self ((Xᵀ * B * V) k k)]
-  · have hr : 1 ≤ q.toReal := by
-      have := ENNReal.toReal_mono ht hq
-      rwa [ENNReal.toReal_one] at this
-    have hr0 : 0 ≤ 1 / q.toReal := by positivity
-    calc (∑ k, singularValue W k ^ q.toReal) ^ (1 / q.toReal) =
-          (∑ k, |(Xᵀ * A * V) k k + (Xᵀ * B * V) k k| ^ q.toReal) ^ (1 / q.toReal) := by
-          congr 1
-          refine Finset.sum_congr rfl fun k _ => ?_
-          rw [← hdiag k, abs_of_nonneg (singularValue_nonneg W k)]
-      _ ≤ (∑ k, |(Xᵀ * A * V) k k| ^ q.toReal) ^ (1 / q.toReal) +
-          (∑ k, |(Xᵀ * B * V) k k| ^ q.toReal) ^ (1 / q.toReal) := Real.Lp_add_le _ _ _ hr
-      _ ≤ (∑ k, singularValue A k ^ q.toReal) ^ (1 / q.toReal) +
-          (∑ k, singularValue B k ^ q.toReal) ^ (1 / q.toReal) :=
-          add_le_add
-            (Real.rpow_le_rpow (Finset.sum_nonneg fun k _ => Real.rpow_nonneg (abs_nonneg _) _)
-              (sum_abs_diag_rpow_le A hV1 hV2 hX1 hX2 hr) hr0)
-            (Real.rpow_le_rpow (Finset.sum_nonneg fun k _ => Real.rpow_nonneg (abs_nonneg _) _)
-              (sum_abs_diag_rpow_le B hV1 hV2 hX1 hX2 hr) hr0)
+  classical
+  rcases eq_or_ne q ⊤ with rfl | hqt
+  · exact schattenNorm_top_add_le A B
+  obtain ⟨p, rfl⟩ : ∃ p : ℝ, q = ENNReal.ofReal p := ⟨q.toReal, (ENNReal.ofReal_toReal hqt).symm⟩
+  have hp : 1 ≤ p := ENNReal.one_le_ofReal.mp hq
+  have hq0 : ENNReal.ofReal p ≠ 0 := (ENNReal.ofReal_pos.mpr (by linarith)).ne'
+  rcases (schattenNorm_nonneg (ENNReal.ofReal p) A).eq_or_lt with ha | ha
+  · rw [(schattenNorm_eq_zero_iff hq0).1 ha.symm, zero_add, schattenNorm_zero hq0, zero_add]
+  rcases (schattenNorm_nonneg (ENNReal.ofReal p) B).eq_or_lt with hb | hb
+  · rw [(schattenNorm_eq_zero_iff hq0).1 hb.symm, add_zero, schattenNorm_zero hq0, add_zero]
+  set a := schattenNorm (ENNReal.ofReal p) A
+  set b := schattenNorm (ENNReal.ofReal p) B
+  have hab : 0 < a + b := add_pos ha hb
+  have hA1 : schattenNorm (ENNReal.ofReal p) (a⁻¹ • A) = 1 := by
+    rw [schattenNorm_smul hq0, abs_of_pos (inv_pos.2 ha), inv_mul_cancel₀ ha.ne']
+  have hB1 : schattenNorm (ENNReal.ofReal p) (b⁻¹ • B) = 1 := by
+    rw [schattenNorm_smul hq0, abs_of_pos (inv_pos.2 hb), inv_mul_cancel₀ hb.ne']
+  have ht0 : 0 ≤ a / (a + b) := div_nonneg ha.le hab.le
+  have ht1 : a / (a + b) ≤ 1 := (div_le_one hab).2 (by linarith)
+  have h := schattenNorm_smul_add_smul_le_one hp hA1 hB1 ht0 ht1
+  have e : (a / (a + b)) • (a⁻¹ • A) + (1 - a / (a + b)) • (b⁻¹ • B) =
+      (a + b)⁻¹ • (A + B) := by
+    have h1 : 1 - a / (a + b) = b / (a + b) := by field_simp; ring
+    rw [h1, smul_smul, smul_smul, smul_add]
+    congr 2 <;> field_simp
+  rw [e, schattenNorm_smul hq0, abs_of_pos (inv_pos.2 hab)] at h
+  rwa [inv_mul_le_iff₀ hab, mul_one] at h
+
+end Triangle
 
 end BanachProbability

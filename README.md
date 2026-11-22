@@ -92,7 +92,7 @@ sources, and Burkholder's results by Burkholder's method in its standard form:
 | HNVW I, Thm 4.5.6; Burkholder (1981) | zig-zag concavity | the standard Bellman-function argument: the supremum over Paley–Walsh pairs, splicing, and Bernstein–Doetsch for midpoint concavity |
 | HNVW II, Thm 6.2.4 | Kahane–Khintchine | hypercontractivity (Bonami (1970), Borell (1979); O'Donnell (2014), §10.1) |
 | Lust-Piquard (1986); Pisier–Xu (2003), Thm 6.1 | noncommutative Khintchine | exchangeable pairs (Mackey–Jordan–Chen–Farrell–Tropp (2014), Lemma 3.4, Cor 7.3, Rem 7.2, §8) |
-| Bhatia (1997) | Weyl's inequalities, the Schatten triangle and Hölder inequalities | Courant–Fischer dimension counts; doubly substochastic matrices; overlaps `⟨u_j, v_k⟩²` (Mackey et al. (2014), Prop 7.5) |
+| Bhatia (1997) | Weyl's inequalities, the Schatten triangle and Hölder inequalities | Courant–Fischer dimension counts; Bourin–Zhang (2026), Prop 3.13 by Rem 3.14 (Hermitian dilation and von Neumann's convexity inequality, the latter by Peierls's argument as in Fehr's lecture notes (2021), proof of Thm 7.1); overlaps `⟨u_j, v_k⟩²` (Mackey et al. (2014), Prop 7.5) |
 | Burkholder (1984, 1988); Osękowski (2012), Thms 3.5, 8.6 | Burkholder's inequality and function, the square function inequality, `UMD_p (H) ≤ p* − 1` | Burkholder's method: the majorization `U ≥ V`, the concavity of `U` along lines (its pieces glued through one-sided derivatives at the kinks), and the integration of the concavity along the martingale |
 
 ## References
@@ -107,9 +107,13 @@ sources, and Burkholder's results by Burkholder's method in its standard form:
   martingale transforms*, Ann. Probab. 12 (1984); *Sharp inequalities for martingales and
   stochastic integrals*, Astérisque 157–158 (1988).
 - R. Bhatia, *Matrix Analysis*, Springer (1997).
+- J.-C. Bourin, T. Zhang, *Matrix triangle inequalities: past, present, and future*,
+  arXiv:2610.30538 (2026).
 - S. Cox, M. Veraar, *Some remarks on tangent martingale difference sequences in `L¹`-spaces*,
   Electron. Commun. Probab. 12 (2007).
 - I. Cuculescu, *Martingales on von Neumann algebras*, J. Multivariate Anal. 1 (1971).
+- S. Fehr, *Quantum Information Theory*, lecture notes (2021), Chapter 7,
+  https://homepages.cwi.nl/~fehr/QIT2021/Chap7.pdf.
 - P. Hitczenko, *On tangent sequences of UMD-space valued random vectors*, unpublished manuscript
   (Cox–Veraar (2007) cite it without a year).
 - T. Hytönen, J. van Neerven, M. Veraar, L. Weis (HNVW), *Analysis in Banach spaces I* (2016) and
