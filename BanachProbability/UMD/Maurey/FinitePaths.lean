@@ -47,9 +47,9 @@ theorem measurableSet_atom {Ω : Type*} [Finite Ω] (m : MeasurableSpace Ω) (ω
 /-- On a finite probability space, the conditional expectation given a σ-algebra is the average
 over the atoms: at a point `ω` of positive mass,
 `E [f | m] (ω) = μ (A)⁻¹ Σ_{ω' ∈ A} μ {ω'} f (ω')`, `A` the atom of `ω`. -/
-theorem condExp_eq_atom_average {Ω : Type*} [Fintype Ω] [MeasurableSpace Ω]
+theorem condExp_eq_atom_average {Ω : Type*} [Fintype Ω] {mΩ : MeasurableSpace Ω}
     [DiscreteMeasurableSpace Ω] {μ : Measure Ω} [IsFiniteMeasure μ] {m : MeasurableSpace Ω}
-    (hm : m ≤ ‹MeasurableSpace Ω›) {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+    (hm : m ≤ mΩ) {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
     [CompleteSpace X] (f : Ω → X) {ω : Ω} (hω : μ {ω} ≠ 0) :
     μ[f | m] ω =
       (μ.real (atom m ω))⁻¹ • ∑ ω', (atom m ω).indicator (fun ω' => μ.real {ω'} • f ω') ω' := by

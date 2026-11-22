@@ -97,23 +97,26 @@ theorem avg_comp_equiv (e : (Fin N → Bool) ≃ (Fin N → Bool)) (g : (Fin N �
   sorry
 
 /-- The flip of the `k`-th sign. -/
-def flip (k : Fin N) (ε : Fin N → Bool) : Fin N → Bool :=
+protected def flip (k : Fin N) (ε : Fin N → Bool) : Fin N → Bool :=
   Function.update ε k (!ε k)
 
-theorem flip_involutive (k : Fin N) : Function.Involutive (flip k) := by
+theorem flip_involutive (k : Fin N) : Function.Involutive (SignCube.flip k) := by
   intro ε
   funext j
   by_cases h : j = k
-  · subst h; simp [flip]
-  · simp [flip, Function.update_of_ne h]
+  · subst h; simp [SignCube.flip]
+  · simp [SignCube.flip, Function.update_of_ne h]
 
-@[simp] theorem flip_apply_self (k : Fin N) (ε : Fin N → Bool) : flip k ε k = !ε k := by
-  simp [flip]
+@[simp] theorem flip_apply_self (k : Fin N) (ε : Fin N → Bool) :
+    SignCube.flip k ε k = !ε k := by
+  simp [SignCube.flip]
 
-theorem flip_apply_of_ne {k j : Fin N} (h : j ≠ k) (ε : Fin N → Bool) : flip k ε j = ε j := by
-  simp [flip, h]
+theorem flip_apply_of_ne {k j : Fin N} (h : j ≠ k) (ε : Fin N → Bool) :
+    SignCube.flip k ε j = ε j := by
+  simp [SignCube.flip, h]
 
-theorem avg_flip (k : Fin N) (g : (Fin N → Bool) → ℝ) : avg (fun ε => g (flip k ε)) = avg g := by
+theorem avg_flip (k : Fin N) (g : (Fin N → Bool) → ℝ) :
+    avg (fun ε => g (SignCube.flip k ε)) = avg g := by
   sorry
 
 /-- The pointwise product of two sign vectors: `coin (mul ε η k) = coin (ε k) * coin (η k)`. -/

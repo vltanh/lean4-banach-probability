@@ -78,7 +78,7 @@ theorem cubeTrace_mdiff_mul_mdiff {j k : ℕ} (hjk : j ≠ k) (x y : (Fin N → 
 /-- A transform by predictable `±1` scalar signs is an isometry of `L² (τ)`. -/
 theorem lpNorm_two_transform {σ : Fin N → (Fin N → Bool) → ℝ} (hσ : IsPredictable σ)
     (hσ1 : ∀ k ε, σ k ε = 1 ∨ σ k ε = -1) (x : (Fin N → Bool) → Matrix n n ℝ) :
-    lpNorm (schattenNorm 2) 2 (transform σ x) = lpNorm (schattenNorm 2) 2 x := by
+    SignCube.lpNorm (schattenNorm 2) 2 (transform σ x) = SignCube.lpNorm (schattenNorm 2) 2 x := by
   sorry
 
 omit [Fintype n] [DecidableEq n] in

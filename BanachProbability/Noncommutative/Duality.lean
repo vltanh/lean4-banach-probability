@@ -30,8 +30,8 @@ variable {N : ℕ} {n : Type*} [Fintype n] [DecidableEq n]
 theorem cubeTrace_mul_le {x y : (Fin N → Bool) → Matrix n n ℝ} (hx : ∀ ε, (x ε).IsHermitian)
     (hy : ∀ ε, (y ε).IsHermitian) {r : ℝ} (hr : 1 < r) :
     cubeTrace (fun ε => x ε * y ε) ≤
-      lpNorm (schattenNorm (ENNReal.ofReal r)) r x *
-        lpNorm (schattenNorm (ENNReal.ofReal (r / (r - 1)))) (r / (r - 1)) y := by
+      SignCube.lpNorm (schattenNorm (ENNReal.ofReal r)) r x *
+        SignCube.lpNorm (schattenNorm (ENNReal.ofReal (r / (r - 1)))) (r / (r - 1)) y := by
   sorry
 
 /-- The norming function of `x` in `L^r (τ)`: a symmetric-matrix-valued `y` with
@@ -39,8 +39,8 @@ theorem cubeTrace_mul_le {x y : (Fin N → Bool) → Matrix n n ℝ} (hx : ∀ �
 theorem exists_cubeTrace_mul_eq {x : (Fin N → Bool) → Matrix n n ℝ}
     (hx : ∀ ε, (x ε).IsHermitian) {r : ℝ} (hr : 1 < r) :
     ∃ y : (Fin N → Bool) → Matrix n n ℝ, (∀ ε, (y ε).IsHermitian) ∧
-      lpNorm (schattenNorm (ENNReal.ofReal (r / (r - 1)))) (r / (r - 1)) y ≤ 1 ∧
-      cubeTrace (fun ε => x ε * y ε) = lpNorm (schattenNorm (ENNReal.ofReal r)) r x := by
+      SignCube.lpNorm (schattenNorm (ENNReal.ofReal (r / (r - 1)))) (r / (r - 1)) y ≤ 1 ∧
+      cubeTrace (fun ε => x ε * y ε) = SignCube.lpNorm (schattenNorm (ENNReal.ofReal r)) r x := by
   sorry
 
 omit [DecidableEq n] in
@@ -55,11 +55,11 @@ symmetric-matrix-valued functions gives the strong `(r', r')` bound with the sam
 theorem lpNorm_transform_le_of_dual {σ : Fin N → (Fin N → Bool) → ℝ} (hσ : IsPredictable σ)
     {r K : ℝ} (hr : 1 < r)
     (h : ∀ x : (Fin N → Bool) → Matrix n n ℝ, (∀ ε, (x ε).IsHermitian) →
-      lpNorm (schattenNorm (ENNReal.ofReal r)) r (transform σ x) ≤
-        K * lpNorm (schattenNorm (ENNReal.ofReal r)) r x)
+      SignCube.lpNorm (schattenNorm (ENNReal.ofReal r)) r (transform σ x) ≤
+        K * SignCube.lpNorm (schattenNorm (ENNReal.ofReal r)) r x)
     (x : (Fin N → Bool) → Matrix n n ℝ) (hx : ∀ ε, (x ε).IsHermitian) :
-    lpNorm (schattenNorm (ENNReal.ofReal (r / (r - 1)))) (r / (r - 1)) (transform σ x) ≤
-      K * lpNorm (schattenNorm (ENNReal.ofReal (r / (r - 1)))) (r / (r - 1)) x := by
+    SignCube.lpNorm (schattenNorm (ENNReal.ofReal (r / (r - 1)))) (r / (r - 1)) (transform σ x) ≤
+      K * SignCube.lpNorm (schattenNorm (ENNReal.ofReal (r / (r - 1)))) (r / (r - 1)) x := by
   sorry
 
 end BanachProbability

@@ -65,8 +65,8 @@ bounds the transforms by predictable multipliers with values in `[−1, 1]`. -/
 theorem lpNorm_paleyWalsh_mul_le {p : ℝ} (hp : 1 ≤ p) {β : ℝ≥0∞} (hβ : IsDyadicUMDBound X p β)
     {N : ℕ} {ξ : Fin N → (Fin N → Bool) → X} {a : Fin N → (Fin N → Bool) → ℝ}
     (hξ : IsPredictable ξ) (ha : IsPredictable a) (ha1 : ∀ k ε, |a k ε| ≤ 1) (n : ℕ) :
-    ENNReal.ofReal (lpNorm (fun x => ‖x‖) p (paleyWalsh (fun k ε => a k ε • ξ k ε) n)) ≤
-      β * ENNReal.ofReal (lpNorm (fun x => ‖x‖) p (paleyWalsh ξ n)) := by
+    ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh (fun k ε => a k ε • ξ k ε) n)) ≤
+      β * ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh ξ n)) := by
   sorry
 
 variable (X) in

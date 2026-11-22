@@ -21,9 +21,11 @@ For a seminorm `S` on a real vector space `E` (no completeness, no quotient), `1
   two-point inequality in the space of functions of the remaining signs with the seminorm
   `L^p` (`SignCube.lpSeminorm`; Minkowski's inequality).
 
-This is vector-valued hypercontractivity (C. Borell, *On the integrability of Banach space valued
-Walsh polynomials*, Séminaire de Probabilités XIII (1979); R. O'Donnell, *Analysis of Boolean
-Functions* (2014), §10.1), with no noise operator.
+This is vector-valued hypercontractivity, due to C. Borell, *On the integrability of Banach space
+valued Walsh polynomials*, Séminaire de Probabilités XIII (1979). The scalar two-point inequality
+is that of R. O'Donnell, *Analysis of Boolean Functions* (2014), §10.1 (real-valued functions
+only); its passage to seminormed spaces through the triangle inequality and the tensorisation on
+affine Rademacher sums are the standard argument, with no noise operator.
 -/
 
 @[expose] public section
@@ -45,8 +47,8 @@ theorem twoPoint_seminorm (S : Seminorm ℝ E) {p q : ℝ} (hp : 1 < p) (hpq : p
 `‖c + ρ Σ_i ε_i x_i‖_{L^q} ≤ ‖c + Σ_i ε_i x_i‖_{L^p}`, `ρ = √((p − 1) / (q − 1))`. -/
 theorem hypercontractive_affine (S : Seminorm ℝ E) {p q : ℝ} (hp : 1 < p) (hpq : p ≤ q) (c : E)
     {n : ℕ} (x : Fin n → E) :
-    lpNorm S q (fun ε : Fin n → Bool => c + √((p - 1) / (q - 1)) • ∑ i, coin (ε i) • x i) ≤
-      lpNorm S p (fun ε : Fin n → Bool => c + ∑ i, coin (ε i) • x i) := by
+    SignCube.lpNorm S q (fun ε : Fin n → Bool => c + √((p - 1) / (q - 1)) • ∑ i, coin (ε i) • x i) ≤
+      SignCube.lpNorm S p (fun ε : Fin n → Bool => c + ∑ i, coin (ε i) • x i) := by
   sorry
 
 end BanachProbability

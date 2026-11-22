@@ -40,8 +40,8 @@ theorem isWeakType_of_lpNorm_le
     {T : ((Fin N → Bool) → Matrix n n ℝ) → ((Fin N → Bool) → Matrix n n ℝ)} {p K : ℝ}
     (hp : 0 < p) (hK : 0 ≤ K)
     (h : ∀ x : (Fin N → Bool) → Matrix n n ℝ, (∀ ε, (x ε).IsHermitian) →
-      lpNorm (schattenNorm (ENNReal.ofReal p)) p (T x) ≤
-        K * lpNorm (schattenNorm (ENNReal.ofReal p)) p x) :
+      SignCube.lpNorm (schattenNorm (ENNReal.ofReal p)) p (T x) ≤
+        K * SignCube.lpNorm (schattenNorm (ENNReal.ofReal p)) p x) :
     IsWeakType T p K := by
   sorry
 

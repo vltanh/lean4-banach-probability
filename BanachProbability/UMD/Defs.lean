@@ -15,7 +15,10 @@ file defines:
 
 * `IsUMDBound X p β` and `umdConst X p`, the best constant `UMD_p (X) ∈ [0, ∞]`, for martingales
   on arbitrary probability spaces (Hytönen–van Neerven–Veraar–Weis, *Analysis in Banach spaces I*
-  (2016), Definition 4.2.1; Pisier, *Martingales in Banach spaces* (2016), Chapter 5);
+  (2016), Definition 4.2.1; Pisier, *Martingales in Banach spaces* (2016), Chapter 5). The
+  definition here quantifies over predictable signs and martingales started at `0`; the sources
+  define the constant with deterministic signs, which are predictable, so the constant here is at
+  least theirs, and the results of this library are stated for it;
 * `IsDyadicUMDBound X p β` and `dyadicUMDConst X p`, the same for Paley–Walsh martingales on the
   sign cube, `UMD_p^Δ (X)`;
 * `IsComplexUMDBound X p β`, `complexUMDConst X p` and their dyadic versions, for a complex
@@ -69,8 +72,8 @@ signs `σ_k`. -/
 def IsDyadicUMDBound (p : ℝ) (β : ℝ≥0∞) : Prop :=
   ∀ (N : ℕ) (ξ : Fin N → (Fin N → Bool) → X) (σ : Fin N → (Fin N → Bool) → ℝ),
     IsPredictable ξ → IsPredictable σ → (∀ k ε, σ k ε = 1 ∨ σ k ε = -1) → ∀ n : ℕ,
-      ENNReal.ofReal (lpNorm (fun x => ‖x‖) p (paleyWalsh (fun k ε => σ k ε • ξ k ε) n)) ≤
-        β * ENNReal.ofReal (lpNorm (fun x => ‖x‖) p (paleyWalsh ξ n))
+      ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh (fun k ε => σ k ε • ξ k ε) n)) ≤
+        β * ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh ξ n))
 
 /-- The dyadic `UMD_p` constant `UMD_p^Δ (X)`. -/
 noncomputable def dyadicUMDConst (p : ℝ) : ℝ≥0∞ :=
@@ -172,8 +175,8 @@ martingales. -/
 def IsComplexDyadicUMDBound (p : ℝ) (β : ℝ≥0∞) : Prop :=
   ∀ (N : ℕ) (ξ : Fin N → (Fin N → Bool) → X) (c : Fin N → (Fin N → Bool) → ℂ),
     IsPredictable ξ → IsPredictable c → (∀ k ε, ‖c k ε‖ = 1) → ∀ n : ℕ,
-      ENNReal.ofReal (lpNorm (fun x => ‖x‖) p (paleyWalsh (fun k ε => c k ε • ξ k ε) n)) ≤
-        β * ENNReal.ofReal (lpNorm (fun x => ‖x‖) p (paleyWalsh ξ n))
+      ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh (fun k ε => c k ε • ξ k ε) n)) ≤
+        β * ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh ξ n))
 
 /-- The dyadic complex `UMD_p` constant `UMD_{ℂ,p}^Δ (X)`. -/
 noncomputable def complexDyadicUMDConst (p : ℝ) : ℝ≥0∞ :=

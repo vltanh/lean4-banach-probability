@@ -33,7 +33,7 @@ variable {n : Type*} [Fintype n] [DecidableEq n]
 `‖Σ_i x_iᵀ x_i‖_{S_{q/2}}^{1/2} ≤ (E ‖Σ_i ε_i x_i‖_{S_q}^q)^{1/q}`, `q ≥ 2`. -/
 theorem ncKhintchine_lower_col {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (x : Fin k → Matrix n n ℝ) :
     √(schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, (x i)ᵀ * x i)) ≤
-      lpNorm (schattenNorm (ENNReal.ofReal q)) q
+      SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
         (fun ε : Fin k → Bool => ∑ i, coin (ε i) • x i) := by
   sorry
 
@@ -41,7 +41,7 @@ theorem ncKhintchine_lower_col {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (x : Fin k →
 `‖Σ_i x_i x_iᵀ‖_{S_{q/2}}^{1/2} ≤ (E ‖Σ_i ε_i x_i‖_{S_q}^q)^{1/q}`, `q ≥ 2`. -/
 theorem ncKhintchine_lower_row {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (x : Fin k → Matrix n n ℝ) :
     √(schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, x i * (x i)ᵀ)) ≤
-      lpNorm (schattenNorm (ENNReal.ofReal q)) q
+      SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
         (fun ε : Fin k → Bool => ∑ i, coin (ε i) • x i) := by
   sorry
 

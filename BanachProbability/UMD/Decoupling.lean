@@ -10,7 +10,9 @@ copy `ε̃` of the signs, the decoupled sum `Ỹ_n = Σ_{k<n} ε̃_k ξ_k (ε)` 
 `UMD_p⁻¹ ‖Ỹ_n‖_{L^p} ≤ ‖Y_n‖_{L^p} ≤ UMD_p ‖Ỹ_n‖_{L^p}`
 (Hytönen–van Neerven–Veraar–Weis, *Analysis in Banach spaces I* (2016), Proposition 4.2.3;
 Cox–Veraar, *Some remarks on tangent martingale difference sequences in `L¹`-spaces*, Electron.
-Commun. Probab. 12 (2007), with the constant `β_{p,X}`; McConnell (1989) for tangent sequences).
+Commun. Probab. 12 (2007), with the constant `β_{p,X}`, who credit the result for tangent
+sequences to T. R. McConnell (1989) and, independently, P. Hitczenko, and the proof from the
+definition used here to S. Montgomery-Smith).
 
 The proof is the standard one from the definition. With `η_k = ε_k ε̃_k`, the map
 `(ε, ε̃) ↦ (ε, η)` preserves the uniform measure (`SignCube.avg_mul_left`) and
@@ -44,8 +46,8 @@ noncomputable def decoupledLpNorm {N : ℕ} (p : ℝ) (ξ : Fin N → (Fin N →
 theorem decoupling_dyadic {p : ℝ} (hp : 1 < p) {N : ℕ} (ξ : Fin N → (Fin N → Bool) → X)
     (hξ : IsPredictable ξ) (n : ℕ) :
     ENNReal.ofReal (decoupledLpNorm p ξ n) ≤
-        dyadicUMDConst X p * ENNReal.ofReal (lpNorm (fun x => ‖x‖) p (paleyWalsh ξ n)) ∧
-      ENNReal.ofReal (lpNorm (fun x => ‖x‖) p (paleyWalsh ξ n)) ≤
+        dyadicUMDConst X p * ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh ξ n)) ∧
+      ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh ξ n)) ≤
         dyadicUMDConst X p * ENNReal.ofReal (decoupledLpNorm p ξ n) := by
   sorry
 
@@ -55,8 +57,8 @@ Paley–Walsh martingales in a Banach space, with the constant `UMD_p (X)`:
 theorem decoupling [CompleteSpace X] {p : ℝ} (hp : 1 < p) {N : ℕ}
     (ξ : Fin N → (Fin N → Bool) → X) (hξ : IsPredictable ξ) (n : ℕ) :
     ENNReal.ofReal (decoupledLpNorm p ξ n) ≤
-        umdConst X p * ENNReal.ofReal (lpNorm (fun x => ‖x‖) p (paleyWalsh ξ n)) ∧
-      ENNReal.ofReal (lpNorm (fun x => ‖x‖) p (paleyWalsh ξ n)) ≤
+        umdConst X p * ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh ξ n)) ∧
+      ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh ξ n)) ≤
         umdConst X p * ENNReal.ofReal (decoupledLpNorm p ξ n) := by
   sorry
 

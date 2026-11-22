@@ -4,9 +4,10 @@ A Lean 4 library of probability in Banach spaces: Rademacher sums and the Kahane
 inequality, martingales and the UMD property, and their Schatten-class (noncommutative) versions.
 
 **Status.** The definitions and the statements of all results below are written, and the library
-builds. Burkholder's inequalities, the bridge from the sign cube to Mathlib's martingales and a
-few elementary lemmas are proved; every other theorem is still proved by `sorry`
-(`scripts/Audit.lean` lists them).
+builds. Proved so far: Burkholder's inequalities, that Paley–Walsh martingales are Mathlib
+martingales and that `L^p` norms on the sign cube are cube averages
+(`SignCube.martingale_paleyWalsh`, `SignCube.eLpNorm_uniformOn`), and a few elementary lemmas.
+Every other theorem is still proved by `sorry` (`scripts/Audit.lean` lists them).
 
 ## Contents
 
@@ -39,11 +40,11 @@ martingales; `p* = max (p, p / (p − 1))`.
 | Hilbert spaces: `UMD_p (H) ≤ p* − 1` | `umdConst_le_of_innerProductSpace` | Burkholder (1984) | open |
 | Maurey: `UMD_p^Δ (X) = UMD_p (X)` | `dyadicUMDConst_eq_umdConst` | Maurey (1975); HNVW I, Thm 4.2.5 | open |
 | Extrapolation: `UMD_p < ∞` for all `p` once for one; `UMD₂ ≤ 200 UMD_p`, `UMD_p ≤ 100 p* UMD₂` | `umdConst_lt_top_of_lt_top`, `umdConst_two_le_mul`, `umdConst_le_mul_umdConst_two` | HNVW I, Thm 4.2.7; Burkholder's good-λ method (1973, 1981) | open |
-| Decoupling: `UMD_p⁻¹ ‖Ỹ_n‖_p ≤ ‖Y_n‖_p ≤ UMD_p ‖Ỹ_n‖_p` for Paley–Walsh martingales | `decoupling`, `decoupling_dyadic` | HNVW I, Prop 4.2.3; Cox–Veraar (2007) | open |
+| Decoupling: `UMD_p⁻¹ ‖Ỹ_n‖_p ≤ ‖Y_n‖_p ≤ UMD_p ‖Ỹ_n‖_p` for Paley–Walsh martingales | `decoupling`, `decoupling_dyadic` | HNVW I, Prop 4.2.3; McConnell (1989), Hitczenko (1988); Cox–Veraar (2007) | open |
 | Complex constants: `UMD_p ≤ UMD_{ℂ,p} ≤ (π/2) UMD_p` | `umdConst_le_complexUMDConst_le` | HNVW I, Prop 4.2.10; Yaroslavtsev (2018), Lemma 3.2 | open |
 | `UMD_p (L^p (μ; B)) ≤ UMD_p (B)`; the complex `L^p (μ)` is UMD, any measure | `umdConst_Lp_le`, `umdConst_Lp_complex_lt_top` | Pisier (2016), Cor 5.22 | open |
 | Schatten classes: `UMD_q (S_q^{n×n}) ≤ K q*`, `UMD₂ (S_q^{n×n}) ≤ C (q* − 1)`, uniformly in `n` | `umdConst_schattenSpace_le`, `umdConst_two_schattenSpace_le` | Randrianantoanina (2002), Thm 3.1, Thm 4.3, Cor 4.5, Rem 4.6 | open |
-| Hypercontractive Kahane–Khintchine: `‖Σ ε_i x_i‖_q ≤ √((q−1)/(p−1)) ‖Σ ε_i x_i‖_p`, any seminorm | `kahaneKhintchine_hypercontractive` | Bonami (1970); Borell (1979); O'Donnell (2014), §10.1 | open |
+| Hypercontractive Kahane–Khintchine: `‖Σ ε_i x_i‖_q ≤ √((q−1)/(p−1)) ‖Σ ε_i x_i‖_p`, any seminorm | `kahaneKhintchine_hypercontractive` | Borell (1979); scalar two-point inequality: Bonami (1970), O'Donnell (2014), §10.1 | open |
 | Kahane–Khintchine: `‖Σ ε_i x_i‖_p ≤ κ_{p,q} ‖Σ ε_i x_i‖_q` | `kahaneKhintchine` | Kahane (1964); HNVW II, Thm 6.2.4 | open |
 | Noncommutative Khintchine, `q ≥ 2`: `‖(Σ x_i x_iᵀ)^{1/2}‖_{S_q} ≤ ‖Σ ε_i x_i‖_{L^q (S_q)} ≤ √2 √q ‖(Σ x_i x_iᵀ)^{1/2}‖_{S_q}` for normal `x_i` | `ncKhintchine_normal`, `pisierXu_khintchine` | Lust-Piquard (1986); Pisier–Xu (2003), Thm 6.1; proof of Mackey–Jordan–Chen–Farrell–Tropp (2014) | open |
 | Zig-zag concave functions characterise UMD | `umdConst_lt_top_iff_exists_isZigZagConcave` | Burkholder (1981); HNVW I, Thm 4.5.6; Yaroslavtsev (2018), Prop 3.7 | open |
@@ -69,16 +70,26 @@ References:
   *A geometrical characterization of Banach spaces in which martingale difference sequences are
   unconditional*, Ann. Probab. 9 (1981); *Boundary value problems and sharp inequalities for
   martingale transforms*, Ann. Probab. 12 (1984).
+- R. Bhatia, *Matrix Analysis*, Springer (1997).
 - S. Cox, M. Veraar, *Some remarks on tangent martingale difference sequences in `L¹`-spaces*,
   Electron. Commun. Probab. 12 (2007).
+- I. Cuculescu, *Martingales on von Neumann algebras*, J. Multivariate Anal. 1 (1971).
+- P. Hitczenko, *Comparison of moments for tangent sequences of random variables*, Probab. Theory
+  Related Fields 78 (1988).
 - T. Hytönen, J. van Neerven, M. Veraar, L. Weis (HNVW), *Analysis in Banach spaces I* (2016) and
   *II* (2017).
+- S. Janson, *Gaussian Hilbert Spaces*, Cambridge University Press (1997).
 - J.-P. Kahane, *Sur les sommes vectorielles `Σ ±u_n`*, C. R. Acad. Sci. Paris 259 (1964).
 - F. Lust-Piquard, *Inégalités de Khintchine dans `C_p` (`1 < p < ∞`)*, C. R. Acad. Sci. Paris 303
   (1986).
+- F. Lust-Piquard, G. Pisier, *Non commutative Khintchine and Paley inequalities*, Ark. Mat. 29
+  (1991).
 - L. Mackey, M. I. Jordan, R. Y. Chen, B. Farrell, J. A. Tropp, *Matrix concentration inequalities
   via the method of exchangeable pairs*, Ann. Probab. 42 (2014).
+- J. Marcinkiewicz, *Sur l'interpolation d'opérations*, C. R. Acad. Sci. Paris 208 (1939).
 - B. Maurey, *Système de Haar*, Séminaire Maurey–Schwartz 1974–1975.
+- T. R. McConnell, *Decoupling and stochastic integration in UMD Banach spaces*, Probab. Math.
+  Statist. 10 (1989).
 - R. O'Donnell, *Analysis of Boolean Functions*, Cambridge University Press (2014).
 - A. Osękowski, *Sharp martingale and semimartingale inequalities*, Birkhäuser (2012).
 - G. Pisier, *Martingales in Banach spaces*, Cambridge University Press (2016).
@@ -87,6 +98,10 @@ References:
 - N. Randrianantoanina, *Non-commutative martingale transforms*, J. Funct. Anal. 194 (2002).
 - I. Yaroslavtsev, *Even Fourier multipliers and martingale transforms in infinite dimensions*,
   Indag. Math. 29 (2018).
+
+Planned extensions, not stated yet: hypercontractivity of the noise operator for all functions on
+the cube; Kahane–Khintchine for Rademacher sums on a probability space and for exponents
+`p ∈ (0, 1]`; the noncommutative Khintchine inequality for rectangular and complex matrices.
 
 ## Using the library
 

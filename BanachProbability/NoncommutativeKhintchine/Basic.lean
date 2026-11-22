@@ -39,7 +39,8 @@ variable {n : Type*} [Fintype n] [DecidableEq n]
 `(E ‖Σ_i ε_i x_i‖_{S_q}^q)^{1/q} ≤ √(2 (q − 1)) max (‖Σ x_i x_iᵀ‖_{S_{q/2}},
 ‖Σ x_iᵀ x_i‖_{S_{q/2}})^{1/2}`, `q ≥ 2`. -/
 theorem ncKhintchine_upper {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (x : Fin k → Matrix n n ℝ) :
-    lpNorm (schattenNorm (ENNReal.ofReal q)) q (fun ε : Fin k → Bool => ∑ i, coin (ε i) • x i) ≤
+    SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
+        (fun ε : Fin k → Bool => ∑ i, coin (ε i) • x i) ≤
       √(2 * (q - 1)) * √(max (schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, x i * (x i)ᵀ))
         (schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, (x i)ᵀ * x i))) := by
   sorry
@@ -50,9 +51,10 @@ theorem ncKhintchine_upper {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (x : Fin k → Mat
 theorem ncKhintchine_normal {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (x : Fin k → Matrix n n ℝ)
     (hx : ∀ i, x i * (x i)ᵀ = (x i)ᵀ * x i) :
     √(schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, x i * (x i)ᵀ)) ≤
-        lpNorm (schattenNorm (ENNReal.ofReal q)) q
+        SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
           (fun ε : Fin k → Bool => ∑ i, coin (ε i) • x i) ∧
-      lpNorm (schattenNorm (ENNReal.ofReal q)) q (fun ε : Fin k → Bool => ∑ i, coin (ε i) • x i) ≤
+      SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
+          (fun ε : Fin k → Bool => ∑ i, coin (ε i) • x i) ≤
         √2 * √q * √(schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, x i * (x i)ᵀ)) := by
   sorry
 
@@ -65,9 +67,9 @@ theorem pisierXu_khintchine : ∃ C : ℝ, 0 < C ∧
     ∀ (q : ℝ), 2 ≤ q → ∀ (n : Type) [Fintype n] [DecidableEq n] (k : ℕ)
       (x : Fin k → Matrix n n ℝ), (∀ i, x i * (x i)ᵀ = (x i)ᵀ * x i) →
       √(schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, x i * (x i)ᵀ)) ≤
-          lpNorm (schattenNorm (ENNReal.ofReal q)) q
+          SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
             (fun ε : Fin k → Bool => ∑ i, coin (ε i) • x i) ∧
-        lpNorm (schattenNorm (ENNReal.ofReal q)) q
+        SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
             (fun ε : Fin k → Bool => ∑ i, coin (ε i) • x i) ≤
           C * √q * √(schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, x i * (x i)ᵀ)) :=
   ⟨√2, by positivity, fun _q hq _n _ _ _k x hx => ncKhintchine_normal hq x hx⟩

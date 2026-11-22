@@ -61,8 +61,10 @@ theorem uniformOn_singleton (ε : Fin N → Bool) :
   rw [Measure.real, ProbabilityTheory.uniformOn_univ, Measure.count_singleton]
   simp [Fintype.card_bool]
 
-/-- `ℱ_k`-measurability on the sign cube is dependence on the signs `ε_j`, `j < k` only. -/
-theorem stronglyMeasurable_filtration_iff {β : Type*} [TopologicalSpace β] [Nonempty β]
+/-- `ℱ_k`-measurability on the sign cube is dependence on the signs `ε_j`, `j < k` only, for
+functions with values in a Hausdorff space. -/
+theorem stronglyMeasurable_filtration_iff {β : Type*} [TopologicalSpace β] [T2Space β]
+    [Nonempty β]
     {k : ℕ} {f : (Fin N → Bool) → β} :
     StronglyMeasurable[filtration N k] f ↔
       ∀ ε ε' : Fin N → Bool, (∀ j : Fin N, j.val < k → ε j = ε' j) → f ε = f ε' := by
@@ -135,7 +137,7 @@ theorem martingale_paleyWalsh {E : Type*} [NormedAddCommGroup E] [NormedSpace �
 theorem eLpNorm_uniformOn {E : Type*} [NormedAddCommGroup E] (f : (Fin N → Bool) → E) {p : ℝ}
     (hp : 0 < p) :
     eLpNorm f (ENNReal.ofReal p) (ProbabilityTheory.uniformOn Set.univ) =
-      ENNReal.ofReal (lpNorm (fun x => ‖x‖) p f) := by
+      ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p f) := by
   rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (by simpa using hp) ENNReal.ofReal_ne_top
     AEStronglyMeasurable.of_discrete, ENNReal.toReal_ofReal hp.le, lintegral_fintype]
   have hμ : ∀ ε : Fin N → Bool,
@@ -144,7 +146,7 @@ theorem eLpNorm_uniformOn {E : Type*} [NormedAddCommGroup E] (f : (Fin N → Boo
     rw [← uniformOn_singleton ε, ofReal_measureReal]
   have hsum : 0 ≤ (∑ ε, ‖f ε‖ ^ p) / 2 ^ N :=
     div_nonneg (Finset.sum_nonneg fun ε _ => Real.rpow_nonneg (norm_nonneg _) _) (by positivity)
-  rw [lpNorm, avg, ← ENNReal.ofReal_rpow_of_nonneg hsum (by positivity)]
+  rw [SignCube.lpNorm, avg, ← ENNReal.ofReal_rpow_of_nonneg hsum (by positivity)]
   congr 1
   have hterm : ∀ ε, ‖f ε‖ₑ ^ p * (ProbabilityTheory.uniformOn Set.univ) {ε} =
       ENNReal.ofReal (‖f ε‖ ^ p * (1 / 2 ^ N)) := by

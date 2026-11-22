@@ -19,9 +19,14 @@ satisfy:
 3. `q_{k+1} x_k q_{k+1} ≤ λ q_{k+1}` (`cuculescu_mul_mul_le`);
 4. `λ τ (1 − q_{N+1}) ≤ τ (x)` (`cuculescu_trace_le`), by a telescoping argument;
 
-and the compressed process `q_{k+1} x_k q_{k+1}` is a supermartingale
-(`condAvg_cuculescu_le`; Randrianantoanina, Lemma 3.3), since `q_{k+2}` commutes with
-`q_{k+1} x_{k+1} q_{k+1}` and `p A p ≤ A` for a projection `p` commuting with `A ≥ 0`.
+and the compressed process `z_k = q_{k+1} x_k q_{k+1}` (`compressed`; the source's `q_k x_k q_k`)
+is a supermartingale (`condAvg_cuculescu_le`; Randrianantoanina, Lemma 3.3), since `q_{k+2}`
+commutes with `q_{k+1} x_{k+1} q_{k+1}` and `p A p ≤ A` for a projection `p` commuting with
+`A ≥ 0`. Its Doob decomposition `z_k = y_k + z'_k` (Randrianantoanina, (3.3)–(3.6)) has the
+martingale part `y_k = z_0 + Σ_{j<k} (z_{j+1} − E_j z_{j+1})` (`compressedMart`), with
+`y_k ≥ z_k` (`posSemidef_compressedMart_sub`) and `‖y_N‖_{L² (τ)}² ≤ 6 λ τ (x)`
+(`cubeTrace_compressedMart_sq_le`, Randrianantoanina, Lemma 3.4: a telescoping sum, using
+`‖z_k‖_∞ ≤ λ` and the supermartingale property).
 -/
 
 @[expose] public section
@@ -83,6 +88,33 @@ theorem condAvg_cuculescu_le (hx : ∀ ε, (x ε).PosSemidef) (k : ℕ) (ε : Fi
     (cuculescu x l (k + 1) ε * condAvg k x ε * cuculescu x l (k + 1) ε -
       condAvg k (fun ε => cuculescu x l (k + 2) ε * condAvg (k + 1) x ε *
         cuculescu x l (k + 2) ε) ε).PosSemidef := by
+  sorry
+
+/-- The compressed process `z_k = q_{k+1} x_k q_{k+1}` (Randrianantoanina's `q_k x_k q_k`). -/
+noncomputable def compressed (x : (Fin N → Bool) → Matrix n n ℝ) (l : ℝ) (k : ℕ)
+    (ε : Fin N → Bool) : Matrix n n ℝ :=
+  cuculescu x l (k + 1) ε * condAvg k x ε * cuculescu x l (k + 1) ε
+
+/-- The martingale part of the Doob decomposition of the compressed process,
+`y_k = z_0 + Σ_{j<k} (z_{j+1} − E_j z_{j+1})`, equivalently
+`y_k = z_k + Σ_{j<k} (z_j − E_j z_{j+1})` (Randrianantoanina, (3.3)). -/
+noncomputable def compressedMart (x : (Fin N → Bool) → Matrix n n ℝ) (l : ℝ) (k : ℕ)
+    (ε : Fin N → Bool) : Matrix n n ℝ :=
+  compressed x l 0 ε +
+    ∑ j ∈ Finset.range k, (compressed x l (j + 1) ε - condAvg j (compressed x l (j + 1)) ε)
+
+theorem isCubeMartingale_compressedMart (hx : ∀ ε, (x ε).PosSemidef) :
+    IsCubeMartingale (compressedMart x l) := by
+  sorry
+
+/-- `y_k − z_k = Σ_{j<k} (z_j − E_j z_{j+1}) ⪰ 0` (Randrianantoanina, (3.5), (3.6)). -/
+theorem posSemidef_compressedMart_sub (hx : ∀ ε, (x ε).PosSemidef) (k : ℕ) (ε : Fin N → Bool) :
+    (compressedMart x l k ε - compressed x l k ε).PosSemidef := by
+  sorry
+
+/-- **Randrianantoanina, Lemma 3.4**: `‖y_N‖_{L² (τ)}² ≤ 6 λ τ (x)`. -/
+theorem cubeTrace_compressedMart_sq_le (hx : ∀ ε, (x ε).PosSemidef) (hl : 0 < l) :
+    cubeTrace (fun ε => compressedMart x l N ε * compressedMart x l N ε) ≤ 6 * l * cubeTrace x := by
   sorry
 
 end BanachProbability

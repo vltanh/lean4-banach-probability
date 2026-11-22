@@ -38,9 +38,9 @@ theorem exists_paleyWalsh_realization {Ω : Type} [Finite Ω] {mΩ : MeasurableS
     {n : ℕ} (hdy : HasDyadicTransitions μ ℱ n) {p : ℝ} (hp : 0 < p) :
     ∃ (M : ℕ) (ξ : Fin M → (Fin M → Bool) → X) (s : Fin M → (Fin M → Bool) → ℝ),
       IsPredictable ξ ∧ IsPredictable s ∧ (∀ k ε, s k ε = 1 ∨ s k ε = -1) ∧
-      ENNReal.ofReal (lpNorm (fun x => ‖x‖) p (paleyWalsh ξ M)) =
+      ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh ξ M)) =
         eLpNorm (fun ω => ‖Y n ω‖) (ENNReal.ofReal p) μ ∧
-      ENNReal.ofReal (lpNorm (fun x => ‖x‖) p (paleyWalsh (fun k ε => s k ε • ξ k ε) M)) =
+      ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh (fun k ε => s k ε • ξ k ε) M)) =
         eLpNorm (fun ω => ‖martingaleTransform σ Y n ω‖) (ENNReal.ofReal p) μ := by
   sorry
 

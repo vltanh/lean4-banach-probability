@@ -51,7 +51,8 @@ theorem avg_schattenNorm_rpow_le {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (A : Fin k �
 §7): `(E ‖Σ_i ε_i A_i‖_{S_q}^q)^{1/q} ≤ √(2 (q − 1)) ‖Σ_i A_i²‖_{S_{q/2}}^{1/2}`, `q ≥ 2`. -/
 theorem ncKhintchine_symmetric_upper {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (A : Fin k → Matrix n n ℝ)
     (hA : ∀ i, (A i).IsHermitian) :
-    lpNorm (schattenNorm (ENNReal.ofReal q)) q (fun ε : Fin k → Bool => ∑ i, coin (ε i) • A i) ≤
+    SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
+        (fun ε : Fin k → Bool => ∑ i, coin (ε i) • A i) ≤
       √(2 * (q - 1)) * √(schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, A i * A i)) := by
   sorry
 

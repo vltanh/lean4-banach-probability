@@ -13,7 +13,7 @@ On the sign cube `Fin N → Bool` with the filtration `ℱ_k = σ (ε₀, …, �
 * `condAvg k f`: the conditional expectation `E [f | ℱ_k]`, the average of `f` over the signs
   `ε_j`, `j ≥ k`;
 * `IsCubeMartingale M`: an adapted process with `E [M (n + 1) | ℱ_n] = M n`;
-* `IsStoppingTime τ`: the event `{τ ≤ n}` depends only on the signs `ε_j`, `j < n`;
+* `SignCube.IsStoppingTime τ`: the event `{τ ≤ n}` depends only on the signs `ε_j`, `j < n`;
 * `transform σ f`: the martingale transform `E [f | ℱ_0] + Σ_k σ_k (E [f | ℱ_{k+1}] − E [f | ℱ_k])`
   of the final value `f`.
 
@@ -41,7 +41,7 @@ def IsAdapted (M : ℕ → (Fin N → Bool) → E) : Prop :=
 
 /-- A time `τ : (Fin N → Bool) → ℕ` is a stopping time: whether `τ ≤ n` depends only on the signs
 `ε j` with `j < n`. -/
-def IsStoppingTime (τ : (Fin N → Bool) → ℕ) : Prop :=
+protected def IsStoppingTime (τ : (Fin N → Bool) → ℕ) : Prop :=
   ∀ (n : ℕ) (ε ε' : Fin N → Bool), (∀ j : Fin N, j.val < n → ε j = ε' j) → (τ ε ≤ n ↔ τ ε' ≤ n)
 
 /-- The sign vector that agrees with `ε` on the coordinates `j < k` and with `ε'` on the others. -/
@@ -117,6 +117,18 @@ theorem map_paleyWalsh {F : Type*} [AddCommGroup F] [Module ℝ F] (T : E →ₗ
     T (paleyWalsh ξ n ε) = paleyWalsh (fun k ε => T (ξ k ε)) n ε := by
   sorry
 
+/-- A linear map commutes with the cube conditional expectations. -/
+theorem map_condAvg {F : Type*} [AddCommGroup F] [Module ℝ F] (T : E →ₗ[ℝ] F) (k : ℕ)
+    (f : (Fin N → Bool) → E) (ε : Fin N → Bool) :
+    T (condAvg k f ε) = condAvg k (fun ε => T (f ε)) ε := by
+  sorry
+
+/-- A linear map commutes with martingale transforms by scalar multipliers. -/
+theorem map_transform {F : Type*} [AddCommGroup F] [Module ℝ F] (T : E →ₗ[ℝ] F)
+    (σ : Fin N → (Fin N → Bool) → ℝ) (f : (Fin N → Bool) → E) (ε : Fin N → Bool) :
+    T (transform σ f ε) = transform σ (fun ε => T (f ε)) ε := by
+  sorry
+
 theorem IsPredictable.add {ξ ζ : Fin N → (Fin N → Bool) → E} (hξ : IsPredictable ξ)
     (hζ : IsPredictable ζ) : IsPredictable fun k ε => ξ k ε + ζ k ε := by
   sorry
@@ -187,7 +199,7 @@ theorem IsPredictable.indicator {ξ : Fin N → (Fin N → Bool) → E} (hξ : I
 /-- A Paley–Walsh martingale stopped at a stopping time is the Paley–Walsh martingale of the
 predictable family `k ↦ 1_{k < τ} ξ_k`. -/
 theorem IsPredictable.stopped {ξ : Fin N → (Fin N → Bool) → E} (hξ : IsPredictable ξ)
-    {τ : (Fin N → Bool) → ℕ} (hτ : IsStoppingTime τ) :
+    {τ : (Fin N → Bool) → ℕ} (hτ : SignCube.IsStoppingTime τ) :
     IsPredictable fun k ε => if k.val < τ ε then ξ k ε else 0 := by
   sorry
 

@@ -50,8 +50,8 @@ theorem lpNorm_transform_le_of_le_five_thirds : ∃ K : ℝ, 0 < K ∧
     ∀ (r : ℝ), 1 < r → r ≤ 5 / 3 → ∀ (N : ℕ) (n : Type) [Fintype n] [DecidableEq n]
       (x : (Fin N → Bool) → Matrix n n ℝ) (σ : Fin N → (Fin N → Bool) → ℝ),
       (∀ ε, (x ε).IsHermitian) → IsPredictable σ → (∀ k ε, σ k ε = 1 ∨ σ k ε = -1) →
-        lpNorm (schattenNorm (ENNReal.ofReal r)) r (transform σ x) ≤
-          K / (r - 1) * lpNorm (schattenNorm (ENNReal.ofReal r)) r x := by
+        SignCube.lpNorm (schattenNorm (ENNReal.ofReal r)) r (transform σ x) ≤
+          K / (r - 1) * SignCube.lpNorm (schattenNorm (ENNReal.ofReal r)) r x := by
   sorry
 
 /-- Middle regime, `r ∈ [5/3, 5/2]`: a bounded constant (Marcinkiewicz between `3/2` and `3`). -/
@@ -59,8 +59,8 @@ theorem lpNorm_transform_le_of_mem_Icc : ∃ K : ℝ, 0 < K ∧
     ∀ (r : ℝ), 5 / 3 ≤ r → r ≤ 5 / 2 → ∀ (N : ℕ) (n : Type) [Fintype n] [DecidableEq n]
       (x : (Fin N → Bool) → Matrix n n ℝ) (σ : Fin N → (Fin N → Bool) → ℝ),
       (∀ ε, (x ε).IsHermitian) → IsPredictable σ → (∀ k ε, σ k ε = 1 ∨ σ k ε = -1) →
-        lpNorm (schattenNorm (ENNReal.ofReal r)) r (transform σ x) ≤
-          K * lpNorm (schattenNorm (ENNReal.ofReal r)) r x := by
+        SignCube.lpNorm (schattenNorm (ENNReal.ofReal r)) r (transform σ x) ≤
+          K * SignCube.lpNorm (schattenNorm (ENNReal.ofReal r)) r x := by
   sorry
 
 /-- Third regime, `r ≥ 5/2`: `K r`, by duality from `r' ≤ 5/3`. -/
@@ -68,8 +68,8 @@ theorem lpNorm_transform_le_of_five_halves_le : ∃ K : ℝ, 0 < K ∧
     ∀ (r : ℝ), 5 / 2 ≤ r → ∀ (N : ℕ) (n : Type) [Fintype n] [DecidableEq n]
       (x : (Fin N → Bool) → Matrix n n ℝ) (σ : Fin N → (Fin N → Bool) → ℝ),
       (∀ ε, (x ε).IsHermitian) → IsPredictable σ → (∀ k ε, σ k ε = 1 ∨ σ k ε = -1) →
-        lpNorm (schattenNorm (ENNReal.ofReal r)) r (transform σ x) ≤
-          K * r * lpNorm (schattenNorm (ENNReal.ofReal r)) r x := by
+        SignCube.lpNorm (schattenNorm (ENNReal.ofReal r)) r (transform σ x) ≤
+          K * r * SignCube.lpNorm (schattenNorm (ENNReal.ofReal r)) r x := by
   sorry
 
 /-- Martingale transforms by predictable signs on `L^r (S_r)` of the matrix cube, for all real
@@ -78,8 +78,8 @@ theorem lpNorm_transform_le : ∃ K : ℝ, 0 < K ∧
     ∀ (r : ℝ), 1 < r → ∀ (N : ℕ) (n : Type) [Fintype n] [DecidableEq n]
       (x : (Fin N → Bool) → Matrix n n ℝ) (σ : Fin N → (Fin N → Bool) → ℝ),
       IsPredictable σ → (∀ k ε, σ k ε = 1 ∨ σ k ε = -1) →
-        lpNorm (schattenNorm (ENNReal.ofReal r)) r (transform σ x) ≤
-          K * pStar r * lpNorm (schattenNorm (ENNReal.ofReal r)) r x := by
+        SignCube.lpNorm (schattenNorm (ENNReal.ofReal r)) r (transform σ x) ≤
+          K * pStar r * SignCube.lpNorm (schattenNorm (ENNReal.ofReal r)) r x := by
   sorry
 
 /-- `UMD_q^Δ (S_q^{n×n}) ≤ K q*` with an absolute `K`. -/
