@@ -4,21 +4,26 @@ public import BanachProbability.Noncommutative.Distribution
 import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
 
 /-!
-# Marcinkiewicz interpolation on the matrix cube
+# Marcinkiewicz interpolation on `L^r (L^∞ (Ω) ⊗ M_n)`
 
-A linear map `T` on matrix-valued functions on the sign cube that is of weak type `(p_j, p_j)`
-with constant `K_j` on symmetric-matrix-valued functions, `j = 0, 1`, `p₀ < p₁`, is of strong
-type `(r, r)` for `p₀ < r < p₁`:
+An a.e.-additive map `T` on matrix-valued functions on a probability space that is of weak type
+`(p_j, p_j)` with constant `K_j` on the symmetric `m`-measurable functions, `j = 0, 1`,
+`1 ≤ p₀ < p₁`, is of strong type `(r, r)` for `p₀ < r < p₁`:
 `‖T x‖_{L^r}^r ≤ 2^r r (K₀^{p₀} / (r − p₀) + K₁^{p₁} / (p₁ − r)) ‖x‖_{L^r}^r`
-(`marcinkiewicz`; J. Marcinkiewicz, C. R. Acad. Sci. Paris 208 (1939); for noncommutative `L^p`
-spaces, e.g. Randrianantoanina (2002), the interpolation step of Theorem 4.3). The proof is the
-classical one, with the spectral truncations: to bound `λ_s (T x)`, split `x` at level `s / 2`
-into `x 1_{(s/2, ∞)} (|x|)` and `x 1_{[0, s/2]} (|x|)` pointwise (`truncAbove`, `truncBelow`), use
-the subadditivity of the distribution function (`distribution_add_add_le`) and the two weak type
-bounds, and integrate with the layer-cake formula (`avg_schattenNorm_rpow_eq_integral`): each
-eigenvalue modulus `a = |λ_i (x ε)|` contributes
-`∫_0^{2a} r s^{r−1} (s/2)^{−p₀} a^{p₀} ds = 2^r r a^r / (r − p₀)` and
-`∫_{2a}^∞ r s^{r−1} (s/2)^{−p₁} a^{p₁} ds = 2^r r a^r / (p₁ − r)`.
+(`marcinkiewicz`; J. Marcinkiewicz, C. R. Acad. Sci. Paris 208 (1939); the interpolation step of
+Theorem 4.3 of N. Randrianantoanina, *Non-commutative martingale transforms*, J. Funct. Anal. 194
+(2002)). The proof is the classical one, with the spectral truncations: to bound `λ_s (T x)`, split
+`x` at level `s / 2` into `x 1_{(s/2, ∞)} (|x|)` and `x 1_{[0, s/2]} (|x|)` pointwise
+(`truncAbove`, `truncBelow`, both `m`-measurable), use the subadditivity of the distribution
+function (`ncDistribution_add_add_le`) and the two weak type bounds, and integrate with the
+layer-cake formula (`lintegral_schattenNorm_rpow_eq`): each eigenvalue modulus `a = |λ_i (x ω)|`
+contributes `∫_0^{2a} r s^{r−1} (s/2)^{−p₀} a^{p₀} ds = 2^r r a^r / (r − p₀)` and
+`∫_{2a}^∞ r s^{r−1} (s/2)^{−p₁} a^{p₁} ds = 2^r r a^r / (p₁ − r)`; the eigenvalues of `x ω` are
+measurable in `ω` (`measurable_hermitianEigenvalue`), so Tonelli's theorem applies.
+
+`IsWeakTypeNC` and `IsStrongTypeNC` are the weak and strong type `(p, p)` conditions on the
+symmetric `m`-measurable functions; a strong type bound gives the weak type bound with the same
+constant (Chebyshev, `IsStrongTypeNC.isWeakTypeNC`).
 -/
 
 @[expose] public section
@@ -28,9 +33,8 @@ open scoped ENNReal Matrix
 
 namespace BanachProbability
 
-open SignCube
-
-variable {N : ℕ} {n : Type*} [Fintype n] [DecidableEq n]
+variable {Ω : Type*} {m mΩ : MeasurableSpace Ω} {μ : Measure Ω} {n : Type*} [Fintype n]
+  [DecidableEq n]
 
 /-- `∫_0^{2a} s^{r−1−p} ds = (2a)^{r−p} / (r − p)` for `p < r`, `a ≥ 0`, as an integral over
 `(0, ∞)` of an indicator. -/
@@ -132,126 +136,39 @@ private theorem ipdBound_of_le {p₀ p₁ K₀ K₁ r a s : ℝ} (hs : 0 < s) (h
   field_simp
   ring
 
-/-- `T` is of weak type `(p, p)` with constant `K` on symmetric-matrix-valued functions:
+/-- `T` is of weak type `(p, p)` with constant `K` on the symmetric `m`-measurable functions:
 `s^p λ_s (T x) ≤ K^p ‖x‖_{L^p}^p`. -/
-def IsWeakType (T : ((Fin N → Bool) → Matrix n n ℝ) → ((Fin N → Bool) → Matrix n n ℝ))
-    (p K : ℝ) : Prop :=
-  ∀ x : (Fin N → Bool) → Matrix n n ℝ, (∀ ε, (x ε).IsHermitian) → ∀ s : ℝ, 0 < s →
-    s ^ p * distribution s (T x) ≤ K ^ p * avg fun ε => schattenNorm (ENNReal.ofReal p) (x ε) ^ p
+def IsWeakTypeNC (μ : Measure Ω) (m : MeasurableSpace Ω)
+    (T : (Ω → Matrix n n ℝ) → Ω → Matrix n n ℝ) (p K : ℝ) : Prop :=
+  ∀ x : Ω → Matrix n n ℝ, Measurable[m] x → (∀ ω, (x ω).IsHermitian) →
+    MatrixMemLp x (ENNReal.ofReal p) μ → ∀ s : ℝ, 0 < s →
+      s ^ p * ncDistribution μ s (T x) ≤
+        K ^ p * ∫ ω, schattenNorm (ENNReal.ofReal p) (x ω) ^ p ∂μ
+
+/-- `T` is of strong type `(r, r)` with constant `K` on the symmetric `m`-measurable functions
+in `L^r`: `‖T x‖_{L^r (S_r)} ≤ K ‖x‖_{L^r (S_r)}`. -/
+def IsStrongTypeNC (μ : Measure Ω) (m : MeasurableSpace Ω)
+    (T : (Ω → Matrix n n ℝ) → Ω → Matrix n n ℝ) (r K : ℝ) : Prop :=
+  ∀ x : Ω → Matrix n n ℝ, Measurable[m] x → (∀ ω, (x ω).IsHermitian) →
+    MatrixMemLp x (ENNReal.ofReal r) μ →
+    eLpNorm (fun ω => schattenNorm (ENNReal.ofReal r) (T x ω)) (ENNReal.ofReal r) μ ≤
+      ENNReal.ofReal K * eLpNorm (fun ω => schattenNorm (ENNReal.ofReal r) (x ω)) (ENNReal.ofReal r) μ
 
 /-- A strong type `(p, p)` bound gives the weak type `(p, p)` bound with the same constant
 (Chebyshev). -/
-theorem isWeakType_of_lpNorm_le
-    {T : ((Fin N → Bool) → Matrix n n ℝ) → ((Fin N → Bool) → Matrix n n ℝ)} {p K : ℝ}
-    (hp : 0 < p) (hK : 0 ≤ K)
-    (h : ∀ x : (Fin N → Bool) → Matrix n n ℝ, (∀ ε, (x ε).IsHermitian) →
-      SignCube.lpNorm (schattenNorm (ENNReal.ofReal p)) p (T x) ≤
-        K * SignCube.lpNorm (schattenNorm (ENNReal.ofReal p)) p x) :
-    IsWeakType T p K := by
-  intro x hx s hs
-  have hS : ∀ A : Matrix n n ℝ, 0 ≤ schattenNorm (ENNReal.ofReal p) A :=
-    fun A => schattenNorm_nonneg _ A
-  have hpow : ∀ y : (Fin N → Bool) → Matrix n n ℝ,
-      SignCube.lpNorm (schattenNorm (ENNReal.ofReal p)) p y ^ p =
-        avg fun ε => schattenNorm (ENNReal.ofReal p) (y ε) ^ p := by
-    intro y
-    unfold SignCube.lpNorm
-    rw [← Real.rpow_mul (avg_nonneg fun ε => Real.rpow_nonneg (hS _) p),
-      one_div_mul_cancel hp.ne', Real.rpow_one]
-  calc s ^ p * distribution s (T x) = distribution s (T x) * s ^ p := mul_comm _ _
-    _ ≤ avg fun ε => schattenNorm (ENNReal.ofReal p) (T x ε) ^ p :=
-        distribution_mul_rpow_le hs hp (T x)
-    _ = SignCube.lpNorm (schattenNorm (ENNReal.ofReal p)) p (T x) ^ p := (hpow _).symm
-    _ ≤ (K * SignCube.lpNorm (schattenNorm (ENNReal.ofReal p)) p x) ^ p :=
-        Real.rpow_le_rpow (lpNorm_nonneg hS _ _) (h x hx) hp.le
-    _ = K ^ p * avg fun ε => schattenNorm (ENNReal.ofReal p) (x ε) ^ p := by
-        rw [Real.mul_rpow hK (lpNorm_nonneg hS _ _), hpow]
+theorem IsStrongTypeNC.isWeakTypeNC [IsFiniteMeasure μ]
+    {T : (Ω → Matrix n n ℝ) → Ω → Matrix n n ℝ} (hT : ∀ x, Measurable (T x)) {p K : ℝ}
+    (hp : 1 ≤ p) (hK : 0 ≤ K) (h : IsStrongTypeNC μ m T p K) : IsWeakTypeNC μ m T p K := by
+  sorry
 
-set_option linter.unusedVariables false in
-/-- **Marcinkiewicz interpolation** on the matrix cube, with two endpoints `p₀ < r < p₁`. -/
-theorem marcinkiewicz (T : ((Fin N → Bool) → Matrix n n ℝ) →ₗ[ℝ] ((Fin N → Bool) → Matrix n n ℝ))
-    {p₀ p₁ K₀ K₁ r : ℝ} (hp₀ : 0 < p₀) (hp₀r : p₀ < r) (hrp₁ : r < p₁) (hK₀ : 0 ≤ K₀)
-    (hK₁ : 0 ≤ K₁) (h₀ : IsWeakType T p₀ K₀) (h₁ : IsWeakType T p₁ K₁)
-    (x : (Fin N → Bool) → Matrix n n ℝ) (hx : ∀ ε, (x ε).IsHermitian) :
-    (avg fun ε => schattenNorm (ENNReal.ofReal r) (T x ε) ^ r) ≤
-      2 ^ r * r * (K₀ ^ p₀ / (r - p₀) + K₁ ^ p₁ / (p₁ - r)) *
-        avg fun ε => schattenNorm (ENNReal.ofReal r) (x ε) ^ r := by
-  -- the constants `K₀, K₁` enter only through `K₀^{p₀}, K₁^{p₁}`: their signs are not used
-  have hr : 0 < r := by linarith
-  have hint : ∀ ε i, IntegrableOn (ipdBound p₀ p₁ K₀ K₁ r |(hx ε).eigenvalues i|) (Ioi 0) :=
-    fun ε i => (ipdBound_integral hp₀ hp₀r hrp₁ (abs_nonneg _)).1
-  -- the bound `G (s) = E Σ_i φ (|λ_i (x ε)|) (s)` for `r s^{r−1} λ_s (T x)`
-  let G : ℝ → ℝ := fun s => avg fun ε => ∑ i, ipdBound p₀ p₁ K₀ K₁ r |(hx ε).eigenvalues i| s
-  have hGi : IntegrableOn G (Ioi 0) :=
-    (integrable_finsetSum _ fun ε _ => integrable_finsetSum _ fun i _ => hint ε i).div_const _
-  have hGint : ∫ s in Ioi (0 : ℝ), G s = 2 ^ r * r * (K₀ ^ p₀ / (r - p₀) + K₁ ^ p₁ / (p₁ - r)) *
-      avg fun ε => schattenNorm (ENNReal.ofReal r) (x ε) ^ r := by
-    simp only [G, avg]
-    rw [integral_div, integral_finsetSum _ fun ε _ => integrable_finsetSum _ fun i _ => hint ε i,
-      mul_div_assoc', Finset.mul_sum]
-    congr 1
-    refine Finset.sum_congr rfl fun ε _ => ?_
-    rw [integral_finsetSum _ fun i _ => hint ε i, schattenNorm_rpow_of_isHermitian (hx ε) hr,
-      Finset.mul_sum]
-    exact Finset.sum_congr rfl fun i _ => (ipdBound_integral hp₀ hp₀r hrp₁ (abs_nonneg _)).2
-  -- the pointwise bound: split `x` at level `s / 2`, subadditivity, the two weak type bounds
-  have hbound : ∀ s : ℝ, 0 < s → r * s ^ (r - 1) * distribution s (T x) ≤ G s := by
-    intro s hs
-    have hs2 : 0 < s / 2 := half_pos hs
-    have hxab : x = (fun ε => truncAbove (s / 2) (x ε)) + fun ε => truncBelow (s / 2) (x ε) :=
-      funext fun ε => (truncAbove_add_truncBelow (hx ε) (s / 2)).symm
-    have h1 : distribution s (T x) ≤ distribution (s / 2) (T fun ε => truncAbove (s / 2) (x ε)) +
-        distribution (s / 2) (T fun ε => truncBelow (s / 2) (x ε)) := by
-      have := distribution_add_add_le (s / 2) (s / 2) (T fun ε => truncAbove (s / 2) (x ε))
-        (T fun ε => truncBelow (s / 2) (x ε))
-      rwa [add_halves, ← map_add, ← hxab] at this
-    have h2 : distribution (s / 2) (T fun ε => truncAbove (s / 2) (x ε)) ≤
-        ((s / 2) ^ p₀)⁻¹ * K₀ ^ p₀ * avg fun ε =>
-          ∑ i ∈ Finset.univ.filter (fun i => s / 2 < |(hx ε).eigenvalues i|),
-            |(hx ε).eigenvalues i| ^ p₀ := by
-      have := h₀ (fun ε => truncAbove (s / 2) (x ε)) (fun ε => isHermitian_truncAbove _ _)
-        (s / 2) hs2
-      simp only [fun ε => schattenNorm_truncAbove_rpow (hx ε) (s / 2) hp₀] at this
-      rw [mul_assoc, le_inv_mul_iff₀ (Real.rpow_pos_of_pos hs2 _)]
-      exact this
-    have h3 : distribution (s / 2) (T fun ε => truncBelow (s / 2) (x ε)) ≤
-        ((s / 2) ^ p₁)⁻¹ * K₁ ^ p₁ * avg fun ε =>
-          ∑ i ∈ Finset.univ.filter (fun i => |(hx ε).eigenvalues i| ≤ s / 2),
-            |(hx ε).eigenvalues i| ^ p₁ := by
-      have := h₁ (fun ε => truncBelow (s / 2) (x ε)) (fun ε => isHermitian_truncBelow _ _)
-        (s / 2) hs2
-      simp only [fun ε => schattenNorm_truncBelow_rpow (hx ε) (s / 2) (hr.trans hrp₁)] at this
-      rw [mul_assoc, le_inv_mul_iff₀ (Real.rpow_pos_of_pos hs2 _)]
-      exact this
-    have key : ∀ ε, r * s ^ (r - 1) * (((s / 2) ^ p₀)⁻¹ * K₀ ^ p₀ *
-          (∑ i ∈ Finset.univ.filter (fun i => s / 2 < |(hx ε).eigenvalues i|),
-            |(hx ε).eigenvalues i| ^ p₀) + ((s / 2) ^ p₁)⁻¹ * K₁ ^ p₁ *
-          ∑ i ∈ Finset.univ.filter (fun i => |(hx ε).eigenvalues i| ≤ s / 2),
-            |(hx ε).eigenvalues i| ^ p₁) =
-        ∑ i, ipdBound p₀ p₁ K₀ K₁ r |(hx ε).eigenvalues i| s := by
-      intro ε
-      rw [Finset.sum_filter, Finset.sum_filter, Finset.mul_sum, Finset.mul_sum,
-        ← Finset.sum_add_distrib, Finset.mul_sum]
-      refine Finset.sum_congr rfl fun i _ => ?_
-      by_cases hi : s / 2 < |(hx ε).eigenvalues i|
-      · rw [ite_eq_left hi, ite_eq_right (not_le.2 hi), ipdBound_of_lt hs hi]
-      · rw [ite_eq_right hi, ite_eq_left (not_lt.1 hi), ipdBound_of_le hs (not_lt.1 hi)]
-    calc r * s ^ (r - 1) * distribution s (T x)
-        ≤ r * s ^ (r - 1) * (((s / 2) ^ p₀)⁻¹ * K₀ ^ p₀ * (avg fun ε =>
-            ∑ i ∈ Finset.univ.filter (fun i => s / 2 < |(hx ε).eigenvalues i|),
-              |(hx ε).eigenvalues i| ^ p₀) + ((s / 2) ^ p₁)⁻¹ * K₁ ^ p₁ * avg fun ε =>
-            ∑ i ∈ Finset.univ.filter (fun i => |(hx ε).eigenvalues i| ≤ s / 2),
-              |(hx ε).eigenvalues i| ^ p₁) :=
-          mul_le_mul_of_nonneg_left (h1.trans (add_le_add h2 h3)) (by positivity)
-      _ = G s := by
-          simp only [G, ← key]
-          rw [avg_const_mul, avg_add, avg_const_mul, avg_const_mul]
-  -- the layer-cake formula and the integral of the bound
-  rw [avg_schattenNorm_rpow_eq_integral hr (T x), ← hGint]
-  refine integral_mono_of_nonneg ?_ hGi ?_
-  · exact (ae_restrict_iff' measurableSet_Ioi).2 (Filter.Eventually.of_forall fun s hs =>
-      mul_nonneg (mul_nonneg hr.le (Real.rpow_nonneg (le_of_lt hs) _))
-        (avg_nonneg fun ε => Nat.cast_nonneg _))
-  · exact (ae_restrict_iff' measurableSet_Ioi).2 (Filter.Eventually.of_forall hbound)
+/-- **Marcinkiewicz interpolation** on `L^r (L^∞ (Ω) ⊗ M_n)`, with two endpoints
+`1 ≤ p₀ < r < p₁`. -/
+theorem marcinkiewicz [IsProbabilityMeasure μ] (hm : m ≤ mΩ)
+    {T : (Ω → Matrix n n ℝ) → Ω → Matrix n n ℝ} (hT : ∀ x, Measurable (T x))
+    (hadd : ∀ x y, MatrixMemLp x 1 μ → MatrixMemLp y 1 μ → T (x + y) =ᵐ[μ] T x + T y)
+    {p₀ p₁ K₀ K₁ r : ℝ} (hp₀ : 1 ≤ p₀) (hp₀r : p₀ < r) (hrp₁ : r < p₁) (hK₀ : 0 ≤ K₀)
+    (hK₁ : 0 ≤ K₁) (h₀ : IsWeakTypeNC μ m T p₀ K₀) (h₁ : IsWeakTypeNC μ m T p₁ K₁) :
+    IsStrongTypeNC μ m T r ((2 ^ r * r * (K₀ ^ p₀ / (r - p₀) + K₁ ^ p₁ / (p₁ - r))) ^ (1 / r)) := by
+  sorry
 
 end BanachProbability

@@ -1,60 +1,46 @@
 module
 
-public import BanachProbability.Noncommutative.MatrixCube
+public import BanachProbability.Noncommutative.Transform
+public import BanachProbability.Noncommutative.Distribution
 import Mathlib.Algebra.Order.Star.Real
 import Mathlib.Analysis.CStarAlgebra.ContinuousFunctionalCalculus.Commute
 
 /-!
-# Cuculescu's projections on the matrix cube
+# Cuculescu's projections
 
-For a positive semidefinite matrix-valued function `x` on the sign cube, with martingale
-`x_k = E_k x`, and `λ > 0`, Cuculescu's projections (I. Cuculescu, *Martingales on von Neumann
-algebras*, J. Multivariate Anal. 1 (1971); Randrianantoanina, *Non-commutative martingale
-transforms*, J. Funct. Anal. 194 (2002), Proposition 2.4) are defined recursively by
-`q_0 = 1` and `q_{k+1} = q_k 1_{[0, λ]} (q_k x_k q_k)` (`cuculescu x λ`); with this indexing
-`q_{k+1}` is a function of the signs `ε_j`, `j < k`, the Cuculescu projection at time `k`. They
-satisfy:
+For a positive semidefinite matrix-valued function `x` on a probability space with a filtration
+`ℱ`, with martingale `x_k = E_k x`, and `λ > 0`, Cuculescu's projections (I. Cuculescu,
+*Martingales on von Neumann algebras*, J. Multivariate Anal. 1 (1971); N. Randrianantoanina,
+*Non-commutative martingale transforms*, J. Funct. Anal. 194 (2002), Proposition 2.4) are the
+random projections defined recursively, pointwise in `ω`, by `q_0 = 1` and
+`q_{k+1} = q_k 1_{[0, λ]} (q_k x_k q_k)` (`cuculescu`); with this indexing `q_{k+1}` is
+`ℱ_k`-measurable, the Cuculescu projection at time `k`.
 
-1. `q_{k+1}` is an orthogonal projection, a function of the first `k` signs, and
-   `q_{k+1} ≤ q_k` (`cuculescu_isProj`, `cuculescu_succ_adapted`, `cuculescu_succ_mul`);
-2. `q_{k+1}` commutes with `q_k x_k q_k` (`commute_cuculescu_succ`);
-3. `q_{k+1} x_k q_{k+1} ≤ λ q_{k+1}` (`cuculescu_mul_mul_le`);
-4. `λ τ (1 − q_{N+1}) ≤ τ (x)` (`cuculescu_trace_le`), by a telescoping argument;
-
-and the compressed process `z_k = q_{k+1} x_k q_{k+1}` (`compressed`; the source's `q_k x_k q_k`)
-is a supermartingale (`condAvg_cuculescu_le`; Randrianantoanina, Lemma 3.3), since `q_{k+2}`
-commutes with `q_{k+1} x_{k+1} q_{k+1}` and `p A p ≤ A` for a projection `p` commuting with
-`A ≥ 0`. Its Doob decomposition `z_k = y_k + z'_k` (Randrianantoanina, (3.3)–(3.6)) has the
-martingale part `y_k = z_0 + Σ_{j<k} (z_{j+1} − E_j z_{j+1})` (`compressedMart`), with
-`y_k ≥ z_k` (`posSemidef_compressedMart_sub`) and `‖y_N‖_{L² (τ)}² ≤ 6 λ τ (x)`
-(`cubeTrace_compressedMart_sq_le`, Randrianantoanina, Lemma 3.4: a telescoping sum, using
-`‖z_k‖_∞ ≤ λ` and the supermartingale property).
+(The statements and the proofs of Proposition 2.4 (i)–(iv), Lemma 3.3 (the supermartingale
+property of the compressed process `z_k = q_{k+1} x_k q_{k+1}`), the Doob decomposition (3.3)–(3.6)
+and Lemma 3.4 follow the source; see the declarations below.)
 -/
 
 @[expose] public section
 
+open MeasureTheory
 open scoped ENNReal Matrix
 
 namespace BanachProbability
 
-open SignCube
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} {n : Type*} [Fintype n]
+  [DecidableEq n]
 
-variable {N : ℕ} {n : Type*} [Fintype n] [DecidableEq n]
-
-/-- Cuculescu's projections `q_0 = 1`, `q_{k+1} = q_k 1_{[0, λ]} (q_k x_k q_k)` of the martingale
-`x_k = E_k x` at level `λ`. Randrianantoanina writes `q_{k+1} = 1_{[0, λ]} (q_k x_k q_k)`; its
-proof requires reading this in the reduced algebra `q_k M q_k`, i.e. as
-`q_{k+1} = q_k 1_{[0, λ]} (q_k x_k q_k)`, which is the definition here (read literally,
-`q_{k+1} ≥ 1 − q_k`, since `q_k x_k q_k` vanishes on the range of `1 − q_k`, and the projections
-would not decrease). -/
-noncomputable def cuculescu (x : (Fin N → Bool) → Matrix n n ℝ) (l : ℝ) :
-    ℕ → (Fin N → Bool) → Matrix n n ℝ
+/-- Cuculescu's projections `q_0 = 1`, `q_{k+1} = q_k 1_{[0, λ]} (q_k X_k q_k)` of a sequence `X`
+of matrix-valued functions (the martingale `X_k = E_k x`) at level `λ`, pointwise in `ω`.
+Randrianantoanina writes `q_{k+1} = 1_{[0, λ]} (q_k x_k q_k)`; its proof requires reading this in
+the reduced algebra `q_k N q_k`, i.e. as `q_{k+1} = q_k 1_{[0, λ]} (q_k x_k q_k)`, which is the
+definition here (read literally, `q_{k+1} ≥ 1 − q_k`, since `q_k x_k q_k` vanishes on the range of
+`1 − q_k`, and the projections would not decrease). -/
+noncomputable def cuculescu (X : ℕ → Ω → Matrix n n ℝ) (l : ℝ) : ℕ → Ω → Matrix n n ℝ
   | 0 => fun _ => 1
-  | k + 1 => fun ε =>
-      cuculescu x l k ε *
-        spectralProj (cuculescu x l k ε * condAvg k x ε * cuculescu x l k ε) (Set.Icc 0 l)
-
-variable {x : (Fin N → Bool) → Matrix n n ℝ} {l : ℝ}
+  | k + 1 => fun ω =>
+      cuculescu X l k ω * spectralProj (cuculescu X l k ω * X k ω * cuculescu X l k ω) (Set.Icc 0 l)
 
 /-! ### Matrix lemmas -/
 
@@ -307,410 +293,5 @@ private theorem cuc_step_conj_le (hq : q * q = q) (hqt : qᵀ = q) (hX : X.PosSe
   rwa [e] at h
 
 end Step
-
-/-! ### Cube lemmas -/
-
-omit [DecidableEq n] in
-private theorem cuc_cubeTrace_sum {ι : Type*} (s : Finset ι)
-    (f : ι → (Fin N → Bool) → Matrix n n ℝ) :
-    cubeTrace (fun ε => ∑ i ∈ s, f i ε) = ∑ i ∈ s, cubeTrace (f i) := by
-  simp only [cubeTrace, Matrix.trace_sum]
-  exact avg_sum s fun i ε => (f i ε).trace
-
-omit [DecidableEq n] in
-private theorem cuc_cubeTrace_sub (f g : (Fin N → Bool) → Matrix n n ℝ) :
-    cubeTrace (fun ε => f ε - g ε) = cubeTrace f - cubeTrace g := by
-  simp only [cubeTrace, Matrix.trace_sub]
-  exact avg_sub _ _
-
-private theorem cuc_condAvg_add {E : Type*} [AddCommGroup E] [Module ℝ E] (k : ℕ)
-    (f g : (Fin N → Bool) → E) :
-    condAvg k (fun ε => f ε + g ε) = fun ε => condAvg k f ε + condAvg k g ε := by
-  funext ε
-  simp only [condAvg, Finset.sum_add_distrib, smul_add]
-
-private theorem cuc_condAvg_sub {E : Type*} [AddCommGroup E] [Module ℝ E] (k : ℕ)
-    (f g : (Fin N → Bool) → E) :
-    condAvg k (fun ε => f ε - g ε) = fun ε => condAvg k f ε - condAvg k g ε := by
-  funext ε
-  simp only [condAvg, Finset.sum_sub_distrib, smul_sub]
-
-/-- `E_k f` is a function of the first `k` signs. -/
-private theorem cuc_condAvg_agree {E : Type*} [AddCommGroup E] [Module ℝ E] {k : ℕ}
-    (f : (Fin N → Bool) → E) {ε ε' : Fin N → Bool} (h : ∀ j : Fin N, j.val < k → ε j = ε' j) :
-    condAvg k f ε = condAvg k f ε' := by
-  simp only [condAvg]
-  congr 1
-  refine Finset.sum_congr rfl fun η _ => ?_
-  congr 1
-  funext j
-  simp only [splice]
-  split_ifs with hj
-  · exact h j hj
-  · rfl
-
-omit [DecidableEq n] in
-/-- `τ (e E_k f) = τ (e f)` for `e` a function of the first `k` signs (bimodule property and
-`τ ∘ E_k = τ`). -/
-private theorem cuc_cubeTrace_mul_condAvg {k : ℕ} {e : (Fin N → Bool) → Matrix n n ℝ}
-    (he : ∀ ε ε' : Fin N → Bool, (∀ j : Fin N, j.val < k → ε j = ε' j) → e ε = e ε')
-    (f : (Fin N → Bool) → Matrix n n ℝ) :
-    cubeTrace (fun ε => e ε * condAvg k f ε) = cubeTrace (fun ε => e ε * f ε) := by
-  classical
-  have h := condAvg_mul_mul (b := fun _ => (1 : Matrix n n ℝ)) he (fun _ _ _ => rfl) f
-  have h2 := cubeTrace_condAvg k (fun ε => e ε * f ε * 1)
-  rw [h] at h2
-  simpa only [mul_one] using h2
-
-private theorem cuc_succ (k : ℕ) (ε : Fin N → Bool) :
-    cuculescu x l (k + 1) ε = cuculescu x l k ε *
-      spectralProj (cuculescu x l k ε * condAvg k x ε * cuculescu x l k ε) (Set.Icc 0 l) :=
-  rfl
-
-theorem cuculescu_isProj (hx : ∀ ε, (x ε).PosSemidef) (k : ℕ) (ε : Fin N → Bool) :
-    cuculescu x l k ε * cuculescu x l k ε = cuculescu x l k ε ∧
-      (cuculescu x l k ε)ᵀ = cuculescu x l k ε := by
-  induction k with
-  | zero =>
-    change (1 : Matrix n n ℝ) * 1 = 1 ∧ (1 : Matrix n n ℝ)ᵀ = 1
-    exact ⟨mul_one 1, Matrix.transpose_one⟩
-  | succ k ih =>
-    rw [cuc_succ k ε]
-    exact ⟨cuc_step_mul_self ih.1 ih.2 (posSemidef_condAvg hx k ε) _,
-      cuc_step_transpose ih.1 ih.2 (posSemidef_condAvg hx k ε) _⟩
-
-theorem cuculescu_succ_adapted (k : ℕ) {ε ε' : Fin N → Bool}
-    (h : ∀ j : Fin N, j.val < k → ε j = ε' j) :
-    cuculescu x l (k + 1) ε = cuculescu x l (k + 1) ε' := by
-  induction k generalizing ε ε' with
-  | zero =>
-    rw [cuc_succ 0 ε, cuc_succ 0 ε', cuc_condAvg_agree x h]
-    rfl
-  | succ k ih =>
-    rw [cuc_succ (k + 1) ε, cuc_succ (k + 1) ε', ih fun j hj => h j (Nat.lt_succ_of_lt hj),
-      cuc_condAvg_agree x h]
-
-/-- `q_k` is a function of the first `k` signs. -/
-private theorem cuc_adapted (k : ℕ) {ε ε' : Fin N → Bool}
-    (h : ∀ j : Fin N, j.val < k → ε j = ε' j) :
-    cuculescu x l k ε = cuculescu x l k ε' := by
-  cases k with
-  | zero => rfl
-  | succ k => exact cuculescu_succ_adapted k fun j hj => h j (Nat.lt_succ_of_lt hj)
-
-/-- The projections decrease: `q_{k+1} q_k = q_{k+1}`. -/
-theorem cuculescu_succ_mul (hx : ∀ ε, (x ε).PosSemidef) (k : ℕ) (ε : Fin N → Bool) :
-    cuculescu x l (k + 1) ε * cuculescu x l k ε = cuculescu x l (k + 1) ε := by
-  rw [cuc_succ k ε]
-  exact cuc_step_mul_q (cuculescu_isProj hx k ε).1 _
-
-theorem commute_cuculescu_succ (hx : ∀ ε, (x ε).PosSemidef) (k : ℕ) (ε : Fin N → Bool) :
-    Commute (cuculescu x l (k + 1) ε)
-      (cuculescu x l k ε * condAvg k x ε * cuculescu x l k ε) := by
-  rw [cuc_succ k ε]
-  exact cuc_step_commute (cuculescu_isProj hx k ε).1 (cuculescu_isProj hx k ε).2
-    (posSemidef_condAvg hx k ε) _
-
--- `hl` is not used: `(λ − t) 1_{[0, λ]} (t) ≥ 0` for every real `λ`.
-set_option linter.unusedVariables false in
-/-- `q_{k+1} x_k q_{k+1} ≤ λ q_{k+1}`. -/
-theorem cuculescu_mul_mul_le (hx : ∀ ε, (x ε).PosSemidef) (hl : 0 < l) (k : ℕ)
-    (ε : Fin N → Bool) :
-    (l • cuculescu x l (k + 1) ε -
-      cuculescu x l (k + 1) ε * condAvg k x ε * cuculescu x l (k + 1) ε).PosSemidef := by
-  rw [cuc_succ k ε]
-  exact cuc_step_le (cuculescu_isProj hx k ε).1 (cuculescu_isProj hx k ε).2
-    (posSemidef_condAvg hx k ε) l
-
--- `hl` is not used: the telescoping argument works for every real `λ`.
-set_option linter.unusedVariables false in
-/-- `λ τ (1 − q_{N+1}) ≤ τ (x)`. -/
-theorem cuculescu_trace_le (hx : ∀ ε, (x ε).PosSemidef) (hl : 0 < l) :
-    l * cubeTrace (fun ε => 1 - cuculescu x l (N + 1) ε) ≤ cubeTrace x := by
-  -- `1 − q_{N+1} = Σ_{k ≤ N} (q_k − q_{k+1})`
-  have hsum1 : cubeTrace (fun ε => 1 - cuculescu x l (N + 1) ε) =
-      ∑ k ∈ Finset.range (N + 1),
-        cubeTrace (fun ε => cuculescu x l k ε - cuculescu x l (k + 1) ε) := by
-    rw [← cuc_cubeTrace_sum]
-    congr 1
-    funext ε
-    exact (Finset.sum_range_sub' (fun k => cuculescu x l k ε) (N + 1)).symm
-  -- `τ (x) = τ (q_{N+1} x) + Σ_{k ≤ N} τ ((q_k − q_{k+1}) x)`
-  have hsum2 : ∑ k ∈ Finset.range (N + 1),
-      cubeTrace (fun ε => (cuculescu x l k ε - cuculescu x l (k + 1) ε) * x ε) =
-      cubeTrace x - cubeTrace (fun ε => cuculescu x l (N + 1) ε * x ε) := by
-    rw [← cuc_cubeTrace_sum, ← cuc_cubeTrace_sub]
-    congr 1
-    funext ε
-    rw [← Finset.sum_mul, Finset.sum_range_sub' (fun k => cuculescu x l k ε), sub_mul]
-    change 1 * x ε - _ = _
-    rw [one_mul]
-  -- `τ ((q_k − q_{k+1}) x) = τ ((q_k − q_{k+1}) x_k) ≥ λ τ (q_k − q_{k+1})`
-  have hstep : ∀ k, l * cubeTrace (fun ε => cuculescu x l k ε - cuculescu x l (k + 1) ε) ≤
-      cubeTrace (fun ε => (cuculescu x l k ε - cuculescu x l (k + 1) ε) * x ε) := by
-    intro k
-    have he : ∀ ε ε' : Fin N → Bool, (∀ j : Fin N, j.val < k → ε j = ε' j) →
-        cuculescu x l k ε - cuculescu x l (k + 1) ε =
-          cuculescu x l k ε' - cuculescu x l (k + 1) ε' :=
-      fun ε ε' h => by rw [cuc_adapted k h, cuculescu_succ_adapted k h]
-    rw [← cuc_cubeTrace_mul_condAvg (e := fun ε => cuculescu x l k ε - cuculescu x l (k + 1) ε)
-      he x]
-    simp only [cubeTrace]
-    rw [← avg_const_mul]
-    refine avg_mono fun ε => ?_
-    rw [cuc_succ k ε]
-    exact cuc_step_trace (cuculescu_isProj hx k ε).1 (cuculescu_isProj hx k ε).2
-      (posSemidef_condAvg hx k ε) l
-  -- `τ (q_{N+1} x) = τ (q_{N+1} x q_{N+1}) ≥ 0`
-  have hnonneg : 0 ≤ cubeTrace (fun ε => cuculescu x l (N + 1) ε * x ε) := by
-    refine avg_nonneg fun ε => ?_
-    rw [← cuc_trace_mul_eq (cuculescu_isProj hx (N + 1) ε).1]
-    exact (cuc_posSemidef_conj (cuculescu_isProj hx (N + 1) ε).2 (hx ε)).trace_nonneg
-  calc l * cubeTrace (fun ε => 1 - cuculescu x l (N + 1) ε)
-      = ∑ k ∈ Finset.range (N + 1),
-          l * cubeTrace (fun ε => cuculescu x l k ε - cuculescu x l (k + 1) ε) := by
-        rw [hsum1, Finset.mul_sum]
-    _ ≤ ∑ k ∈ Finset.range (N + 1),
-          cubeTrace (fun ε => (cuculescu x l k ε - cuculescu x l (k + 1) ε) * x ε) :=
-        Finset.sum_le_sum fun k _ => hstep k
-    _ = cubeTrace x - cubeTrace (fun ε => cuculescu x l (N + 1) ε * x ε) := hsum2
-    _ ≤ cubeTrace x := by linarith
-
-/-- The compressed process `q_{k+1} x_k q_{k+1}` is a supermartingale:
-`E_k (q_{k+2} x_{k+1} q_{k+2}) ≤ q_{k+1} x_k q_{k+1}`. -/
-theorem condAvg_cuculescu_le (hx : ∀ ε, (x ε).PosSemidef) (k : ℕ) (ε : Fin N → Bool) :
-    (cuculescu x l (k + 1) ε * condAvg k x ε * cuculescu x l (k + 1) ε -
-      condAvg k (fun ε => cuculescu x l (k + 2) ε * condAvg (k + 1) x ε *
-        cuculescu x l (k + 2) ε) ε).PosSemidef := by
-  -- `q_{k+2} x_{k+1} q_{k+2} ⪯ q_{k+1} x_{k+1} q_{k+1}` pointwise
-  have h1 : ∀ ε, (cuculescu x l (k + 1) ε * condAvg (k + 1) x ε * cuculescu x l (k + 1) ε -
-      cuculescu x l (k + 2) ε * condAvg (k + 1) x ε * cuculescu x l (k + 2) ε).PosSemidef := by
-    intro ε
-    rw [cuc_succ (k + 1) ε]
-    exact cuc_step_conj_le (cuculescu_isProj hx (k + 1) ε).1 (cuculescu_isProj hx (k + 1) ε).2
-      (posSemidef_condAvg hx (k + 1) ε) _
-  have h2 := posSemidef_condAvg_sub h1 k ε
-  -- `E_k (q_{k+1} x_{k+1} q_{k+1}) = q_{k+1} E_k (x_{k+1}) q_{k+1} = q_{k+1} x_k q_{k+1}`
-  have hq : ∀ ε ε' : Fin N → Bool, (∀ j : Fin N, j.val < k → ε j = ε' j) →
-      cuculescu x l (k + 1) ε = cuculescu x l (k + 1) ε' :=
-    fun ε ε' h => cuculescu_succ_adapted k h
-  rw [condAvg_mul_mul hq hq, condAvg_condAvg (Nat.le_succ k)] at h2
-  exact h2
-
-/-- The compressed process `z_k = q_{k+1} x_k q_{k+1}` (Randrianantoanina's `q_k x_k q_k`). -/
-noncomputable def compressed (x : (Fin N → Bool) → Matrix n n ℝ) (l : ℝ) (k : ℕ)
-    (ε : Fin N → Bool) : Matrix n n ℝ :=
-  cuculescu x l (k + 1) ε * condAvg k x ε * cuculescu x l (k + 1) ε
-
-/-- The martingale part of the Doob decomposition of the compressed process,
-`y_k = z_0 + Σ_{j<k} (z_{j+1} − E_j z_{j+1})`, equivalently
-`y_k = z_k + Σ_{j<k} (z_j − E_j z_{j+1})` (Randrianantoanina, (3.3)). -/
-noncomputable def compressedMart (x : (Fin N → Bool) → Matrix n n ℝ) (l : ℝ) (k : ℕ)
-    (ε : Fin N → Bool) : Matrix n n ℝ :=
-  compressed x l 0 ε +
-    ∑ j ∈ Finset.range k, (compressed x l (j + 1) ε - condAvg j (compressed x l (j + 1)) ε)
-
-/-! ### The Doob decomposition of the compressed process -/
-
-private theorem cuc_compressedMart_succ (k : ℕ) (ε : Fin N → Bool) :
-    compressedMart x l (k + 1) ε = compressedMart x l k ε +
-      (compressed x l (k + 1) ε - condAvg k (compressed x l (k + 1)) ε) := by
-  simp only [compressedMart, Finset.sum_range_succ, add_assoc]
-
-/-- `z_k ⪰ 0`. -/
-private theorem cuc_compressed_psd (hx : ∀ ε, (x ε).PosSemidef) (k : ℕ) (ε : Fin N → Bool) :
-    (compressed x l k ε).PosSemidef :=
-  cuc_posSemidef_conj (cuculescu_isProj hx (k + 1) ε).2 (posSemidef_condAvg hx k ε)
-
-/-- `z_k ⪯ λ`: `z_k ⪯ λ q_{k+1} ⪯ λ`. -/
-private theorem cuc_compressed_le (hx : ∀ ε, (x ε).PosSemidef) (hl : 0 < l) (k : ℕ)
-    (ε : Fin N → Bool) : (l • (1 : Matrix n n ℝ) - compressed x l k ε).PosSemidef := by
-  have h1 := cuculescu_mul_mul_le hx hl k ε
-  have h2 := (cuc_posSemidef_one_sub (cuculescu_isProj hx (l := l) (k + 1) ε).1
-    (cuculescu_isProj hx (l := l) (k + 1) ε).2).smul hl.le
-  have e : l • (1 : Matrix n n ℝ) - compressed x l k ε =
-      (l • cuculescu x l (k + 1) ε -
-        cuculescu x l (k + 1) ε * condAvg k x ε * cuculescu x l (k + 1) ε) +
-      l • (1 - cuculescu x l (k + 1) ε) := by
-    rw [smul_sub]
-    unfold compressed
-    abel
-  rw [e]
-  exact h1.add h2
-
-/-- `z_k` is a function of the first `k` signs. -/
-private theorem cuc_compressed_adapted (k : ℕ) {ε ε' : Fin N → Bool}
-    (h : ∀ j : Fin N, j.val < k → ε j = ε' j) : compressed x l k ε = compressed x l k ε' := by
-  simp only [compressed]
-  rw [cuculescu_succ_adapted k h, cuc_condAvg_agree x h]
-
-private theorem cuc_compressedMart_adapted : IsAdapted (compressedMart x l) := by
-  intro m ε ε' h
-  simp only [compressedMart]
-  rw [cuc_compressed_adapted (ε := ε) (ε' := ε') 0 fun j hj => absurd hj (Nat.not_lt_zero _)]
-  congr 1
-  refine Finset.sum_congr rfl fun j hj => ?_
-  have hj' := Finset.mem_range.mp hj
-  rw [cuc_compressed_adapted (j + 1) fun i hi => h i (by omega),
-    cuc_condAvg_agree _ fun i hi => h i (by omega)]
-
--- `hx` is not used: the martingale property is a formal consequence of the definition.
-set_option linter.unusedVariables false in
-theorem isCubeMartingale_compressedMart (hx : ∀ ε, (x ε).PosSemidef) :
-    IsCubeMartingale (compressedMart x l) := by
-  refine ⟨cuc_compressedMart_adapted, fun m => ?_⟩
-  have h1 : compressedMart x l (m + 1) = fun ε => compressedMart x l m ε +
-      (compressed x l (m + 1) ε - condAvg m (compressed x l (m + 1)) ε) :=
-    funext (cuc_compressedMart_succ m)
-  rw [h1, cuc_condAvg_add, cuc_condAvg_sub, condAvg_condAvg le_rfl,
-    condAvg_of_isAdapted fun ε ε' h => cuc_compressedMart_adapted m ε ε' h]
-  funext ε
-  simp
-
-/-- `y_k − z_k = Σ_{j<k} (z_j − E_j z_{j+1}) ⪰ 0` (Randrianantoanina, (3.5), (3.6)). -/
-theorem posSemidef_compressedMart_sub (hx : ∀ ε, (x ε).PosSemidef) (k : ℕ) (ε : Fin N → Bool) :
-    (compressedMart x l k ε - compressed x l k ε).PosSemidef := by
-  induction k with
-  | zero =>
-    rw [show compressedMart x l 0 ε - compressed x l 0 ε = 0 by simp [compressedMart]]
-    exact Matrix.PosSemidef.zero
-  | succ k ih =>
-    have e : compressedMart x l (k + 1) ε - compressed x l (k + 1) ε =
-        (compressedMart x l k ε - compressed x l k ε) +
-          (compressed x l k ε - condAvg k (compressed x l (k + 1)) ε) := by
-      rw [cuc_compressedMart_succ]
-      abel
-    rw [e]
-    exact ih.add (condAvg_cuculescu_le hx k ε)
-
-/-! ### Lemma 3.4 -/
-
-/-- Orthogonality of the martingale differences:
-`τ (y_{k+1}²) = τ (y_k²) + τ ((z_{k+1} − E_k z_{k+1})²)`. -/
-private theorem cuc_cubeTrace_mart_sq_succ (k : ℕ) :
-    cubeTrace (fun ε => compressedMart x l (k + 1) ε * compressedMart x l (k + 1) ε) =
-      cubeTrace (fun ε => compressedMart x l k ε * compressedMart x l k ε) +
-      cubeTrace (fun ε => (compressed x l (k + 1) ε - condAvg k (compressed x l (k + 1)) ε) *
-        (compressed x l (k + 1) ε - condAvg k (compressed x l (k + 1)) ε)) := by
-  have hd : condAvg k (fun ε => compressed x l (k + 1) ε - condAvg k (compressed x l (k + 1)) ε) =
-      fun _ => 0 := by
-    rw [cuc_condAvg_sub, condAvg_condAvg le_rfl]
-    funext ε
-    exact sub_self _
-  have h0 : cubeTrace (fun ε => compressedMart x l k ε *
-      (compressed x l (k + 1) ε - condAvg k (compressed x l (k + 1)) ε)) = 0 := by
-    rw [← cuc_cubeTrace_mul_condAvg (fun ε ε' h => cuc_compressedMart_adapted k ε ε' h), hd]
-    simp [cubeTrace]
-  have e : ∀ ε, (compressedMart x l (k + 1) ε * compressedMart x l (k + 1) ε).trace =
-      (compressedMart x l k ε * compressedMart x l k ε).trace +
-      2 * (compressedMart x l k ε *
-        (compressed x l (k + 1) ε - condAvg k (compressed x l (k + 1)) ε)).trace +
-      ((compressed x l (k + 1) ε - condAvg k (compressed x l (k + 1)) ε) *
-        (compressed x l (k + 1) ε - condAvg k (compressed x l (k + 1)) ε)).trace := by
-    intro ε
-    rw [cuc_compressedMart_succ k ε]
-    exact cuc_trace_add_mul_self _ _
-  simp only [cubeTrace] at h0 ⊢
-  simp only [e, avg_add, avg_const_mul, h0, mul_zero, add_zero]
-
-/-- One step of Lemma 3.4:
-`‖y_{k+1} − y_k‖₂² ≤ 2 (‖z_{k+1}‖₂² − ‖z_k‖₂²) + 6 λ τ (z_k − z_{k+1})`. -/
-private theorem cuc_cubeTrace_diff_sq_le (hx : ∀ ε, (x ε).PosSemidef) (hl : 0 < l) (k : ℕ) :
-    cubeTrace (fun ε => (compressed x l (k + 1) ε - condAvg k (compressed x l (k + 1)) ε) *
-        (compressed x l (k + 1) ε - condAvg k (compressed x l (k + 1)) ε)) ≤
-      2 * cubeTrace (fun ε => compressed x l (k + 1) ε * compressed x l (k + 1) ε) -
-        2 * cubeTrace (fun ε => compressed x l k ε * compressed x l k ε) +
-        6 * l * (cubeTrace (compressed x l k) - cubeTrace (compressed x l (k + 1))) := by
-  have ha := cuc_compressed_psd hx (l := l) (k + 1)
-  have hb := cuc_compressed_psd hx (l := l) k
-  have hEa : ∀ ε, (condAvg k (compressed x l (k + 1)) ε).PosSemidef := posSemidef_condAvg ha k
-  have hc : ∀ ε, (compressed x l k ε - condAvg k (compressed x l (k + 1)) ε).PosSemidef :=
-    fun ε => condAvg_cuculescu_le hx k ε
-  have hbl := cuc_compressed_le hx hl k
-  -- `‖a − E a‖₂² ≤ 2 ‖a − b‖₂² + 2 ‖b − E a‖₂²`, `a = z_{k+1}`, `b = z_k`
-  have P1 : ∀ ε, ((compressed x l (k + 1) ε - condAvg k (compressed x l (k + 1)) ε) *
-        (compressed x l (k + 1) ε - condAvg k (compressed x l (k + 1)) ε)).trace ≤
-      2 * (compressed x l (k + 1) ε * compressed x l (k + 1) ε).trace +
-      2 * (compressed x l k ε * compressed x l k ε).trace -
-      4 * (compressed x l k ε * compressed x l (k + 1) ε).trace +
-      2 * ((compressed x l k ε - condAvg k (compressed x l (k + 1)) ε) *
-        (compressed x l k ε - condAvg k (compressed x l (k + 1)) ε)).trace := fun ε =>
-    cuc_trace_split_le (ha ε).isHermitian (hb ε).isHermitian (hEa ε).isHermitian
-  -- `τ (b (b − E a)) ≤ λ τ (b − E a)`, as `0 ⪯ b ⪯ λ` and `b − E a ⪰ 0`
-  have P2 : ∀ ε, (compressed x l k ε * compressed x l k ε).trace -
-      (compressed x l k ε * condAvg k (compressed x l (k + 1)) ε).trace ≤
-      l * ((compressed x l k ε).trace - (condAvg k (compressed x l (k + 1)) ε).trace) := by
-    intro ε
-    have h := trace_mul_le_of_le_smul_one (hb ε) (hbl ε) (hc ε)
-    rwa [mul_sub, Matrix.trace_sub, Matrix.trace_sub] at h
-  -- `‖b − E a‖₂² ≤ λ τ (b − E a)`, as `0 ⪯ b − E a ⪯ b ⪯ λ`
-  have P3 : ∀ ε, ((compressed x l k ε - condAvg k (compressed x l (k + 1)) ε) *
-        (compressed x l k ε - condAvg k (compressed x l (k + 1)) ε)).trace ≤
-      l * ((compressed x l k ε).trace - (condAvg k (compressed x l (k + 1)) ε).trace) := by
-    intro ε
-    have hcl : (l • (1 : Matrix n n ℝ) -
-        (compressed x l k ε - condAvg k (compressed x l (k + 1)) ε)).PosSemidef := by
-      have h := (hbl ε).add (hEa ε)
-      rwa [show l • (1 : Matrix n n ℝ) - compressed x l k ε +
-          condAvg k (compressed x l (k + 1)) ε =
-          l • 1 - (compressed x l k ε - condAvg k (compressed x l (k + 1)) ε) by abel] at h
-    have h := trace_mul_le_of_le_smul_one (hc ε) hcl (hc ε)
-    rwa [Matrix.trace_sub] at h
-  -- `τ (b a) = τ (b E a)` and `τ (E a) = τ (a)`
-  have A1 := cuc_cubeTrace_mul_condAvg (k := k) (e := compressed x l k)
-    (fun ε ε' h => cuc_compressed_adapted k h) (compressed x l (k + 1))
-  have A2 := cubeTrace_condAvg k (compressed x l (k + 1))
-  have S1 := avg_mono P1
-  have S2 := avg_mono P2
-  have S3 := avg_mono P3
-  simp only [avg_add, avg_sub, avg_const_mul] at S1 S2 S3
-  simp only [cubeTrace] at A1 A2 ⊢
-  rw [A2] at S2 S3
-  linarith
-
-/-- The telescoped form of Lemma 3.4:
-`‖y_m‖₂² ≤ 2 ‖z_m‖₂² − ‖z_0‖₂² + 6 λ τ (z_0 − z_m)`. -/
-private theorem cuc_cubeTrace_mart_sq_le (hx : ∀ ε, (x ε).PosSemidef) (hl : 0 < l) (m : ℕ) :
-    cubeTrace (fun ε => compressedMart x l m ε * compressedMart x l m ε) ≤
-      2 * cubeTrace (fun ε => compressed x l m ε * compressed x l m ε) -
-        cubeTrace (fun ε => compressed x l 0 ε * compressed x l 0 ε) +
-        6 * l * (cubeTrace (compressed x l 0) - cubeTrace (compressed x l m)) := by
-  induction m with
-  | zero =>
-    have h0 : compressedMart x l 0 = compressed x l 0 := funext fun ε => by simp [compressedMart]
-    rw [h0]
-    linarith
-  | succ m ih =>
-    rw [cuc_cubeTrace_mart_sq_succ m]
-    linarith [cuc_cubeTrace_diff_sq_le hx hl m]
-
-/-- **Randrianantoanina, Lemma 3.4**: `‖y_N‖_{L² (τ)}² ≤ 6 λ τ (x)`. -/
-theorem cubeTrace_compressedMart_sq_le (hx : ∀ ε, (x ε).PosSemidef) (hl : 0 < l) :
-    cubeTrace (fun ε => compressedMart x l N ε * compressedMart x l N ε) ≤ 6 * l * cubeTrace x := by
-  have h := cuc_cubeTrace_mart_sq_le hx hl N
-  -- `‖z_N‖₂² ≤ λ τ (z_N)`
-  have h1 : cubeTrace (fun ε => compressed x l N ε * compressed x l N ε) ≤
-      l * cubeTrace (compressed x l N) := by
-    simp only [cubeTrace]
-    rw [← avg_const_mul]
-    exact avg_mono fun ε => trace_mul_le_of_le_smul_one (cuc_compressed_psd hx N ε)
-      (cuc_compressed_le hx hl N ε) (cuc_compressed_psd hx N ε)
-  have h2 : 0 ≤ cubeTrace (fun ε => compressed x l 0 ε * compressed x l 0 ε) :=
-    avg_nonneg fun ε => trace_mul_nonneg_of_posSemidef (cuc_compressed_psd hx 0 ε)
-      (cuc_compressed_psd hx 0 ε)
-  have h3 : 0 ≤ cubeTrace (compressed x l N) :=
-    avg_nonneg fun ε => (cuc_compressed_psd hx N ε).trace_nonneg
-  -- `τ (z_0) = τ (q_1 x_0) ≤ τ (x_0) = τ (x)`
-  have h4 : cubeTrace (compressed x l 0) ≤ cubeTrace x := by
-    rw [← cubeTrace_condAvg 0 x]
-    refine avg_mono fun ε => ?_
-    have hq := cuculescu_isProj hx (l := l) 1 ε
-    have h := trace_mul_le_of_le_smul_one (cuc_posSemidef_proj hq.1 hq.2)
-      (by rw [one_smul]; exact cuc_posSemidef_one_sub hq.1 hq.2) (posSemidef_condAvg hx 0 ε)
-    rw [one_mul, ← cuc_trace_mul_eq hq.1] at h
-    exact h
-  have h5 := mul_le_mul_of_nonneg_left h4 hl.le
-  have h6 := mul_nonneg hl.le h3
-  linarith
 
 end BanachProbability

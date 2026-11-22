@@ -1,19 +1,20 @@
 module
 
-public import BanachProbability.Noncommutative.MatrixCube
+public import BanachProbability.Noncommutative.CondExp
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 
 /-!
-# Distribution functions on the matrix cube
+# Distribution functions of matrix-valued functions
 
-For a matrix-valued function `x` on the sign cube, the distribution function
-`λ_s (x) = τ (1_{(s, ∞)} (|x|)) = E #{i : s_i (x (ε)) > s}` (`distribution`). It is subadditive,
-`λ_{s+t} (x + y) ≤ λ_s (x) + λ_t (y)` (from `countAbove_add_add_le`), satisfies Chebyshev's
-inequality `s^r λ_s (x) ≤ ‖x‖_{L^r}^r`, and gives the layer-cake formula
+For a matrix-valued function `x` on a probability space, the distribution function
+`λ_s (x) = τ (1_{(s, ∞)} (|x|)) = ∫ #{i : s_i (x ω) > s} dμ (ω)` (`ncDistribution`; the
+noncommutative weak `L¹` quasi-norm is `sup_s s λ_s (x)`). It is subadditive,
+`λ_{s+t} (x + y) ≤ λ_s (x) + λ_t (y)` (from Weyl's inequality `countAbove_add_add_le`), satisfies
+Chebyshev's inequality `s^r λ_s (x) ≤ ‖x‖_{L^r}^r`, and gives the layer-cake formula
 `‖x‖_{L^r}^r = ∫₀^∞ r s^{r−1} λ_s (x) ds`. The spectral truncations of a symmetric matrix at level
 `s`, `A 1_{(s, ∞)} (|A|)` and `A 1_{[0, s]} (|A|)` (`truncAbove`, `truncBelow`), split it into its
-large and small eigenvalues.
+large and small eigenvalues; both are measurable functions of the matrix.
 -/
 
 @[expose] public section
@@ -23,13 +24,12 @@ open scoped ENNReal Matrix
 
 namespace BanachProbability
 
-open SignCube
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} {n : Type*} [Fintype n]
+  [DecidableEq n]
 
-variable {N : ℕ} {n : Type*} [Fintype n] [DecidableEq n]
-
-/-- The distribution function `λ_s (x) = E #{i : s_i (x (ε)) > s}`. -/
-noncomputable def distribution (s : ℝ) (x : (Fin N → Bool) → Matrix n n ℝ) : ℝ :=
-  avg fun ε => (countAbove s (x ε) : ℝ)
+/-- The distribution function `λ_s (x) = ∫ #{i : s_i (x ω) > s} dμ (ω)`. -/
+noncomputable def ncDistribution (μ : Measure Ω) (s : ℝ) (x : Ω → Matrix n n ℝ) : ℝ :=
+  ∫ ω, (countAbove s (x ω) : ℝ) ∂μ
 
 private theorem mcd_rpow_ite_eq_indicator (r a : ℝ) :
     (fun s : ℝ => r * s ^ (r - 1) * (if s < a then 1 else 0)) =
@@ -84,32 +84,44 @@ theorem mcd_integral_countAbove {r : ℝ} (hr : 0 < r) (A : Matrix m n ℝ) :
   rw [h, mcd_mul_countAbove_eq_sum, integral_finsetSum _ fun i _ => mcd_integrableOn_rpow_ite hr _]
   exact Finset.sum_congr rfl fun i _ => mcd_integral_rpow_ite hr (singularValue_nonneg A i)
 
-theorem distribution_add_add_le (s t : ℝ) (x y : (Fin N → Bool) → Matrix n n ℝ) :
-    distribution (s + t) (x + y) ≤ distribution s x + distribution t y := by
-  unfold distribution
-  rw [← avg_add]
-  refine avg_mono fun ε => ?_
-  exact_mod_cast countAbove_add_add_le s t (x ε) (y ε)
+theorem integrable_countAbove [IsFiniteMeasure μ] {x : Ω → Matrix n n ℝ} (hx : AEMeasurable x μ)
+    (s : ℝ) : Integrable (fun ω => (countAbove s (x ω) : ℝ)) μ := by
+  sorry
 
-theorem distribution_mul_rpow_le {s r : ℝ} (hs : 0 < s) (hr : 0 < r)
-    (x : (Fin N → Bool) → Matrix n n ℝ) :
-    distribution s x * s ^ r ≤ avg fun ε => schattenNorm (ENNReal.ofReal r) (x ε) ^ r := by
-  unfold distribution
-  rw [mul_comm, ← avg_const_mul]
-  refine avg_mono fun ε => ?_
-  rw [mul_comm]
-  exact countAbove_mul_rpow_le hs hr (x ε)
+theorem ncDistribution_nonneg (s : ℝ) (x : Ω → Matrix n n ℝ) : 0 ≤ ncDistribution μ s x := by
+  sorry
 
-/-- The layer-cake formula `‖x‖_{L^r}^r = ∫₀^∞ r s^{r−1} λ_s (x) ds`. -/
-theorem avg_schattenNorm_rpow_eq_integral {r : ℝ} (hr : 0 < r)
-    (x : (Fin N → Bool) → Matrix n n ℝ) :
-    (avg fun ε => schattenNorm (ENNReal.ofReal r) (x ε) ^ r) =
-      ∫ s in Set.Ioi (0 : ℝ), r * s ^ (r - 1) * distribution s x := by
-  have hI : ∀ ε, IntegrableOn (fun s => r * s ^ (r - 1) * (countAbove s (x ε) : ℝ))
-      (Set.Ioi 0) := fun ε => mcd_integrableOn_countAbove hr (x ε)
-  simp only [distribution, avg, mul_div_assoc', Finset.mul_sum]
-  rw [integral_div, integral_finsetSum _ fun ε _ => hI ε]
-  simp only [mcd_integral_countAbove hr]
+theorem ncDistribution_congr_ae {x y : Ω → Matrix n n ℝ} (h : x =ᵐ[μ] y) (s : ℝ) :
+    ncDistribution μ s x = ncDistribution μ s y := by
+  sorry
+
+theorem ncDistribution_neg (s : ℝ) (x : Ω → Matrix n n ℝ) :
+    ncDistribution μ s (fun ω => -x ω) = ncDistribution μ s x := by
+  sorry
+
+theorem ncDistribution_anti [IsFiniteMeasure μ] {x : Ω → Matrix n n ℝ} (hx : AEMeasurable x μ)
+    {s t : ℝ} (hst : s ≤ t) : ncDistribution μ t x ≤ ncDistribution μ s x := by
+  sorry
+
+/-- Subadditivity: `λ_{s+t} (x + y) ≤ λ_s (x) + λ_t (y)`. -/
+theorem ncDistribution_add_add_le [IsFiniteMeasure μ] {x y : Ω → Matrix n n ℝ}
+    (hx : AEMeasurable x μ) (hy : AEMeasurable y μ) (s t : ℝ) :
+    ncDistribution μ (s + t) (x + y) ≤ ncDistribution μ s x + ncDistribution μ t y := by
+  sorry
+
+/-- Chebyshev's inequality `λ_s (x) s^r ≤ ‖x‖_{L^r}^r`. -/
+theorem ncDistribution_mul_rpow_le [IsFiniteMeasure μ] {x : Ω → Matrix n n ℝ}
+    (hx : AEMeasurable x μ) {s r : ℝ} (hs : 0 < s) (hr : 0 < r)
+    (hint : Integrable (fun ω => schattenNorm (ENNReal.ofReal r) (x ω) ^ r) μ) :
+    ncDistribution μ s x * s ^ r ≤ ∫ ω, schattenNorm (ENNReal.ofReal r) (x ω) ^ r ∂μ := by
+  sorry
+
+/-- The layer-cake formula `‖x‖_{L^r}^r = ∫₀^∞ r s^{r−1} λ_s (x) ds`, in `ℝ≥0∞`. -/
+theorem lintegral_schattenNorm_rpow_eq [IsFiniteMeasure μ] {x : Ω → Matrix n n ℝ}
+    (hx : AEMeasurable x μ) {r : ℝ} (hr : 0 < r) :
+    ∫⁻ ω, ENNReal.ofReal (schattenNorm (ENNReal.ofReal r) (x ω) ^ r) ∂μ =
+      ∫⁻ s in Set.Ioi (0 : ℝ), ENNReal.ofReal (r * s ^ (r - 1) * ncDistribution μ s x) := by
+  sorry
 
 /-- The part `A 1_{(s, ∞)} (|A|)` of a symmetric matrix with the eigenvalues of absolute value
 larger than `s`. -/
@@ -135,6 +147,12 @@ theorem isHermitian_truncAbove (s : ℝ) (A : Matrix n n ℝ) : (truncAbove s A)
 
 theorem isHermitian_truncBelow (s : ℝ) (A : Matrix n n ℝ) : (truncBelow s A).IsHermitian := by
   exact cfc_predicate _ A
+
+theorem measurable_truncAbove (s : ℝ) : Measurable fun A : Matrix n n ℝ => truncAbove s A := by
+  sorry
+
+theorem measurable_truncBelow (s : ℝ) : Measurable fun A : Matrix n n ℝ => truncBelow s A := by
+  sorry
 
 /-- Two finite families with the same multiset of values differ by a bijection of the index
 types. -/
