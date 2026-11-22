@@ -1,6 +1,7 @@
 module
 
 public import BanachProbability.Hypercontractivity.Binomial
+public import BanachProbability.Hypercontractivity.HeatSemigroup
 public import BanachProbability.Hypercontractivity.TwoPoint
 public import BanachProbability.Hypercontractivity.Vector
 public import BanachProbability.KahaneKhintchine.Basic
@@ -32,14 +33,21 @@ public import BanachProbability.SignCube.Bridge
 public import BanachProbability.SignCube.LpSeminorm
 public import BanachProbability.SignCube.PaleyWalsh
 public import BanachProbability.UMD.Complex
+public import BanachProbability.UMD.ConvexHull
+public import BanachProbability.UMD.CubeTransform
 public import BanachProbability.UMD.Decoupling
 public import BanachProbability.UMD.Defs
 public import BanachProbability.UMD.Extrapolation
+public import BanachProbability.UMD.GoodLambda
 public import BanachProbability.UMD.Hilbert
+public import BanachProbability.UMD.Incremental
 public import BanachProbability.UMD.Lp
 public import BanachProbability.UMD.Maurey.Basic
+public import BanachProbability.UMD.Maurey.FiniteModel
 public import BanachProbability.UMD.Maurey.StepApprox
 public import BanachProbability.ZigZag.Basic
+public import BanachProbability.ZigZag.Bellman
+public import BanachProbability.ZigZag.Concave
 
 /-!
 # Probability in Banach spaces
