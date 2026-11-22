@@ -142,7 +142,7 @@ says otherwise.
 | O'Donnell (2014) | the book | two-point inequality and tensorisation (§10.1, Exercises 9.7, 10.1, 10.3) | none |
 | Randrianantoanina (2002) | arXiv:math/0111264 | Thms 3.1, 4.3, Cor 4.5, Rem 4.6 (1) | a rank count for Lemma 3.2; the interpolation is written out |
 | Mackey et al. (2014) | arXiv:1201.6002 | noncommutative Khintchine, trace Hölder | the variant of Lemma 3.4 for `2 < q < 3` is proved |
-| Bourin–Zhang (2026) | arXiv:2610.30538 | the triangle inequality | real `m × n` matrices; von Neumann's inequality, quoted there, is proved by Peierls's argument as in Fehr (2021), Thm 7.1 |
+| Bourin–Zhang (2026) | arXiv:2610.30538 | the triangle inequality | real `m × n` matrices; von Neumann's inequality, quoted there, is proved by Peierls's argument (its Jensen step is in the proof of Fehr (2021), Thm 7.1) |
 | Burkholder (1973, 1981) | Ann. Probab. | origin of the good-λ method and of the characterization of UMD | not followed: the proofs are HNVW's |
 
 Cited for a statement or its origin, with another argument here: Maurey (1974–75); Burkholder
@@ -159,7 +159,7 @@ their authors.
 
 | Result | Origin | State of the question |
 | --- | --- | --- |
-| Burkholder's inequality | Burkholder 1966 (martingale transforms), 1984 (sharp constant, real martingales), 1988 (Hilbert-valued, differential subordination); Osękowski 2012 (monograph) | `p* − 1` is best possible; in the square function inequality it is best possible in two of the four cases, and in the other two the best constants were unknown in 1988 (current status not checked) |
+| Burkholder's inequality | Burkholder 1966 (martingale transforms), 1984 (sharp constant, real martingales), 1988 (Hilbert-valued, differential subordination); Osękowski 2012 (monograph) | `p* − 1` is best possible; in the square function inequality it is best possible in two of the four cases, and in the other two the best constants were unknown in 1988 (Burkholder, Rem. 3.1) and in 2012 (Osękowski, Thm 8.6) |
 | UMD constants | Maurey 1974–75 (Paley–Walsh martingales), Burkholder 1981 (geometric characterization), Bourgain 1983 (Hilbert transform); monographs: HNVW 2016, 2017, 2023, Pisier 2016 | whether `UMD_p = UMD_{ℂ,p}` was an open question in 2018 (Yaroslavtsev); linear bounds between the UMD constant and the norm of the Hilbert transform fail in both directions, according to a 2026 preprint of Lorist and van Neerven |
 | Kahane–Khintchine, hypercontractivity | Kahane 1964; Bonami 1970, Beckner 1975; Borell 1979 | scalar best constants: Haagerup 1981; the best `L²`–`L¹` constant in normed spaces is `√2` (Latała–Oleszkiewicz 1994); the constants here are not claimed to be sharp |
 | UMD of Schatten classes | Pisier–Xu 1997 (noncommutative martingale inequalities); Randrianantoanina 2002 (weak type `(1, 1)`, optimal order in `p`) | no exact value of `UMD_p (S_p)` was found |
@@ -167,7 +167,7 @@ their authors.
 
 ### Related formalizations
 
-Searched on 2026-11-22: GitHub repository search (not code search), the Mathlib source, Loogle, the
+Searched on 2026-11-22: GitHub repository and code search, the Mathlib source, Loogle, the
 Palomar registry, the Archive of Formal Proofs, Rocq and HOL4 libraries, Lean Zulip topic titles, and
 arXiv. Third-party code was read as text; none of it was built or audited. The projects are in Lean
 unless said otherwise.
@@ -175,14 +175,16 @@ unless said otherwise.
 | Project | Overlap | Not seen there |
 | --- | --- | --- |
 | [SmaniaD/Burkholder](https://github.com/SmaniaD/Burkholder) | `‖w ⋆ f‖_p ≤ (p* − 1) ‖f‖_p` for real martingales on finite measure spaces and predictable `\|w\| ≤ 1` | Hilbert-valued martingales, differential subordination, square function, sharpness |
-| [elorist/UMD_Hilberttransform](https://github.com/elorist/UMD_Hilberttransform) | a UMD constant (σ-finite filtrations), the dyadic reduction at `p = 2`, Burkholder's inequality at `p = 3` for dyadic Hilbert-valued martingales | other `p`, extrapolation, decoupling, real against complex constants, zig-zag functions, `L^p (B)` |
-| [Polarnova/FABL](https://github.com/Polarnova/FABL) | Kahane–Khintchine `L²`–`L¹` in real normed spaces with the sharp `√2`, which this package does not have; scalar Khintchine; scalar hypercontractivity, `(p, 2)` and `(2, q)` | vector-valued sums for other exponents |
+| [elorist/UMD_Hilberttransform](https://github.com/elorist/UMD_Hilberttransform) | a UMD constant (σ-finite filtrations), the dyadic reduction at `p = 2`, Burkholder's inequality at `p = 3` for dyadic Hilbert-valued martingales | other `p`, extrapolation, decoupling, `UMD_ℂ ≤ (π/2) UMD`, zig-zag functions, `L^p (B)` |
+| [TauCetiProject/TauCeti](https://github.com/TauCetiProject/TauCeti) | Kahane–Khintchine for all exponents `p, q > 0` in real normed spaces; `p* − 1` for real signed Haar sums; the Schatten triangle inequality; Doob's `L^p` inequality for Banach-valued martingales with `p/(p − 1)` | UMD constants, differential subordination, noncommutative Khintchine, vector-valued hypercontractivity |
+| [openai/math](https://github.com/openai/math), [AxiomMath/BandMatrixQUE](https://github.com/AxiomMath/BandMatrixQUE), [formal-applied-math/formal-mathfin](https://github.com/formal-applied-math/formal-mathfin), [facebookresearch/atlas-lean](https://github.com/facebookresearch/atlas-lean) | Banach-valued Khintchine `L²`–`L¹` with constant `4`, Schatten triangle and Hölder at even exponents; Doob's `L^p` inequality; Doob's `L²` inequality, type and cotype 2 of Hilbert spaces | the other exponents and the UMD theory |
+| [Polarnova/FABL](https://github.com/Polarnova/FABL) | Kahane–Khintchine `L²`–`L¹` in real normed spaces with the sharp `√2`, which this package does not have; scalar Khintchine; scalar hypercontractivity for `1 ≤ p ≤ 2 ≤ q`, and two-function forms on product spaces | vector-valued sums for other exponents |
 | [Shilun-Allan-Li/tcslib](https://github.com/Shilun-Allan-Li/tcslib) | scalar hypercontractivity on the cube for `1 ≤ p ≤ q`, and two-function, reverse, Gaussian and product-space forms | vector-valued statements |
 | [roos-j/lean-trilinearht](https://github.com/roos-j/lean-trilinearht), [ZephyrZhng/khintchine-lean](https://github.com/ZephyrZhng/khintchine-lean), [leanprover-community/add-combi](https://github.com/leanprover-community/add-combi) | Khintchine's upper bound in Hilbert spaces; sharp scalar `L^p`–`L¹` constants; Marcinkiewicz–Zygmund for independent variables in inner product spaces | general normed spaces |
 | [BuxinSu/LearningTheoryFormalizations](https://github.com/BuxinSu/LearningTheoryFormalizations), [xf-shi/Tensor_Norm](https://github.com/xf-shi/Tensor_Norm) | matrix Khintchine in operator norm with a factor `√log` of the dimension; an `L¹` noncommutative Khintchine inequality with Haar unitary coefficients | the dimension-free Rademacher inequality in `S_q` |
 | [Timeroot/Lean-QuantumInfo](https://github.com/Timeroot/Lean-QuantumInfo), [savarin/hlawka-schatten](https://github.com/savarin/hlawka-schatten) | Schatten norms of complex square matrices with Hölder, and the trace norm; Schatten norms of linear maps and the Hermitian dilation | in the first, the triangle inequality of `S_q` for all `q` |
 | [fpvandoorn/carleson](https://github.com/fpvandoorn/carleson), [RemyDegenne/brownian-motion](https://github.com/RemyDegenne/brownian-motion) | real (Marcinkiewicz) interpolation; continuous-time martingales, with the `L^p` maximal inequality stated with `sorry` | interpolation on matrices; a proof of Doob's `L^p` inequality |
-| Mathlib | martingales, Doob's weak maximal inequality, Hoeffding, Azuma | no text match for Khintchine, UMD, Burkholder, hypercontractivity, Schatten norms or Doob's `L^p` inequality |
+| Mathlib | martingales, Doob's weak maximal inequality, Hoeffding, Azuma | no declaration for Khintchine, UMD, Burkholder, hypercontractivity, Schatten norms or Doob's `L^p` inequality |
 | Archive of Formal Proofs (Isabelle); FormalML, MathComp-Analysis (Rocq); HOL4 | martingales and their convergence, optional stopping, concentration inequalities | none of the results above was found |
 
 ## Shorter proofs

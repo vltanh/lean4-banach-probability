@@ -65,7 +65,7 @@ Works cited in the README, in [SHORTER_PROOFS.md](SHORTER_PROOFS.md) and in the 
   the method of exchangeable pairs*, Ann. Probab. 42 (2014) 906–945.
   https://doi.org/10.1214/13-AOP892, arXiv:1201.6002
 - J. Marcinkiewicz, *Sur l'interpolation d'opérations*, C. R. Acad. Sci. Paris 208 (1939) 1272–1273.
-  https://zbmath.org/3033497
+  Zbl 0021.01601
 - B. Maurey, *Système de Haar*, Séminaire Maurey–Schwartz 1974–1975, exposés 1 and 2.
   http://www.numdam.org/item?id=SAF_1974-1975____A1_0
 - T. R. McConnell, *Decoupling and stochastic integration in UMD Banach spaces*, Probab. Math. Statist.
