@@ -6,9 +6,9 @@ public import BanachProbability.Schatten.Trace
 /-!
 # The triangle inequality for Schatten norms
 
-For `q ∈ [1, ∞]`, `‖A + B‖_{S_q} ≤ ‖A‖_{S_q} + ‖B‖_{S_q}` (`schattenNorm_add_le`). The usual
-reference, R. Bhatia, *Matrix Analysis* (1997), Chapter IV, was not accessible. The proof follows
-J.-C. Bourin and T. Zhang, *Matrix triangle inequalities: past, present, and future*,
+For `q ∈ [1, ∞]`, `‖A + B‖_{S_q} ≤ ‖A‖_{S_q} + ‖B‖_{S_q}` (`schattenNorm_add_le`). A usual
+reference is R. Bhatia, *Matrix Analysis* (1997), Theorem IV.2.1, whose argument is another. The
+proof follows J.-C. Bourin and T. Zhang, *Matrix triangle inequalities: past, present, and future*,
 arXiv:2610.30538 (2026), Proposition 3.13, by the third proof of their Remark 3.14: the second
 part of the proof of Proposition 3.13, rerun on the Hermitian dilations `A₀ = [[0, A], [Aᵀ, 0]]`,
 `B₀ = [[0, B], [Bᵀ, 0]]` with the convex function `t ↦ |t|^p`, `p = q < ∞`.

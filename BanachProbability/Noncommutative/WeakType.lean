@@ -6,9 +6,8 @@ public import BanachProbability.Noncommutative.Cuculescu
 # Weak type `(1, 1)` of noncommutative martingale transforms
 
 Randrianantoanina's theorem (N. Randrianantoanina, *Non-commutative martingale transforms*,
-J. Funct. Anal. 194 (2002), Theorem 3.1, with the constant `14√3/3 + 28`) for the von Neumann
-algebra `L^∞ (Ω, μ) ⊗ M_n (ℝ)` of a probability space with a filtration `ℱ` and predictable
-scalar multipliers `|c_k| ≤ 1` (the multipliers commuting with `N_{k+1}`, see `ncTransform`):
+J. Funct. Anal. 194 (2002), Theorem 3.1) for the von Neumann algebra `L^∞ (Ω, μ) ⊗ M_n (ℝ)` of a
+probability space with a filtration `ℱ` and predictable scalar multipliers `|c_k| ≤ 1` (the multipliers commuting with `N_{k+1}`, see `ncTransform`):
 `λ τ (1_{(λ, ∞)} (|T_c x|)) ≤ C ‖x‖_{L¹ (τ)}` for every symmetric `x ∈ L¹`, every `λ > 0` and
 every `N` (`weakType_one_one`); `x` need not be `ℱ_N`-measurable, since `T_c x` involves only
 `E_0 x, …, E_N x`.
@@ -41,9 +40,10 @@ The proof follows the source:
   `E c_j c_k tr (a_j a_k) ≤ E tr (a_j a_k)` for positive semidefinite `a_j`, `a_k`.
 
 The constants obtained are `26` for positive semidefinite `x` (`weakType_one_one_of_posSemidef`)
-and `52` in general (`weakType_one_one`), instead of the source's `14√3/3 + 28`: the counting form
-of Lemma 3.2 corresponds to the source's parameters `α = β = 1` in
-`24 α^{−1} β^{−2} + 2 (1 − α)^{−1}`.
+and `52` in general (`weakType_one_one`). The source proves the positive case, its (3.2), with the
+infimum of `24 α^{−1} β^{−2} + 2 (1 − α)^{−1}` over `α, β ∈ (0, 1)`, which it evaluates to
+`14√3/3 + 28`; the infimum is `26 + 8√3` (`β → 1`, `α = 2√3/(2√3 + 1)`). The counting form of
+Lemma 3.2 needs no such parameters, and the sum is `24 + 2`.
 -/
 
 @[expose] public section
@@ -569,10 +569,10 @@ positive semidefinite `x`: `λ τ (1_{(λ, ∞)} (|T_c x|)) ≤ 26 τ (x)`.
 With `q = q_{N+1}` at level `λ`: `λ_λ (T_c x) ≤ λ_λ (q T_c x q) + 2 τ (1 − q)`
 (`ncDistribution_le_compress_add`), `τ (1 − q) ≤ τ (x) / λ` (`cuculescu_trace_le`) and
 `λ_λ (q T_c x q) ≤ λ^{−2} ‖W‖_{L² (τ)}² ≤ 4 λ^{−2} ‖y_N‖_{L² (τ)}² ≤ 24 τ (x) / λ` (Lemmas 3.3, 3.5
-and 3.4). The source optimizes `24 α^{−1} β^{−2} + 2 (1 − α)^{−1}` over `α, β ∈ (0, 1)` to
-`14√3/3 + 28`; the counting form of Lemma 3.2 used here corresponds to `α = β = 1`, whence
-`24 + 2 = 26`. (The `ℱ_N`-measurability of `x` is not needed: `T_c x` only involves
-`E_0 x, …, E_N x`.) -/
+and 3.4). The source has here the infimum of `24 α^{−1} β^{−2} + 2 (1 − α)^{−1}` over
+`α, β ∈ (0, 1)`, printed as `14√3/3 + 28` (it is `26 + 8√3`); the counting form of Lemma 3.2 used
+here has no such parameters, whence `24 + 2 = 26`. (The `ℱ_N`-measurability of `x` is not needed:
+`T_c x` only involves `E_0 x, …, E_N x`.) -/
 theorem weakType_one_one_of_posSemidef [IsProbabilityMeasure μ] {ℱ : Filtration ℕ mΩ} {N : ℕ}
     {x : Ω → Matrix n n ℝ} (hxi : MatrixMemLp x 1 μ)
     (hx : ∀ ω, (x ω).PosSemidef) {c : ℕ → Ω → ℝ} (hc : ∀ k, StronglyMeasurable[ℱ k] (c k))
@@ -612,8 +612,8 @@ symmetric `x`: `λ τ (1_{(λ, ∞)} (|T_c x|)) ≤ 52 ‖x‖_{L¹ (τ)}`.
 From the positive case by the Krickeberg decomposition `x = x⁺ − x⁻` (Randrianantoanina,
 Theorem 2.3, trivial in finite time), with `‖x‖_{L¹ (τ)} = τ (x⁺) + τ (x⁻)` and
 `λ_λ (T_c x) ≤ λ_{λ/2} (T_c x⁺) + λ_{λ/2} (T_c x⁻)`: the constant is `52`, twice the constant `26`
-of `weakType_one_one_of_posSemidef` (the source's constant is `14√3/3 + 28`). As in the positive
-case, `x` need not be `ℱ_N`-measurable. -/
+of `weakType_one_one_of_posSemidef` (the source, Theorem 2.3 with (3.2), writes one constant `C`
+for both cases). As in the positive case, `x` need not be `ℱ_N`-measurable. -/
 theorem weakType_one_one [IsProbabilityMeasure μ] {ℱ : Filtration ℕ mΩ} {N : ℕ}
     {x : Ω → Matrix n n ℝ} (hxi : MatrixMemLp x 1 μ)
     (hx : ∀ ω, (x ω).IsHermitian) {c : ℕ → Ω → ℝ} (hc : ∀ k, StronglyMeasurable[ℱ k] (c k))

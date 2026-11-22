@@ -30,8 +30,8 @@ Schatten-valued inequalities use:
   singular values), with the rank perturbation bound
   `countAbove s (A + R) ≤ countAbove s A + rank R` and the subadditivity
   `countAbove (s + t) (A + B) ≤ countAbove s A + countAbove t B` (Weyl's inequalities for singular
-  values, by the standard Courant–Fischer dimension count; R. Bhatia, *Matrix Analysis*, Ch. III,
-  was not consulted), and Chebyshev's inequality;
+  values, by the standard Courant–Fischer dimension count; a usual reference
+  is R. Bhatia, *Matrix Analysis*, Ch. III), and Chebyshev's inequality;
 * Loewner-order and trace lemmas: `A − P A P ⪰ 0` for a projection `P` commuting with `A ⪰ 0`,
   `tr (A B) ≥ 0` and `tr (A B) ≤ c tr B` for `0 ⪯ A ⪯ c` and `B ⪰ 0`, and monotonicity of the
   Hilbert–Schmidt norm on `0 ⪯ A ⪯ B`.
