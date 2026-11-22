@@ -53,8 +53,8 @@ Run with `lake env lean scripts/Audit.lean` after `lake build`.
 
 Checks every declaration of the library: the run fails if one depends on an axiom other than
 Lean's standard `propext`, `Classical.choice` and `Quot.sound`. A `sorry` shows up as the axiom
-`sorryAx`. While proofs are still open (`allowSorry := true`) the declarations that depend on
-`sorryAx` are listed instead of failing the run; set `allowSorry` to `false` before publishing.
+`sorryAx`, and fails the run too (`allowSorry := false`); with `allowSorry := true`, for work in
+progress, the declarations that depend on `sorryAx` are listed instead.
 -/
 
 open Lean Elab Command
@@ -62,7 +62,7 @@ open Lean Elab Command
 namespace Audit
 
 /-- Whether declarations may still depend on `sorryAx`. -/
-meta def allowSorry : Bool := true
+meta def allowSorry : Bool := false
 
 /-- Lean's standard axioms. -/
 meta def standardAxioms : List Name := [``propext, ``Classical.choice, ``Quot.sound]

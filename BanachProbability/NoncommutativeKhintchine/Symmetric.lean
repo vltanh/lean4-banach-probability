@@ -38,8 +38,9 @@ conditional variance is `Δ_X = V = Σ_i A_i²`. With `h (t) = t |t|^{q−2}` an
   expectation give `E ‖Y‖_q^q ≤ 2 c ‖V‖_{q/2} (E ‖Y‖_q^q)^{1−2/q}`, which is solved for
   `E ‖Y‖_q^q`.
 
-The proof thus gives the source's constants: `1` for `q = 2`, `√(q − 1)` for `q ≥ 3` (Corollary
-7.3) and `√(2 (q − 1))` for `2 < q < 3` (Remark 7.2); the statement records the largest of them,
+The proof thus gives the source's constants: `1` for `q = 2`, `√(q − 1)` for `q ≥ 3`
+(Corollary 7.3, `ncKhintchine_symmetric_upper_of_three_le`) and `√(2 (q − 1))` for
+`2 < q < 3` (Remark 7.2); `ncKhintchine_symmetric_upper` records the largest of them,
 `√(2 (q − 1))`, for every `q ≥ 2`. The source does not prove the variant of the mean value trace
 inequality that Remark 7.2 requires; it is proved in `BanachProbability.Schatten.Trace`
 (`trace_mean_value`).
@@ -345,6 +346,17 @@ private theorem rpow_le_of_avg_le {q c : ℝ} (hq2 : 2 < q) (hc : 0 ≤ c) {k : 
     rw [hroot, ← Real.sqrt_mul hc]
     exact Real.sqrt_le_sqrt h2
 
+/-- **Noncommutative Khintchine inequality, symmetric case, `q ≥ 3`** (Mackey et al. 2014,
+Corollary 7.3, from Lemma 3.4), with the source's constant `√(q − 1)`:
+`(E ‖Σ_i ε_i A_i‖_{S_q}^q)^{1/q} ≤ √(q − 1) ‖Σ_i A_i²‖_{S_{q/2}}^{1/2}`. -/
+theorem ncKhintchine_symmetric_upper_of_three_le {q : ℝ} (hq : 3 ≤ q) {k : ℕ}
+    (A : Fin k → Matrix n n ℝ) (hA : ∀ i, (A i).IsHermitian) :
+    SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
+        (fun ε : Fin k → Bool => ∑ i, coin (ε i) • A i) ≤
+      √(q - 1) * √(schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, A i * A i)) :=
+  rpow_le_of_avg_le (by linarith) (by linarith) A hA _ (fun _ => rfl)
+    (avg_schattenNorm_rpow_le_of_three_le hq A hA _ fun _ => rfl)
+
 /-- **Noncommutative Khintchine inequality, symmetric case, upper bound** (Mackey et al. 2014,
 §7, Corollary 7.3 (7.2) and Remark 7.2):
 `(E ‖Σ_i ε_i A_i‖_{S_q}^q)^{1/q} ≤ √(2 (q − 1)) ‖Σ_i A_i²‖_{S_{q/2}}^{1/2}`, `q ≥ 2`.
@@ -379,8 +391,7 @@ theorem ncKhintchine_symmetric_upper {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (A : Fin
     exact Real.sqrt_le_sqrt (by norm_num)
   rcases le_or_gt 3 q with hq3 | hq3
   · -- `q ≥ 3`: Lemma 3.4, constant `√(q − 1) ≤ √(2 (q − 1))`
-    refine (rpow_le_of_avg_le hq2 (by linarith) A hA Y (fun _ => rfl)
-      (avg_schattenNorm_rpow_le_of_three_le hq3 A hA Y fun _ => rfl)).trans ?_
+    refine (ncKhintchine_symmetric_upper_of_three_le hq3 A hA).trans ?_
     exact mul_le_mul_of_nonneg_right (Real.sqrt_le_sqrt (by linarith)) (Real.sqrt_nonneg _)
   · -- `2 < q < 3`: the variant of Lemma 3.4 (Remark 7.2), constant `√(2 (q − 1))`
     exact rpow_le_of_avg_le hq2 (by linarith) A hA Y (fun _ => rfl)
