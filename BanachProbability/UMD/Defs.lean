@@ -17,8 +17,9 @@ file defines:
   on arbitrary probability spaces (Hytönen–van Neerven–Veraar–Weis, *Analysis in Banach spaces I*
   (2016), Definition 4.2.1; Pisier, *Martingales in Banach spaces* (2016), Chapter 5). The
   definition here quantifies over predictable signs and martingales started at `0`; the sources
-  define the constant with deterministic signs, which are predictable, so the constant here is at
-  least theirs, and the results of this library are stated for it;
+  define the constant with deterministic signs, which, on probability spaces, gives the same
+  constant (`BanachProbability.umdConst_eq_sInf_isDeterministicUMDBound`; Hytönen–van
+  Neerven–Veraar–Weis, Theorem 4.2.25);
 * `IsDyadicUMDBound X p β` and `dyadicUMDConst X p`, the same for Paley–Walsh martingales on the
   sign cube, `UMD_p^Δ (X)`;
 * `IsComplexUMDBound X p β`, `complexUMDConst X p` and their dyadic versions, for a complex
@@ -28,8 +29,8 @@ file defines:
 Basic facts: the constants are attained (`isUMDBound_umdConst`), they do not increase under linear
 isometric embeddings (`umdConst_le_of_linearIsometry`), they are at least `1` on a nonzero space
 (`one_le_umdConst`), and the dyadic constant is at most the full one
-(`dyadicUMDConst_le_umdConst`). The converse, `dyadicUMDConst X p = umdConst X p`, is Maurey's
-theorem (`BanachProbability.dyadicUMDConst_eq_umdConst`).
+(`dyadicUMDConst_le_umdConst`). In fact `dyadicUMDConst X p = umdConst X p`, a theorem of Maurey
+(`BanachProbability.dyadicUMDConst_eq_umdConst`).
 -/
 
 @[expose] public section
@@ -65,7 +66,7 @@ variable {Ω E : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} {ℱ : Filt
 
 /-- A martingale vanishing a.e. at time `n` vanishes a.e. at every time `k ≤ n`:
 `Y_k = E [Y_n | ℱ_k] = 0`. -/
-theorem umdd_ae_eq_zero_of_le {Y : ℕ → Ω → E} (hY : Martingale Y ℱ μ) {n : ℕ}
+private theorem umdd_ae_eq_zero_of_le {Y : ℕ → Ω → E} (hY : Martingale Y ℱ μ) {n : ℕ}
     (hn : Y n =ᵐ[μ] 0) {k : ℕ} (hk : k ≤ n) : Y k =ᵐ[μ] 0 := by
   refine (hY.condExp_ae_eq hk).symm.trans ((condExp_congr_ae hn).trans ?_)
   rw [condExp_zero]
@@ -170,7 +171,7 @@ theorem umdd_eLpNorm_norm_uniformOn {E : Type*} [NormedAddCommGroup E] {N : ℕ}
 
 /-- The cube instance: the martingale `Y_1 = ε_0 x` on the one-sign cube, transformed by `σ ≡ 1`,
 shows that every `UMD_p` constant of a nonzero space is at least `1`. -/
-theorem umdd_one_le_of_isUMDBound [CompleteSpace X] [Nontrivial X] {p : ℝ} (hp : 0 < p)
+private theorem umdd_one_le_of_isUMDBound [CompleteSpace X] [Nontrivial X] {p : ℝ} (hp : 0 < p)
     {β : ℝ≥0∞} (h : IsUMDBound X p β) : 1 ≤ β := by
   obtain ⟨x, hx⟩ := exists_ne (0 : X)
   have key := h (Fin 1 → Bool) inferInstance (ProbabilityTheory.uniformOn Set.univ)
@@ -290,7 +291,7 @@ theorem umdConst_congr [CompleteSpace X] [CompleteSpace Y] (e : X ≃ₗᵢ[ℝ]
     (umdConst_le_of_linearIsometry e.symm.toLinearIsometry p)
 
 /-- A linear isometry preserves the `L^p` norms of Paley–Walsh martingales. -/
-theorem umdd_lpNorm_paleyWalsh_linearIsometry (f : X →ₗᵢ[ℝ] Y) {N : ℕ}
+private theorem umdd_lpNorm_paleyWalsh_linearIsometry (f : X →ₗᵢ[ℝ] Y) {N : ℕ}
     (ζ : Fin N → (Fin N → Bool) → X) (p : ℝ) (n : ℕ) :
     SignCube.lpNorm (fun y => ‖y‖) p (paleyWalsh (fun k ε => f (ζ k ε)) n) =
       SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh ζ n) := by
@@ -341,7 +342,7 @@ theorem one_le_dyadicUMDConst [Nontrivial X] {p : ℝ} (hp : 0 < p) : 1 ≤ dyad
 
 /-- The signs of a cube transform, re-indexed as the multipliers of a martingale transform:
 `σ' (k + 1) = σ k` for `k < N`, and `σ' (k + 1) = 1` otherwise. -/
-theorem umdd_shift_succ {N : ℕ} {Ω 𝕜 : Type*} [One 𝕜] (σ : Fin N → Ω → 𝕜) (k : ℕ) (ε : Ω) :
+private theorem umdd_shift_succ {N : ℕ} {Ω 𝕜 : Type*} [One 𝕜] (σ : Fin N → Ω → 𝕜) (k : ℕ) (ε : Ω) :
     (fun m ε => if hm : m - 1 < N then σ ⟨m - 1, hm⟩ ε else 1) (k + 1) ε =
       if hk : k < N then σ ⟨k, hk⟩ ε else 1 :=
   rfl
@@ -367,7 +368,7 @@ theorem umdd_sum_shift_smul_paleyWalsh {N : ℕ} {𝕜 : Type*} [Monoid 𝕜] {E
     · exact smul_zero _
 
 /-- The re-indexed signs `σ' (k + 1)` of a predictable family are `ℱ_k`-measurable. -/
-theorem umdd_stronglyMeasurable_shift {N : ℕ} {𝕜 : Type*} [TopologicalSpace 𝕜] [T2Space 𝕜]
+private theorem umdd_stronglyMeasurable_shift {N : ℕ} {𝕜 : Type*} [TopologicalSpace 𝕜] [T2Space 𝕜]
     [One 𝕜] {σ : Fin N → (Fin N → Bool) → 𝕜} (hσ : IsPredictable σ) (k : ℕ) :
     StronglyMeasurable[filtration N k]
       ((fun m ε => if hm : m - 1 < N then σ ⟨m - 1, hm⟩ ε else 1) (k + 1)) := by
@@ -449,8 +450,8 @@ theorem complexUMDConst_le_of_isComplexUMDBound [CompleteSpace X] {p : ℝ} {β 
 /-- The cube instance for the complex constant: the martingale `Y_1 = ε_0 x` on the one-sign cube,
 transformed by `c ≡ 1`, shows that every complex `UMD_p` constant of a nonzero space is at
 least `1`. -/
-theorem umdd_one_le_of_isComplexUMDBound [CompleteSpace X] [Nontrivial X] {p : ℝ} (hp : 0 < p)
-    {β : ℝ≥0∞} (h : IsComplexUMDBound X p β) : 1 ≤ β := by
+private theorem umdd_one_le_of_isComplexUMDBound [CompleteSpace X] [Nontrivial X] {p : ℝ}
+    (hp : 0 < p) {β : ℝ≥0∞} (h : IsComplexUMDBound X p β) : 1 ≤ β := by
   obtain ⟨x, hx⟩ := exists_ne (0 : X)
   have key := h (Fin 1 → Bool) inferInstance (ProbabilityTheory.uniformOn Set.univ)
     (filtration 1) (fun k => paleyWalsh (fun _ _ => x) k) (fun _ _ => 1)

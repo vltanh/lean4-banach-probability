@@ -37,7 +37,7 @@ section Helpers
 
 /-- The `r`-th power of the cube `L^r` norm is the normalised sum of the `r`-th powers of the
 extended norms: `(‖f‖_{L^r})^r = 2^{-N} Σ_ε ‖f (ε)‖ₑ^r`. -/
-theorem ulp_ofReal_lpNorm_rpow {E : Type*} [SeminormedAddCommGroup E] {N : ℕ}
+private theorem ulp_ofReal_lpNorm_rpow {E : Type*} [SeminormedAddCommGroup E] {N : ℕ}
     (f : (Fin N → Bool) → E) {r : ℝ} (hr : 0 < r) :
     ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) r f) ^ r =
       ((2 : ℝ≥0∞) ^ N)⁻¹ * ∑ ε, ‖f ε‖ₑ ^ r := by
@@ -53,7 +53,7 @@ theorem ulp_ofReal_lpNorm_rpow {E : Type*} [SeminormedAddCommGroup E] {N : ℕ}
 
 /-- The dyadic inequality `‖F‖_{L^r} ≤ β ‖G‖_{L^r}` on the cube, in terms of `r`-th powers:
 `Σ_ε ‖F (ε)‖ₑ^r ≤ β^r Σ_ε ‖G (ε)‖ₑ^r`. -/
-theorem ulp_ofReal_lpNorm_le_iff {E F : Type*} [SeminormedAddCommGroup E]
+private theorem ulp_ofReal_lpNorm_le_iff {E F : Type*} [SeminormedAddCommGroup E]
     [SeminormedAddCommGroup F] {N : ℕ} (f : (Fin N → Bool) → E) (g : (Fin N → Bool) → F)
     {r : ℝ} (hr : 0 < r) (β : ℝ≥0∞) :
     ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) r f) ≤
@@ -66,14 +66,14 @@ theorem ulp_ofReal_lpNorm_le_iff {E F : Type*} [SeminormedAddCommGroup E]
 variable {E : Type*} [NormedAddCommGroup E] {p : ℝ≥0∞}
 
 /-- The `p`-th power of the norm of `L^p (μ; E)`: `‖f‖ₑ^p = ∫ ‖f (s)‖ₑ^p dμ (s)`. -/
-theorem ulp_enorm_rpow (hp0 : p ≠ 0) (hpt : p ≠ ⊤) (f : Lp E p μ) :
+private theorem ulp_enorm_rpow (hp0 : p ≠ 0) (hpt : p ≠ ⊤) (f : Lp E p μ) :
     ‖f‖ₑ ^ p.toReal = ∫⁻ s, ‖f s‖ₑ ^ p.toReal ∂μ := by
   rw [Lp.enorm_def, eLpNorm_eq_lintegral_rpow_enorm_toReal hp0 hpt (Lp.aestronglyMeasurable f),
     ← ENNReal.rpow_mul, one_div_mul_cancel (ENNReal.toReal_pos hp0 hpt).ne', ENNReal.rpow_one]
 
 /-- A finite sum in `L^p (μ; E)` has, almost everywhere, the sum of the representatives as
 representative. -/
-theorem ulp_coeFn_finsetSum {ι : Type*} (t : Finset ι) (g : ι → Lp E p μ) :
+private theorem ulp_coeFn_finsetSum {ι : Type*} (t : Finset ι) (g : ι → Lp E p μ) :
     ⇑(∑ i ∈ t, g i) =ᵐ[μ] ∑ i ∈ t, ⇑(g i) := by
   classical
   induction t using Finset.induction_on with
@@ -86,7 +86,7 @@ variable [NormedSpace ℝ E]
 
 /-- Off one null set, evaluation commutes with the Paley–Walsh sums of an `L^p (μ; E)`-valued
 family: `(Σ_{k<n} ε_k ζ_k (ε)) (s) = Σ_{k<n} ε_k ζ_k (ε) (s)` for every `ε`. -/
-theorem ulp_coeFn_paleyWalsh {N : ℕ} (ζ : Fin N → (Fin N → Bool) → Lp E p μ) (n : ℕ) :
+private theorem ulp_coeFn_paleyWalsh {N : ℕ} (ζ : Fin N → (Fin N → Bool) → Lp E p μ) (n : ℕ) :
     ∀ᵐ s ∂μ, ∀ ε, ((paleyWalsh ζ n ε : Lp E p μ) : S → E) s =
       paleyWalsh (fun k ε => (ζ k ε : S → E) s) n ε := by
   rw [ae_all_iff]
@@ -103,7 +103,7 @@ end Helpers
 
 /-- The dyadic Fubini step: a dyadic `UMD_p` constant of `B` is one of `L^p (μ; B)`
 (`r = p.toReal`). -/
-theorem ulp_isDyadicUMDBound_Lp {B : Type*} [NormedAddCommGroup B] [NormedSpace ℝ B]
+private theorem ulp_isDyadicUMDBound_Lp {B : Type*} [NormedAddCommGroup B] [NormedSpace ℝ B]
     (p : ℝ≥0∞) [Fact (1 ≤ p)] (hp : 1 < p) (hpt : p ≠ ⊤) {β : ℝ≥0∞}
     (h : IsDyadicUMDBound B p.toReal β) : IsDyadicUMDBound (Lp B p μ) p.toReal β := by
   intro N ξ σ hξ hσ hσ1 n
@@ -136,7 +136,7 @@ theorem dyadicUMDConst_Lp_le {B : Type*} [NormedAddCommGroup B] [NormedSpace ℝ
   sInf_le_sInf fun _ hβ => ulp_isDyadicUMDBound_Lp μ p hp hpt hβ
 
 /-- `1 < p.toReal` for `1 < p < ∞`. -/
-theorem ulp_one_lt_toReal {p : ℝ≥0∞} (hp : 1 < p) (hpt : p ≠ ⊤) : 1 < p.toReal := by
+private theorem ulp_one_lt_toReal {p : ℝ≥0∞} (hp : 1 < p) (hpt : p ≠ ⊤) : 1 < p.toReal := by
   simpa using (ENNReal.toReal_lt_toReal ENNReal.one_ne_top hpt).mpr hp
 
 /-- `UMD_p (L^p (μ; B)) ≤ UMD_p (B)`, for every measure `μ` and every Banach space `B`. -/

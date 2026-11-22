@@ -5,6 +5,7 @@ public meta import Lean.Elab.Command
 -- system hides them from a plain `import`). Generate the lines with
 --   find BanachProbability -name '*.lean' | sed 's/\.lean$//; s#/#.#g; s/^/import all /' | sort
 import all BanachProbability.Hypercontractivity.Binomial
+import all BanachProbability.Hypercontractivity.HeatSemigroup
 import all BanachProbability.Hypercontractivity.TwoPoint
 import all BanachProbability.Hypercontractivity.Vector
 import all BanachProbability.KahaneKhintchine.Basic
@@ -36,16 +37,21 @@ import all BanachProbability.SignCube.Bridge
 import all BanachProbability.SignCube.LpSeminorm
 import all BanachProbability.SignCube.PaleyWalsh
 import all BanachProbability.UMD.Complex
+import all BanachProbability.UMD.ConvexHull
+import all BanachProbability.UMD.CubeTransform
 import all BanachProbability.UMD.Decoupling
 import all BanachProbability.UMD.Defs
 import all BanachProbability.UMD.Extrapolation
+import all BanachProbability.UMD.GoodLambda
 import all BanachProbability.UMD.Hilbert
+import all BanachProbability.UMD.Incremental
 import all BanachProbability.UMD.Lp
 import all BanachProbability.UMD.Maurey.Basic
-import all BanachProbability.UMD.Maurey.FinitePaths
-import all BanachProbability.UMD.Maurey.Realization
+import all BanachProbability.UMD.Maurey.FiniteModel
 import all BanachProbability.UMD.Maurey.StepApprox
 import all BanachProbability.ZigZag.Basic
+import all BanachProbability.ZigZag.Bellman
+import all BanachProbability.ZigZag.Concave
 
 /-!
 # Axiom audit
