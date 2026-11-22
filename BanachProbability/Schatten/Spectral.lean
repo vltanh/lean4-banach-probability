@@ -30,8 +30,8 @@ Schatten-valued inequalities use:
   singular values), with the rank perturbation bound
   `countAbove s (A + R) ≤ countAbove s A + rank R` and the subadditivity
   `countAbove (s + t) (A + B) ≤ countAbove s A + countAbove t B` (Weyl's inequalities for singular
-  values, by the Courant–Fischer dimension count of R. Bhatia, *Matrix Analysis* (1997), Ch. III),
-  and Chebyshev's inequality;
+  values, by the standard Courant–Fischer dimension count; R. Bhatia, *Matrix Analysis*, Ch. III,
+  was not consulted), and Chebyshev's inequality;
 * Loewner-order and trace lemmas: `A − P A P ⪰ 0` for a projection `P` commuting with `A ⪰ 0`,
   `tr (A B) ≥ 0` and `tr (A B) ≤ c tr B` for `0 ⪯ A ⪯ c` and `B ⪰ 0`, and monotonicity of the
   Hilbert–Schmidt norm on `0 ⪯ A ⪯ B`.
@@ -449,7 +449,7 @@ private theorem rank_add_finrank_ker [Finite m] (R : Matrix m n ℝ) :
 `s_{i+k+1} (A + R) ≤ s_{i+1} (A)` for `rank R ≤ k`, by a Courant–Fischer dimension count). -/
 theorem countAbove_add_le_add_rank (s : ℝ) (A R : Matrix m n ℝ) :
     countAbove s (A + R) ≤ countAbove s A + R.rank := by
-  -- Courant–Fischer (Bhatia, *Matrix Analysis*, Ch. III): if the claim fails, the span `U` of
+  -- Courant–Fischer (the standard dimension count): if the claim fails, the span `U` of
   -- the eigenvectors of `(A + R)ᵀ (A + R)` with `s_i (A + R) > s` meets `W = ker R ∩` the span
   -- of the eigenvectors of `Aᵀ A` with `s_i (A) ≤ s`, by counting dimensions; on a common
   -- `v ≠ 0`, `s ‖v‖ < ‖(A + R) v‖ = ‖A v‖ ≤ s ‖v‖`. For `s < 0` the right side is `≥ #n`.
@@ -479,7 +479,7 @@ theorem countAbove_add_le_add_rank (s : ℝ) (A R : Matrix m n ℝ) :
 `s_{i+j+1} (A + B) ≤ s_{i+1} (A) + s_{j+1} (B)`). -/
 theorem countAbove_add_add_le (s t : ℝ) (A B : Matrix m n ℝ) :
     countAbove (s + t) (A + B) ≤ countAbove s A + countAbove t B := by
-  -- Courant–Fischer (Bhatia, *Matrix Analysis*, Ch. III), as in `countAbove_add_le_add_rank`,
+  -- Courant–Fischer (the standard dimension count), as in `countAbove_add_le_add_rank`,
   -- with `W = W_A ∩ W_B` and `‖(A + B) v‖ ≤ ‖A v‖ + ‖B v‖ ≤ (s + t) ‖v‖` on `W`.
   rcases lt_or_ge s 0 with hs | hs
   · have := countAbove_le_card (s + t) (A + B)
