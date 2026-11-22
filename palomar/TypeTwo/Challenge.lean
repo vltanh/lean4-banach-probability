@@ -53,19 +53,20 @@ size of the matrices. After
 
 ## Statements
 
-* `typeTwo_hilbert` ([HNVW, Example 7.1.2]): a Hilbert space has type 2 with constant `1`.
+* `typeTwo_hilbert` ([HNVW, Example 7.1.2], type 2 only): a real Hilbert space has type 2 with
+  constant `1`.
 * `gaussianTypeTwo_of_typeTwo`, `typeTwo_of_gaussianTypeTwo` ([HNVW, Proposition 7.1.18 (1)],
   `p = 2` and real Gaussian variables): `√(2/π) τ₂ ≤ τ₂^g ≤ τ₂`.
 * `kConvex_of_gaussianTypeTwo` ([HNVW, Proposition 7.4.22]), `kConvex_of_typeTwo` (the same with
   Proposition 7.1.18 (1); [MP, Remark 2.10], without constant and proof): a space of Gaussian type
   2, or of type 2, with constant `τ` is K-convex in `L²` with constant `√(π/2) τ`.
-* `typeTwo_schatten_interp`, `typeTwo_schatten` ([TJ, Theorem 3.1 (ii)]): for `q ≥ 2`,
-  `(E ‖Σ ε_i A_i‖_{S_q}^q)^{1/q} ≤ C (Σ ‖A_i‖_{S_q}²)^{1/2}` with `C = M_{2k}^{1−θ} M_{2k+2}^θ`,
-  `2k ≤ q ≤ 2k + 2`, and with `C = √(q + 1)`; so `S_q` has type 2 with these constants, as the norm
-  of `L²` is at most that of `L^q`.
+* `typeTwo_schatten_interp`, `typeTwo_schatten` ([TJ, Theorem 3.1 (ii)], for square matrices): for
+  `q ≥ 2`, `(E ‖Σ ε_i A_i‖_{S_q}^q)^{1/q} ≤ C (Σ ‖A_i‖_{S_q}²)^{1/2}` with
+  `C = M_{2k}^{1−θ} M_{2k+2}^θ`, `2k ≤ q ≤ 2k + 2`, and with `C = √(q + 1)`; so `S_q` has type 2
+  with these constants, as the norm of `L²` is at most that of `L^q`.
 * `kConvex_of_piLp`, `rademacherProj_schatten`, `rademacherProj_schatten_conj` ([P], p. 106; the
   last one is implicit there): the Rademacher projection on `L^q (S_q)`, `q ≥ 2`, and on
-  `L^{q'} (S_{q'})` has norm at most `√(π/2) √(q + 1)`, for real matrices of every size.
+  `L^{q'} (S_{q'})` has norm at most `√(π/2) √(q + 1)`, for real square matrices of every size.
 
 The definitions are copied word for word from `BanachProbability/Defs.lean` (kept in sync by
 `scripts/sync_challenge_defs.py`); the theorems are proved in `palomar/TypeTwo/Solution.lean`.
@@ -183,7 +184,7 @@ namespace TypeTwoChallenge
 
 open BanachProbability BanachProbability.SignCube
 
-/-- A real Hilbert space has type 2 with constant `1` ([HNVW, Example 7.1.2]). -/
+/-- A real inner product space has type 2 with constant `1` ([HNVW, Example 7.1.2], type 2 only). -/
 theorem typeTwo_hilbert (H : Type*) [NormedAddCommGroup H] [InnerProductSpace ℝ H] :
     IsTypeTwoBound H 1 := by
   sorry
@@ -216,8 +217,8 @@ theorem kConvex_of_typeTwo {τ : ℝ} (h : IsTypeTwoBound X τ) :
     IsKConvexBound X 2 (√(Real.pi / 2) * τ) := by
   sorry
 
-/-- **Averaging** ([P], p. 106): if the spaces `ℓ_p ({±1}^M; X)` are K-convex in `L²` with constant
-`K`, then `X` is K-convex in `L^p` with constant `K`. -/
+/-- **Averaging** ([P], p. 106), `1 ≤ p < ∞`: if the spaces `ℓ_p ({±1}^M; X)` are K-convex in `L²`
+with constant `K`, then `X` is K-convex in `L^p` with constant `K`. -/
 theorem kConvex_of_piLp {p K : ℝ} [Fact (1 ≤ ENNReal.ofReal p)]
     (h : ∀ M : ℕ, IsKConvexBound (PiLp (ENNReal.ofReal p) fun _ : Fin M → Bool => X) 2 K) :
     IsKConvexBound X p K := by
@@ -242,8 +243,8 @@ theorem typeTwo_schatten_interp {k : ℕ} (hk : 1 ≤ k) {q : ℝ} (hkq : 2 * k 
         √(∑ i, complexSchattenNorm (ENNReal.ofReal q) (A i) ^ 2) := by
   sorry
 
-/-- **Type 2 of `S_q`**, `q ≥ 2`, with the constant `√(q + 1)`, for complex and for real matrices of
-every size ([TJ, Theorem 3.1 (ii)]):
+/-- **Type 2 of `S_q`**, `q ≥ 2`, with the constant `√(q + 1)`, for complex and for real square
+matrices of every size ([TJ, Theorem 3.1 (ii)]):
 `(E ‖Σ ε_i A_i‖_{S_q}^q)^{1/q} ≤ √(q + 1) (Σ ‖A_i‖_{S_q}²)^{1/2}`. -/
 theorem typeTwo_schatten {q : ℝ} (hq : 2 ≤ q) :
     (∀ A : Fin N → Matrix n n ℂ, SignCube.lpNorm (complexSchattenNorm (ENNReal.ofReal q)) q
@@ -255,7 +256,7 @@ theorem typeTwo_schatten {q : ℝ} (hq : 2 ≤ q) :
   sorry
 
 /-- **The Rademacher projection on `L^q (S_q)`**, `q ≥ 2` ([P], p. 106): its norm is at most
-`√(π/2) √(q + 1)`, for real matrices of every size. -/
+`√(π/2) √(q + 1)`, for real square matrices of every size. -/
 theorem rademacherProj_schatten {q : ℝ} (hq : 2 ≤ q) (f : (Fin N → Bool) → Matrix n n ℝ) :
     SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q (rademacherProj f) ≤
       √(Real.pi / 2) * √(q + 1) * SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q f := by

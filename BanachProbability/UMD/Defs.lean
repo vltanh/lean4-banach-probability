@@ -21,7 +21,8 @@ constants, defined in `BanachProbability.Defs`:
   constant (`BanachProbability.umdConst_eq_sInf_isDeterministicUMDBound`; Hytönen–van
   Neerven–Veraar–Weis, Theorem 4.2.25);
 * `IsDyadicUMDBound X p β` and `dyadicUMDConst X p`, the same for Paley–Walsh martingales on the
-  sign cube, `UMD_p^Δ (X)`;
+  sign cube, `UMD_p^Δ (X)`, with predictable signs, defined here (with deterministic signs the
+  constants are the same, `isUMDBound_iff_isDeterministicDyadicUMDBound`);
 * `IsComplexUMDBound X p β`, `complexUMDConst X p` and their dyadic versions, for a complex
   Banach space and predictable unimodular complex multipliers, `UMD_{ℂ,p} (X)`.
 
@@ -100,7 +101,22 @@ end Helpers
 
 section Real
 
-variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+variable (X : Type*) [NormedAddCommGroup X] [NormedSpace ℝ X]
+
+/-- `β` bounds the `±1`-transforms of Paley–Walsh martingales with values in `X`:
+`‖Σ_{k<n} σ_k ε_k ξ_k‖_{L^p} ≤ β ‖Σ_{k<n} ε_k ξ_k‖_{L^p}` for predictable `ξ_k` and predictable
+signs `σ_k`. -/
+def IsDyadicUMDBound (p : ℝ) (β : ℝ≥0∞) : Prop :=
+  ∀ (N : ℕ) (ξ : Fin N → (Fin N → Bool) → X) (σ : Fin N → (Fin N → Bool) → ℝ),
+    IsPredictable ξ → IsPredictable σ → (∀ k ε, σ k ε = 1 ∨ σ k ε = -1) → ∀ n : ℕ,
+      ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh (fun k ε => σ k ε • ξ k ε) n)) ≤
+        β * ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh ξ n))
+
+/-- The dyadic `UMD_p` constant `UMD_p^Δ (X)`. -/
+noncomputable def dyadicUMDConst (p : ℝ) : ℝ≥0∞ :=
+  sInf {β | IsDyadicUMDBound X p β}
+
+variable {X}
 
 theorem IsUMDBound.mono [CompleteSpace X] {p : ℝ} {β β' : ℝ≥0∞} (h : IsUMDBound X p β)
     (hβ : β ≤ β') : IsUMDBound X p β' := by
@@ -380,7 +396,21 @@ end Real
 
 section Complex
 
-variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℂ X]
+variable (X : Type*) [NormedAddCommGroup X] [NormedSpace ℂ X]
+
+/-- The dyadic complex `UMD_p` bound: predictable unimodular complex multipliers of Paley–Walsh
+martingales. -/
+def IsComplexDyadicUMDBound (p : ℝ) (β : ℝ≥0∞) : Prop :=
+  ∀ (N : ℕ) (ξ : Fin N → (Fin N → Bool) → X) (c : Fin N → (Fin N → Bool) → ℂ),
+    IsPredictable ξ → IsPredictable c → (∀ k ε, ‖c k ε‖ = 1) → ∀ n : ℕ,
+      ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh (fun k ε => c k ε • ξ k ε) n)) ≤
+        β * ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh ξ n))
+
+/-- The dyadic complex `UMD_p` constant `UMD_{ℂ,p}^Δ (X)`. -/
+noncomputable def complexDyadicUMDConst (p : ℝ) : ℝ≥0∞ :=
+  sInf {β | IsComplexDyadicUMDBound X p β}
+
+variable {X}
 
 theorem complexUMDConst_le_of_isComplexUMDBound [CompleteSpace X] {p : ℝ} {β : ℝ≥0∞}
     (h : IsComplexUMDBound X p β) : complexUMDConst X p ≤ β :=
@@ -419,6 +449,37 @@ theorem isComplexUMDBound_complexUMDConst [CompleteSpace X] {p : ℝ} (hp : 1 < 
 theorem one_le_complexUMDConst [CompleteSpace X] [Nontrivial X] {p : ℝ} (hp : 1 < p) :
     1 ≤ complexUMDConst X p :=
   le_sInf fun _ hβ => umdd_one_le_of_isComplexUMDBound (by linarith) hβ
+
+/-- A complex `UMD_p` constant of `Y` is one of every complex space linearly isometric to a subspace
+of `Y`. -/
+theorem IsComplexUMDBound.of_linearIsometry {Y : Type*} [NormedAddCommGroup Y] [NormedSpace ℂ Y]
+    [CompleteSpace X] [CompleteSpace Y] (f : X →ₗᵢ[ℂ] Y) {p : ℝ} {β : ℝ≥0∞}
+    (h : IsComplexUMDBound Y p β) : IsComplexUMDBound X p β := by
+  intro Ω mΩ μ _ ℱ Z c hZ hZ0 hc hcm n
+  have hfZ : Martingale (fun m ω => f (Z m ω)) ℱ μ :=
+    martingale_map_continuousLinearMap hZ (f.toContinuousLinearMap.restrictScalars ℝ)
+  have key := h Ω mΩ μ ℱ (fun m ω => f (Z m ω)) c hfZ (fun ω => by simp [hZ0]) hc hcm n
+  have hZm : ∀ k, StronglyMeasurable (Z k) := fun k => (hZ.stronglyAdapted k).mono (ℱ.le k)
+  have hm : AEStronglyMeasurable
+      (fun ω => ∑ k ∈ Finset.range n, c (k + 1) ω • (Z (k + 1) ω - Z k ω)) μ :=
+    (Finset.stronglyMeasurable_fun_sum _ fun k _ => ((hcm k).mono (ℱ.le k)).smul
+      ((hZm (k + 1)).sub (hZm k))).aestronglyMeasurable
+  have e1 : (fun ω => ∑ k ∈ Finset.range n, c (k + 1) ω • (f (Z (k + 1) ω) - f (Z k ω))) =
+      fun ω => f (∑ k ∈ Finset.range n, c (k + 1) ω • (Z (k + 1) ω - Z k ω)) := by
+    funext ω
+    simp only [map_sum, map_smul, map_sub]
+  have e2 : ∀ {g : Ω → X}, AEStronglyMeasurable g μ →
+      eLpNorm (fun ω => f (g ω)) (ENNReal.ofReal p) μ = eLpNorm g (ENNReal.ofReal p) μ :=
+    fun {g} hg => by
+      rw [← eLpNorm_norm _ (f.continuous.comp_aestronglyMeasurable hg), ← eLpNorm_norm g hg]
+      simp only [f.norm_map]
+  rw [e1, e2 hm, e2 (hZm n).aestronglyMeasurable] at key
+  exact key
+
+theorem complexUMDConst_le_of_linearIsometry {Y : Type*} [NormedAddCommGroup Y] [NormedSpace ℂ Y]
+    [CompleteSpace X] [CompleteSpace Y] (f : X →ₗᵢ[ℂ] Y) (p : ℝ) :
+    complexUMDConst X p ≤ complexUMDConst Y p :=
+  sInf_le_sInf fun _ hβ => IsComplexUMDBound.of_linearIsometry f hβ
 
 /-- Every complex `UMD_p` constant is a dyadic one: a Paley–Walsh martingale is a martingale on
 the probability space `Fin N → Bool`, and its transform by predictable unimodular multipliers is

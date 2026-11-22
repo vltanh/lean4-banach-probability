@@ -27,7 +27,10 @@ that the two kinds of signs give the same constants (`isSignDyadicUMDBound_iff_i
 compare HNVW, Theorem 4.2.25, p. 300).
 
 The complex version, with predictable unimodular multipliers, is
-`complexDyadicUMDConst_eq_complexUMDConst`; its proof is the same.
+`complexDyadicUMDConst_eq_complexUMDConst`; its proof is the same. The theorem for the dyadic UMD
+property as the book defines it, with deterministic signs or unimodular multipliers, is
+`isUMDBound_iff_isDeterministicDyadicUMDBound` and
+`isComplexUMDBound_iff_isDeterministicDyadicUMDBound`.
 -/
 
 @[expose] public section
@@ -124,6 +127,58 @@ theorem isSignDyadicUMDBound_iff_isComplexDyadicUMDBound {p β : ℝ} (hp : 1 �
     (isComplexUMDBound_of_isSignDyadicUMDBound hp hβ h), fun h => h.isSignDyadicUMDBound hβ⟩
 
 end Complex
+
+/-- A finite dyadic UMD bound for deterministic multipliers, as the inequality at the last time. -/
+theorem IsDeterministicDyadicUMDBound.isSignDyadicUMDBound {𝕜 X : Type*} [RCLike 𝕜]
+    [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedSpace 𝕜 X] {p β : ℝ} (hβ : 0 ≤ β)
+    (h : IsDeterministicDyadicUMDBound 𝕜 X p (ENNReal.ofReal β)) :
+    IsSignDyadicUMDBound 𝕜 X p β := by
+  intro N ξ l hξ hl
+  have key := h N ξ l hξ hl N
+  rwa [← ENNReal.ofReal_mul hβ, ENNReal.ofReal_le_ofReal_iff
+    (mul_nonneg hβ (SignCube.lpNorm_nonneg (fun x => norm_nonneg x) p _))] at key
+
+/-- **Dyadic UMD equals UMD** (HNVW I, Theorem 4.2.5, p. 282, real scalars, by the alternative proof
+of p. 334), for the dyadic UMD property of the book, with deterministic signs: the UMD constants of
+`X` for martingales on probability spaces are those for Paley–Walsh martingales. (The signs of
+`IsUMDBound` are predictable; `isUMDBound_iff_isDeterministicUMDBound`.) -/
+theorem isUMDBound_iff_isDeterministicDyadicUMDBound {X : Type*} [NormedAddCommGroup X]
+    [NormedSpace ℝ X] [CompleteSpace X] {p : ℝ} (hp : 1 ≤ p) {β : ℝ≥0∞} :
+    IsUMDBound X p β ↔ IsDeterministicDyadicUMDBound ℝ X p β := by
+  refine ⟨fun h N ξ l hξ hl n => umdd_isDyadicUMDBound_of_isUMDBound (by linarith) h N ξ
+    (fun k _ => l k) hξ (fun _ _ _ _ => rfl) (fun k _ => eq_or_eq_neg_of_abs_eq (hl k)) n,
+    fun h => ?_⟩
+  by_cases hβ : β = ⊤
+  · -- `β = ∞`: the transform vanishes if `Y_n = 0`
+    intro Ω mΩ μ _ ℱ Y σ hY hY0 hσ hσm n
+    have hp0 : ENNReal.ofReal p ≠ 0 := by simp; linarith
+    by_cases h0 : eLpNorm (fun ω => ‖Y n ω‖) (ENNReal.ofReal p) μ = 0
+    · exact (stp_eLpNorm_norm_transform_eq_zero hY hp0 h0 σ).le.trans zero_le
+    · rw [hβ, ENNReal.top_mul h0]
+      exact le_top
+  · rw [← ENNReal.ofReal_toReal hβ] at h ⊢
+    exact isUMDBound_of_isSignDyadicUMDBound hp ENNReal.toReal_nonneg
+      (h.isSignDyadicUMDBound ENNReal.toReal_nonneg)
+
+/-- **Dyadic UMD equals UMD** (HNVW I, Theorem 4.2.5, p. 282, complex scalars, by the alternative
+proof of p. 334), for the dyadic UMD property of the book, with deterministic unimodular
+multipliers. -/
+theorem isComplexUMDBound_iff_isDeterministicDyadicUMDBound {Z : Type*} [NormedAddCommGroup Z]
+    [NormedSpace ℂ Z] [CompleteSpace Z] {p : ℝ} (hp : 1 ≤ p) {β : ℝ≥0∞} :
+    IsComplexUMDBound Z p β ↔ IsDeterministicDyadicUMDBound ℂ Z p β := by
+  refine ⟨fun h N ξ l hξ hl n => umdd_isComplexDyadicUMDBound_of_isComplexUMDBound (by linarith) h N
+    ξ (fun k _ => l k) hξ (fun _ _ _ _ => rfl) (fun k _ => hl k) n, fun h => ?_⟩
+  by_cases hβ : β = ⊤
+  · -- `β = ∞`: the transform vanishes if `Y_n = 0`
+    intro Ω mΩ μ _ ℱ Y c hY hY0 hc hcm n
+    have hp0 : ENNReal.ofReal p ≠ 0 := by simp; linarith
+    by_cases h0 : eLpNorm (Y n) (ENNReal.ofReal p) μ = 0
+    · exact (umdd_eLpNorm_transform_eq_zero hY hp0 h0 c).le.trans zero_le
+    · rw [hβ, ENNReal.top_mul h0]
+      exact le_top
+  · rw [← ENNReal.ofReal_toReal hβ] at h ⊢
+    exact isComplexUMDBound_of_isSignDyadicUMDBound hp ENNReal.toReal_nonneg
+      (h.isSignDyadicUMDBound ENNReal.toReal_nonneg)
 
 /-- **Dyadic UMD equals UMD, complex version** (HNVW I, Theorem 4.2.5, p. 282, over `ℂ`, by the
 alternative proof of p. 334: Theorem 4.5.6, Burkholder (1986)): for a complex Banach space, the

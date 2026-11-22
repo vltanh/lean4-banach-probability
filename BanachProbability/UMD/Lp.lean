@@ -10,9 +10,9 @@ public import Mathlib.MeasureTheory.Function.LpSpace.Complete
 For any measure space `(S, μ)`, any Banach space `B` and `p ∈ (1, ∞)`,
 `UMD_p (L^p (μ; B)) ≤ UMD_p (B)` (Hytönen–van Neerven–Veraar–Weis (HNVW), *Analysis in Banach Spaces
 I* (2016), Proposition 4.2.15 (2)), with equality if there is a set of finite positive measure,
-since `B` embeds in `L^p (μ; B)`; in particular `UMD_p (L^p (μ; ℂ)) ≤ p* − 1` and the complex
-`L^p (μ)` is UMD (also G. Pisier, *Martingales in Banach spaces* (2016), Corollary 5.22, "by
-Fubini").
+since `B` embeds in `L^p (μ; B)`, and the same for the complex constants; in particular
+`UMD_p (L^p (μ; ℂ)) ≤ p* − 1` and the complex `L^p (μ)` is UMD (also G. Pisier, *Martingales in
+Banach spaces* (2016), Corollary 5.22, "by Fubini").
 
 The proof is the dyadic one, as in HNVW, which needs neither σ-finiteness nor joint measurability. A
 Paley–Walsh martingale with values in `L^p (μ; B)` takes finitely many values; for every `s` the
@@ -104,6 +104,35 @@ private theorem ulp_coeFn_paleyWalsh {N : ℕ} (ζ : Fin N → (Fin N → Bool) 
 
 end Helpers
 
+/-- The dyadic Fubini step for deterministic multipliers, real or complex: a dyadic UMD constant of
+`B` is one of `L^p (μ; B)` (`r = p.toReal`; HNVW I, proof of Proposition 4.2.15). -/
+theorem IsDeterministicDyadicUMDBound.Lp {𝕜 B : Type*} [RCLike 𝕜] [NormedAddCommGroup B]
+    [NormedSpace ℝ B] [NormedSpace 𝕜 B] (p : ℝ≥0∞) [Fact (1 ≤ p)] (hp : 1 < p) (hpt : p ≠ ⊤)
+    {β : ℝ≥0∞} (h : IsDeterministicDyadicUMDBound 𝕜 B p.toReal β) :
+    IsDeterministicDyadicUMDBound 𝕜 (Lp B p μ) p.toReal β := by
+  intro N ξ l hξ hl n
+  have hp0 : p ≠ 0 := (zero_lt_one.trans hp).ne'
+  have hr : 0 < p.toReal := ENNReal.toReal_pos hp0 hpt
+  rw [ulp_ofReal_lpNorm_le_iff _ _ hr]
+  simp_rw [ulp_enorm_rpow μ hp0 hpt]
+  have hm : ∀ F : MeasureTheory.Lp B p μ, AEMeasurable (fun s => ‖F s‖ₑ ^ p.toReal) μ :=
+    fun F => (Lp.aestronglyMeasurable F).enorm.pow_const _
+  rw [← lintegral_finsetSum' _ fun ε _ => hm _, ← lintegral_finsetSum' _ fun ε _ => hm _,
+    ← lintegral_const_mul'' _ (Finset.aemeasurable_fun_sum _ fun ε _ => hm _)]
+  have hsmul : ∀ᵐ s ∂μ, ∀ k ε, (⇑(l k • ξ k ε) : S → B) s = l k • (ξ k ε : S → B) s := by
+    rw [ae_all_iff]
+    intro k
+    rw [ae_all_iff]
+    exact fun ε => Lp.coeFn_smul _ _
+  refine lintegral_mono_ae ?_
+  filter_upwards [ulp_coeFn_paleyWalsh μ (fun k ε => l k • ξ k ε) n,
+    ulp_coeFn_paleyWalsh μ ξ n, hsmul] with s h1 h2 h3
+  simp only [h1, h2, h3]
+  -- pointwise in `s`, the dyadic bound of `B` for the representatives `ε ↦ ξ_k (ε) (s)`
+  have hξs : IsPredictable fun k ε => (ξ k ε : S → B) s :=
+    fun k ε ε' hk => congrArg (fun F : MeasureTheory.Lp B p μ => (F : S → B) s) (hξ k ε ε' hk)
+  exact (ulp_ofReal_lpNorm_le_iff _ _ hr β).mp (h N _ l hξs hl n)
+
 /-- The dyadic Fubini step: a dyadic `UMD_p` constant of `B` is one of `L^p (μ; B)`
 (`r = p.toReal`). -/
 private theorem ulp_isDyadicUMDBound_Lp {B : Type*} [NormedAddCommGroup B] [NormedSpace ℝ B]
@@ -153,18 +182,18 @@ theorem umdConst_Lp_le {B : Type*} [NormedAddCommGroup B] [NormedSpace ℝ B] [C
 
 /-- `B` embeds isometrically in `L^p (μ; B)`, by the multiples of an indicator function, if there is
 a set of finite positive measure. -/
-theorem exists_linearIsometry_Lp {B : Type*} [NormedAddCommGroup B] [NormedSpace ℝ B] (p : ℝ≥0∞)
-    [Fact (1 ≤ p)] (hpt : p ≠ ⊤) {A : Set S} (hA : MeasurableSet A) (h0 : μ A ≠ 0)
-    (ht : μ A ≠ ⊤) : Nonempty (B →ₗᵢ[ℝ] Lp B p μ) := by
+theorem exists_linearIsometry_Lp (𝕜 : Type*) [RCLike 𝕜] {B : Type*} [NormedAddCommGroup B]
+    [NormedSpace 𝕜 B] (p : ℝ≥0∞) [Fact (1 ≤ p)] (hpt : p ≠ ⊤) {A : Set S} (hA : MeasurableSet A)
+    (h0 : μ A ≠ 0) (ht : μ A ≠ ⊤) : Nonempty (B →ₗᵢ[𝕜] Lp B p μ) := by
   have hp0 : p ≠ 0 := (zero_lt_one.trans_le (Fact.out : 1 ≤ p)).ne'
-  set c : ℝ := (μ.real A ^ (1 / p.toReal))⁻¹
   have hA0 : 0 < μ.real A := ENNReal.toReal_pos h0 ht
-  have hc : 0 < c := inv_pos.2 (Real.rpow_pos_of_pos hA0 _)
-  refine ⟨⟨{ toFun := fun x => c • indicatorConstLp p hA ht x
+  set r : ℝ := (μ.real A ^ (1 / p.toReal))⁻¹
+  have hr : 0 < r := inv_pos.2 (Real.rpow_pos_of_pos hA0 _)
+  refine ⟨⟨{ toFun := fun x => (r : 𝕜) • indicatorConstLp p hA ht x
              map_add' := fun x y => ?_
              map_smul' := fun a x => ?_ }, fun x => ?_⟩⟩
   · rw [← indicatorConstLp_add, smul_add]
-  · rw [RingHom.id_apply, smul_comm a c]
+  · rw [RingHom.id_apply, smul_comm a (r : 𝕜)]
     congr 1
     refine Lp.ext ?_
     filter_upwards [indicatorConstLp_coeFn (p := p) (hs := hA) (hμs := ht) (c := a • x),
@@ -172,18 +201,39 @@ theorem exists_linearIsometry_Lp {B : Type*} [NormedAddCommGroup B] [NormedSpace
       Lp.coeFn_smul a (indicatorConstLp p hA ht x)] with s h1 h2 h3
     rw [h1, h3, Pi.smul_apply, h2]
     by_cases hs : s ∈ A <;> simp [hs]
-  · change ‖c • indicatorConstLp p hA ht x‖ = ‖x‖
-    rw [norm_smul, norm_indicatorConstLp hp0 hpt, Real.norm_of_nonneg hc.le, mul_left_comm,
+  · change ‖(r : 𝕜) • indicatorConstLp p hA ht x‖ = ‖x‖
+    rw [norm_smul, norm_indicatorConstLp hp0 hpt, RCLike.norm_ofReal, abs_of_pos hr, mul_left_comm,
       inv_mul_cancel₀ (Real.rpow_pos_of_pos hA0 _).ne', mul_one]
 
-/-- **Fubini** (HNVW I, Proposition 4.2.15 (2)): `UMD_p (L^p (μ; B)) = UMD_p (B)`, if there is a set
-of finite positive measure. (The book does not say so, but for `L^p (μ) = 0` the constant on the
-left is that of the space `0`.) -/
+/-- **Fubini** (HNVW I, Proposition 4.2.15 (2), real scalars): `UMD_p (L^p (μ; B)) = UMD_p (B)`, if
+there is a set of finite positive measure. (The book does not say so, but for `L^p (μ) = 0` the
+constant on the left is that of the space `0`.) -/
 theorem umdConst_Lp_eq {B : Type*} [NormedAddCommGroup B] [NormedSpace ℝ B] [CompleteSpace B]
     (p : ℝ≥0∞) [Fact (1 ≤ p)] (hp : 1 < p) (hpt : p ≠ ⊤) {A : Set S} (hA : MeasurableSet A)
     (h0 : μ A ≠ 0) (ht : μ A ≠ ⊤) : umdConst (Lp B p μ) p.toReal = umdConst B p.toReal := by
-  obtain ⟨T⟩ := exists_linearIsometry_Lp (B := B) μ p hpt hA h0 ht
+  obtain ⟨T⟩ := exists_linearIsometry_Lp (B := B) μ ℝ p hpt hA h0 ht
   exact le_antisymm (umdConst_Lp_le μ p hp hpt) (umdConst_le_of_linearIsometry T _)
+
+/-- `UMD_{ℂ,p} (L^p (μ; B)) ≤ UMD_{ℂ,p} (B)`, for every measure `μ` and every complex Banach space
+`B` (HNVW I, Proposition 4.2.15 (2), complex scalars). -/
+theorem complexUMDConst_Lp_le {B : Type*} [NormedAddCommGroup B] [NormedSpace ℂ B]
+    [CompleteSpace B] (p : ℝ≥0∞) [Fact (1 ≤ p)] (hp : 1 < p) (hpt : p ≠ ⊤) :
+    complexUMDConst (Lp B p μ) p.toReal ≤ complexUMDConst B p.toReal := by
+  have hr := ulp_one_lt_toReal hp hpt
+  refine complexUMDConst_le_of_isComplexUMDBound
+    ((isComplexUMDBound_iff_isDeterministicDyadicUMDBound hr.le).2 ?_)
+  exact IsDeterministicDyadicUMDBound.Lp μ p hp hpt
+    ((isComplexUMDBound_iff_isDeterministicDyadicUMDBound hr.le).1
+      (isComplexUMDBound_complexUMDConst hr))
+
+/-- **Fubini** (HNVW I, Proposition 4.2.15 (2), complex scalars):
+`UMD_{ℂ,p} (L^p (μ; B)) = UMD_{ℂ,p} (B)`, if there is a set of finite positive measure. -/
+theorem complexUMDConst_Lp_eq {B : Type*} [NormedAddCommGroup B] [NormedSpace ℂ B]
+    [CompleteSpace B] (p : ℝ≥0∞) [Fact (1 ≤ p)] (hp : 1 < p) (hpt : p ≠ ⊤) {A : Set S}
+    (hA : MeasurableSet A) (h0 : μ A ≠ 0) (ht : μ A ≠ ⊤) :
+    complexUMDConst (Lp B p μ) p.toReal = complexUMDConst B p.toReal := by
+  obtain ⟨T⟩ := exists_linearIsometry_Lp (B := B) μ ℂ p hpt hA h0 ht
+  exact le_antisymm (complexUMDConst_Lp_le μ p hp hpt) (complexUMDConst_le_of_linearIsometry T _)
 
 /-- The complex `L^p (μ)` is UMD with `UMD_p (L^p (μ; ℂ)) ≤ p* − 1`, for every measure `μ`. -/
 theorem umdConst_Lp_complex_le (p : ℝ≥0∞) [Fact (1 ≤ p)] (hp : 1 < p) (hpt : p ≠ ⊤) :

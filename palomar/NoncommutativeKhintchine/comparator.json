@@ -3,6 +3,7 @@
   "solution_module": "NoncommutativeKhintchine.Solution",
   "theorem_names": [
     "NoncommutativeKhintchineChallenge.khintchine",
+    "NoncommutativeKhintchineChallenge.khintchine_of_eq_two_or_three_le",
     "NoncommutativeKhintchineChallenge.khintchine_symmetric",
     "NoncommutativeKhintchineChallenge.schattenNorm_transpose_mul_self",
     "NoncommutativeKhintchineChallenge.schattenNorm_two_sq"

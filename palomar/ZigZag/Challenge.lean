@@ -30,7 +30,7 @@ after
   Martingales and Littlewood–Paley Theory*, Springer, 2016 (in the docstrings also HNVW I):
   Definitions 4.2.1 and 4.5.3, Theorem 4.5.6, which is due to D. L. Burkholder;
 * [Y] I. Yaroslavtsev, *Even Fourier multipliers and martingale transforms in infinite dimensions*,
-  Indag. Math. 29 (2018), 1290–1309: Proposition 3.7 (complex scalars and the closed unit disc).
+  Indag. Math. 29 (2018), 1290–1309: Proposition 3.7, for the closed unit ball of the scalars.
 
 ## Conventions
 
@@ -42,23 +42,24 @@ after
 * `UMD_p (X) = umdConst X p` is the best `β` in `‖Σ σ_{k+1} (Y_{k+1} − Y_k)‖_p ≤ β ‖Y_n‖_p` over the
   predictable signs `σ_k ∈ {±1}`, and `UMD_{ℂ,p} (X) = complexUMDConst X p` is the same for a
   complex space and predictable unimodular complex multipliers; they are `∞` if there is no such
-  `β`. [HNVW, Definition 4.2.1] has deterministic multipliers; for probability spaces the constants
-  are the same ([HNVW, Theorem 4.2.25]), which is not part of this entry.
+  `β`, and `0` for `X = 0`. [HNVW, Definition 4.2.1] has deterministic multipliers; for probability
+  spaces the constants are the same ([HNVW, Theorem 4.2.25]), which is not part of this entry.
 * The theorems hold for each `p` separately. ([HNVW, Theorem 4.5.6] has "for some (equivalently,
   all) `p`"; that finiteness does not depend on `p` is [HNVW, Theorem 4.2.7].)
 
 ## Statements
 
-For real scalars, and in the second line of each item for complex ones:
+The first name of each pair is for real scalars and the second for complex ones.
 
 * `umd_iff_signZigZag`, `complexUMD_iff_signZigZag` ([HNVW, Theorem 4.5.6, (1)⇔(3)]): the UMD
   constant is finite if and only if there are `β ≥ 1` and a function `u` such that
   `z ↦ u (x + z, y + ε z)` is concave for all `|ε| = 1` and `u (x, y) ≥ ‖y‖^p − β^p ‖x‖^p`.
 * `isLeast_signZigZag`, `isLeast_complexSignZigZag` ([HNVW, Theorem 4.5.6], last clause): for
   `X ≠ 0`, the least such `β ≥ 1` is the UMD constant; it is attained.
-* `umd_iff_zigZag`, `complexUMD_iff_zigZag`, `isLeast_zigZag`, `isLeast_complexZigZag` (for complex
-  scalars, [Y, Proposition 3.7]): the same with functions `U` that are concave along the lines for
-  all `|ε| ≤ 1` and satisfy `U (0, 0) = 0`, `β > 0` in the equivalence and the least `β ≥ 0`.
+* `umd_iff_ballZigZag`, `complexUMD_iff_ballZigZag`, `isLeast_ballZigZag`,
+  `isLeast_complexBallZigZag` ([Y, Proposition 3.7], `A` the closed unit ball of the scalars): the
+  same with functions that are concave along the lines for all `|ε| ≤ 1`, with `β > 0` in the
+  equivalence and the least `β ≥ 0`.
 
 The definitions are copied word for word from `BanachProbability/Defs.lean` (kept in sync by
 `scripts/sync_challenge_defs.py`); the theorems are proved in `palomar/ZigZag/Solution.lean`.
@@ -132,19 +133,11 @@ def IsSignZigZagConcave (𝕜 : Type*) {X : Type*} [RCLike 𝕜] [NormedAddCommG
     [NormedSpace ℝ X] (u : X → X → ℝ) : Prop :=
   ∀ (x y : X) (ε : 𝕜), ‖ε‖ = 1 → ConcaveOn ℝ Set.univ fun z : X => u (x + z) (y + ε • z)
 
-/-- `U : X × X → ℝ` is zig-zag concave for the obstacle `‖y‖^p − β^p ‖x‖^p` (real scalars):
-`z ↦ U (x + z, y + ε z)` is concave for every `ε ∈ [−1, 1]`, `U (0, 0) = 0`, and
-`U (x, y) ≥ ‖y‖^p − β^p ‖x‖^p`. -/
-def IsZigZagConcave {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (p β : ℝ)
-    (U : X → X → ℝ) : Prop :=
-  (∀ (x y : X) (ε : ℝ), |ε| ≤ 1 → ConcaveOn ℝ Set.univ fun z : X => U (x + z) (y + ε • z)) ∧
-    U 0 0 = 0 ∧ ∀ x y : X, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ U x y
-
-/-- The complex version: `ε` ranges over the closed unit disc. -/
-def IsComplexZigZagConcave {X : Type*} [NormedAddCommGroup X] [NormedSpace ℂ X] (p β : ℝ)
-    (U : X → X → ℝ) : Prop :=
-  (∀ (x y : X) (ε : ℂ), ‖ε‖ ≤ 1 → ConcaveOn ℝ Set.univ fun z : X => U (x + z) (y + ε • z)) ∧
-    U 0 0 = 0 ∧ ∀ x y : X, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ U x y
+/-- The same for all `ε` in the closed unit ball of `𝕜`: `z ↦ u (x + z, y + ε z)` is concave for all
+`x`, `y` and all `ε ∈ 𝕜` with `‖ε‖ ≤ 1`. -/
+def IsBallZigZagConcave (𝕜 : Type*) {X : Type*} [RCLike 𝕜] [NormedAddCommGroup X] [NormedSpace 𝕜 X]
+    [NormedSpace ℝ X] (u : X → X → ℝ) : Prop :=
+  ∀ (x y : X) (ε : 𝕜), ‖ε‖ ≤ 1 → ConcaveOn ℝ Set.univ fun z : X => u (x + z) (y + ε • z)
 
 -- END SHARED DEFINITIONS: zigZag
 
@@ -173,16 +166,19 @@ theorem isLeast_signZigZag [Nontrivial X] (hp : 1 < p) (h : umdConst X p < ∞) 
       ∀ x y, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ u x y} (umdConst X p).toReal := by
   sorry
 
-/-- The characterization with functions that are concave along `z ↦ (x + z, y + ε z)` for all
-`ε ∈ [−1, 1]` and vanish at `(0, 0)`. -/
-theorem umd_iff_zigZag (hp : 1 < p) :
-    umdConst X p < ∞ ↔ ∃ β : ℝ, 0 < β ∧ ∃ U : X → X → ℝ, IsZigZagConcave p β U := by
+/-- **The closed unit ball of scalars** ([Y, Proposition 3.7], `A = [−1, 1]`): `UMD_p (X) < ∞` if
+and only if there are `β > 0` and a function `U : X × X → ℝ`, concave along `z ↦ (x + z, y + ε z)`
+for all `ε ∈ [−1, 1]`, with `U (x, y) ≥ ‖y‖^p − β^p ‖x‖^p`. -/
+theorem umd_iff_ballZigZag (hp : 1 < p) :
+    umdConst X p < ∞ ↔ ∃ β : ℝ, 0 < β ∧ ∃ U : X → X → ℝ, IsBallZigZagConcave ℝ U ∧
+      ∀ x y, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ U x y := by
   sorry
 
-/-- The least `β ≥ 0` for which there is a function as in `umd_iff_zigZag` is `UMD_p (X)` (it is `0`
-for `X = 0`). -/
-theorem isLeast_zigZag (hp : 1 < p) (h : umdConst X p < ∞) :
-    IsLeast {β : ℝ | 0 ≤ β ∧ ∃ U : X → X → ℝ, IsZigZagConcave p β U} (umdConst X p).toReal := by
+/-- **The best constant** ([Y, Proposition 3.7], `A = [−1, 1]`): for a UMD space, the least `β ≥ 0`
+for which there is a function as in `umd_iff_ballZigZag` is `UMD_p (X)` (`0` for `X = 0`). -/
+theorem isLeast_ballZigZag (hp : 1 < p) (h : umdConst X p < ∞) :
+    IsLeast {β : ℝ | 0 ≤ β ∧ ∃ U : X → X → ℝ, IsBallZigZagConcave ℝ U ∧
+      ∀ x y, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ U x y} (umdConst X p).toReal := by
   sorry
 
 end Real
@@ -207,18 +203,20 @@ theorem isLeast_complexSignZigZag [Nontrivial X] (hp : 1 < p) (h : complexUMDCon
       ∀ x y, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ u x y} (complexUMDConst X p).toReal := by
   sorry
 
-/-- The characterization with functions that are concave along `z ↦ (x + z, y + ε z)` for all `ε` in
-the closed unit disc and vanish at `(0, 0)` ([Y, Proposition 3.7]). -/
-theorem complexUMD_iff_zigZag (hp : 1 < p) :
-    complexUMDConst X p < ∞ ↔
-      ∃ β : ℝ, 0 < β ∧ ∃ U : X → X → ℝ, IsComplexZigZagConcave p β U := by
+/-- **The closed unit disc** ([Y, Proposition 3.7]): `UMD_{ℂ,p} (X) < ∞` if and only if there are
+`β > 0` and a function `U : X × X → ℝ`, concave along `z ↦ (x + z, y + ε z)` for all `ε ∈ ℂ` with
+`|ε| ≤ 1`, with `U (x, y) ≥ ‖y‖^p − β^p ‖x‖^p`. -/
+theorem complexUMD_iff_ballZigZag (hp : 1 < p) :
+    complexUMDConst X p < ∞ ↔ ∃ β : ℝ, 0 < β ∧ ∃ U : X → X → ℝ, IsBallZigZagConcave ℂ U ∧
+      ∀ x y, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ U x y := by
   sorry
 
-/-- The least `β ≥ 0` for which there is a function as in `complexUMD_iff_zigZag` is `UMD_{ℂ,p} (X)`
-([Y, Proposition 3.7]; it is `0` for `X = 0`). -/
-theorem isLeast_complexZigZag (hp : 1 < p) (h : complexUMDConst X p < ∞) :
-    IsLeast {β : ℝ | 0 ≤ β ∧ ∃ U : X → X → ℝ, IsComplexZigZagConcave p β U}
-      (complexUMDConst X p).toReal := by
+/-- **The best constant** ([Y, Proposition 3.7], the closed unit disc): for a UMD space, the least
+`β ≥ 0` for which there is a function as in `complexUMD_iff_ballZigZag` is `UMD_{ℂ,p} (X)` (`0` for
+`X = 0`). -/
+theorem isLeast_complexBallZigZag (hp : 1 < p) (h : complexUMDConst X p < ∞) :
+    IsLeast {β : ℝ | 0 ≤ β ∧ ∃ U : X → X → ℝ, IsBallZigZagConcave ℂ U ∧
+      ∀ x y, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ U x y} (complexUMDConst X p).toReal := by
   sorry
 
 end Complex

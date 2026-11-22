@@ -3,16 +3,16 @@
   "solution_module": "UMD.Solution",
   "theorem_names": [
     "UMDChallenge.isUMDBound_iff_deterministic",
-    "UMDChallenge.dyadicUMDConst_eq_umdConst",
+    "UMDChallenge.isUMDBound_iff_dyadic",
     "UMDChallenge.umdConst_extrapolation",
     "UMDChallenge.umdConst_two_comparison",
-    "UMDChallenge.umdConst_Lp_le",
-    "UMDChallenge.umdConst_Lp_eq",
+    "UMDChallenge.umdConst_Lp",
     "UMDChallenge.umdConst_hilbert",
     "UMDChallenge.deterministic_transform_le",
     "UMDChallenge.isComplexUMDBound_iff_deterministic",
-    "UMDChallenge.complexDyadicUMDConst_eq_complexUMDConst",
-    "UMDChallenge.umdConst_le_complexUMDConst_le"
+    "UMDChallenge.isComplexUMDBound_iff_dyadic",
+    "UMDChallenge.umdConst_le_complexUMDConst_le",
+    "UMDChallenge.complexUMDConst_Lp"
   ],
   "definition_names": [],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],

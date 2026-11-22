@@ -33,8 +33,8 @@ in the modules named with each block.
 * `burkholder`: Burkholder's function (`Martingale/Burkholder/Function.lean`);
 * `umd`, `complexUMD`: the UMD constants, for real signs and for complex multipliers
   (`UMD/Defs.lean`);
-* `dyadicUMD`: the dyadic and deterministic forms of the UMD property (`UMD/Maurey/Basic.lean`,
-  `UMD/Incremental.lean`);
+* `dyadicUMD`: the UMD property with deterministic multipliers, for all martingales and for
+  Paley–Walsh martingales (`UMD/Incremental.lean`, `UMD/Maurey/Basic.lean`);
 * `randomisedUMD`: the randomised UMD property (`UMD/Decoupling.lean`);
 * `zigZag`: zig-zag concave functions (`ZigZag/`);
 * `hypercontractivity`: the discrete heat semigroup (`Hypercontractivity/`);
@@ -171,47 +171,6 @@ end
 
 -- BEGIN SHARED DEFINITIONS: dyadicUMD
 
-section
-
-open SignCube
-
-variable (X : Type*) [NormedAddCommGroup X] [NormedSpace ℝ X]
-
-/-- `β` bounds the `±1`-transforms of Paley–Walsh martingales with values in `X`:
-`‖Σ_{k<n} σ_k ε_k ξ_k‖_{L^p} ≤ β ‖Σ_{k<n} ε_k ξ_k‖_{L^p}` for predictable `ξ_k` and predictable
-signs `σ_k`. -/
-def IsDyadicUMDBound (p : ℝ) (β : ℝ≥0∞) : Prop :=
-  ∀ (N : ℕ) (ξ : Fin N → (Fin N → Bool) → X) (σ : Fin N → (Fin N → Bool) → ℝ),
-    IsPredictable ξ → IsPredictable σ → (∀ k ε, σ k ε = 1 ∨ σ k ε = -1) → ∀ n : ℕ,
-      ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh (fun k ε => σ k ε • ξ k ε) n)) ≤
-        β * ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh ξ n))
-
-/-- The dyadic `UMD_p` constant `UMD_p^Δ (X)`. -/
-noncomputable def dyadicUMDConst (p : ℝ) : ℝ≥0∞ :=
-  sInf {β | IsDyadicUMDBound X p β}
-
-end
-
-section
-
-open SignCube
-
-variable (X : Type*) [NormedAddCommGroup X] [NormedSpace ℂ X]
-
-/-- The dyadic complex `UMD_p` bound: predictable unimodular complex multipliers of Paley–Walsh
-martingales. -/
-def IsComplexDyadicUMDBound (p : ℝ) (β : ℝ≥0∞) : Prop :=
-  ∀ (N : ℕ) (ξ : Fin N → (Fin N → Bool) → X) (c : Fin N → (Fin N → Bool) → ℂ),
-    IsPredictable ξ → IsPredictable c → (∀ k ε, ‖c k ε‖ = 1) → ∀ n : ℕ,
-      ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh (fun k ε => c k ε • ξ k ε) n)) ≤
-        β * ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh ξ n))
-
-/-- The dyadic complex `UMD_p` constant `UMD_{ℂ,p}^Δ (X)`. -/
-noncomputable def complexDyadicUMDConst (p : ℝ) : ℝ≥0∞ :=
-  sInf {β | IsComplexDyadicUMDBound X p β}
-
-end
-
 /-- `β` is a UMD constant of `X` for *deterministic* multipliers (HNVW I, Definition 4.2.1,
 p. 281): for every `X`-valued martingale `Y` with `Y_0 = 0` on a probability space and all scalars
 `ε_k ∈ 𝕜` with `|ε_k| = 1`, `‖Σ_{k<n} ε_{k+1} (Y_{k+1} − Y_k)‖_{L^p} ≤ β ‖Y_n‖_{L^p}`. In the book
@@ -225,6 +184,17 @@ def IsDeterministicUMDBound (𝕜 X : Type*) [RCLike 𝕜] [NormedAddCommGroup X
       ∀ n, eLpNorm (fun ω => ‖∑ k ∈ Finset.range n, ε (k + 1) • (Y (k + 1) ω - Y k ω)‖)
           (ENNReal.ofReal p) μ ≤
         β * eLpNorm (fun ω => ‖Y n ω‖) (ENNReal.ofReal p) μ
+
+/-- `β` is a dyadic UMD constant of `X` (HNVW I, Definition 4.2.1, for Paley–Walsh martingales): for
+every number of signs `N`, every predictable family `ξ` with values in `X` and all scalars `l_k ∈ 𝕜`
+with `|l_k| = 1`, `‖Σ_{k<n} l_k ε_k ξ_k‖_{L^p} ≤ β ‖Σ_{k<n} ε_k ξ_k‖_{L^p}`. -/
+def IsDeterministicDyadicUMDBound (𝕜 X : Type*) [RCLike 𝕜] [NormedAddCommGroup X] [NormedSpace ℝ X]
+    [NormedSpace 𝕜 X] (p : ℝ) (β : ℝ≥0∞) : Prop :=
+  ∀ (N : ℕ) (ξ : Fin N → (Fin N → Bool) → X) (l : Fin N → 𝕜),
+    SignCube.IsPredictable ξ → (∀ k, ‖l k‖ = 1) → ∀ n : ℕ,
+      ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p
+          (SignCube.paleyWalsh (fun k ε => l k • ξ k ε) n)) ≤
+        β * ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (SignCube.paleyWalsh ξ n))
 
 -- END SHARED DEFINITIONS: dyadicUMD
 
@@ -277,19 +247,11 @@ def IsSignZigZagConcave (𝕜 : Type*) {X : Type*} [RCLike 𝕜] [NormedAddCommG
     [NormedSpace ℝ X] (u : X → X → ℝ) : Prop :=
   ∀ (x y : X) (ε : 𝕜), ‖ε‖ = 1 → ConcaveOn ℝ Set.univ fun z : X => u (x + z) (y + ε • z)
 
-/-- `U : X × X → ℝ` is zig-zag concave for the obstacle `‖y‖^p − β^p ‖x‖^p` (real scalars):
-`z ↦ U (x + z, y + ε z)` is concave for every `ε ∈ [−1, 1]`, `U (0, 0) = 0`, and
-`U (x, y) ≥ ‖y‖^p − β^p ‖x‖^p`. -/
-def IsZigZagConcave {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (p β : ℝ)
-    (U : X → X → ℝ) : Prop :=
-  (∀ (x y : X) (ε : ℝ), |ε| ≤ 1 → ConcaveOn ℝ Set.univ fun z : X => U (x + z) (y + ε • z)) ∧
-    U 0 0 = 0 ∧ ∀ x y : X, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ U x y
-
-/-- The complex version: `ε` ranges over the closed unit disc. -/
-def IsComplexZigZagConcave {X : Type*} [NormedAddCommGroup X] [NormedSpace ℂ X] (p β : ℝ)
-    (U : X → X → ℝ) : Prop :=
-  (∀ (x y : X) (ε : ℂ), ‖ε‖ ≤ 1 → ConcaveOn ℝ Set.univ fun z : X => U (x + z) (y + ε • z)) ∧
-    U 0 0 = 0 ∧ ∀ x y : X, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ U x y
+/-- The same for all `ε` in the closed unit ball of `𝕜`: `z ↦ u (x + z, y + ε z)` is concave for all
+`x`, `y` and all `ε ∈ 𝕜` with `‖ε‖ ≤ 1`. -/
+def IsBallZigZagConcave (𝕜 : Type*) {X : Type*} [RCLike 𝕜] [NormedAddCommGroup X] [NormedSpace 𝕜 X]
+    [NormedSpace ℝ X] (u : X → X → ℝ) : Prop :=
+  ∀ (x y : X) (ε : 𝕜), ‖ε‖ ≤ 1 → ConcaveOn ℝ Set.univ fun z : X => u (x + z) (y + ε • z)
 
 -- END SHARED DEFINITIONS: zigZag
 

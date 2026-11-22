@@ -31,13 +31,15 @@ theorem isLeast_signZigZag [Nontrivial X] (hp : 1 < p) (h : umdConst X p < ∞) 
       ∀ x y, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ u x y} (umdConst X p).toReal :=
   isLeast_umdConst_isSignZigZagConcave hp h
 
-theorem umd_iff_zigZag (hp : 1 < p) :
-    umdConst X p < ∞ ↔ ∃ β : ℝ, 0 < β ∧ ∃ U : X → X → ℝ, IsZigZagConcave p β U :=
-  umdConst_lt_top_iff_exists_isZigZagConcave hp
+theorem umd_iff_ballZigZag (hp : 1 < p) :
+    umdConst X p < ∞ ↔ ∃ β : ℝ, 0 < β ∧ ∃ U : X → X → ℝ, IsBallZigZagConcave ℝ U ∧
+      ∀ x y, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ U x y :=
+  umdConst_lt_top_iff_exists_isBallZigZagConcave hp
 
-theorem isLeast_zigZag (hp : 1 < p) (h : umdConst X p < ∞) :
-    IsLeast {β : ℝ | 0 ≤ β ∧ ∃ U : X → X → ℝ, IsZigZagConcave p β U} (umdConst X p).toReal :=
-  isLeast_umdConst_isZigZagConcave hp h
+theorem isLeast_ballZigZag (hp : 1 < p) (h : umdConst X p < ∞) :
+    IsLeast {β : ℝ | 0 ≤ β ∧ ∃ U : X → X → ℝ, IsBallZigZagConcave ℝ U ∧
+      ∀ x y, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ U x y} (umdConst X p).toReal :=
+  isLeast_umdConst_isBallZigZagConcave hp h
 
 end Real
 
@@ -55,15 +57,15 @@ theorem isLeast_complexSignZigZag [Nontrivial X] (hp : 1 < p) (h : complexUMDCon
       ∀ x y, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ u x y} (complexUMDConst X p).toReal :=
   isLeast_complexUMDConst_isSignZigZagConcave hp h
 
-theorem complexUMD_iff_zigZag (hp : 1 < p) :
-    complexUMDConst X p < ∞ ↔
-      ∃ β : ℝ, 0 < β ∧ ∃ U : X → X → ℝ, IsComplexZigZagConcave p β U :=
-  complexUMDConst_lt_top_iff_exists_isComplexZigZagConcave hp
+theorem complexUMD_iff_ballZigZag (hp : 1 < p) :
+    complexUMDConst X p < ∞ ↔ ∃ β : ℝ, 0 < β ∧ ∃ U : X → X → ℝ, IsBallZigZagConcave ℂ U ∧
+      ∀ x y, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ U x y :=
+  complexUMDConst_lt_top_iff_exists_isBallZigZagConcave hp
 
-theorem isLeast_complexZigZag (hp : 1 < p) (h : complexUMDConst X p < ∞) :
-    IsLeast {β : ℝ | 0 ≤ β ∧ ∃ U : X → X → ℝ, IsComplexZigZagConcave p β U}
-      (complexUMDConst X p).toReal :=
-  isLeast_complexUMDConst_isComplexZigZagConcave hp h
+theorem isLeast_complexBallZigZag (hp : 1 < p) (h : complexUMDConst X p < ∞) :
+    IsLeast {β : ℝ | 0 ≤ β ∧ ∃ U : X → X → ℝ, IsBallZigZagConcave ℂ U ∧
+      ∀ x y, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ U x y} (complexUMDConst X p).toReal :=
+  isLeast_complexUMDConst_isBallZigZagConcave hp h
 
 end Complex
 

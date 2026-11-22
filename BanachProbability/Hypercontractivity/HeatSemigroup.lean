@@ -368,6 +368,51 @@ theorem heatSemigroup_walsh (t : ℝ) {n : ℕ} (α : Finset (Fin n)) (x : E) :
   simp only [e1, e2] at h
   exact h
 
+/-- `T (t)` is linear: the sum of two functions. -/
+theorem heatSemigroup_add (t : ℝ) {n : ℕ} (f g : (Fin n → Bool) → E) :
+    heatSemigroup t (f + g) = heatSemigroup t f + heatSemigroup t g := by
+  unfold heatSemigroup
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+    funext ε
+    have e : ∀ η : Bool, kBarTensor (Real.exp (-t)) n
+        (fun ε' : Fin n → Bool => (f + g) (Fin.cons η ε')) (Fin.tail ε) =
+        kBarTensor (Real.exp (-t)) n (fun ε' => f (Fin.cons η ε')) (Fin.tail ε) +
+          kBarTensor (Real.exp (-t)) n (fun ε' => g (Fin.cons η ε')) (Fin.tail ε) := fun η =>
+      congrFun (ih (fun ε' => f (Fin.cons η ε')) fun ε' => g (Fin.cons η ε')) (Fin.tail ε)
+    rw [Pi.add_apply, kBarTensor_succ, kBarTensor_succ, kBarTensor_succ]
+    simp only [kBar, e]
+    module
+
+/-- `T (t) 0 = 0`. -/
+theorem heatSemigroup_zero (t : ℝ) (n : ℕ) : heatSemigroup t (0 : (Fin n → Bool) → E) = 0 := by
+  have h := heatSemigroup_add t (0 : (Fin n → Bool) → E) 0
+  rw [add_zero] at h
+  simpa using h
+
+/-- **(6.6)** (HNVW II, p. 19), the definition of the discrete heat semigroup there:
+`T (t) (Σ_α w_α x_α) = Σ_α e^{−t #α} w_α x_α`. Every function on the cube is of the form
+`Σ_α w_α x_α` (`SignCube.sum_walsh_smul_walshCoeff`). -/
+theorem heatSemigroup_sum_walsh (t : ℝ) {n : ℕ} (x : Finset (Fin n) → E) :
+    heatSemigroup t (fun ε : Fin n → Bool => ∑ α, (∏ i ∈ α, coin (ε i)) • x α) =
+      fun ε => ∑ α, Real.exp (-t * α.card) • (∏ i ∈ α, coin (ε i)) • x α := by
+  have key : ∀ s : Finset (Finset (Fin n)),
+      heatSemigroup t (∑ α ∈ s, fun ε : Fin n → Bool => (∏ i ∈ α, coin (ε i)) • x α) =
+        ∑ α ∈ s, fun ε => Real.exp (-t * α.card) • (∏ i ∈ α, coin (ε i)) • x α := fun s => by
+    classical
+    induction s using Finset.induction_on with
+    | empty => simpa only [Finset.sum_empty] using heatSemigroup_zero t n
+    | insert a s ha ih =>
+      rw [Finset.sum_insert ha, Finset.sum_insert ha, heatSemigroup_add, ih, heatSemigroup_walsh]
+  have e1 : (fun ε : Fin n → Bool => ∑ α, (∏ i ∈ α, coin (ε i)) • x α) =
+      ∑ α, fun ε : Fin n → Bool => (∏ i ∈ α, coin (ε i)) • x α := by
+    funext ε
+    rw [Finset.sum_apply]
+  rw [e1, key]
+  funext ε
+  rw [Finset.sum_apply]
+
 /-- `T (t) (c + Σ_i ε_i x_i) = c + e^{−t} Σ_i ε_i x_i`, (6.6) for `#α ≤ 1`. -/
 theorem heatSemigroup_affine (t : ℝ) {n : ℕ} (c : E) (x : Fin n → E) :
     heatSemigroup t (fun ε : Fin n → Bool => c + ∑ i, coin (ε i) • x i) =

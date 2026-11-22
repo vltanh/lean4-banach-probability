@@ -27,7 +27,8 @@ compared with the inequalities for randomised martingale differences, after
 
 * [HNVW] T. Hytönen, J. van Neerven, M. Veraar, L. Weis, *Analysis in Banach Spaces, Volume I:
   Martingales and Littlewood–Paley Theory*, Springer, 2016 (in the docstrings also HNVW I):
-  Definition 4.2.1, Proposition 4.2.3, with the constants after it, p. 282.
+  Definition 4.2.1, Proposition 4.2.3, with the constants after it, p. 282, and Theorem 4.4.1 with
+  Remark 4.4.2, pp. 319–320.
 
 ## Conventions
 
@@ -55,9 +56,10 @@ compared with the inequalities for randomised martingale differences, after
   `β⁻¹ ‖Y_n‖_p ≤ ‖Σ_{k<n} ε_k (Y_{k+1} − Y_k)‖_p ≤ β ‖Y_n‖_p`.
 * `umd_of_randomised` ([HNVW, Proposition 4.2.3], `β ≤ β⁻ β⁺`): two such inequalities with constants
   `β⁻` and `β⁺` give the UMD constant `β⁻ β⁺`.
-* `decoupling` (the two inequalities of [HNVW, Proposition 4.2.3] for Paley–Walsh martingales; the
-  converse for them is not formalized): `UMD_p⁻¹ ‖Ỹ_n‖_p ≤ ‖Y_n‖_p ≤ UMD_p ‖Ỹ_n‖_p` for a
-  Paley–Walsh martingale `Y` and its decoupled sums `Ỹ`.
+* `decoupling` ([HNVW, Theorem 4.4.1] for `X = ℝ`, the Rademacher variables `ξ_n = r_n` and
+  `v_n = φ_n (r_1, …, r_{n−1})`, as in [HNVW, Remark 4.4.2]):
+  `UMD_p⁻¹ ‖Ỹ_n‖_p ≤ ‖Y_n‖_p ≤ UMD_p ‖Ỹ_n‖_p` for a Paley–Walsh martingale `Y` and its decoupled
+  sums `Ỹ`.
 * `eLpNorm_uniformOn`: a check of the two norms on the sign cube.
 
 The definitions are copied word for word from `BanachProbability/Defs.lean` (kept in sync by
@@ -202,8 +204,8 @@ variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X
 
 /-- **The randomised UMD property** ([HNVW, Proposition 4.2.3], `β⁻ ≤ β` and `β⁺ ≤ β`): if `β` is a
 `UMD_p` constant of `X`, then `‖Y_n‖_p ≤ β ‖Σ_{k<n} ε_k (Y_{k+1} − Y_k)‖_p` and
-`‖Σ_{k<n} ε_k (Y_{k+1} − Y_k)‖_p ≤ β ‖Y_n‖_p` for all martingales `Y`, with independent fair signs
-`ε_k` on a further probability space. -/
+`‖Σ_{k<n} ε_k (Y_{k+1} − Y_k)‖_p ≤ β ‖Y_n‖_p` for all martingales `Y` started at `0`, with
+independent fair signs `ε_k` on a further probability space. -/
 theorem randomisedUMD (hp : 1 < p) {β : ℝ≥0∞} (h : IsUMDBound X p β) :
     IsLowerRandomisedUMDBound X p β ∧ IsUpperRandomisedUMDBound X p β := by
   sorry
@@ -214,9 +216,9 @@ theorem umd_of_randomised (hp : 1 < p) {β₁ β₂ : ℝ≥0∞} (hl : IsLowerR
     (hu : IsUpperRandomisedUMDBound X p β₂) : IsUMDBound X p (β₁ * β₂) := by
   sorry
 
-/-- **Decoupling** of Paley–Walsh martingales (the two inequalities of [HNVW, Proposition 4.2.3] for
-Paley–Walsh martingales, with the constant `UMD_p (X)`): for `Y_n = Σ_{k<n} ε_k ξ_k`, `ξ`
-predictable, and `Ỹ_n = Σ_{k<n} ε̃_k ξ_k`, with an independent copy `ε̃` of the signs `ε`,
+/-- **Decoupling** of Paley–Walsh martingales ([HNVW, Theorem 4.4.1, (4.26)] for `X = ℝ` and
+Rademacher variables `ξ_n`, [HNVW, Remark 4.4.2]): for `Y_n = Σ_{k<n} ε_k ξ_k`, `ξ` predictable, and
+`Ỹ_n = Σ_{k<n} ε̃_k ξ_k`, with an independent copy `ε̃` of the signs `ε`,
 `‖Ỹ_n‖_p ≤ UMD_p (X) ‖Y_n‖_p` and `‖Y_n‖_p ≤ UMD_p (X) ‖Ỹ_n‖_p`. -/
 theorem decoupling (hp : 1 < p) {N : ℕ} (ξ : Fin N → (Fin N → Bool) → X) (hξ : IsPredictable ξ)
     (n : ℕ) :

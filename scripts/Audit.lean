@@ -1,8 +1,8 @@
 module
 
 public meta import Lean.Elab.Command
--- One `import all` line per module of the library and per Solution of `palomar/`, so that the proofs
--- are visible (the module system hides them from a plain `import`). Generate the lines with
+-- One `import all` line per module of the library and per Solution of `palomar/`, so that the
+-- proofs are visible (the module system hides them from a plain `import`). Generate the lines with
 --   { find BanachProbability -name '*.lean'; cd palomar && find . -name Solution.lean; } |
 --     sed 's#^\./##; s/\.lean$//; s#/#.#g; s/^/import all /' | sort
 -- No Challenge is imported: each holds a copy of definitions of the library.
@@ -90,10 +90,10 @@ Run with `lake env lean scripts/Audit.lean` after `lake build`.
 
 Checks every declaration of the library and of the Solutions in `palomar/`, including private and
 auxiliary ones: the run fails if one depends on an axiom other than Lean's standard `propext`,
-`Classical.choice` and `Quot.sound`. A `sorry` shows up as the axiom `sorryAx`, and fails the run too
-(`allowSorry := false`); with `allowSorry := true`, for work in progress, the declarations that depend
-on `sorryAx` are listed instead. (The Challenges in `palomar/`, whose theorems are stated with
-`sorry`, are not imported.) Prints the axioms on which the theorems of the Solutions depend.
+`Classical.choice` and `Quot.sound`. A `sorry` shows up as the axiom `sorryAx`, and fails the run
+too (`allowSorry := false`); with `allowSorry := true`, for work in progress, the declarations that
+depend on `sorryAx` are listed instead. (The Challenges in `palomar/`, whose theorems are stated
+with `sorry`, are not imported.) Prints the axioms on which the theorems of the Solutions depend.
 -/
 
 open Lean Elab Command
@@ -128,6 +128,7 @@ meta def solutionResults : List Name :=
    ``KahaneKhintchineChallenge.contraction_real,
    ``KahaneKhintchineChallenge.contraction_complex,
    ``NoncommutativeKhintchineChallenge.khintchine,
+   ``NoncommutativeKhintchineChallenge.khintchine_of_eq_two_or_three_le,
    ``NoncommutativeKhintchineChallenge.khintchine_symmetric,
    ``NoncommutativeKhintchineChallenge.schattenNorm_transpose_mul_self,
    ``NoncommutativeKhintchineChallenge.schattenNorm_two_sq,
@@ -154,24 +155,24 @@ meta def solutionResults : List Name :=
    ``TypeTwoChallenge.rademacherProj_schatten,
    ``TypeTwoChallenge.rademacherProj_schatten_conj,
    ``UMDChallenge.isUMDBound_iff_deterministic,
-   ``UMDChallenge.dyadicUMDConst_eq_umdConst,
+   ``UMDChallenge.isUMDBound_iff_dyadic,
    ``UMDChallenge.umdConst_extrapolation,
    ``UMDChallenge.umdConst_two_comparison,
-   ``UMDChallenge.umdConst_Lp_le,
-   ``UMDChallenge.umdConst_Lp_eq,
+   ``UMDChallenge.umdConst_Lp,
    ``UMDChallenge.umdConst_hilbert,
    ``UMDChallenge.deterministic_transform_le,
    ``UMDChallenge.isComplexUMDBound_iff_deterministic,
-   ``UMDChallenge.complexDyadicUMDConst_eq_complexUMDConst,
+   ``UMDChallenge.isComplexUMDBound_iff_dyadic,
    ``UMDChallenge.umdConst_le_complexUMDConst_le,
+   ``UMDChallenge.complexUMDConst_Lp,
    ``ZigZagChallenge.umd_iff_signZigZag,
    ``ZigZagChallenge.isLeast_signZigZag,
-   ``ZigZagChallenge.umd_iff_zigZag,
-   ``ZigZagChallenge.isLeast_zigZag,
+   ``ZigZagChallenge.umd_iff_ballZigZag,
+   ``ZigZagChallenge.isLeast_ballZigZag,
    ``ZigZagChallenge.complexUMD_iff_signZigZag,
    ``ZigZagChallenge.isLeast_complexSignZigZag,
-   ``ZigZagChallenge.complexUMD_iff_zigZag,
-   ``ZigZagChallenge.isLeast_complexZigZag]
+   ``ZigZagChallenge.complexUMD_iff_ballZigZag,
+   ``ZigZagChallenge.isLeast_complexBallZigZag]
 
 /-- Whether `m` is a module of the library or a Solution of `palomar/`. -/
 meta def isLibraryModule (m : Name) : Bool :=

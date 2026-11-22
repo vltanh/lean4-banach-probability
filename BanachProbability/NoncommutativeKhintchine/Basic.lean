@@ -36,13 +36,16 @@ open SignCube
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
-/-- **Noncommutative Khintchine inequality, upper bound**, for real square matrices:
-`(E ‖Σ_i ε_i x_i‖_{S_q}^q)^{1/q} ≤ √(2 (q − 1)) max (‖Σ x_i x_iᵀ‖_{S_{q/2}},
-‖Σ x_iᵀ x_i‖_{S_{q/2}})^{1/2}`, `q ≥ 2`. -/
-theorem ncKhintchine_upper {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (x : Fin k → Matrix n n ℝ) :
+/-- The dilation step (Mackey et al. 2014, §8): an upper bound with a constant `K` for the symmetric
+matrices `D (x_i)` gives one with the same constant for the `x_i`. -/
+private theorem ncKhintchine_upper_of_dilation {q K : ℝ} (hq : 2 ≤ q) (hK : 0 ≤ K) {k : ℕ}
+    (x : Fin k → Matrix n n ℝ)
+    (hsym : SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
+        (fun ε : Fin k → Bool => ∑ i, coin (ε i) • dilation (x i)) ≤
+      K * √(schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, dilation (x i) * dilation (x i)))) :
     SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
         (fun ε : Fin k → Bool => ∑ i, coin (ε i) • x i) ≤
-      √(2 * (q - 1)) * √(max (schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, x i * (x i)ᵀ))
+      K * √(max (schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, x i * (x i)ᵀ))
         (schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, (x i)ᵀ * x i))) := by
   have hq0 : 0 < q := by linarith
   have hq2 : 0 < q / 2 := by linarith
@@ -54,9 +57,6 @@ theorem ncKhintchine_upper {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (x : Fin k → Mat
   set M := avg fun ε : Fin k → Bool =>
     schattenNorm (ENNReal.ofReal q) (∑ i, coin (ε i) • x i) ^ q
   have hM0 : 0 ≤ M := avg_nonneg fun ε => Real.rpow_nonneg (schattenNorm_nonneg _ _) _
-  -- the symmetric case, for the dilations `D (x_i)` on `n ⊕ n`
-  have hsym := ncKhintchine_symmetric_upper hq (fun i => dilation (x i))
-    (fun i => dilation_isHermitian (x i))
   -- `Σ_i ε_i D (x_i) = D (Σ_i ε_i x_i)`
   have hD : ∀ ε : Fin k → Bool,
       ∑ i, coin (ε i) • dilation (x i) = dilation (∑ i, coin (ε i) • x i) := fun ε => by
@@ -107,14 +107,37 @@ theorem ncKhintchine_upper {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (x : Fin k → Mat
   rw [hlpD, hsq] at hsym
   -- the factors `2^{1/q}` cancel
   have h2pos : 0 < (2 : ℝ) ^ (1 / q) := by positivity
-  change M ^ (1 / q) ≤ √(2 * (q - 1)) * √m
+  change M ^ (1 / q) ≤ K * √m
   refine le_of_mul_le_mul_left ?_ h2pos
   calc (2 : ℝ) ^ (1 / q) * M ^ (1 / q)
-      ≤ √(2 * (q - 1)) * √(schattenNorm (ENNReal.ofReal (q / 2)) (Matrix.fromBlocks B 0 0 C)) :=
-        hsym
-    _ ≤ √(2 * (q - 1)) * ((2 : ℝ) ^ (1 / q) * √m) :=
-        mul_le_mul_of_nonneg_left hsqrt (Real.sqrt_nonneg _)
-    _ = (2 : ℝ) ^ (1 / q) * (√(2 * (q - 1)) * √m) := by ring
+      ≤ K * √(schattenNorm (ENNReal.ofReal (q / 2)) (Matrix.fromBlocks B 0 0 C)) := hsym
+    _ ≤ K * ((2 : ℝ) ^ (1 / q) * √m) := mul_le_mul_of_nonneg_left hsqrt hK
+    _ = (2 : ℝ) ^ (1 / q) * (K * √m) := by ring
+
+/-- **Noncommutative Khintchine inequality, upper bound**, for real square matrices:
+`(E ‖Σ_i ε_i x_i‖_{S_q}^q)^{1/q} ≤ √(2 (q − 1)) max (‖Σ x_i x_iᵀ‖_{S_{q/2}},
+‖Σ x_iᵀ x_i‖_{S_{q/2}})^{1/2}`, `q ≥ 2`. -/
+theorem ncKhintchine_upper {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (x : Fin k → Matrix n n ℝ) :
+    SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
+        (fun ε : Fin k → Bool => ∑ i, coin (ε i) • x i) ≤
+      √(2 * (q - 1)) * √(max (schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, x i * (x i)ᵀ))
+        (schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, (x i)ᵀ * x i))) :=
+  ncKhintchine_upper_of_dilation hq (Real.sqrt_nonneg _) x (ncKhintchine_symmetric_upper hq
+    (fun i => dilation (x i)) fun i => dilation_isHermitian (x i))
+
+/-- **Noncommutative Khintchine inequality, upper bound**, for real square matrices and `q = 2` or
+`q ≥ 3`, with the constant `√(q − 1)`:
+`(E ‖Σ_i ε_i x_i‖_{S_q}^q)^{1/q} ≤ √(q − 1) max (‖Σ x_i x_iᵀ‖_{S_{q/2}},
+‖Σ x_iᵀ x_i‖_{S_{q/2}})^{1/2}`. -/
+theorem ncKhintchine_upper_of_eq_two_or_three_le {q : ℝ} (hq : q = 2 ∨ 3 ≤ q) {k : ℕ}
+    (x : Fin k → Matrix n n ℝ) :
+    SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
+        (fun ε : Fin k → Bool => ∑ i, coin (ε i) • x i) ≤
+      √(q - 1) * √(max (schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, x i * (x i)ᵀ))
+        (schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, (x i)ᵀ * x i))) :=
+  ncKhintchine_upper_of_dilation (by rcases hq with h | h <;> linarith) (Real.sqrt_nonneg _) x
+    (ncKhintchine_symmetric_upper_of_eq_two_or_three_le hq (fun i => dilation (x i)) fun i =>
+      dilation_isHermitian (x i))
 
 /-- **The noncommutative Khintchine inequality** for real square matrices, `q ≥ 2`, both bounds
 (Pisier–Xu 2003, Theorem 6.1 (i); Lust-Piquard 1986): with

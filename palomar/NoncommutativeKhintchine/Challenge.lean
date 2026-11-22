@@ -23,8 +23,9 @@ public import Mathlib.Probability.UniformOn
 # Challenge: the noncommutative Khintchine inequality
 
 The two-sided noncommutative Khintchine inequality in the Schatten classes `S_q`, `q ≥ 2`, for real
-square matrices, with an explicit constant of the optimal order `√q` that does not depend on the
-size of the matrices. After
+square matrices, with an explicit constant of the order `√q` that does not depend on the size of the
+matrices ([PX, Remark (i) after Theorem 6.1]: this order is the best possible, which is not
+formalized). After
 
 * [MJCFT] L. Mackey, M. I. Jordan, R. Y. Chen, B. Farrell, J. A. Tropp, *Matrix concentration
   inequalities via the method of exchangeable pairs*, Ann. Probab. 42 (2014), 906–945,
@@ -53,8 +54,10 @@ size of the matrices. After
   `m = max (‖(Σ x_i x_iᵀ)^{1/2}‖_{S_q}, ‖(Σ x_iᵀ x_i)^{1/2}‖_{S_q})`,
   `m ≤ (E ‖Σ ε_i x_i‖_{S_q}^q)^{1/q} ≤ √(2 (q − 1)) m`. The upper bound is proved by the method of
   [MJCFT], not by those of Lust-Piquard and Pisier.
-* `khintchine_symmetric` ([MJCFT, Corollary 7.3], real symmetric matrices): the constant `√(q − 1)`
-  for `q ≥ 3`.
+* `khintchine_of_eq_two_or_three_le`: the upper bound with the constant `√(q − 1)` for `q = 2` and
+  `q ≥ 3`, from the next theorem and [MJCFT, 8].
+* `khintchine_symmetric` ([MJCFT, Corollary 7.3, (7.2)], real symmetric matrices, `q = 2p`): the
+  constant `√(q − 1)` for `q = 2` and `q ≥ 3`.
 * `schattenNorm_transpose_mul_self`, `schattenNorm_two_sq`: checks of the definitions.
 
 Not formalized: complex and rectangular matrices, `q < 2`, general von Neumann algebras.
@@ -150,9 +153,20 @@ theorem khintchine {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (x : Fin k → Matrix n n 
           (schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, (x i)ᵀ * x i))) := by
   sorry
 
-/-- **Symmetric matrices** ([MJCFT, Corollary 7.3], real symmetric matrices): for `q ≥ 3`,
-`(E ‖Σ ε_i A_i‖_{S_q}^q)^{1/q} ≤ √(q − 1) ‖Σ A_i²‖_{S_{q/2}}^{1/2}`. -/
-theorem khintchine_symmetric {q : ℝ} (hq : 3 ≤ q) {k : ℕ} (A : Fin k → Matrix n n ℝ)
+/-- **The upper bound with the constant `√(q − 1)`** for `q = 2` and `q ≥ 3` ([MJCFT, Corollary 7.3,
+(7.2)] and the dilation of [MJCFT,  8], real square matrices): with `m` as in `khintchine`,
+`(E ‖Σ ε_i x_i‖_{S_q}^q)^{1/q} ≤ √(q − 1) m`. -/
+theorem khintchine_of_eq_two_or_three_le {q : ℝ} (hq : q = 2 ∨ 3 ≤ q) {k : ℕ}
+    (x : Fin k → Matrix n n ℝ) :
+    SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
+        (fun ε : Fin k → Bool => ∑ i, coin (ε i) • x i) ≤
+      √(q - 1) * √(max (schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, x i * (x i)ᵀ))
+        (schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, (x i)ᵀ * x i))) := by
+  sorry
+
+/-- **Symmetric matrices** ([MJCFT, Corollary 7.3, (7.2)], real symmetric matrices, `q = 2p`): for
+`q = 2` and `q ≥ 3`, `(E ‖Σ ε_i A_i‖_{S_q}^q)^{1/q} ≤ √(q − 1) ‖Σ A_i²‖_{S_{q/2}}^{1/2}`. -/
+theorem khintchine_symmetric {q : ℝ} (hq : q = 2 ∨ 3 ≤ q) {k : ℕ} (A : Fin k → Matrix n n ℝ)
     (hA : ∀ i, (A i).IsHermitian) :
     SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
         (fun ε : Fin k → Bool => ∑ i, coin (ε i) • A i) ≤

@@ -28,10 +28,10 @@ section Seminorm
 
 variable {E : Type*} [AddCommGroup E] [Module ℝ E]
 
-theorem heatSemigroup_walsh (t : ℝ) {n : ℕ} (α : Finset (Fin n)) (x : E) :
-    heatSemigroup t (fun ε : Fin n → Bool => (∏ i ∈ α, coin (ε i)) • x) =
-      fun ε => Real.exp (-t * α.card) • (∏ i ∈ α, coin (ε i)) • x :=
-  BanachProbability.heatSemigroup_walsh t α x
+theorem heatSemigroup_walsh (t : ℝ) {n : ℕ} (x : Finset (Fin n) → E) :
+    heatSemigroup t (fun ε : Fin n → Bool => ∑ α, (∏ i ∈ α, coin (ε i)) • x α) =
+      fun ε => ∑ α, Real.exp (-t * α.card) • (∏ i ∈ α, coin (ε i)) • x α :=
+  heatSemigroup_sum_walsh t x
 
 theorem heatSemigroup_hypercontractive (S : Seminorm ℝ E) {p q t : ℝ} (hp : 1 < p) (hpq : p ≤ q)
     (ht : Real.exp (-t) ≤ √((p - 1) / (q - 1))) {n : ℕ} (f : (Fin n → Bool) → E) :

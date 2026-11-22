@@ -41,9 +41,9 @@ in a seminormed space, the Kahane–Khintchine inequality, and Kahane's contract
 * In the first part the values are in a real vector space `E` with a seminorm `S`; [HNVW] has a
   Banach space, which is the case of its norm. No completeness is needed.
 * `heatSemigroup t f` is the discrete heat semigroup `T (t) f`; `heatSemigroup_walsh` is its
-  definition in [HNVW, (6.6)], `T (t) (w_α x) = e^{−t #α} w_α x` for the Walsh functions
-  `w_α = Π_{i ∈ α} ε_i`, whose combinations are all functions on the cube. It is built from the
-  operators `K̄` (`kBar`) and their tensor powers `⊗ⁿ K̄` (`kBarTensor`) of [B].
+  definition in [HNVW, (6.6)], `T (t) (Σ_α w_α x_α) = Σ_α e^{−t #α} w_α x_α` with the Walsh
+  functions `w_α = Π_{i ∈ α} ε_i`, whose combinations are all functions on the cube. It is built
+  from the operators `K̄` (`kBar`) and their tensor powers `⊗ⁿ K̄` (`kBarTensor`) of [B].
 
 ## Statements
 
@@ -149,11 +149,11 @@ section Seminorm
 
 variable {E : Type*} [AddCommGroup E] [Module ℝ E]
 
-/-- **The discrete heat semigroup** ([HNVW, (6.6)]): `T (t) (w_α x) = e^{−t #α} w_α x` for
-`w_α = Π_{i ∈ α} ε_i`, `α ⊆ {1, …, n}`. -/
-theorem heatSemigroup_walsh (t : ℝ) {n : ℕ} (α : Finset (Fin n)) (x : E) :
-    heatSemigroup t (fun ε : Fin n → Bool => (∏ i ∈ α, coin (ε i)) • x) =
-      fun ε => Real.exp (-t * α.card) • (∏ i ∈ α, coin (ε i)) • x := by
+/-- **The discrete heat semigroup** ([HNVW, (6.6)]): `T (t) (Σ_α w_α x_α) = Σ_α e^{−t #α} w_α x_α`,
+with `w_α = Π_{i ∈ α} ε_i`, `α ⊆ {1, …, n}`. -/
+theorem heatSemigroup_walsh (t : ℝ) {n : ℕ} (x : Finset (Fin n) → E) :
+    heatSemigroup t (fun ε : Fin n → Bool => ∑ α, (∏ i ∈ α, coin (ε i)) • x α) =
+      fun ε => ∑ α, Real.exp (-t * α.card) • (∏ i ∈ α, coin (ε i)) • x α := by
   sorry
 
 /-- **Hypercontractivity** ([HNVW, Theorem 6.2.2], the "if" part): `‖T (t) f‖_q ≤ ‖f‖_p` for

@@ -703,8 +703,10 @@ theorem exists_lt_lpNorm_transform {p K : ℝ} (hp : 1 < p) (hK : K < pStar p - 
 are a real Paley–Walsh martingale `f = Σ ε_k φ_k` and constants `l_k ∈ {±1}` such that
 `g = Σ l_k ε_k φ_k` satisfies `K ‖f‖_p < ‖g‖_p`. Deterministic and predictable signs give the same
 dyadic constants (`isUMDBound_of_isSignDyadicUMDBound`; Hytönen–van Neerven–Veraar–Weis, *Analysis
-in Banach Spaces I* (2016), Theorem 4.2.25). The dyadic martingales of the book are the partial sums
-of Haar series, whose deterministic signs are predictable signs of Paley–Walsh martingales. -/
+in Banach Spaces I* (2016), Theorem 4.2.25). Paley–Walsh martingales whose coefficients `φ_k` do not
+vanish are dyadic in the sense of the book (p. 136). Those of its Theorem 3.34, from which Remark
+3.8 follows, are the partial sums of Haar series, whose deterministic signs are predictable signs of
+Paley–Walsh martingales. -/
 theorem exists_lt_lpNorm_transform_const {p K : ℝ} (hp : 1 < p) (hK : K < pStar p - 1) :
     ∃ (N : ℕ) (φ : Fin N → (Fin N → Bool) → ℝ) (l : Fin N → ℝ), IsPredictable φ ∧
       (∀ k, l k = 1 ∨ l k = -1) ∧

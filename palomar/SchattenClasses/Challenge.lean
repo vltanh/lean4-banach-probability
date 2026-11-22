@@ -24,8 +24,8 @@ public import Mathlib.Probability.UniformOn
 
 Inequalities for the singular values and the Schatten norms of real and complex matrices, and the
 martingale transforms of matrix-valued martingales: their weak type `(1, 1)`, their boundedness in
-`L^r (S_r)`, and the UMD property of the Schatten classes with the optimal order of the constant,
-uniformly in the size of the matrices. After
+`L^r (S_r)`, and the UMD property of the Schatten classes, with a constant of the order of `q*` in
+`L^q`, uniformly in the size of the matrices. After
 
 * [HNVW] T. Hytönen, J. van Neerven, M. Veraar, L. Weis, *Analysis in Banach Spaces, Volume I:
   Martingales and Littlewood–Paley Theory*, Springer, 2016: Appendix D, Proposition D.2.3, Corollary
@@ -51,8 +51,9 @@ uniformly in the size of the matrices. After
   larger than `λ`.
 * `T_c x = E_0 x + Σ_{k<N} c_k (E_{k+1} x − E_k x)` (`ncTransform ℱ μ c N x`), with scalar
   multipliers `c_k`, `ℱ_k`-measurable and `|c_k| ≤ 1`. ([R, Theorem 3.1] has multipliers `ξ_k` in
-  the algebra `L^∞ (ℱ_k) ⊗ M_n` that commute with the next algebra, which for this `𝒩` are the
-  scalar ones.)
+  the algebra of time `k` that commute with the algebra of time `k + 1`, which for this `𝒩` are the
+  real scalar functions; for the complex matrices of the source they are the complex scalar
+  functions.)
 * A matrix-valued martingale is a process whose entries are martingales; `IsMatrixUMDBound nrm p β`
   is the UMD inequality in `L^p` with constant `β` for the norm `nrm`, predictable signs, and
   probability spaces in the universe `Type`.
@@ -61,17 +62,19 @@ uniformly in the size of the matrices. After
 
 * `schattenNorm_eq_singularValues`, `complexSchattenNorm_eq_singularValues`: checks of the
   definitions.
-* `schattenNorm_triangle` (cf. [BZ, Proposition 3.13]): the triangle inequality, `1 ≤ q ≤ ∞`.
+* `schattenNorm_triangle` ([BZ, Proposition 3.13], for square matrices): the triangle inequality,
+  `1 ≤ q ≤ ∞`, for rectangular matrices.
 * `horn_prod` ([HNVW, Proposition D.2.3]), `horn_sum` ([TJ, Lemma 1.1]): Horn's inequalities for the
   singular values of products.
 * `schattenNorm_holder` ([HNVW, Corollary D.2.4]), `abs_trace_mul_le` ([HNVW, Theorem D.2.6]):
   Hölder's inequality, and for the trace.
-* `weakType_posSemidef`, `weakType` ([R, Theorem 3.1]):
-  `λ τ (1_{(λ, ∞)} (|T_c x|)) ≤ C ‖x‖_{L¹ (τ)}`, `C = 26` for `x ⪰ 0` and `C = 52` for all `x`.
+* `weakType_posSemidef`, `weakType` ([R, Theorem 3.1]; there with `x_N = E_N x` for `x` on the
+  right): `λ τ (1_{(λ, ∞)} (|T_c x|)) ≤ C ‖x‖_{L¹ (τ)}`, `C = 26` for `x ⪰ 0` and `C = 52` for all
+  `x`.
 * `transform_bounded` ([R, Theorem 4.3]): `‖T_c x‖_{L^r (S_r)} ≤ K r* ‖x‖_{L^r (S_r)}`, `1 < r < ∞`,
   `r* = max (r, r/(r − 1))`, `K = 192 · 864³`.
-* `umd_schatten` ([R, Corollary 4.5]): `UMD_q (S_q) ≤ K q*`, real and complex matrices of every
-  size; `umd_two_schatten` ([R, Remark 4.6 (1)]): `UMD₂ (S_q) ≤ C (q* − 1)`.
+* `umd_schatten` ([R, Corollary 4.5]): `UMD_q (S_q) ≤ K q*`, real and complex `n × n` matrices;
+  `umd_two_schatten` ([R, Remark 4.6 (1)]): `UMD₂ (S_q) ≤ C (q* − 1)`.
 
 The definitions are copied word for word from `BanachProbability/Defs.lean` (kept in sync by
 `scripts/sync_challenge_defs.py`); the theorems are proved in
@@ -196,8 +199,8 @@ theorem complexSchattenNorm_eq_singularValues (A : Matrix m n ℂ) :
     complexSchattenNorm ∞ A = (Matrix.toEuclideanLin A).singularValues 0 := by
   sorry
 
-/-- **The triangle inequality** for the Schatten norms, `1 ≤ q ≤ ∞`, real and complex matrices (cf.
-[BZ, Proposition 3.13]). -/
+/-- **The triangle inequality** for the Schatten norms, `1 ≤ q ≤ ∞`, real and complex rectangular
+matrices ([BZ, Proposition 3.13], for complex square ones). -/
 theorem schattenNorm_triangle {q : ℝ≥0∞} (hq : 1 ≤ q) :
     (∀ A B : Matrix m n ℝ, schattenNorm q (A + B) ≤ schattenNorm q A + schattenNorm q B) ∧
     ∀ A B : Matrix m n ℂ,

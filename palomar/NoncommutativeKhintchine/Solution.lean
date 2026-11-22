@@ -32,12 +32,20 @@ theorem khintchine {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (x : Fin k → Matrix n n 
           (schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, (x i)ᵀ * x i))) :=
   ncKhintchine hq x
 
-theorem khintchine_symmetric {q : ℝ} (hq : 3 ≤ q) {k : ℕ} (A : Fin k → Matrix n n ℝ)
+theorem khintchine_of_eq_two_or_three_le {q : ℝ} (hq : q = 2 ∨ 3 ≤ q) {k : ℕ}
+    (x : Fin k → Matrix n n ℝ) :
+    SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
+        (fun ε : Fin k → Bool => ∑ i, coin (ε i) • x i) ≤
+      √(q - 1) * √(max (schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, x i * (x i)ᵀ))
+        (schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, (x i)ᵀ * x i))) :=
+  ncKhintchine_upper_of_eq_two_or_three_le hq x
+
+theorem khintchine_symmetric {q : ℝ} (hq : q = 2 ∨ 3 ≤ q) {k : ℕ} (A : Fin k → Matrix n n ℝ)
     (hA : ∀ i, (A i).IsHermitian) :
     SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
         (fun ε : Fin k → Bool => ∑ i, coin (ε i) • A i) ≤
       √(q - 1) * √(schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, A i * A i)) :=
-  ncKhintchine_symmetric_upper_of_three_le hq A hA
+  ncKhintchine_symmetric_upper_of_eq_two_or_three_le hq A hA
 
 theorem schattenNorm_transpose_mul_self {m : Type*} [Fintype m] {q : ℝ≥0∞} (hq : q ≠ 0)
     (B : Matrix m n ℝ) : schattenNorm (q / 2) (Bᵀ * B) = schattenNorm q B ^ 2 :=

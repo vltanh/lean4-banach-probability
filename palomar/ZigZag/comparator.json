@@ -4,12 +4,12 @@
   "theorem_names": [
     "ZigZagChallenge.umd_iff_signZigZag",
     "ZigZagChallenge.isLeast_signZigZag",
-    "ZigZagChallenge.umd_iff_zigZag",
-    "ZigZagChallenge.isLeast_zigZag",
+    "ZigZagChallenge.umd_iff_ballZigZag",
+    "ZigZagChallenge.isLeast_ballZigZag",
     "ZigZagChallenge.complexUMD_iff_signZigZag",
     "ZigZagChallenge.isLeast_complexSignZigZag",
-    "ZigZagChallenge.complexUMD_iff_zigZag",
-    "ZigZagChallenge.isLeast_complexZigZag"
+    "ZigZagChallenge.complexUMD_iff_ballZigZag",
+    "ZigZagChallenge.isLeast_complexBallZigZag"
   ],
   "definition_names": [],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],

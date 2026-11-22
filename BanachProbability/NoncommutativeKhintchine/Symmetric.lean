@@ -357,6 +357,36 @@ theorem ncKhintchine_symmetric_upper_of_three_le {q : ℝ} (hq : 3 ≤ q) {k : �
   rpow_le_of_avg_le (by linarith) (by linarith) A hA _ (fun _ => rfl)
     (avg_schattenNorm_rpow_le_of_three_le hq A hA _ fun _ => rfl)
 
+/-- **Noncommutative Khintchine inequality, symmetric case, `q = 2`** (Mackey et al. 2014,
+Corollary 7.3 for `p = 1`), an equality, by the identity (2.5):
+`(E ‖Σ_i ε_i A_i‖_{S_2}²)^{1/2} = ‖Σ_i A_i²‖_{S_1}^{1/2}`. -/
+theorem ncKhintchine_symmetric_two {k : ℕ} (A : Fin k → Matrix n n ℝ)
+    (hA : ∀ i, (A i).IsHermitian) :
+    SignCube.lpNorm (schattenNorm (ENNReal.ofReal 2)) 2
+        (fun ε : Fin k → Bool => ∑ i, coin (ε i) • A i) =
+      √(schattenNorm (ENNReal.ofReal (2 / 2)) (∑ i, A i * A i)) := by
+  set V := ∑ i, A i * A i
+  have hV : V.PosSemidef := Matrix.posSemidef_sum _ fun i _ => by
+    have := Matrix.posSemidef_conjTranspose_mul_self (A i)
+    rwa [(hA i).eq] at this
+  have hV1 : schattenNorm (ENNReal.ofReal (2 / 2)) V = V.trace := by
+    rw [div_self two_ne_zero]
+    exact schattenNorm_one_of_posSemidef hV
+  rw [SignCube.lpNorm, avg_schattenNorm_two_rpow A hA _ (fun _ => rfl), hV1, ← Real.sqrt_eq_rpow]
+
+/-- **Noncommutative Khintchine inequality, symmetric case**, with the source's constant
+`√(q − 1)` in its range `q = 2` or `q ≥ 3` (Mackey et al. 2014, Corollary 7.3, (7.2), where
+`q = 2p`). -/
+theorem ncKhintchine_symmetric_upper_of_eq_two_or_three_le {q : ℝ} (hq : q = 2 ∨ 3 ≤ q) {k : ℕ}
+    (A : Fin k → Matrix n n ℝ) (hA : ∀ i, (A i).IsHermitian) :
+    SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
+        (fun ε : Fin k → Bool => ∑ i, coin (ε i) • A i) ≤
+      √(q - 1) * √(schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, A i * A i)) := by
+  rcases hq with rfl | hq
+  · rw [show (2 : ℝ) - 1 = 1 by norm_num, Real.sqrt_one, one_mul]
+    exact (ncKhintchine_symmetric_two A hA).le
+  · exact ncKhintchine_symmetric_upper_of_three_le hq A hA
+
 /-- **Noncommutative Khintchine inequality, symmetric case, upper bound** (Mackey et al. 2014,
 §7, Corollary 7.3 (7.2) and Remark 7.2):
 `(E ‖Σ_i ε_i A_i‖_{S_q}^q)^{1/q} ≤ √(2 (q − 1)) ‖Σ_i A_i²‖_{S_{q/2}}^{1/2}`, `q ≥ 2`.

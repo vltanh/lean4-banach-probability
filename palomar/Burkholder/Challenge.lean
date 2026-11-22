@@ -56,7 +56,8 @@ space `H`, `1 < p < ∞`, and the square function inequality that follows from i
   case of equality in [B, Theorem 1.1] is not formalized.)
 * `squareFunction_inequality` ([O, Theorem 8.6, (8.28)], [B, Theorem 3.1]): for
   `S_n (f) = (‖f_0‖² + Σ_{k<n} ‖f_{k+1} − f_k‖²)^{1/2}`,
-  `(p* − 1)⁻¹ ‖f_n‖_p ≤ ‖S_n (f)‖_p ≤ (p* − 1) ‖f_n‖_p`. (The sharpness clauses are not formalized.)
+  `(p* − 1)⁻¹ ‖f_n‖_p ≤ ‖S_n (f)‖_p ≤ (p* − 1) ‖f_n‖_p`. (The sharpness clauses and the case of
+  equality are not formalized.)
 * `burkholderFun_majorizes`, `burkholderFun_concave` ([B, (1.10), Remark 1.2]): the properties of
   Burkholder's function `u_p` (`burkholderFun`).
 * `martingale_paleyWalsh`: a check of the definitions on the sign cube.
