@@ -1,43 +1,34 @@
 module
 
+public import BanachProbability.UMD.GoodLambda
 public import BanachProbability.UMD.Maurey.Basic
-public import BanachProbability.Martingale.Doob
+public import Mathlib.Analysis.Complex.ExponentialBounds
 
 /-!
 # Extrapolation of the UMD property
 
-A Banach space that is `UMD_{p₀}` for one `p₀ ∈ (1, ∞)` is `UMD_p` for every `p ∈ (1, ∞)`, and
-`UMD₂ (X) / 200 ≤ UMD_p (X) ≤ 100 p* UMD₂ (X)` (Hytönen–van Neerven–Veraar–Weis, *Analysis in
-Banach spaces I* (2016), Theorem 4.2.7).
+A Banach space that is `UMD_q` for one `q ∈ (1, ∞)` is `UMD_p` for every `p ∈ (1, ∞)`, with
+`UMD_p (X) ≤ 100 (p / q + p' / q') UMD_q (X)`, and in particular
+`UMD₂ (X) / 200 ≤ UMD_p (X) ≤ 50 (p + p') UMD₂ (X)`: T. Hytönen, J. van Neerven, M. Veraar and
+L. Weis (HNVW), *Analysis in Banach Spaces I* (2016), Theorem 4.2.7 (p. 283). The proof is theirs:
+(3.49) of Theorem 3.5.4 (p. 223), the extrapolation of the bounds of one transform `T` of
+Paley–Walsh martingales, then the supremum over the transforms, in the form of Lemma 4.2.8, and the
+equality of the dyadic and the general constants, Theorem 4.2.5 (`dyadicUMDConst_eq_umdConst`).
 
-The proof is Burkholder's good-λ method (D. L. Burkholder, *Distribution function inequalities
-for martingales*, Ann. Probab. 1 (1973); *A geometrical characterization of Banach spaces in which
-martingale difference sequences are unconditional*, Ann. Probab. 9 (1981), both open access on
-Project Euclid but not obtained; HNVW I was not obtained either), in the form it takes for dyadic
-martingales in Pisier, *Martingales in Banach spaces* (2016), the second proof of the
-extrapolation theorem, run on Paley–Walsh martingales, then lifted by Maurey's theorem
-(`dyadicUMDConst_eq_umdConst`).
-
-* `goodLambda`: for a Paley–Walsh martingale `f_k = Σ_{j<k} ε_j ξ_j`, its transform `g` by
-  predictable signs, `β > 1`, `δ > 0` with `a = β − 1 − 2δ > 0` and `λ > 0`,
-  `P (g*_n > βλ, f*_n ≤ δλ) ≤ (4 u δ / a)^p P (g*_n > λ)`, `u` a dyadic `UMD_p` constant. The
-  stopping times `μ = inf {k : ‖g_k‖ > λ}`, `ν = inf {k : ‖g_k‖ > βλ}` and
-  `ρ = inf {k : ‖f_k‖ > δλ or ‖ξ_k‖ > 2δλ}` (a stopping time because the jumps `‖ξ_k‖` are
-  predictable), taken as `Nat.find`s, cut out the predictable family
-  `h_k = 1_{μ ≤ k < ν ∧ ρ} ξ_k`. Its Paley–Walsh martingale at time `n` is `f_{n ∧ ν ∧ ρ} − f_μ`
-  (or `0`), of norm at most `4δλ 1_{g*_n > λ}`, and its transform is `g_ν − g_μ`, of norm at
-  least `aλ`, on `{g*_n > βλ, f*_n ≤ δλ}`; apply the `UMD_p` bound to `h` and Chebyshev.
-* `isDyadicUMDBound_of_goodLambda`: the layer-cake formula on the cube (Mathlib's
-  `lintegral_rpow_eq_lintegral_meas_lt_mul` for the uniform probability, applied to `g* / β`,
-  `g*` and `f* / δ`, which performs the substitutions `λ ↦ βλ`, `λ ↦ λ / δ`), absorption (every
-  quantity is finite on the cube) and Doob's inequality (`SignCube.lpNorm_runningMax_le`) give,
-  for every `r ∈ (1, ∞)`, the dyadic `UMD_r` constant
-  `r' (β / δ) (1 − β^r (4 u δ / a)^p)^{−1/r}` whenever `β^r (4 u δ / a)^p < 1`.
-* With `δ = θ (β − 1) / (4u + 2θ)` (so that `4uδ / a = θ`) and `β`, `θ` chosen as functions of
-  the exponents: `UMD_r^Δ ≤ 100 r* UMD_2^Δ` (the proof gives `76 r UMD_2^Δ` for `r ≥ 2`, with
-  `β = 1 + 1/r`, `θ = 1/3`, and `48 r' UMD_2^Δ` for `r < 2`, with `β = 2`, `θ = 1/4`),
-  `UMD_2^Δ ≤ 200 UMD_p^Δ` (the proof gives `180`, with `β = 3/2`, `θ = 2/9`), and finiteness for
-  every pair of exponents.
+* Lemma 3.5.15 with the constant of (3.59) (p. 232), `IsWeakTransformBound.lpNorm_cubeMax_le`: a
+  bound `K ≥ 1` of `T` from `H^q` to `L^{q,∞}` gives
+  `‖T* f‖_p ≤ 2^{1/p+1/q} (1 + p/q) (3e + 1) K ‖f* ∨ w*‖_p`, by integrating the good-λ inequality of
+  `BanachProbability.UMD.GoodLambda` with `θ = 1 + q/p`, `α = 2^{1/q} K θ^{p/q}`.
+* Proof of (3.49) (p. 234), `IsWeakTransformBound.lpNorm_cubeMax_le_lpNorm`: with `w_n = ‖df_n‖`,
+  predictable for Paley–Walsh martingales, and Doob's inequality (`doob_lpNorm_cubeMax_le`),
+  `‖T* f‖_p ≤ 20 K C (p, q) p p' ‖f‖_p`, `C (p, q) = 2^{1/p+1/q} (1/p + 1/q)`. The same for the
+  adjoint of `T` (Lemma 3.5.3) gives the minimum of `C (p, q)` and `C (p', q')`
+  (`IsTransformBound.extrapolation_min`), and an elementary inequality gives (3.49):
+  `‖T‖_{p → p} ≤ 80 (p/q + p'/q') ‖T‖_{q → q}` (`IsTransformBound.extrapolation`), which the book
+  states with `100` (`isTransformBound_extrapolation`).
+* Theorem 4.2.7 for the dyadic constants (`dyadicUMDConst_le_mul_dyadicUMDConst`) and for the UMD
+  constants (`umdConst_le_mul_umdConst`), with the special cases of one exponent `2` and the
+  finiteness (`umdConst_lt_top_of_lt_top`).
 -/
 
 @[expose] public section
@@ -48,90 +39,11 @@ namespace BanachProbability
 
 open SignCube
 
-section Helpers
-
-/-- Telescoping a stopped sum: `Σ_{i<n} 1_{i<e} (F_{i+1} − F_i) = F_{min (n, e)} − F_0`. -/
-private theorem xtr_sum_range_ite_lt {E : Type*} [AddCommGroup E] (F : ℕ → E) (n e : ℕ) :
-    ∑ i ∈ Finset.range n, (if i < e then F (i + 1) - F i else 0) = F (min n e) - F 0 := by
-  induction n with
-  | zero => simp
-  | succ n ih =>
-    rw [Finset.sum_range_succ, ih]
-    split_ifs with h
-    · rw [min_eq_left h.le, min_eq_left (Nat.succ_le_of_lt h)]
-      abel
-    · rw [min_eq_right (not_lt.mp h), min_eq_right (by omega), add_zero]
-
-/-- The increments of `F` summed over the times `i < n` of an event which, for `i < n`, is the
-interval `m ≤ i < e` (`m ≤ e ≤ n`): `F_e − F_m`. -/
-private theorem xtr_sum_indicator_interval {Ω E : Type*} [AddCommGroup E] (F : ℕ → Ω → E)
-    (A : ℕ → Set Ω) (ω : Ω) {n m e : ℕ} (hA : ∀ i < n, (ω ∈ A i ↔ m ≤ i ∧ i < e))
-    (hme : m ≤ e) (hen : e ≤ n) :
-    ∑ i ∈ Finset.range n, (A i).indicator (fun ω => F (i + 1) ω - F i ω) ω = F e ω - F m ω := by
-  have key : ∀ i ∈ Finset.range n, (A i).indicator (fun ω => F (i + 1) ω - F i ω) ω =
-      (if i < e then F (i + 1) ω - F i ω else 0) - (if i < m then F (i + 1) ω - F i ω else 0) := by
-    intro i hi
-    have hi' := hA i (Finset.mem_range.mp hi)
-    by_cases hω : ω ∈ A i
-    · rw [Set.indicator_of_mem hω, ite_eq_left (hi'.mp hω).2,
-        ite_eq_right (not_lt.mpr (hi'.mp hω).1), sub_zero]
-    · rw [Set.indicator_of_notMem hω]
-      by_cases him : i < m
-      · rw [ite_eq_left (lt_of_lt_of_le him hme), ite_eq_left him, sub_self]
-      · have hie : ¬ i < e := fun h => hω (hi'.mpr ⟨not_lt.mp him, h⟩)
-        rw [ite_eq_right hie, ite_eq_right him, sub_self]
-  rw [Finset.sum_congr rfl key, Finset.sum_sub_distrib,
-    xtr_sum_range_ite_lt (fun i => F i ω) n e, xtr_sum_range_ite_lt (fun i => F i ω) n m,
-    min_eq_right hen, min_eq_right (hme.trans hen), sub_sub_sub_cancel_right]
-
-/-- First hitting times, through `Nat.find`: for a property `P` that holds somewhere, with `m` the
-first time of `P` and `e` the first time `< n` at which `Q` fails (`e = n` if there is none), the
-times `i < n` at which `P` has happened and `Q` has always held form the interval `m ≤ i < e`. -/
-private theorem xtr_exists_interval (P Q : ℕ → Prop) (hP : ∃ j, P j) (n : ℕ) :
-    ∃ m e, P m ∧ (∀ j < m, ¬ P j) ∧ e ≤ n ∧ (∀ j < e, Q j) ∧ (e < n → ¬ Q e) ∧
-      ∀ i < n, (((∃ j ≤ i, P j) ∧ ∀ j ≤ i, Q j) ↔ m ≤ i ∧ i < e) := by
-  classical
-  have hQ : ∃ j, n ≤ j ∨ ¬ Q j := ⟨n, Or.inl le_rfl⟩
-  refine ⟨Nat.find hP, Nat.find hQ, Nat.find_spec hP, fun j hj => Nat.find_min hP hj,
-    Nat.find_min' hQ (Or.inl le_rfl), fun j hj => ?_, fun he => ?_, fun i hi => ?_⟩
-  · have := Nat.find_min hQ hj
-    push Not at this
-    exact this.2
-  · exact (Nat.find_spec hQ).resolve_left (by omega)
-  · rw [Nat.find_le_iff, Nat.lt_find_iff]
-    refine and_congr_right fun _ => forall_congr' fun j => imp_congr_right fun hj => ?_
-    constructor
-    · rintro hq (h' | h')
-      · omega
-      · exact h' hq
-    · intro h'
-      by_contra hq
-      exact h' (Or.inr hq)
-
 variable {N : ℕ}
 
-/-- A Paley–Walsh martingale of a family cut down to events `A k`: its value at time `n` is the
-sum of the increments `M_{i+1} − M_i` of the uncut martingale over the times `i < n` with
-`ε ∈ A i`. -/
-private theorem xtr_paleyWalsh_indicator {E : Type*} [AddCommGroup E] [Module ℝ E]
-    (ζ : Fin N → (Fin N → Bool) → E) (A : ℕ → Set (Fin N → Bool)) (n : ℕ) (ε : Fin N → Bool) :
-    paleyWalsh (fun k => (A k.val).indicator (ζ k)) n ε =
-      ∑ i ∈ Finset.range n,
-        (A i).indicator (fun ε => paleyWalsh ζ (i + 1) ε - paleyWalsh ζ i ε) ε := by
-  induction n with
-  | zero => simp
-  | succ n ih =>
-    rw [paleyWalsh_succ, Finset.sum_range_succ, ih]
-    congr 1
-    by_cases hA : ε ∈ A n
-    · simp only [Set.indicator_of_mem hA, paleyWalsh_succ ζ n, add_sub_cancel_left]
-    · simp only [Set.indicator_of_notMem hA, smul_zero, dite_eq_ite, ite_self]
+section LayerCake
 
-private theorem xtr_prob_nonneg (s : Set (Fin N → Bool)) : 0 ≤ prob s :=
-  avg_nonneg fun ε => Set.indicator_nonneg (fun _ _ => zero_le_one) ε
-
-private theorem xtr_prob_mono {s s' : Set (Fin N → Bool)} (h : s ⊆ s') : prob s ≤ prob s' :=
-  avg_mono fun ε => Set.indicator_le_indicator_of_subset h (fun _ => zero_le_one) ε
+/-! ### Integration of a good-λ inequality -/
 
 /-- The union bound on the cube. -/
 private theorem xtr_prob_le_add {s s₁ s₂ : Set (Fin N → Bool)} (h : s ⊆ s₁ ∪ s₂) :
@@ -194,269 +106,29 @@ private theorem xtr_layerCake {Z : (Fin N → Bool) → ℝ} (hZ : ∀ ε, 0 ≤
 private theorem xtr_measurable_integrand (Z : (Fin N → Bool) → ℝ) (r : ℝ) :
     Measurable fun t : ℝ => ENNReal.ofReal (prob {ε | t < Z ε}) * ENNReal.ofReal (t ^ (r - 1)) := by
   have hanti : Antitone fun t : ℝ => prob {ε | t < Z ε} := fun t t' htt' =>
-    xtr_prob_mono fun ε hε => lt_of_le_of_lt htt' hε
+    gdl_prob_mono fun ε hε => lt_of_le_of_lt htt' hε
   exact hanti.measurable.ennreal_ofReal.mul (measurable_id.pow_const _).ennreal_ofReal
 
-end Helpers
-
-section Dyadic
-
-variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
-
-/-- The event `{μ ≤ k < min (ν, ρ)}` of the good-λ argument for processes `f`, `g` and the levels
-`t`, `β t`, `δ t`: some `‖g_j‖`, `j ≤ k`, exceeds `t` (`μ ≤ k`), and for every `j ≤ k`,
-`‖g_j‖ ≤ β t` (`k < ν`), `‖f_j‖ ≤ δ t` and `‖f_{j+1} − f_j‖ ≤ 2 δ t` (`k < ρ`). -/
-private def xtrEvent {Ω : Type*} (f g : ℕ → Ω → X) (β δ t : ℝ) (k : ℕ) : Set Ω :=
-  {ω | (∃ j ≤ k, t < ‖g j ω‖) ∧
-    ∀ j ≤ k, ‖g j ω‖ ≤ β * t ∧ ‖f j ω‖ ≤ δ * t ∧ ‖f (j + 1) ω - f j ω‖ ≤ 2 * δ * t}
-
-omit [NormedSpace ℝ X] in
-/-- First fact of the good-λ argument: the cut process `Σ_{i<n} 1_{μ ≤ i < min (ν, ρ)} df_i` is
-`f_e − f_μ`, `e = min (n, ν, ρ)`, with `‖f_μ‖ ≤ δ t` and
-`‖f_e‖ ≤ ‖f_{e−1}‖ + ‖df_{e−1}‖ ≤ 3 δ t`; so its norm is at most `4 δ t`, and it vanishes unless
-`μ < n`, which forces `g*_n > t`. -/
-private theorem xtr_norm_cut_le {Ω : Type*} (f g : ℕ → Ω → X) {β δ t : ℝ} (hδt : 0 ≤ δ * t)
-    (n : ℕ) (ω : Ω) :
-    ‖∑ i ∈ Finset.range n,
-        (xtrEvent f g β δ t i).indicator (fun ω => f (i + 1) ω - f i ω) ω‖ ≤ 4 * δ * t ∧
-      (¬ t < runningMax (fun k ω => ‖g k ω‖) n ω →
-        ∑ i ∈ Finset.range n,
-          (xtrEvent f g β δ t i).indicator (fun ω => f (i + 1) ω - f i ω) ω = 0) := by
-  by_cases hex : ∃ k < n, ω ∈ xtrEvent f g β δ t k
-  · obtain ⟨k, hkn, hk⟩ := hex
-    obtain ⟨j, hjk, hj⟩ := hk.1
-    obtain ⟨m, e, -, -, hen, hQ, -, hS⟩ := xtr_exists_interval (fun j => t < ‖g j ω‖)
-      (fun j => ‖g j ω‖ ≤ β * t ∧ ‖f j ω‖ ≤ δ * t ∧ ‖f (j + 1) ω - f j ω‖ ≤ 2 * δ * t)
-      ⟨j, hj⟩ n
-    have hS' : ∀ i < n, (ω ∈ xtrEvent f g β δ t i ↔ m ≤ i ∧ i < e) := hS
-    have hmk := (hS' k hkn).mp hk
-    rw [xtr_sum_indicator_interval f _ ω hS' (hmk.1.trans hmk.2.le) hen]
-    refine ⟨?_, fun h => absurd (lt_of_lt_of_le hj
-      (le_runningMax (fun k ω => ‖g k ω‖) (hjk.trans hkn.le) ω)) h⟩
-    obtain ⟨e', rfl⟩ : ∃ e', e = e' + 1 := ⟨e - 1, by omega⟩
-    have h1 := (hQ m (by omega)).2.1
-    have h2 := (hQ e' (by omega)).2
-    calc ‖f (e' + 1) ω - f m ω‖ ≤ ‖f (e' + 1) ω‖ + ‖f m ω‖ := norm_sub_le _ _
-      _ ≤ (‖f e' ω‖ + ‖f (e' + 1) ω - f e' ω‖) + ‖f m ω‖ := by
-          gcongr
-          exact norm_le_insert' _ _
-      _ ≤ (δ * t + 2 * δ * t) + δ * t := by
-          gcongr
-          · exact h2.1
-          · exact h2.2
-      _ = 4 * δ * t := by ring
-  · push Not at hex
-    have h0 : ∑ i ∈ Finset.range n,
-        (xtrEvent f g β δ t i).indicator (fun ω => f (i + 1) ω - f i ω) ω = 0 :=
-      Finset.sum_eq_zero fun i hi => Set.indicator_of_notMem (hex i (Finset.mem_range.mp hi)) _
-    rw [h0, norm_zero]
-    exact ⟨by linarith, fun _ => rfl⟩
-
-omit [NormedSpace ℝ X] in
-/-- Second fact of the good-λ argument: on `{g*_n > β t, f*_n ≤ δ t}`, `ρ ≥ n ≥ ν`, `μ ≥ 1` (as
-`g_0 = 0`), `‖g_μ‖ ≤ ‖g_{μ−1}‖ + ‖dg_{μ−1}‖ ≤ t + 2 δ t < β t` (the jumps of `g` and `f` have the
-same norm), so `μ < ν`, and the cut transform `Σ_{i<n} 1_{μ ≤ i < min (ν, ρ)} dg_i = g_ν − g_μ` has
-norm at least `β t − (1 + 2 δ) t`. -/
-private theorem xtr_le_norm_cut {Ω : Type*} (f g : ℕ → Ω → X) {β δ t : ℝ} (hβ : 1 < β)
-    (ht : 0 < t) (hg0 : ∀ ω, g 0 ω = 0)
-    (hjump : ∀ j ω, ‖g (j + 1) ω - g j ω‖ = ‖f (j + 1) ω - f j ω‖) (n : ℕ) (ω : Ω)
-    (hgω : β * t < runningMax (fun k ω => ‖g k ω‖) n ω)
-    (hfω : runningMax (fun k ω => ‖f k ω‖) n ω ≤ δ * t) :
-    (β - 1 - 2 * δ) * t ≤
-      ‖∑ i ∈ Finset.range n,
-        (xtrEvent f g β δ t i).indicator (fun ω => g (i + 1) ω - g i ω) ω‖ := by
-  have hF : ∀ j ≤ n, ‖f j ω‖ ≤ δ * t := fun j hj =>
-    (le_runningMax (fun k ω => ‖f k ω‖) hj ω).trans hfω
-  have hD : ∀ j < n, ‖f (j + 1) ω - f j ω‖ ≤ 2 * δ * t := fun j hj => by
-    have := norm_sub_le (f (j + 1) ω) (f j ω)
-    linarith [hF (j + 1) hj, hF j hj.le]
-  obtain ⟨j₀, hj₀n, hj₀⟩ : ∃ j₀ ≤ n, β * t < ‖g j₀ ω‖ := by
-    obtain ⟨j, hj, h⟩ := (Finset.lt_sup'_iff _).mp hgω
-    exact ⟨j, Nat.lt_succ_iff.mp (Finset.mem_range.mp hj), h⟩
-  have htβ : t < β * t := by nlinarith
-  obtain ⟨m, e, hPm, hPlt, hen, hQ, hQe, hS⟩ := xtr_exists_interval (fun j => t < ‖g j ω‖)
-    (fun j => ‖g j ω‖ ≤ β * t ∧ ‖f j ω‖ ≤ δ * t ∧ ‖f (j + 1) ω - f j ω‖ ≤ 2 * δ * t)
-    ⟨j₀, htβ.trans hj₀⟩ n
-  have hm0 : m ≠ 0 := by
-    rintro rfl
-    have : t < ‖g 0 ω‖ := hPm
-    rw [hg0, norm_zero] at this
-    linarith
-  have hmj₀ : m ≤ j₀ := not_lt.mp fun h => hPlt j₀ h (htβ.trans hj₀)
-  have hgm : ‖g m ω‖ ≤ t + 2 * δ * t := by
-    obtain ⟨m', rfl⟩ : ∃ m', m = m' + 1 := ⟨m - 1, by omega⟩
-    have h1 : ‖g m' ω‖ ≤ t := not_lt.mp (hPlt m' (by omega))
-    have h2 := hD m' (by omega)
-    rw [← hjump] at h2
-    linarith [norm_le_insert' (g (m' + 1) ω) (g m' ω)]
-  have hge : β * t < ‖g e ω‖ := by
-    by_contra hle
-    push Not at hle
-    rcases lt_or_eq_of_le hen with hlt | heq
-    · exact hQe hlt ⟨hle, hF e hen, hD e hlt⟩
-    · rcases lt_or_eq_of_le hj₀n with hj | hj
-      · have := (hQ j₀ (by omega)).1
-        linarith
-      · rw [hj, ← heq] at hj₀
-        linarith
-  have hme : m ≤ e := not_lt.mp fun h => by
-    have := not_lt.mp (hPlt e h)
-    linarith
-  have hS' : ∀ i < n, (ω ∈ xtrEvent f g β δ t i ↔ m ≤ i ∧ i < e) := hS
-  rw [xtr_sum_indicator_interval g _ ω hS' hme hen]
-  have := norm_sub_norm_le (g e ω) (g m ω)
-  nlinarith
-
-/-- The jumps of the transform have the norms of the jumps of the martingale (`|σ_k| = 1`). -/
-private theorem xtr_norm_jump {N : ℕ} {ξ : Fin N → (Fin N → Bool) → X}
-    {σ : Fin N → (Fin N → Bool) → ℝ} (hσ1 : ∀ k ε, σ k ε = 1 ∨ σ k ε = -1) (j : ℕ)
-    (ε : Fin N → Bool) :
-    ‖paleyWalsh (fun k ε => σ k ε • ξ k ε) (j + 1) ε -
-        paleyWalsh (fun k ε => σ k ε • ξ k ε) j ε‖ =
-      ‖paleyWalsh ξ (j + 1) ε - paleyWalsh ξ j ε‖ := by
-  rw [paleyWalsh_succ, paleyWalsh_succ ξ, add_sub_cancel_left, add_sub_cancel_left]
-  split_ifs with hj
-  · rw [norm_smul, norm_smul, norm_smul]
-    rcases hσ1 ⟨j, hj⟩ ε with h | h <;> simp [h]
-  · rfl
-
-/-- **Burkholder's good-λ inequality** for Paley–Walsh martingales: with `f = Σ ε_k ξ_k`,
-`g = Σ σ_k ε_k ξ_k` and `u` a dyadic `UMD_p` constant,
-`P (g*_n > β t, f*_n ≤ δ t) ≤ (4 u δ / (β − 1 − 2δ))^p P (g*_n > t)`. -/
-theorem goodLambda {p u : ℝ} (hp : 0 < p) (hu0 : 0 ≤ u)
-    (hu : IsDyadicUMDBound X p (ENNReal.ofReal u)) {N : ℕ} {ξ : Fin N → (Fin N → Bool) → X}
-    {σ : Fin N → (Fin N → Bool) → ℝ} (hξ : IsPredictable ξ) (hσ : IsPredictable σ)
-    (hσ1 : ∀ k ε, σ k ε = 1 ∨ σ k ε = -1) {β δ t : ℝ} (hβ : 1 < β) (hδ : 0 < δ)
-    (ha : 0 < β - 1 - 2 * δ) (ht : 0 < t) (n : ℕ) :
-    prob {ε | β * t < runningMax (fun k ε => ‖paleyWalsh (fun k ε => σ k ε • ξ k ε) k ε‖) n ε ∧
-        runningMax (fun k ε => ‖paleyWalsh ξ k ε‖) n ε ≤ δ * t} ≤
-      (4 * u * δ / (β - 1 - 2 * δ)) ^ p *
-        prob {ε | t < runningMax (fun k ε => ‖paleyWalsh (fun k ε => σ k ε • ξ k ε) k ε‖) n ε} := by
-  classical
-  set f : ℕ → (Fin N → Bool) → X := paleyWalsh ξ with hf
-  set g : ℕ → (Fin N → Bool) → X := paleyWalsh (fun k ε => σ k ε • ξ k ε) with hg
-  set A := xtrEvent f g β δ t with hA
-  set a := β - 1 - 2 * δ with ha_def
-  -- the cut family `h_k = 1_{μ ≤ k < min (ν, ρ)} ξ_k`: the event depends on `ε_j`, `j < k`, only
-  set h : Fin N → (Fin N → Bool) → X := fun k => (A k.val).indicator (ξ k) with hh
-  have hAp : ∀ (k : Fin N) (ε ε' : Fin N → Bool), (∀ j, j < k → ε j = ε' j) →
-      (ε ∈ A k.val ↔ ε' ∈ A k.val) := by
-    intro k ε ε' hεε'
-    have hlt : ∀ j ≤ k.val, ∀ i : Fin N, i.val < j → ε i = ε' i := fun j hj i hi =>
-      hεε' i (Fin.lt_def.mpr (lt_of_lt_of_le hi hj))
-    have hfj : ∀ j ≤ k.val, f j ε = f j ε' := fun j hj =>
-      hξ.isAdapted_paleyWalsh j ε ε' (hlt j hj)
-    have hgj : ∀ j ≤ k.val, g j ε = g j ε' := fun j hj =>
-      (hσ.smul hξ).isAdapted_paleyWalsh j ε ε' (hlt j hj)
-    have hdj : ∀ j ≤ k.val, ‖f (j + 1) ε - f j ε‖ = ‖f (j + 1) ε' - f j ε'‖ := by
-      intro j hj
-      have hjN : j < N := lt_of_le_of_lt hj k.isLt
-      have e1 := norm_paleyWalsh_succ_sub ξ ⟨j, hjN⟩ ε
-      have e2 := norm_paleyWalsh_succ_sub ξ ⟨j, hjN⟩ ε'
-      simp only at e1 e2
-      rw [hf, e1, e2, hξ ⟨j, hjN⟩ ε ε' fun i hi => hlt j hj i (Fin.lt_def.mp hi)]
-    simp only [hA, xtrEvent, Set.mem_ofPred_eq]
-    exact and_congr (exists_congr fun j => and_congr_right fun hj => by rw [hgj j hj])
-      (forall_congr' fun j => imp_congr_right fun hj => by rw [hgj j hj, hdj j hj, hfj j hj])
-  have hhp : IsPredictable h := hξ.indicator hAp
-  have hH : ∀ ε, paleyWalsh h n ε = ∑ i ∈ Finset.range n,
-      (A i).indicator (fun ε => f (i + 1) ε - f i ε) ε := xtr_paleyWalsh_indicator ξ A n
-  have hT : ∀ ε, paleyWalsh (fun k ε => σ k ε • h k ε) n ε = ∑ i ∈ Finset.range n,
-      (A i).indicator (fun ε => g (i + 1) ε - g i ε) ε := by
-    intro ε
-    have e : (fun k ε => σ k ε • h k ε) =
-        fun k => (A k.val).indicator (fun ε => σ k ε • ξ k ε) := by
-      funext k ε
-      by_cases hk : ε ∈ A k.val
-      · simp only [hh, Set.indicator_of_mem hk]
-      · simp only [hh, Set.indicator_of_notMem hk, smul_zero]
-    rw [e]
-    exact xtr_paleyWalsh_indicator _ A n ε
-  -- the dyadic `UMD_p` bound applied to `h`, raised to the power `p`
-  have hUMD := hu N h σ hhp hσ hσ1 n
-  rw [← ENNReal.ofReal_mul hu0, ENNReal.ofReal_le_ofReal_iff
-    (mul_nonneg hu0 (lpNorm_nonneg (fun x => norm_nonneg x) p _))] at hUMD
-  have hpow : ∀ Y : (Fin N → Bool) → X,
-      SignCube.lpNorm (fun x => ‖x‖) p Y ^ p = avg fun ε => ‖Y ε‖ ^ p :=
-    lpNorm_rpow (fun x => norm_nonneg x) hp
-  have hTH : (avg fun ε => ‖paleyWalsh (fun k ε => σ k ε • h k ε) n ε‖ ^ p) ≤
-      u ^ p * avg fun ε => ‖paleyWalsh h n ε‖ ^ p := by
-    rw [← hpow, ← hpow, ← Real.mul_rpow hu0 (lpNorm_nonneg (fun x => norm_nonneg x) p _)]
-    exact Real.rpow_le_rpow (lpNorm_nonneg (fun x => norm_nonneg x) p _) hUMD hp.le
-  set E := {ε | β * t < runningMax (fun k ε => ‖g k ε‖) n ε ∧
-    runningMax (fun k ε => ‖f k ε‖) n ε ≤ δ * t} with hE
-  set B := {ε | t < runningMax (fun k ε => ‖g k ε‖) n ε} with hB
-  -- Chebyshev: `‖T h‖ ≥ a t` on `E`
-  have hcheb : (a * t) ^ p * prob E ≤
-      avg fun ε => ‖paleyWalsh (fun k ε => σ k ε • h k ε) n ε‖ ^ p := by
-    rw [prob, ← avg_const_mul]
-    refine avg_mono fun ε => ?_
-    by_cases hε : ε ∈ E
-    · rw [Set.indicator_of_mem hε, Pi.one_apply, mul_one, hT ε]
-      exact Real.rpow_le_rpow (by positivity) (xtr_le_norm_cut f g hβ ht
-        (fun ε => paleyWalsh_zero _ ε) (xtr_norm_jump hσ1) n ε hε.1 hε.2) hp.le
-    · rw [Set.indicator_of_notMem hε, mul_zero]
-      exact Real.rpow_nonneg (norm_nonneg _) _
-  -- `‖h‖ ≤ 4 δ t 1_B`
-  have hH4 : (avg fun ε => ‖paleyWalsh h n ε‖ ^ p) ≤ (4 * δ * t) ^ p * prob B := by
-    rw [prob, ← avg_const_mul]
-    refine avg_mono fun ε => ?_
-    obtain ⟨h1, h2⟩ := xtr_norm_cut_le f g (β := β) (δ := δ) (t := t) (by positivity) n ε
-    rw [hH ε]
-    by_cases hε : ε ∈ B
-    · rw [Set.indicator_of_mem hε, Pi.one_apply, mul_one]
-      exact Real.rpow_le_rpow (norm_nonneg _) h1 hp.le
-    · rw [Set.indicator_of_notMem hε, mul_zero, h2 hε, norm_zero, Real.zero_rpow hp.ne']
-  have hat : 0 < a * t := mul_pos ha ht
-  have hconst : u ^ p * (4 * δ * t) ^ p = (a * t) ^ p * (4 * u * δ / a) ^ p := by
-    rw [← Real.mul_rpow hu0 (by positivity), ← Real.mul_rpow hat.le (by positivity)]
-    congr 1
-    field_simp
-  have hcomb : (a * t) ^ p * prob E ≤ (a * t) ^ p * ((4 * u * δ / a) ^ p * prob B) := by
-    calc (a * t) ^ p * prob E ≤ u ^ p * ((4 * δ * t) ^ p * prob B) :=
-          hcheb.trans (hTH.trans (mul_le_mul_of_nonneg_left hH4 (Real.rpow_nonneg hu0 _)))
-      _ = (a * t) ^ p * ((4 * u * δ / a) ^ p * prob B) := by
-          rw [← mul_assoc, hconst, mul_assoc]
-  exact le_of_mul_le_mul_left hcomb (Real.rpow_pos_of_pos hat p)
-
-/-- **Extrapolation by the good-λ inequality**: a dyadic `UMD_p` constant `u` gives, for every
-`r ∈ (1, ∞)` and every `β > 1`, `δ > 0` with `a = β − 1 − 2δ > 0` and
-`β^r (4 u δ / a)^p < 1`, the dyadic `UMD_r` constant
-`(r / (r − 1)) (β / δ) (1 − β^r (4 u δ / a)^p)^{−1/r}`. -/
-theorem isDyadicUMDBound_of_goodLambda {p r u β δ : ℝ} (hp : 0 < p) (hr : 1 < r) (hu0 : 0 ≤ u)
-    (hu : IsDyadicUMDBound X p (ENNReal.ofReal u)) (hβ : 1 < β) (hδ : 0 < δ)
-    (ha : 0 < β - 1 - 2 * δ) (hc : β ^ r * (4 * u * δ / (β - 1 - 2 * δ)) ^ p < 1) :
-    IsDyadicUMDBound X r (ENNReal.ofReal (r / (r - 1) * (β / δ) *
-      (1 - β ^ r * (4 * u * δ / (β - 1 - 2 * δ)) ^ p) ^ (-(1 / r)))) := by
-  intro N ξ σ hξ hσ hσ1 n
-  have hr0 : 0 < r := by linarith
-  have hr1 : 0 < r - 1 := by linarith
-  have hβ0 : 0 < β := by linarith
-  set a := β - 1 - 2 * δ with ha_def
-  set c' := (4 * u * δ / a) ^ p with hc'
-  have hc'0 : 0 ≤ c' := Real.rpow_nonneg (by positivity) _
-  set c := β ^ r * c' with hc_def
-  set Zg := runningMax (fun k ε => ‖paleyWalsh (fun k ε => σ k ε • ξ k ε) k ε‖) n with hZg
-  set Zf := runningMax (fun k ε => ‖paleyWalsh ξ k ε‖) n with hZf
-  have hZg0 : ∀ ε, 0 ≤ Zg ε := fun ε => (norm_nonneg _).trans
-    (le_runningMax (fun k ε => ‖paleyWalsh (fun k ε => σ k ε • ξ k ε) k ε‖) (Nat.zero_le n) ε)
-  have hZf0 : ∀ ε, 0 ≤ Zf ε := fun ε => (norm_nonneg _).trans
-    (le_runningMax (fun k ε => ‖paleyWalsh ξ k ε‖) (Nat.zero_le n) ε)
-  -- the good-λ inequality and the union bound:
-  -- `P (g* > β t) ≤ c' P (g* > t) + P (f* > δ t)`
+/-- The integration of a good-λ inequality `P (G > θ λ, Z ≤ δ λ) ≤ η P (G > λ)` against
+`p λ^{p−1} dλ` (HNVW, proof of Lemma 3.5.15, p. 232):
+`‖G‖_p^p ≤ η θ^p ‖G‖_p^p + (θ / δ)^p ‖Z‖_p^p`. -/
+private theorem xtr_avg_rpow_le {G Z : (Fin N → Bool) → ℝ} (hG : ∀ ε, 0 ≤ G ε)
+    (hZ : ∀ ε, 0 ≤ Z ε) {p θ δ η : ℝ} (hp : 0 < p) (hθ : 0 < θ) (hδ : 0 < δ) (hη : 0 ≤ η)
+    (h : ∀ t, 0 < t → prob {ε | θ * t < G ε ∧ Z ε ≤ δ * t} ≤ η * prob {ε | t < G ε}) :
+    (avg fun ε => G ε ^ p) ≤
+      η * θ ^ p * (avg fun ε => G ε ^ p) + (θ / δ) ^ p * avg fun ε => Z ε ^ p := by
+  -- `P (G > θ t) ≤ η P (G > t) + P (Z > δ t)`
   have hGL : ∀ t, 0 < t →
-      prob {ε | β * t < Zg ε} ≤ c' * prob {ε | t < Zg ε} + prob {ε | δ * t < Zf ε} := by
+      prob {ε | θ * t < G ε} ≤ η * prob {ε | t < G ε} + prob {ε | δ * t < Z ε} := by
     intro t ht
-    refine (xtr_prob_le_add (s₁ := {ε | β * t < Zg ε ∧ Zf ε ≤ δ * t})
-      (s₂ := {ε | δ * t < Zf ε}) fun ε hε => ?_).trans
-      (add_le_add (goodLambda hp hu0 hu hξ hσ hσ1 hβ hδ ha ht n) le_rfl)
-    by_cases h' : Zf ε ≤ δ * t
+    refine (xtr_prob_le_add (s₁ := {ε | θ * t < G ε ∧ Z ε ≤ δ * t})
+      (s₂ := {ε | δ * t < Z ε}) fun ε hε => ?_).trans (add_le_add (h t ht) le_rfl)
+    by_cases h' : Z ε ≤ δ * t
     · exact Or.inl ⟨hε, h'⟩
     · exact Or.inr (not_le.mp h')
-  -- integrate against `r t^{r−1} dt` (layer cake), after the substitutions `t ↦ β t`, `t ↦ t / δ`,
-  -- done as `E (Z / b)^r = b^{−r} E Z^r`
+  -- the substitutions `t ↦ θ t`, `t ↦ δ t`, done as `E (Z / b)^p = b^{−p} E Z^p`
   have hdiv : ∀ (Z : (Fin N → Bool) → ℝ) (b : ℝ), 0 < b → (∀ ε, 0 ≤ Z ε) →
-      avg (fun ε => (Z ε / b) ^ r) = avg (fun ε => Z ε ^ r) / b ^ r := by
+      avg (fun ε => (Z ε / b) ^ p) = avg (fun ε => Z ε ^ p) / b ^ p := by
     intro Z b hb hZ
     simp only [Real.div_rpow (hZ _) hb.le, avg]
     rw [← Finset.sum_div, div_right_comm]
@@ -465,113 +137,334 @@ theorem isDyadicUMDBound_of_goodLambda {p r u β δ : ℝ} (hp : 0 < p) (hr : 1 
     intro Z b hb t
     ext ε
     simp only [Set.mem_ofPred_eq, lt_div_iff₀ hb, mul_comm]
-  have hkey : ENNReal.ofReal (avg fun ε => (Zg ε / β) ^ r) ≤
-      ENNReal.ofReal c' * ENNReal.ofReal (avg fun ε => Zg ε ^ r) +
-        ENNReal.ofReal (avg fun ε => (Zf ε / δ) ^ r) := by
-    rw [xtr_layerCake (fun ε => div_nonneg (hZg0 ε) hβ0.le) hr0, xtr_layerCake hZg0 hr0,
-      xtr_layerCake (fun ε => div_nonneg (hZf0 ε) hδ.le) hr0, mul_left_comm, ← mul_add,
-      ← MeasureTheory.lintegral_const_mul' (ENNReal.ofReal c') _ ENNReal.ofReal_ne_top,
-      ← MeasureTheory.lintegral_add_left ((xtr_measurable_integrand Zg r).const_mul _)]
-    gcongr ENNReal.ofReal r * ?_
+  have hkey : ENNReal.ofReal (avg fun ε => (G ε / θ) ^ p) ≤
+      ENNReal.ofReal η * ENNReal.ofReal (avg fun ε => G ε ^ p) +
+        ENNReal.ofReal (avg fun ε => (Z ε / δ) ^ p) := by
+    rw [xtr_layerCake (fun ε => div_nonneg (hG ε) hθ.le) hp, xtr_layerCake hG hp,
+      xtr_layerCake (fun ε => div_nonneg (hZ ε) hδ.le) hp, mul_left_comm, ← mul_add,
+      ← MeasureTheory.lintegral_const_mul' (ENNReal.ofReal η) _ ENNReal.ofReal_ne_top,
+      ← MeasureTheory.lintegral_add_left ((xtr_measurable_integrand G p).const_mul _)]
+    gcongr ENNReal.ofReal p * ?_
     refine MeasureTheory.setLIntegral_mono' measurableSet_Ioi fun t ht => ?_
-    simp only [hset Zg β hβ0, hset Zf δ hδ]
+    simp only [hset G θ hθ, hset Z δ hδ]
     rw [← mul_assoc, ← add_mul]
     gcongr
-    rw [← ENNReal.ofReal_mul hc'0,
-      ← ENNReal.ofReal_add (mul_nonneg hc'0 (xtr_prob_nonneg _)) (xtr_prob_nonneg _)]
+    rw [← ENNReal.ofReal_mul hη,
+      ← ENNReal.ofReal_add (mul_nonneg hη (gdl_prob_nonneg _)) (gdl_prob_nonneg _)]
     exact ENNReal.ofReal_le_ofReal (hGL t ht)
-  set G := avg fun ε => Zg ε ^ r with hG
-  set F := avg fun ε => Zf ε ^ r with hF
-  have hG0 : 0 ≤ G := avg_nonneg fun ε => Real.rpow_nonneg (hZg0 ε) r
-  have hF0 : 0 ≤ F := avg_nonneg fun ε => Real.rpow_nonneg (hZf0 ε) r
-  have hβr : 0 < β ^ r := Real.rpow_pos_of_pos hβ0 r
-  have hδr : 0 < δ ^ r := Real.rpow_pos_of_pos hδ r
-  rw [hdiv Zg β hβ0 hZg0, hdiv Zf δ hδ hZf0, ← ENNReal.ofReal_mul hc'0,
-    ← ENNReal.ofReal_add (mul_nonneg hc'0 hG0) (div_nonneg hF0 hδr.le),
-    ENNReal.ofReal_le_ofReal_iff (add_nonneg (mul_nonneg hc'0 hG0) (div_nonneg hF0 hδr.le)),
-    div_le_iff₀ hβr] at hkey
-  -- absorb: `(1 − c) E (g*)^r ≤ (β / δ)^r E (f*)^r`, everything being finite on the cube
-  have h1c : 0 < 1 - c := by linarith
-  have hGle : G * (1 - c) ≤ (β / δ) ^ r * F := by
-    rw [Real.div_rpow hβ0.le hδ.le]
-    have e : (c' * G + F / δ ^ r) * β ^ r = c * G + β ^ r / δ ^ r * F := by
-      rw [hc_def]
-      field_simp
-    rw [e] at hkey
-    nlinarith
-  have hnormZ : ∀ Z : (Fin N → Bool) → ℝ, (∀ ε, 0 ≤ Z ε) →
-      SignCube.lpNorm (fun t : ℝ => ‖t‖) r Z = (avg fun ε => Z ε ^ r) ^ (1 / r) := by
-    intro Z hZ
-    simp only [SignCube.lpNorm, Real.norm_of_nonneg (hZ _)]
-  have hmain : G ^ (1 / r) ≤ β / δ * (1 - c) ^ (-(1 / r)) * F ^ (1 / r) := by
-    have hG' : G ≤ (β / δ) ^ r * F * (1 - c)⁻¹ := by
-      rw [le_mul_inv_iff₀ h1c]
-      exact hGle
-    calc G ^ (1 / r) ≤ ((β / δ) ^ r * F * (1 - c)⁻¹) ^ (1 / r) :=
-          Real.rpow_le_rpow hG0 hG' (by positivity)
-      _ = β / δ * (1 - c) ^ (-(1 / r)) * F ^ (1 / r) := by
-          rw [Real.mul_rpow (mul_nonneg (by positivity) hF0) (inv_nonneg.mpr h1c.le),
-            Real.mul_rpow (by positivity) hF0, one_div, Real.rpow_rpow_inv (by positivity) hr0.ne',
-            Real.inv_rpow h1c.le, Real.rpow_neg h1c.le]
-          ring
-  -- `‖g_n‖_r ≤ ‖g*_n‖_r` and Doob's inequality `‖f*_n‖_r ≤ r' ‖f_n‖_r`
-  have hgn : SignCube.lpNorm (fun x => ‖x‖) r (paleyWalsh (fun k ε => σ k ε • ξ k ε) n) ≤
-      SignCube.lpNorm (fun t : ℝ => ‖t‖) r Zg := by
-    rw [hnormZ Zg hZg0]
-    exact Real.rpow_le_rpow (avg_nonneg fun ε => Real.rpow_nonneg (norm_nonneg _) _)
-      (avg_mono fun ε => Real.rpow_le_rpow (norm_nonneg _)
-        (le_runningMax (fun k ε => ‖paleyWalsh (fun k ε => σ k ε • ξ k ε) k ε‖) le_rfl ε) hr0.le)
-      (by positivity)
-  have hdoob := SignCube.lpNorm_runningMax_le hξ hr n
-  have hfin : SignCube.lpNorm (fun x => ‖x‖) r (paleyWalsh (fun k ε => σ k ε • ξ k ε) n) ≤
-      r / (r - 1) * (β / δ) * (1 - c) ^ (-(1 / r)) *
-        SignCube.lpNorm (fun x => ‖x‖) r (paleyWalsh ξ n) := by
-    have hK : 0 ≤ β / δ * (1 - c) ^ (-(1 / r)) :=
-      mul_nonneg (by positivity) (Real.rpow_nonneg h1c.le _)
-    calc SignCube.lpNorm (fun x => ‖x‖) r (paleyWalsh (fun k ε => σ k ε • ξ k ε) n)
-        ≤ SignCube.lpNorm (fun t : ℝ => ‖t‖) r Zg := hgn
-      _ = G ^ (1 / r) := hnormZ Zg hZg0
-      _ ≤ β / δ * (1 - c) ^ (-(1 / r)) * F ^ (1 / r) := hmain
-      _ = β / δ * (1 - c) ^ (-(1 / r)) * SignCube.lpNorm (fun t : ℝ => ‖t‖) r Zf := by
-          rw [hnormZ Zf hZf0]
-      _ ≤ β / δ * (1 - c) ^ (-(1 / r)) *
-          (r / (r - 1) * SignCube.lpNorm (fun x => ‖x‖) r (paleyWalsh ξ n)) :=
-          mul_le_mul_of_nonneg_left hdoob hK
-      _ = _ := by ring
-  rw [← ENNReal.ofReal_mul
-    (mul_nonneg (mul_nonneg (by positivity) (by positivity)) (Real.rpow_nonneg h1c.le _))]
-  exact ENNReal.ofReal_le_ofReal hfin
+  set A := avg fun ε => G ε ^ p with hA
+  set B := avg fun ε => Z ε ^ p with hB
+  have hA0 : 0 ≤ A := avg_nonneg fun ε => Real.rpow_nonneg (hG ε) p
+  have hB0 : 0 ≤ B := avg_nonneg fun ε => Real.rpow_nonneg (hZ ε) p
+  have hθp : 0 < θ ^ p := Real.rpow_pos_of_pos hθ p
+  have hδp : 0 < δ ^ p := Real.rpow_pos_of_pos hδ p
+  rw [hdiv G θ hθ hG, hdiv Z δ hδ hZ, ← ENNReal.ofReal_mul hη,
+    ← ENNReal.ofReal_add (mul_nonneg hη hA0) (div_nonneg hB0 hδp.le),
+    ENNReal.ofReal_le_ofReal_iff (add_nonneg (mul_nonneg hη hA0) (div_nonneg hB0 hδp.le)),
+    div_le_iff₀ hθp] at hkey
+  refine hkey.trans_eq ?_
+  rw [Real.div_rpow hθ.le hδ.le]
+  field_simp
 
-/-- The good-λ extrapolation with `δ = θ (β − 1) / (4 u + 2 θ)`, for which
-`4 u δ / (β − 1 − 2 δ) = θ` and `β / δ = β (4 u + 2 θ) / (θ (β − 1))`. -/
-private theorem xtr_isDyadicUMDBound_theta {p r u β θ : ℝ} (hp : 0 < p) (hr : 1 < r)
-    (hu1 : 1 ≤ u) (hu : IsDyadicUMDBound X p (ENNReal.ofReal u)) (hβ : 1 < β) (hθ : 0 < θ)
-    (hc : β ^ r * θ ^ p < 1) :
-    IsDyadicUMDBound X r (ENNReal.ofReal (r / (r - 1) * (β * (4 * u + 2 * θ) / (θ * (β - 1))) *
-      (1 - β ^ r * θ ^ p) ^ (-(1 / r)))) := by
-  have hβ1 : 0 < β - 1 := by linarith
-  have hD : 0 < 4 * u + 2 * θ := by linarith
-  have hD' : 4 * u + 2 * θ ≠ 0 := hD.ne'
-  have hθ' : θ ≠ 0 := hθ.ne'
-  have hβ1' : β - 1 ≠ 0 := hβ1.ne'
-  have hu' : u ≠ 0 := by linarith
-  set δ := θ * (β - 1) / (4 * u + 2 * θ) with hδ_def
-  have hδ : 0 < δ := div_pos (mul_pos hθ hβ1) hD
-  have ha : β - 1 - 2 * δ = 4 * u * (β - 1) / (4 * u + 2 * θ) := by
-    rw [hδ_def]
+end LayerCake
+
+section Extrapolation
+
+variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {σ : Fin N → (Fin N → Bool) → ℝ}
+
+/-- `(1 + x)^{1/x} ≤ e` (with `x = q / p`, the book's `θ^{p/q} ≤ e`, p. 232). -/
+private theorem xtr_rpow_le_exp {x : ℝ} (hx : 0 < x) : (1 + x) ^ (1 / x) ≤ Real.exp 1 := by
+  calc (1 + x) ^ (1 / x) ≤ Real.exp x ^ (1 / x) :=
+        Real.rpow_le_rpow (by positivity) (by linarith [Real.add_one_le_exp x]) (by positivity)
+    _ = Real.exp 1 := by rw [← Real.exp_mul, mul_one_div_cancel hx.ne']
+
+/-- The `L^p` norm of a nonnegative function. -/
+private theorem xtr_lpNorm_of_nonneg {Z : (Fin N → Bool) → ℝ} (hZ : ∀ ε, 0 ≤ Z ε) (p : ℝ) :
+    SignCube.lpNorm (fun t : ℝ => ‖t‖) p Z = (avg fun ε => Z ε ^ p) ^ (1 / p) := by
+  simp only [SignCube.lpNorm, Real.norm_of_nonneg (hZ _)]
+
+/-- **HNVW, Lemma 3.5.15** (p. 232) with the constant of (3.59): if the transform `T` by predictable
+signs is bounded from `H^q (X)` to `L^{q,∞} (X)` with constant `K ≥ 1`, and `w` is a predictable
+majorant of the differences of the martingale generated by `f`, then
+`‖T* f‖_p ≤ 2^{1/p+1/q} (1 + p/q) (3e + 1) K ‖f* ∨ w*‖_p` (the book, `p, q ∈ [1, ∞)`, rounds the
+constant to `37 (1 + p/q) K` in (3.58)).
+
+As in the book: the good-λ inequality (Lemma 3.5.14) is integrated with `θ = 1 + q/p`,
+`α = 2^{1/q} K θ^{p/q}`, for which `η = (K / α)^q = θ^{−p} / 2`, and
+`δ = (θ − 1) / (3 α + 1)`; the first term is absorbed, everything being finite on the cube; finally
+`θ / (θ − 1) = 1 + p/q`, `θ^{p/q} ≤ e` and `‖v‖_∞ = 1 ≤ 2^{1/q} K` (Proposition 3.5.10 of the book;
+trivial for signs, as `K ≥ 1`, see `IsTransformBound.one_le`). -/
+theorem IsWeakTransformBound.lpNorm_cubeMax_le {p q K : ℝ} (hp : 0 < p) (hq : 0 < q) (hK : 1 ≤ K)
+    (h : IsWeakTransformBound X σ q K) (hσ : IsPredictable σ)
+    (hσ1 : ∀ k ε, σ k ε = 1 ∨ σ k ε = -1) (f : (Fin N → Bool) → X)
+    {w : ℕ → (Fin N → Bool) → ℝ} (hw : IsAdapted w)
+    (hfw : ∀ k ε, ‖condAvg (k + 1) f ε - condAvg k f ε‖ ≤ w k ε) :
+    SignCube.lpNorm (fun t : ℝ => ‖t‖) p (cubeMax (cubeTransform σ f)) ≤
+      (2 : ℝ) ^ (1 / p + 1 / q) * (1 + p / q) * (3 * Real.exp 1 + 1) * K *
+        SignCube.lpNorm (fun t : ℝ => ‖t‖) p (fun ε => max (cubeMax f ε) (runningMax w N ε)) := by
+  have hK0 : 0 < K := by linarith
+  -- the choices `θ = 1 + q / p`, `α = 2^{1/q} K θ^{p/q}`, `δ = (θ − 1) / (3 α + 1)`
+  set θ : ℝ := 1 + q / p with hθ_def
+  have hqp : 0 < q / p := div_pos hq hp
+  have hθ : 1 < θ := by linarith
+  have hθ0 : 0 < θ := by linarith
+  set α : ℝ := 2 ^ (1 / q) * K * θ ^ (p / q) with hα_def
+  have hα : 0 < α := by positivity
+  set δ : ℝ := (θ - 1) / (3 * α + 1) with hδ_def
+  have hδ : 0 < δ := div_pos (by linarith) (by positivity)
+  -- `η = (K / α)^q = θ^{−p} / 2`
+  have hη : (K / α) ^ q * θ ^ p = 1 / 2 := by
+    have e1 : K / α = ((2 : ℝ) ^ (1 / q) * θ ^ (p / q))⁻¹ := by
+      rw [hα_def]
+      field_simp
+    rw [e1, Real.inv_rpow (by positivity), Real.mul_rpow (by positivity) (by positivity),
+      ← Real.rpow_mul (by norm_num), ← Real.rpow_mul hθ0.le, one_div_mul_cancel hq.ne',
+      div_mul_cancel₀ _ hq.ne', Real.rpow_one, mul_inv, mul_assoc,
+      inv_mul_cancel₀ (Real.rpow_pos_of_pos hθ0 p).ne', mul_one, one_div]
+  have hloc := h.isLocalTransformBound hq hK0.le hα
+  set G := cubeMax (cubeTransform σ f) with hG_def
+  set Z : (Fin N → Bool) → ℝ := fun ε => max (cubeMax f ε) (runningMax w N ε) with hZ_def
+  have hG : ∀ ε, 0 ≤ G ε := cubeMax_nonneg _
+  have hZ : ∀ ε, 0 ≤ Z ε := fun ε => (cubeMax_nonneg f ε).trans (le_max_left _ _)
+  have hint := xtr_avg_rpow_le hG hZ hp hθ0 hδ
+    (Real.rpow_nonneg (div_nonneg hK0.le hα.le) q) fun t ht =>
+      hloc.goodLambda hσ hσ1 hα.le hθ hδ.le le_rfl ht hw hfw
+  rw [hη] at hint
+  rw [xtr_lpNorm_of_nonneg hG, xtr_lpNorm_of_nonneg hZ]
+  set A := avg fun ε => G ε ^ p with hA
+  set B := avg fun ε => Z ε ^ p with hB
+  have hA0 : 0 ≤ A := avg_nonneg fun ε => Real.rpow_nonneg (hG ε) p
+  have hB0 : 0 ≤ B := avg_nonneg fun ε => Real.rpow_nonneg (hZ ε) p
+  -- absorb
+  have hAB : A ≤ 2 * ((θ / δ) ^ p * B) := by linarith
+  have hθδ : θ / δ = (1 + p / q) * (3 * α + 1) := by
+    rw [hδ_def, show θ - 1 = q / p by rw [hθ_def]; ring, hθ_def]
     field_simp
     ring
-  have ha0 : 0 < β - 1 - 2 * δ := by
-    rw [ha]
-    exact div_pos (mul_pos (by linarith) hβ1) hD
-  have hθδ : 4 * u * δ / (β - 1 - 2 * δ) = θ := by
-    rw [ha, hδ_def]
-    field_simp
-  have hβδ : β / δ = β * (4 * u + 2 * θ) / (θ * (β - 1)) := by
-    rw [hδ_def]
-    field_simp
-  have key := isDyadicUMDBound_of_goodLambda hp hr (by linarith) hu hβ hδ ha0 (by rwa [hθδ])
-  rwa [hθδ, hβδ] at key
+  have hα1 : 3 * α + 1 ≤ 2 ^ (1 / q) * (3 * Real.exp 1 + 1) * K := by
+    have h1 : θ ^ (p / q) ≤ Real.exp 1 := by
+      have := xtr_rpow_le_exp hqp
+      rwa [one_div_div] at this
+    have h2 : (1 : ℝ) ≤ 2 ^ (1 / q) := Real.one_le_rpow (by norm_num) (by positivity)
+    have h3 : 1 ≤ (2 : ℝ) ^ (1 / q) * K := by nlinarith
+    have h4 : α ≤ 2 ^ (1 / q) * K * Real.exp 1 := by
+      rw [hα_def]
+      exact mul_le_mul_of_nonneg_left h1 (by positivity)
+    nlinarith
+  have hpq : 0 < p / q := div_pos hp hq
+  calc A ^ (1 / p) ≤ (2 * ((θ / δ) ^ p * B)) ^ (1 / p) :=
+        Real.rpow_le_rpow hA0 hAB (by positivity)
+    _ = 2 ^ (1 / p) * (θ / δ) * B ^ (1 / p) := by
+        rw [Real.mul_rpow (by norm_num) (by positivity), Real.mul_rpow (by positivity) hB0,
+          one_div, Real.rpow_rpow_inv (by positivity) hp.ne', mul_assoc]
+    _ ≤ 2 ^ (1 / p) * ((1 + p / q) * (2 ^ (1 / q) * (3 * Real.exp 1 + 1) * K)) * B ^ (1 / p) := by
+        rw [hθδ]
+        gcongr
+    _ = 2 ^ (1 / p + 1 / q) * (1 + p / q) * (3 * Real.exp 1 + 1) * K * B ^ (1 / p) := by
+        rw [Real.rpow_add (by norm_num)]
+        ring
+
+/-- Doob's maximal inequality on the cube, `‖f*‖_p ≤ p' ‖f‖_p`. Doob's inequality for Paley–Walsh
+martingales (`SignCube.lpNorm_runningMax_le`) is about martingales started at `0`; it is applied to
+`g_0 = 0`, `g_{n+1} = r f_n` with one more sign `r`, as in the proof of HNVW, Lemma 4.2.8. -/
+theorem doob_lpNorm_cubeMax_le {p : ℝ} (hp : 1 < p) (f : (Fin N → Bool) → X) :
+    SignCube.lpNorm (fun t : ℝ => ‖t‖) p (cubeMax f) ≤
+      p / (p - 1) * SignCube.lpNorm (fun x => ‖x‖) p f := by
+  obtain ⟨ξ, hξ, hf⟩ := cbt_exists_paleyWalsh f
+  set c := condAvg 0 f fun _ => false with hc_def
+  have hc : ∀ ε, condAvg 0 f ε = c := fun ε => cbt_condAvg_eq_of_agree 0 f _ _ (by simp)
+  have hcons := cbt_paleyWalsh_cons_condAvg hc hf
+  have key := SignCube.lpNorm_runningMax_le (cbt_isPredictable_cons c hξ) hp (N + 1)
+  rw [show paleyWalsh (cbtCons c ξ) (N + 1) = fun ω => coin (ω 0) • f (Fin.tail ω) from
+    funext fun ω => by rw [hcons, cbt_condAvg_of_le le_rfl], cbt_lpNorm_coin_smul_tail] at key
+  refine le_trans ?_ key
+  rw [xtr_lpNorm_of_nonneg (cubeMax_nonneg f), SignCube.lpNorm,
+    ← cbt_avg_tail fun ε => cubeMax f ε ^ p]
+  refine Real.rpow_le_rpow (avg_nonneg fun ω => Real.rpow_nonneg (cubeMax_nonneg f _) p)
+    (avg_mono fun ω => Real.rpow_le_rpow (cubeMax_nonneg f _) ?_ (by linarith)) (by positivity)
+  refine le_trans (gdl_runningMax_le fun k hk => ?_) (le_abs_self _)
+  have h1 := le_runningMax (fun k ω => ‖paleyWalsh (cbtCons c ξ) k ω‖) (Nat.succ_le_succ hk) ω
+  rw [hcons, norm_smul, Real.norm_eq_abs, abs_coin, one_mul] at h1
+  exact h1
+
+/-- The first bound in the proof of HNVW, (3.49) (p. 234): if the transform `T` by predictable signs
+is bounded from `H^q (X)` to `L^{q,∞} (X)` with constant `K ≥ 1`, then
+`‖T* f‖_p ≤ 20 K C (p, q) p p' ‖f‖_p`, `C (p, q) = 2^{1/p+1/q} (1/p + 1/q)`. The weights
+`w_n = ‖df_n‖` are predictable because the martingale generated by `f` is a Paley–Walsh martingale
+(Proposition 3.1.10, p. 169), `f* ∨ (df)* ≤ 2 f*`, `3e + 1 ≤ 10`, and Doob's inequality. -/
+theorem IsWeakTransformBound.lpNorm_cubeMax_le_lpNorm {p q K : ℝ} (hp : 1 < p) (hq : 0 < q)
+    (hK : 1 ≤ K) (h : IsWeakTransformBound X σ q K) (hσ : IsPredictable σ)
+    (hσ1 : ∀ k ε, σ k ε = 1 ∨ σ k ε = -1) (f : (Fin N → Bool) → X) :
+    SignCube.lpNorm (fun t : ℝ => ‖t‖) p (cubeMax (cubeTransform σ f)) ≤
+      20 * K * (2 ^ (1 / p + 1 / q) * (1 / p + 1 / q)) * (p * (p / (p - 1))) *
+        SignCube.lpNorm (fun x => ‖x‖) p f := by
+  have hp0 : 0 < p := by linarith
+  have hp1 : 0 < p - 1 := by linarith
+  -- `w_n = ‖df_n‖` is predictable
+  set w : ℕ → (Fin N → Bool) → ℝ := fun k ε => ‖condAvg (k + 1) f ε - condAvg k f ε‖ with hw_def
+  have hw : IsAdapted w := by
+    obtain ⟨ξ, hξ, hf⟩ := cbt_exists_paleyWalsh f
+    intro k ε ε' hε
+    have hwk : ∀ ε, w k ε = if h : k < N then ‖ξ ⟨k, h⟩ ε‖ else 0 := by
+      intro ε
+      simp only [hw_def]
+      rw [hf (k + 1), hf k, add_sub_add_left_eq_sub]
+      split_ifs with hk
+      · exact norm_paleyWalsh_succ_sub ξ ⟨k, hk⟩ ε
+      · rw [paleyWalsh_succ, dite_eq_right hk, add_zero, sub_self, norm_zero]
+    rw [hwk, hwk]
+    split_ifs with hk
+    · rw [hξ ⟨k, hk⟩ ε ε' fun j hj => hε j (Fin.lt_def.mp hj)]
+    · rfl
+  have hwt : ∀ ε, max (cubeMax f ε) (runningMax w N ε) ≤ 2 * cubeMax f ε := by
+    intro ε
+    refine max_le (by linarith [cubeMax_nonneg f ε]) (gdl_runningMax_le fun k _ => ?_)
+    have := norm_sub_le (condAvg (k + 1) f ε) (condAvg k f ε)
+    linarith [norm_condAvg_le_cubeMax f (k + 1) ε, norm_condAvg_le_cubeMax f k ε]
+  have hm0 : ∀ ε, 0 ≤ max (cubeMax f ε) (runningMax w N ε) := fun ε =>
+    (cubeMax_nonneg f ε).trans (le_max_left _ _)
+  have hZ : SignCube.lpNorm (fun t : ℝ => ‖t‖) p
+        (fun ε => max (cubeMax f ε) (runningMax w N ε)) ≤
+      2 * SignCube.lpNorm (fun t : ℝ => ‖t‖) p (cubeMax f) := by
+    rw [xtr_lpNorm_of_nonneg hm0, xtr_lpNorm_of_nonneg (cubeMax_nonneg f)]
+    calc (avg fun ε => max (cubeMax f ε) (runningMax w N ε) ^ p) ^ (1 / p)
+        ≤ (avg fun ε => 2 ^ p * cubeMax f ε ^ p) ^ (1 / p) := by
+          refine Real.rpow_le_rpow (avg_nonneg fun ε => Real.rpow_nonneg (hm0 ε) p)
+            (avg_mono fun ε => ?_) (by positivity)
+          rw [← Real.mul_rpow (by norm_num) (cubeMax_nonneg f ε)]
+          exact Real.rpow_le_rpow (hm0 ε) (hwt ε) hp0.le
+      _ = 2 * (avg fun ε => cubeMax f ε ^ p) ^ (1 / p) := by
+          rw [avg_const_mul, Real.mul_rpow (by positivity)
+            (avg_nonneg fun ε => Real.rpow_nonneg (cubeMax_nonneg f ε) p), one_div,
+            Real.rpow_rpow_inv (by norm_num) hp0.ne']
+  have he : 3 * Real.exp 1 + 1 ≤ 10 := by linarith [Real.exp_one_lt_d9]
+  have h3 := h.lpNorm_cubeMax_le hp0 hq hK hσ hσ1 f hw fun _ _ => le_rfl
+  have hD := doob_lpNorm_cubeMax_le hp f
+  set c : ℝ := 2 ^ (1 / p + 1 / q) * (1 + p / q) with hc
+  have hc0 : 0 ≤ c := by positivity
+  have hK0 : 0 ≤ K := by linarith
+  calc SignCube.lpNorm (fun t : ℝ => ‖t‖) p (cubeMax (cubeTransform σ f))
+      ≤ c * (3 * Real.exp 1 + 1) * K * SignCube.lpNorm (fun t : ℝ => ‖t‖) p
+          (fun ε => max (cubeMax f ε) (runningMax w N ε)) := h3
+    _ ≤ c * 10 * K * (2 * (p / (p - 1) * SignCube.lpNorm (fun x => ‖x‖) p f)) := by
+        have h0 : 0 ≤ SignCube.lpNorm (fun t : ℝ => ‖t‖) p
+            (fun ε => max (cubeMax f ε) (runningMax w N ε)) :=
+          lpNorm_nonneg (fun t => norm_nonneg t) p _
+        refine mul_le_mul ?_ (hZ.trans (by linarith)) h0 (by positivity)
+        gcongr
+    _ = _ := by
+        rw [hc]
+        field_simp
+        ring
+
+/-- The consequence of the first bound in the proof of HNVW, (3.49) (p. 234), for `‖T f‖ ≤ T* f`. -/
+theorem IsWeakTransformBound.isTransformBound {p q K : ℝ} (hp : 1 < p) (hq : 0 < q) (hK : 1 ≤ K)
+    (h : IsWeakTransformBound X σ q K) (hσ : IsPredictable σ)
+    (hσ1 : ∀ k ε, σ k ε = 1 ∨ σ k ε = -1) :
+    IsTransformBound X σ p
+      (20 * K * (2 ^ (1 / p + 1 / q) * (1 / p + 1 / q)) * (p * (p / (p - 1)))) := by
+  intro f
+  refine le_trans ?_ (h.lpNorm_cubeMax_le_lpNorm hp hq hK hσ hσ1 f)
+  have hp0 : 0 < p := by linarith
+  rw [xtr_lpNorm_of_nonneg (cubeMax_nonneg _)]
+  exact Real.rpow_le_rpow (avg_nonneg fun ε => Real.rpow_nonneg (norm_nonneg _) p)
+    (avg_mono fun ε => Real.rpow_le_rpow (norm_nonneg _) (norm_le_cubeMax _ ε) hp0.le)
+    (by positivity)
+
+/-- `2^s s ≤ 4 s − 2 s²` for `0 ≤ s ≤ 1`: `2^s ≤ 1 + s ≤ 4 − 2 s`. -/
+private theorem xtr_two_rpow_mul_le {s : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≤ 1) :
+    (2 : ℝ) ^ s * s ≤ 4 * s - 2 * s ^ 2 := by
+  have h := rpow_one_add_le_one_add_mul_self (s := 1) (by norm_num) hs0 hs1
+  rw [one_add_one_eq_two, mul_one] at h
+  nlinarith
+
+/-- The elementary inequality "left to the reader" in the proof of HNVW, (3.49) (p. 234):
+`min {C (p, q), C (p', q')} ≤ 4 (1 / (p q') + 1 / (p' q))`, `C (p, q) = 2^{1/p+1/q} (1/p + 1/q)`.
+With `a = 1/p`, `b = 1/q`, `s = a + b`, the right side is `4 (s − 2 a b) ≥ 4 s − 2 s²`; it and the
+left side do not change under `(a, b) ↦ (1 − a, 1 − b)`, so `s ≤ 1` without loss of generality. -/
+private theorem xtr_min_le {a b : ℝ} (ha0 : 0 ≤ a) (ha1 : a ≤ 1) (hb0 : 0 ≤ b) (hb1 : b ≤ 1) :
+    min ((2 : ℝ) ^ (a + b) * (a + b)) (2 ^ ((1 - a) + (1 - b)) * ((1 - a) + (1 - b))) ≤
+      4 * (a * (1 - b) + (1 - a) * b) := by
+  rcases le_total (a + b) 1 with h | h
+  · refine (min_le_left _ _).trans ((xtr_two_rpow_mul_le (by linarith) h).trans ?_)
+    nlinarith [sq_nonneg (a - b)]
+  · refine (min_le_right _ _).trans
+      ((xtr_two_rpow_mul_le (s := (1 - a) + (1 - b)) (by linarith) (by linarith)).trans ?_)
+    nlinarith [sq_nonneg (a - b)]
+
+/-- The second bound in the proof of HNVW, (3.49) (p. 234):
+`‖T‖_{p → p} ≤ 20 ‖T‖_{q → q} min {C (p, q), C (p', q')} p p'`, from the first bound for `T` on `X`
+at the exponents `p, q` and for its adjoint, the transform by the same signs on the dual of `X`, at
+the exponents `p', q'` (Lemma 3.5.3). -/
+theorem IsTransformBound.extrapolation_min {p p' q q' K : ℝ} (hp : p.HolderConjugate p')
+    (hq : q.HolderConjugate q') (hK : 1 ≤ K) (hσ : IsPredictable σ)
+    (hσ1 : ∀ k ε, σ k ε = 1 ∨ σ k ε = -1) (h : IsTransformBound X σ q K) :
+    IsTransformBound X σ p (20 * K * min (2 ^ (1 / p + 1 / q) * (1 / p + 1 / q))
+      (2 ^ (1 / p' + 1 / q') * (1 / p' + 1 / q')) * (p * p')) := by
+  have hK0 : 0 ≤ K := by linarith
+  have hp0 := hp.pos
+  have hp'0 := hp.symm.pos
+  have hq0 := hq.pos
+  have hq'0 := hq.symm.pos
+  rcases min_choice ((2 : ℝ) ^ (1 / p + 1 / q) * (1 / p + 1 / q))
+    (2 ^ (1 / p' + 1 / q') * (1 / p' + 1 / q')) with hm | hm
+  · rw [hm, hp.conjugate_eq]
+    exact (h.isWeakTransformBound hq0 hK0).isTransformBound hp.lt hq0 hK hσ hσ1
+  · -- the adjoint
+    have h1 := ((h.dual hq hσ hK0).isWeakTransformBound hq'0 hK0).isTransformBound hp.symm.lt
+      hq'0 hK hσ hσ1
+    rw [← hp.symm.conjugate_eq] at h1
+    rw [hm, mul_comm p p']
+    exact h1.of_dual hp hσ (by positivity)
+
+/-- **HNVW, (3.49)** with the constant of its proof (p. 234):
+`‖T‖_{p → p} ≤ 80 (p/q + p'/q') ‖T‖_{q → q}` for the transform `T` by predictable signs on
+Paley–Walsh martingales, for a bound `K ≥ 1` of `T` on `L^q (X)`. -/
+theorem IsTransformBound.extrapolation {p p' q q' K : ℝ} (hp : p.HolderConjugate p')
+    (hq : q.HolderConjugate q') (hK : 1 ≤ K) (hσ : IsPredictable σ)
+    (hσ1 : ∀ k ε, σ k ε = 1 ∨ σ k ε = -1) (h : IsTransformBound X σ q K) :
+    IsTransformBound X σ p (80 * (p / q + p' / q') * K) := by
+  refine (h.extrapolation_min hp hq hK hσ hσ1).mono ?_
+  have hp0 := hp.pos
+  have hp'0 := hp.symm.pos
+  have hq0 := hq.pos
+  have hq'0 := hq.symm.pos
+  have ep : 1 / p' = 1 - 1 / p := by rw [one_div, one_div, hp.one_sub_inv]
+  have eq : 1 / q' = 1 - 1 / q := by rw [one_div, one_div, hq.one_sub_inv]
+  have hmin := xtr_min_le (a := 1 / p) (b := 1 / q) hp.one_div_nonneg
+    ((div_le_one hp0).mpr hp.lt.le) hq.one_div_nonneg ((div_le_one hq0).mpr hq.lt.le)
+  rw [← ep, ← eq] at hmin
+  calc 20 * K * min (2 ^ (1 / p + 1 / q) * (1 / p + 1 / q))
+        (2 ^ (1 / p' + 1 / q') * (1 / p' + 1 / q')) * (p * p')
+      ≤ 20 * K * (4 * (1 / p * (1 / q') + 1 / p' * (1 / q))) * (p * p') := by gcongr
+    _ = 80 * (p / q + p' / q') * K := by
+        field_simp
+        ring
+
+/-- **HNVW, Theorem 3.5.4, (3.49)** (p. 223), for transforms by predictable signs of Paley–Walsh
+martingales: `‖T‖_{L^p → L^p} ≤ 100 (p/q + p'/q') ‖T‖_{L^q → L^q}`, `p, q ∈ (1, ∞)`. (The proof
+gives `80`, see `IsTransformBound.extrapolation`. On the zero space there is nothing to prove; on a
+nonzero space a bound of `T` is at least `1`.) -/
+theorem isTransformBound_extrapolation {p p' q q' K : ℝ} (hp : p.HolderConjugate p')
+    (hq : q.HolderConjugate q') (hσ : IsPredictable σ) (hσ1 : ∀ k ε, σ k ε = 1 ∨ σ k ε = -1)
+    (h : IsTransformBound X σ q K) : IsTransformBound X σ p (100 * (p / q + p' / q') * K) := by
+  rcases subsingleton_or_nontrivial X with hX | hX
+  · intro f
+    have h0 : ∀ u : (Fin N → Bool) → X, SignCube.lpNorm (fun x => ‖x‖) p u = 0 := fun u =>
+      (umdd_lpNorm_eq_zero_iff hp.pos).mpr fun ε => Subsingleton.elim _ _
+    rw [h0, h0, mul_zero]
+  · have hK := h.one_le hq.pos
+    refine (h.extrapolation hp hq hK hσ hσ1).mono ?_
+    have : 0 ≤ (p / q + p' / q') * K :=
+      mul_nonneg (add_nonneg (div_nonneg hp.nonneg hq.nonneg)
+        (div_nonneg hp.symm.nonneg hq.symm.nonneg)) (by linarith)
+    linarith
+
+end Extrapolation
+
+section Dyadic
+
+variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
 
 /-- On the zero space every constant is a dyadic `UMD_p` constant. -/
 private theorem xtr_dyadicUMDConst_eq_zero [Subsingleton X] {p : ℝ} (hp : 0 < p) :
@@ -580,194 +473,111 @@ private theorem xtr_dyadicUMDConst_eq_zero [Subsingleton X] {p : ℝ} (hp : 0 < 
   rw [(umdd_lpNorm_eq_zero_iff hp).mpr fun ε => Subsingleton.elim _ _, ENNReal.ofReal_zero]
   exact zero_le
 
-/-- A finite dyadic `UMD_s` constant of a nonzero space is a real number `u ≥ 1` that is itself
-a dyadic `UMD_s` constant. -/
-private theorem xtr_exists_finite [Nontrivial X] {s : ℝ} (hs : 0 < s)
-    (ht : dyadicUMDConst X s ≠ ⊤) :
-    1 ≤ (dyadicUMDConst X s).toReal ∧
-      IsDyadicUMDBound X s (ENNReal.ofReal (dyadicUMDConst X s).toReal) := by
-  refine ⟨?_, ?_⟩
-  · simpa using ENNReal.toReal_mono ht (one_le_dyadicUMDConst hs)
-  · rw [ENNReal.ofReal_toReal ht]
-    exact isDyadicUMDBound_dyadicUMDConst hs
-
-/-- From constants to best constants: if every real dyadic `UMD_s` constant `u ≥ 1` gives a dyadic
-`UMD_q` constant at most `C u`, then `UMD_q^Δ ≤ C UMD_s^Δ` (on the zero space both sides vanish,
-and the right side is `∞` when `UMD_s^Δ` is). -/
-private theorem xtr_dyadicUMDConst_le {q s C : ℝ} (hq : 0 < q) (hs : 0 < s) (hC : 0 < C)
-    (h : ∀ u : ℝ, 1 ≤ u → IsDyadicUMDBound X s (ENNReal.ofReal u) →
-      ∃ K ≤ C * u, IsDyadicUMDBound X q (ENNReal.ofReal K)) :
-    dyadicUMDConst X q ≤ ENNReal.ofReal C * dyadicUMDConst X s := by
+/-- **HNVW, Theorem 4.2.7** (p. 283) for the dyadic constants, with its proof (p. 285): the
+transforms `T` by predictable signs on all sign cubes satisfy (3.49), and, by Lemma 4.2.8, the
+supremum of their norms is the dyadic constant. -/
+theorem dyadicUMDConst_le_mul_dyadicUMDConst {p q : ℝ} (hp : 1 < p) (hq : 1 < q) :
+    dyadicUMDConst X p ≤
+      ENNReal.ofReal (100 * (p / q + p / (p - 1) / (q / (q - 1)))) * dyadicUMDConst X q := by
+  have hp' : 0 < p / (p - 1) := div_pos (by linarith) (by linarith)
+  have hq' : 0 < q / (q - 1) := div_pos (by linarith) (by linarith)
+  have hC : 0 < 100 * (p / q + p / (p - 1) / (q / (q - 1))) := by positivity
   rcases subsingleton_or_nontrivial X with hX | hX
-  · rw [xtr_dyadicUMDConst_eq_zero hq]
+  · rw [xtr_dyadicUMDConst_eq_zero (by linarith)]
     exact zero_le
-  by_cases ht : dyadicUMDConst X s = ⊤
+  by_cases ht : dyadicUMDConst X q = ⊤
   · rw [ht, ENNReal.mul_top (by simpa using hC)]
     exact le_top
-  obtain ⟨hu1, hu⟩ := xtr_exists_finite hs ht
-  obtain ⟨K, hK, hKb⟩ := h _ hu1 hu
-  calc dyadicUMDConst X q ≤ ENNReal.ofReal K := dyadicUMDConst_le_of_isDyadicUMDBound hKb
-    _ ≤ ENNReal.ofReal (C * (dyadicUMDConst X s).toReal) := ENNReal.ofReal_le_ofReal hK
-    _ = ENNReal.ofReal C * dyadicUMDConst X s := by
-        rw [ENNReal.ofReal_mul hC.le, ENNReal.ofReal_toReal ht]
-
-/-- `y^{−1/r} ≤ y^{−1}` for `0 < y ≤ 1` and `r ≥ 1`. -/
-private theorem xtr_rpow_neg_le_inv {y r : ℝ} (hy0 : 0 < y) (hy1 : y ≤ 1) (hr : 1 ≤ r) :
-    y ^ (-(1 / r)) ≤ y⁻¹ := by
-  rw [← Real.rpow_neg_one]
-  refine Real.rpow_le_rpow_of_exponent_ge hy0 hy1 ?_
-  rw [neg_le_neg_iff, div_le_one (by linarith)]
-  exact hr
-
-/-- `(1 + 1 / p)^p ≤ e ≤ 4` (`1 + x ≤ eˣ`, and `e^{1/2} ≤ 1 / (1 − 1/2)`). -/
-private theorem xtr_one_add_inv_rpow_le {p : ℝ} (hp : 0 < p) : (1 + 1 / p) ^ p ≤ 4 := by
-  have h1 : 1 + 1 / p ≤ Real.exp (1 / p) := by linarith [Real.add_one_le_exp (1 / p)]
-  have h2 : Real.exp (1 / 2) ≤ 2 :=
-    (Real.exp_bound_div_one_sub_of_interval (x := 1 / 2) (by norm_num) (by norm_num)).trans
-      (by norm_num)
-  calc (1 + 1 / p) ^ p ≤ Real.exp (1 / p) ^ p := Real.rpow_le_rpow (by positivity) h1 hp.le
-    _ = Real.exp (1 / 2) * Real.exp (1 / 2) := by
-        rw [← Real.exp_mul, ← Real.exp_add, one_div_mul_cancel hp.ne']
-        norm_num
-    _ ≤ 2 * 2 := by gcongr
-    _ = 4 := by norm_num
+  set K := (dyadicUMDConst X q).toReal with hK_def
+  have hK : IsDyadicUMDBound X q (ENNReal.ofReal K) := by
+    rw [hK_def, ENNReal.ofReal_toReal ht]
+    exact isDyadicUMDBound_dyadicUMDConst (by linarith)
+  have hK0 : 0 ≤ K := ENNReal.toReal_nonneg
+  calc dyadicUMDConst X p
+      ≤ ENNReal.ofReal (100 * (p / q + p / (p - 1) / (q / (q - 1))) * K) :=
+        dyadicUMDConst_le_of_isDyadicUMDBound <|
+          isDyadicUMDBound_of_isTransformBound (mul_nonneg hC.le hK0) fun N σ hσ hσ1 =>
+            isTransformBound_extrapolation (Real.HolderConjugate.conjExponent hp)
+              (Real.HolderConjugate.conjExponent hq) hσ hσ1 (hK.isTransformBound hK0 hσ hσ1)
+    _ = _ := by rw [ENNReal.ofReal_mul hC.le, ENNReal.ofReal_toReal ht]
 
 /-- Extrapolation of the dyadic UMD property: finiteness for one exponent gives it for all. -/
 theorem dyadicUMDConst_lt_top_of_lt_top {p₀ p : ℝ} (hp₀ : 1 < p₀)
-    (h : dyadicUMDConst X p₀ < ⊤) (hp : 1 < p) : dyadicUMDConst X p < ⊤ := by
-  rcases subsingleton_or_nontrivial X with hX | hX
-  · rw [xtr_dyadicUMDConst_eq_zero (by linarith)]
-    exact ENNReal.zero_lt_top
-  obtain ⟨hu1, hu⟩ := xtr_exists_finite (X := X) (by linarith : (0 : ℝ) < p₀) h.ne
-  -- `β = 2` and `θ = (2^{p+1})^{−1/p₀}`, so that `β^p θ^{p₀} = 1/2`
-  set x : ℝ := (2 ^ p * 2)⁻¹ with hx_def
-  have hx : 0 < x := by positivity
-  have hθ : 0 < x ^ p₀⁻¹ := Real.rpow_pos_of_pos hx _
-  have h2p : 0 < (2 : ℝ) ^ p := by positivity
-  have hc : (2 : ℝ) ^ p * (x ^ p₀⁻¹) ^ p₀ < 1 := by
-    rw [Real.rpow_inv_rpow hx.le (by linarith), hx_def, mul_inv, ← mul_assoc,
-      mul_inv_cancel₀ h2p.ne', one_mul]
-    norm_num
-  exact (dyadicUMDConst_le_of_isDyadicUMDBound (xtr_isDyadicUMDBound_theta (by linarith) hp hu1
-    hu one_lt_two hθ hc)).trans_lt ENNReal.ofReal_lt_top
+    (h : dyadicUMDConst X p₀ < ⊤) (hp : 1 < p) : dyadicUMDConst X p < ⊤ :=
+  (dyadicUMDConst_le_mul_dyadicUMDConst hp hp₀).trans_lt
+    (ENNReal.mul_lt_top ENNReal.ofReal_lt_top h)
 
-/-- `UMD_p^Δ (X) ≤ 100 p* UMD_2^Δ (X)`, by the good-λ inequality from `L²` with `β`, `δ` chosen as
-functions of `p`. -/
+/-- `50 (p + p') ≤ 100 p*`. -/
+private theorem xtr_le_pStar (p : ℝ) : 50 * (p + p / (p - 1)) ≤ 100 * pStar p := by
+  have h1 : p ≤ pStar p := le_max_left _ _
+  have h2 : p / (p - 1) ≤ pStar p := le_max_right _ _
+  linarith
+
+/-- `100 (p / 2 + p' / 2') = 50 (p + p')`. -/
+private theorem xtr_const_two (p : ℝ) :
+    100 * (p / 2 + p / (p - 1) / (2 / (2 - 1))) = 50 * (p + p / (p - 1)) := by
+  ring
+
+/-- `100 (2 / p + 2' / p') = 200`. -/
+private theorem xtr_two_const {p : ℝ} (hp : 1 < p) :
+    100 * (2 / p + 2 / (2 - 1) / (p / (p - 1))) = (200 : ℝ) := by
+  have h0 : p ≠ 0 := by linarith
+  have h1 : p - 1 ≠ 0 := by linarith
+  field_simp
+  ring
+
+/-- `UMD_p^Δ (X) ≤ 100 p* UMD_2^Δ (X)`, by `50 (p + p') ≤ 100 p*`. -/
 theorem dyadicUMDConst_le_mul_dyadicUMDConst_two {p : ℝ} (hp : 1 < p) :
     dyadicUMDConst X p ≤ ENNReal.ofReal (100 * pStar p) * dyadicUMDConst X 2 := by
-  have hpS : p ≤ pStar p := le_max_left _ _
-  have hpS' : p / (p - 1) ≤ pStar p := le_max_right _ _
-  have hp1 : 0 < p - 1 := by linarith
-  refine xtr_dyadicUMDConst_le (by linarith) two_pos (by linarith) fun u hu1 hu => ?_
-  rcases le_or_gt 2 p with hp2 | hp2
-  · -- `p ≥ 2`: `β = 1 + 1 / p`, `θ = 1 / 3`
-    have hq : 0 < 1 / p := by positivity
-    have hβ : 1 < 1 + 1 / p := by linarith
-    have hB : (1 + 1 / p) ^ p ≤ 4 := xtr_one_add_inv_rpow_le (by linarith)
-    have hB0 : 0 ≤ (1 + 1 / p) ^ p := Real.rpow_nonneg (by linarith) _
-    have hc : (1 + 1 / p) ^ p * (1 / 3 : ℝ) ^ (2 : ℝ) ≤ 4 / 9 := by
-      rw [Real.rpow_two]
-      nlinarith
-    have hc0 : 0 ≤ (1 + 1 / p) ^ p * (1 / 3 : ℝ) ^ (2 : ℝ) := by positivity
-    refine ⟨_, ?_, xtr_isDyadicUMDBound_theta (θ := 1 / 3) two_pos hp hu1 hu hβ (by norm_num)
-      (by linarith)⟩
-    have hA1 : p / (p - 1) ≤ 2 := by
-      rw [div_le_iff₀ hp1]
-      linarith
-    have hA2 : (1 + 1 / p) * (4 * u + 2 * (1 / 3)) / (1 / 3 * (1 + 1 / p - 1)) =
-        3 * (p + 1) * (4 * u + 2 / 3) := by
-      field_simp
-      ring
-    have hA2' : 3 * (p + 1) * (4 * u + 2 / 3) ≤ 21 * p * u := by
-      nlinarith [mul_nonneg (sub_nonneg.mpr hp2) (sub_nonneg.mpr hu1)]
-    have hA3 : (1 - (1 + 1 / p) ^ p * (1 / 3 : ℝ) ^ (2 : ℝ)) ^ (-(1 / p)) ≤ 9 / 5 := by
-      refine (xtr_rpow_neg_le_inv (by linarith) (by linarith) hp.le).trans ?_
-      rw [inv_le_comm₀ (by linarith) (by norm_num)]
-      linarith
-    rw [hA2]
-    calc p / (p - 1) * (3 * (p + 1) * (4 * u + 2 / 3)) *
-          (1 - (1 + 1 / p) ^ p * (1 / 3 : ℝ) ^ (2 : ℝ)) ^ (-(1 / p))
-        ≤ 2 * (21 * p * u) * (9 / 5) :=
-          mul_le_mul (mul_le_mul hA1 hA2' (by positivity) (by norm_num)) hA3
-            (Real.rpow_nonneg (by linarith) _) (by positivity)
-      _ ≤ 100 * pStar p * u := by nlinarith [mul_le_mul_of_nonneg_right hpS (by linarith : 0 ≤ u)]
-  · -- `1 < p < 2`: `β = 2`, `θ = 1 / 4`
-    have h2p : (2 : ℝ) ^ p < 4 := by
-      have := Real.rpow_lt_rpow_of_exponent_lt (x := 2) (by norm_num) hp2
-      rw [Real.rpow_two] at this
-      linarith
-    have h2p0 : 0 ≤ (2 : ℝ) ^ p := by positivity
-    have hc : (2 : ℝ) ^ p * (1 / 4 : ℝ) ^ (2 : ℝ) < 1 / 4 := by
-      rw [Real.rpow_two]
-      nlinarith
-    have hc0 : 0 ≤ (2 : ℝ) ^ p * (1 / 4 : ℝ) ^ (2 : ℝ) := by positivity
-    refine ⟨_, ?_, xtr_isDyadicUMDBound_theta (θ := 1 / 4) two_pos hp hu1 hu one_lt_two
-      (by norm_num) (by linarith)⟩
-    have hA2 : (2 : ℝ) * (4 * u + 2 * (1 / 4)) / (1 / 4 * (2 - 1)) = 32 * u + 4 := by ring
-    have hA3 : (1 - (2 : ℝ) ^ p * (1 / 4 : ℝ) ^ (2 : ℝ)) ^ (-(1 / p)) ≤ 4 / 3 := by
-      refine (xtr_rpow_neg_le_inv (by linarith) (by linarith) hp.le).trans ?_
-      rw [inv_le_comm₀ (by linarith) (by norm_num)]
-      linarith
-    rw [hA2]
-    calc p / (p - 1) * (32 * u + 4) * (1 - (2 : ℝ) ^ p * (1 / 4 : ℝ) ^ (2 : ℝ)) ^ (-(1 / p))
-        ≤ pStar p * (36 * u) * (4 / 3) :=
-          mul_le_mul (mul_le_mul hpS' (by linarith) (by linarith) (by linarith)) hA3
-            (Real.rpow_nonneg (by linarith) _) (by nlinarith)
-      _ ≤ 100 * pStar p * u := by nlinarith
+  refine (dyadicUMDConst_le_mul_dyadicUMDConst hp one_lt_two).trans ?_
+  rw [xtr_const_two]
+  gcongr ENNReal.ofReal ?_ * _
+  exact xtr_le_pStar p
 
-/-- `UMD_2^Δ (X) ≤ 200 UMD_p^Δ (X)`, by the good-λ inequality from `L^p` to `L²`. -/
+/-- `UMD_2^Δ (X) ≤ 200 UMD_p^Δ (X)`. -/
 theorem dyadicUMDConst_two_le_mul {p : ℝ} (hp : 1 < p) :
     dyadicUMDConst X 2 ≤ 200 * dyadicUMDConst X p := by
-  rw [← ENNReal.ofReal_ofNat 200]
-  refine xtr_dyadicUMDConst_le two_pos (by linarith) (by norm_num) fun u hu1 hu => ?_
-  -- `β = 3 / 2`, `θ = 2 / 9`
-  have hθp : (2 / 9 : ℝ) ^ p ≤ 2 / 9 := by
-    have := Real.rpow_le_rpow_of_exponent_ge (x := 2 / 9) (by norm_num) (by norm_num) hp.le
-    rwa [Real.rpow_one] at this
-  have hθp0 : 0 ≤ (2 / 9 : ℝ) ^ p := by positivity
-  have hc : (3 / 2 : ℝ) ^ (2 : ℝ) * (2 / 9 : ℝ) ^ p ≤ 1 / 2 := by
-    rw [Real.rpow_two]
-    nlinarith
-  refine ⟨_, ?_, xtr_isDyadicUMDBound_theta (θ := 2 / 9) (by linarith) one_lt_two hu1 hu
-    (by norm_num : (1 : ℝ) < 3 / 2) (by norm_num) (by linarith)⟩
-  have hA2 : (2 : ℝ) / (2 - 1) * (3 / 2 * (4 * u + 2 * (2 / 9)) / (2 / 9 * (3 / 2 - 1))) =
-      2 * (54 * u + 6) := by ring
-  have hA3 : (1 - (3 / 2 : ℝ) ^ (2 : ℝ) * (2 / 9 : ℝ) ^ p) ^ (-(1 / 2 : ℝ)) ≤ 3 / 2 := by
-    set y := 1 - (3 / 2 : ℝ) ^ (2 : ℝ) * (2 / 9 : ℝ) ^ p with hy_def
-    have hy : 1 / 2 ≤ y := by linarith
-    have hy0 : 0 < y := by linarith
-    rw [Real.rpow_neg hy0.le, ← Real.sqrt_eq_rpow,
-      inv_le_comm₀ (Real.sqrt_pos.mpr hy0) (by norm_num), Real.le_sqrt (by norm_num) hy0.le]
-    nlinarith
-  rw [hA2]
-  calc 2 * (54 * u + 6) * (1 - (3 / 2 : ℝ) ^ (2 : ℝ) * (2 / 9 : ℝ) ^ p) ^ (-(1 / 2 : ℝ))
-      ≤ 2 * (60 * u) * (3 / 2) :=
-        mul_le_mul (by linarith) hA3 (Real.rpow_nonneg (by linarith) _) (by positivity)
-    _ ≤ 200 * u := by linarith
+  have h := dyadicUMDConst_le_mul_dyadicUMDConst (X := X) one_lt_two hp
+  rwa [xtr_two_const hp, ENNReal.ofReal_ofNat] at h
 
 end Dyadic
 
 variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
 
-/-- **Extrapolation of the UMD property** (Hytönen–van Neerven–Veraar–Weis I, Theorem 4.2.7): a
-Banach space that is `UMD_{p₀}` for some `p₀ ∈ (1, ∞)` is `UMD_p` for every `p ∈ (1, ∞)`. -/
-theorem umdConst_lt_top_of_lt_top {p₀ p : ℝ} (hp₀ : 1 < p₀) (h : umdConst X p₀ < ⊤)
-    (hp : 1 < p) : umdConst X p < ⊤ := by
-  rw [← dyadicUMDConst_eq_umdConst hp₀] at h
-  rw [← dyadicUMDConst_eq_umdConst hp]
-  exact dyadicUMDConst_lt_top_of_lt_top hp₀ h hp
+/-- **Extrapolation of the UMD property** (HNVW, Theorem 4.2.7, p. 283):
+`UMD_p (X) ≤ 100 (p/q + p'/q') UMD_q (X)` for all `p, q ∈ (1, ∞)`, with `p' = p / (p − 1)` and
+`q' = q / (q − 1)`. -/
+theorem umdConst_le_mul_umdConst {p q : ℝ} (hp : 1 < p) (hq : 1 < q) :
+    umdConst X p ≤
+      ENNReal.ofReal (100 * (p / q + p / (p - 1) / (q / (q - 1)))) * umdConst X q := by
+  rw [← dyadicUMDConst_eq_umdConst hp, ← dyadicUMDConst_eq_umdConst hq]
+  exact dyadicUMDConst_le_mul_dyadicUMDConst hp hq
 
-/-- **Extrapolation of the UMD property, constants** (Hytönen–van Neerven–Veraar–Weis I,
-Theorem 4.2.7): `UMD_p (X) ≤ 100 p* UMD₂ (X)` for every `p ∈ (1, ∞)`. -/
+/-- **Extrapolation of the UMD property** (HNVW, Theorem 4.2.7, p. 283): a Banach space that is
+`UMD_{p₀}` for some `p₀ ∈ (1, ∞)` is `UMD_p` for every `p ∈ (1, ∞)`. -/
+theorem umdConst_lt_top_of_lt_top {p₀ p : ℝ} (hp₀ : 1 < p₀) (h : umdConst X p₀ < ⊤)
+    (hp : 1 < p) : umdConst X p < ⊤ :=
+  (umdConst_le_mul_umdConst hp hp₀).trans_lt (ENNReal.mul_lt_top ENNReal.ofReal_lt_top h)
+
+/-- **Extrapolation of the UMD property, the exponent `2`** (HNVW, Theorem 4.2.7, p. 283):
+`UMD_p (X) ≤ 50 (p + p') UMD₂ (X)` for every `p ∈ (1, ∞)`. -/
+theorem umdConst_le_fifty_mul_umdConst_two {p : ℝ} (hp : 1 < p) :
+    umdConst X p ≤ ENNReal.ofReal (50 * (p + p / (p - 1))) * umdConst X 2 := by
+  have h := umdConst_le_mul_umdConst (X := X) hp one_lt_two
+  rwa [xtr_const_two] at h
+
+/-- **Extrapolation of the UMD property, the exponent `2`** (HNVW, Theorem 4.2.7, p. 283, weakened
+by `50 (p + p') ≤ 100 p*`): `UMD_p (X) ≤ 100 p* UMD₂ (X)` for every `p ∈ (1, ∞)`. -/
 theorem umdConst_le_mul_umdConst_two {p : ℝ} (hp : 1 < p) :
     umdConst X p ≤ ENNReal.ofReal (100 * pStar p) * umdConst X 2 := by
-  rw [← dyadicUMDConst_eq_umdConst hp, ← dyadicUMDConst_eq_umdConst one_lt_two]
-  exact dyadicUMDConst_le_mul_dyadicUMDConst_two hp
+  refine (umdConst_le_fifty_mul_umdConst_two hp).trans ?_
+  gcongr ENNReal.ofReal ?_ * _
+  exact xtr_le_pStar p
 
-/-- **Extrapolation of the UMD property, constants** (Hytönen–van Neerven–Veraar–Weis I,
-Theorem 4.2.7): `UMD₂ (X) ≤ 200 UMD_p (X)` for every `p ∈ (1, ∞)`. -/
+/-- **Extrapolation of the UMD property, the exponent `2`** (HNVW, Theorem 4.2.7, p. 283):
+`UMD₂ (X) ≤ 200 UMD_p (X)` for every `p ∈ (1, ∞)`. -/
 theorem umdConst_two_le_mul {p : ℝ} (hp : 1 < p) : umdConst X 2 ≤ 200 * umdConst X p := by
-  rw [← dyadicUMDConst_eq_umdConst hp, ← dyadicUMDConst_eq_umdConst one_lt_two]
-  exact dyadicUMDConst_two_le_mul hp
+  have h := umdConst_le_mul_umdConst (X := X) one_lt_two hp
+  rwa [xtr_two_const hp, ENNReal.ofReal_ofNat] at h
 
 end BanachProbability
