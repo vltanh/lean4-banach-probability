@@ -12,7 +12,9 @@ A Banach space `X` is `UMD_p`, `p ∈ (1, ∞)`, if and only if there are `β > 
 `UMD_p (X) ≤ β` (D. L. Burkholder, *A geometrical characterization of Banach spaces in which
 martingale difference sequences are unconditional*, Ann. Probab. 9 (1981), and *Boundary value
 problems and sharp inequalities for martingale transforms*, Ann. Probab. 12 (1984);
-Hytönen–van Neerven–Veraar–Weis, *Analysis in Banach spaces I* (2016), Theorem 4.5.6). For a
+Hytönen–van Neerven–Veraar–Weis, *Analysis in Banach spaces I* (2016), Theorem 4.5.6; none of the
+three was obtained: the two papers are open access on Project Euclid, which refused automated
+download. The arguments below are the standard ones). For a
 complex space and `ε` in the closed unit disc of `ℂ` (`IsComplexZigZagConcave`), `U` bounds the
 complex constant `UMD_{ℂ,p} (X)` (I. Yaroslavtsev, *Even Fourier multipliers and martingale
 transforms in infinite dimensions*, Indag. Math. 29 (2018), Proposition 3.7).

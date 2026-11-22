@@ -8,7 +8,9 @@ public import BanachProbability.Martingale.Burkholder.Inequality
 
 For a real Hilbert space `H` and `p ∈ (1, ∞)`, `UMD_p (H) ≤ p* − 1` with
 `p* = max (p, p / (p − 1))` (Burkholder, *Boundary value problems and sharp inequalities for
-martingale transforms*, Ann. Probab. 12 (1984); the constant is sharp). A transform by predictable
+martingale transforms*, Ann. Probab. 12 (1984), not obtained; Burkholder, *Sharp inequalities for
+martingales and stochastic integrals*, Astérisque 157–158 (1988), Theorem 1.1; the constant is
+sharp). A transform by predictable
 signs is a martingale (`martingale_martingaleTransform`) whose increments have the same norms as
 those of the original martingale, so Burkholder's inequality
 (`BanachProbability.Burkholder.inequality_of_subordinate`) applies to the pair. The complex

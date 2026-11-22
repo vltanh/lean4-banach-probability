@@ -12,9 +12,11 @@ Banach spaces I* (2016), Theorem 4.2.7).
 
 The proof is Burkholder's good-λ method (D. L. Burkholder, *Distribution function inequalities
 for martingales*, Ann. Probab. 1 (1973); *A geometrical characterization of Banach spaces in which
-martingale difference sequences are unconditional*, Ann. Probab. 9 (1981); for dyadic martingales
-Pisier, *Martingales in Banach spaces* (2016), the second proof of the extrapolation theorem),
-run on Paley–Walsh martingales, then lifted by Maurey's theorem (`dyadicUMDConst_eq_umdConst`).
+martingale difference sequences are unconditional*, Ann. Probab. 9 (1981), both open access on
+Project Euclid but not obtained; HNVW I was not obtained either), in the form it takes for dyadic
+martingales in Pisier, *Martingales in Banach spaces* (2016), the second proof of the
+extrapolation theorem, run on Paley–Walsh martingales, then lifted by Maurey's theorem
+(`dyadicUMDConst_eq_umdConst`).
 
 * `goodLambda`: for a Paley–Walsh martingale `f_k = Σ_{j<k} ε_j ξ_j`, its transform `g` by
   predictable signs, `β > 1`, `δ > 0` with `a = β − 1 − 2δ > 0` and `λ > 0`,
