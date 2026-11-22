@@ -46,6 +46,7 @@ public import BanachProbability.SignCube.Basic
 public import BanachProbability.SignCube.Bridge
 public import BanachProbability.SignCube.LpSeminorm
 public import BanachProbability.SignCube.PaleyWalsh
+public import BanachProbability.SignCube.Walsh
 public import BanachProbability.TypeTwo.Basic
 public import BanachProbability.TypeTwo.Even
 public import BanachProbability.TypeTwo.Schatten

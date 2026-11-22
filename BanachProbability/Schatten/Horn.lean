@@ -12,16 +12,24 @@ For real matrices `A`, `B` with singular values in decreasing order,
 Horn's inequality), and hence **Hölder's inequality**
 `‖A B‖_{S_p} ≤ ‖A‖_{S_q} ‖B‖_{S_r}`, `1/p = 1/q + 1/r` (`schattenNorm_mul_le`), for all
 `0 < q, r < ∞`; also `|tr A| ≤ ‖A‖_{S_1}` (`abs_trace_le_schattenNorm_one`) and
-`|tr (A B)| ≤ ‖A‖_{S_q} ‖B‖_{S_{q'}}` (`abs_trace_mul_le`).
+`|tr (A B)| ≤ ‖A‖_{S_q} ‖B‖_{S_{q'}}` (`abs_trace_mul_le`). The additive form of Horn's inequality
+is `Σ_{k < N} s_k (A B) ≤ Σ_{k < N} s_k (A) s_k (B)` (`sum_sortedSingularValue_mul_le`), and for
+several square matrices `Σ_{k < N} s_k (A_1 ⋯ A_r) ≤ Σ_{k < N} s_k (A_1) ⋯ s_k (A_r)`
+(`sum_sortedSingularValue_prod_le`, the **general Horn inequality**).
 
-The proofs are those of Hytönen–van Neerven–Veraar–Weis (HNVW), *Analysis in Banach spaces I*
-(2016), Appendix D: Lemma D.1.1 and (D.3) (p. 566), Lemma D.1.4 (pp. 567–568), Lemmas D.2.1–D.2.2
-(pp. 570–571), Proposition D.2.3 (p. 571), Corollary D.2.4 and Proposition D.2.5 (p. 572), and the
-first line of the proof of Theorem D.2.6 (p. 573). Two remarks on Corollary D.2.4. The proof in the
-book takes the logarithms of Horn's inequality; where some singular values vanish, this is completed
-here by the restriction to the positive singular values of `A B`. The book states it for exponents
-`p, q, r ≥ 1`; its proof, by Horn's inequality, gives it for all positive exponents, and it is
-stated for these.
+The proofs, up to those of the last two results, are those of Hytönen–van Neerven–Veraar–Weis
+(HNVW), *Analysis in Banach spaces I* (2016), Appendix D: Lemma D.1.1 and (D.3) (p. 566), Lemma
+D.1.4 (pp. 567–568), Lemmas D.2.1–D.2.2 (pp. 570–571), Proposition D.2.3 (p. 571), Corollary D.2.4
+and Proposition D.2.5 (p. 572), and the first line of the proof of Theorem D.2.6 (p. 573). Two
+remarks on Corollary D.2.4. The proof in the book takes the logarithms of Horn's inequality; where
+some singular values vanish, this is completed here by the restriction to the positive singular
+values of `A B`. The book states it for exponents `p, q, r ≥ 1`; its proof, by Horn's inequality,
+gives it for all positive exponents, and it is stated for these.
+
+The general Horn inequality, with its proof, is Lemma 1.1 of N. Tomczak-Jaegermann, *The moduli of
+smoothness and convexity and the Rademacher averages of trace classes `S_p` (`1 ≤ p < ∞`)*, Studia
+Math. 50 (1974) 163–182, pp. 165–166. The additive Horn inequality, with which it begins, is quoted
+there; here it is deduced from the multiplicative one, as in Corollary D.2.4 of HNVW I.
 -/
 
 @[expose] public section
@@ -619,17 +627,73 @@ theorem abs_trace_mul_le {q q' : ℝ} (hq : q.HolderConjugate q') (A : Matrix n 
   rw [ENNReal.ofReal_one] at h
   exact (abs_trace_le_schattenNorm_one _).trans h
 
-/-- **Horn's inequality**, in the additive form: `Σ_{k<N} s_k (A B) ≤ Σ_{k<N} s_k (A) s_k (B)`. -/
+/-! ### The general Horn inequality -/
+
+/-- **Horn's inequality**, in the additive form: `Σ_{k<N} s_k (A B) ≤ Σ_{k<N} s_k (A) s_k (B)`
+(Tomczak-Jaegermann (1974), p. 165, the case of two factors of Lemma 1.1, quoted there as the
+classical Horn inequality). It follows from the multiplicative form
+`prod_sortedSingularValue_mul_le` and the weak majorization lemma, by the first step of Corollary
+D.2.4 of HNVW I with the exponent `1`, after the restriction to the positive singular values of
+`A B`. -/
 theorem sum_sortedSingularValue_mul_le (A : Matrix l m ℝ) (B : Matrix m n ℝ) (N : ℕ) :
     ∑ k ∈ Finset.range N, sortedSingularValue (A * B) k ≤
       ∑ k ∈ Finset.range N, sortedSingularValue A k * sortedSingularValue B k := by
-  sorry
+  classical
+  have hex : ∃ k, sortedSingularValue (A * B) k = 0 :=
+    ⟨Fintype.card n, sortedSingularValue_eq_zero _ le_rfl⟩
+  -- the first `K` of the first `N` singular values of `A B` are positive, the others are zero
+  set K := min N (Nat.find hex)
+  have hK : ∀ k < K, 0 < sortedSingularValue (A * B) k := fun k hk =>
+    (sortedSingularValue_nonneg _ k).lt_of_ne'
+      (Nat.find_min hex (hk.trans_le (min_le_right _ _)))
+  have hKN : Finset.range K ⊆ Finset.range N := Finset.range_mono (min_le_left _ _)
+  have hK0 : ∀ k ∈ Finset.range N, k ∉ Finset.range K → sortedSingularValue (A * B) k = 0 :=
+    fun k hkN hk => by
+      have hfind : Nat.find hex ≤ k := by
+        rw [Finset.mem_range, not_lt, min_le_iff] at hk
+        exact hk.resolve_left (not_le.2 (Finset.mem_range.1 hkN))
+      exact le_antisymm ((antitone_sortedSingularValue _ hfind).trans (Nat.find_spec hex).le)
+        (sortedSingularValue_nonneg _ k)
+  have h := sum_sortedSingularValue_mul_rpow_le one_pos A B hK
+  simp only [Real.rpow_one] at h
+  rw [← Finset.sum_subset hKN hK0]
+  exact h.trans (Finset.sum_le_sum_of_subset_of_nonneg hKN fun k _ _ =>
+    mul_nonneg (sortedSingularValue_nonneg A k) (sortedSingularValue_nonneg B k))
 
-/-- The general Horn inequality (Tomczak-Jaegermann (1974), Lemma 1.1, p. 165):
-`Σ_{k<N} s_k (A_1 ⋯ A_r) ≤ Σ_{k<N} s_k (A_1) ⋯ s_k (A_r)`. -/
+/-- The singular values of the identity are at most `1`. -/
+private theorem sortedSingularValue_one_le (k : ℕ) :
+    sortedSingularValue (1 : Matrix n n ℝ) k ≤ 1 := by
+  rcases lt_or_ge k (Fintype.card n) with hk | hk
+  · have h := inner_toEuclideanLin_sortedBasis (1 : Matrix n n ℝ) ⟨k, hk⟩ ⟨k, hk⟩
+    rw [Matrix.toLpLin_one, LinearMap.id_apply, real_inner_self_eq_norm_sq,
+      (sortedBasis (1 : Matrix n n ℝ)).norm_eq_one, ite_eq_left rfl] at h
+    exact le_of_sq_le_sq h.ge zero_le_one
+  · rw [sortedSingularValue_eq_zero _ hk]
+    exact zero_le_one
+
+/-- **The general Horn inequality** (Tomczak-Jaegermann (1974), Lemma 1.1, pp. 165–166):
+`Σ_{k<N} s_k (A_1 ⋯ A_r) ≤ Σ_{k<N} s_k (A_1) ⋯ s_k (A_r)`. The proof is that of the source, an
+induction on `r` with Horn's inequality (1.3) and the Abel transform (1.4); the induction starts
+from the empty product, for which the claim is `Σ_{k<N} s_k (1) ≤ N`. -/
 theorem sum_sortedSingularValue_prod_le (L : List (Matrix n n ℝ)) (N : ℕ) :
     ∑ k ∈ Finset.range N, sortedSingularValue L.prod k ≤
       ∑ k ∈ Finset.range N, (L.map fun A => sortedSingularValue A k).prod := by
-  sorry
+  induction L using List.reverseRecOn generalizing N with
+  | nil =>
+    simp only [List.prod_nil, List.map_nil]
+    exact Finset.sum_le_sum fun k _ => sortedSingularValue_one_le k
+  | append_singleton L A ih =>
+    simp only [List.prod_append, List.prod_singleton, List.map_append, List.map_singleton]
+    -- (1.4): the Abel transform, and the induction hypothesis for all partial sums
+    have h := sum_mul_nonneg_of_antitone (antitone_sortedSingularValue A)
+      (sortedSingularValue_nonneg A) (d := fun k =>
+        (L.map fun B => sortedSingularValue B k).prod - sortedSingularValue L.prod k) N
+      fun i _ => by
+        rw [Finset.sum_sub_distrib, sub_nonneg]
+        exact ih i
+    simp only [mul_sub, Finset.sum_sub_distrib, sub_nonneg] at h
+    -- (1.3): Horn's inequality for `A_1 ⋯ A_r` and `A_{r+1}`
+    refine (sum_sortedSingularValue_mul_le L.prod A N).trans ?_
+    simpa only [mul_comm] using h
 
 end BanachProbability

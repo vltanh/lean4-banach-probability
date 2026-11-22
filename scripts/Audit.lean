@@ -50,6 +50,7 @@ import all BanachProbability.SignCube.Basic
 import all BanachProbability.SignCube.Bridge
 import all BanachProbability.SignCube.LpSeminorm
 import all BanachProbability.SignCube.PaleyWalsh
+import all BanachProbability.SignCube.Walsh
 import all BanachProbability.TypeTwo.Basic
 import all BanachProbability.TypeTwo.Even
 import all BanachProbability.TypeTwo.Schatten

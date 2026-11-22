@@ -11,14 +11,15 @@ import BanachProbability.Schatten.Block
 For `q ≥ 2` the Rademacher projection (real signs) is bounded on `L^q (Ω; S_q)`, real square
 matrices, with norm at most `√(π/2) √(q + 1)`, uniformly in the size
 (`lpNorm_rademacherProj_schattenNorm_le`), and, by duality, with the same bound on
-`L^{q'} (Ω; S_{q'})` for functions with symmetric values
-(`lpNorm_rademacherProj_schattenNorm_conj_le`). The proof is G. Pisier's, *Non-commutative vector
-valued `L_p`-spaces and completely `p`-summing maps*, Astérisque 247 (1998), p. 106, for the
-projection `P_1 ⊗ I_X`, `X = S_q`: by averaging, its norm on `L_q (X)` is at most `K (L_q (X))`, the
-K-convexity constant of `L_q (X)`; this is `K (S_q)`, because `ℓ_q (S_q)` embeds isometrically in
-`S_q` (block diagonal matrices); and `K (S_q)` is dominated by the type 2 constant (here up to the
-factor `√(π/2)`). The second statement is implicit there: Pisier uses the duality only with (8.4.4),
-the noncommutative Khintchine inequality for `1 ≤ p ≤ 2`, to get the inequality for `p ≥ 2`.
+`L^{q'} (Ω; S_{q'})` (`lpNorm_rademacherProj_schattenNorm_conj_le`). The proof is G. Pisier's,
+*Non-commutative vector valued `L_p`-spaces and completely `p`-summing maps*, Astérisque 247 (1998),
+p. 106, for the projection `P_1 ⊗ I_X`, `X = S_q`: by averaging, its norm on `L_q (X)` is at most
+`K (L_q (X))`, the K-convexity constant of `L_q (X)`; this is `K (S_q)`, because `ℓ_q (S_q)` embeds
+isometrically in `S_q` (block diagonal matrices); and `K (S_q)` is dominated by the type 2 constant
+(here up to the factor `√(π/2)`). The second statement is implicit there: Pisier uses the duality
+only with (8.4.4), the noncommutative Khintchine inequality for `1 ≤ p ≤ 2`, to get the inequality
+for `p ≥ 2`. Here it follows from `E tr (Yᵀ π_N f) = E tr ((π_N Y)ᵀ f)` and the isometric duality of
+`L^q (Ω; S_q)` and `L^{q'} (Ω; S_{q'})`, `BanachProbability.Schatten.CubeDuality`.
 -/
 
 @[expose] public section
@@ -127,6 +128,24 @@ theorem lpNorm_rademacherProj_schattenNorm_conj_le {q q' : ℝ} (hq : 2 ≤ q)
     (hqq' : q.HolderConjugate q') (f : (Fin N → Bool) → Matrix n n ℝ) :
     SignCube.lpNorm (schattenNorm (ENNReal.ofReal q')) q' (rademacherProj f) ≤
       √(Real.pi / 2) * √(q + 1) * SignCube.lpNorm (schattenNorm (ENNReal.ofReal q')) q' f := by
-  sorry
+  obtain ⟨Y, hY, hY'⟩ := exists_avg_trace_transpose_mul_eq_lpNorm hqq'.symm (rademacherProj f)
+  -- `E tr (Yᵀ π_N f) = E tr ((π_N Y)ᵀ f)`
+  have hP : ∀ ε, rademacherProj (fun ε => (Y ε)ᵀ) ε = (rademacherProj Y ε)ᵀ := fun ε => by
+    simp only [rademacherProj, rademacherCoeff, Matrix.transpose_sum, Matrix.transpose_smul]
+  rw [← hY', ← kcs_avg_trace_comm fun ε => (Y ε)ᵀ]
+  simp only [hP]
+  have h0 := lpNorm_nonneg (fun A : Matrix n n ℝ => schattenNorm_nonneg (ENNReal.ofReal q') A) q' f
+  calc (avg fun ε => ((rademacherProj Y ε)ᵀ * f ε).trace)
+      ≤ SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q (fun ε => (rademacherProj Y ε)ᵀ) *
+          SignCube.lpNorm (schattenNorm (ENNReal.ofReal q')) q' f :=
+        (le_abs_self _).trans (abs_avg_trace_mul_le hqq' _ _)
+    _ = SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q (rademacherProj Y) *
+          SignCube.lpNorm (schattenNorm (ENNReal.ofReal q')) q' f := by
+        simp only [SignCube.lpNorm, schattenNorm_transpose]
+    _ ≤ √(Real.pi / 2) * √(q + 1) * 1 *
+          SignCube.lpNorm (schattenNorm (ENNReal.ofReal q')) q' f := by
+        refine mul_le_mul_of_nonneg_right ((lpNorm_rademacherProj_schattenNorm_le hq Y).trans ?_) h0
+        exact mul_le_mul_of_nonneg_left hY (by positivity)
+    _ = _ := by rw [mul_one]
 
 end BanachProbability

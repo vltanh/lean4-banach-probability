@@ -1,7 +1,9 @@
 module
 
+public import BanachProbability.SignCube.Walsh
 public import BanachProbability.TypeTwo.Basic
 public import Mathlib.Probability.Distributions.Gaussian.Multivariate
+import BanachProbability.RandomSums.Contraction
 import Mathlib.Analysis.Convex.Integral
 import Mathlib.MeasureTheory.Integral.Gamma
 import Mathlib.MeasureTheory.Measure.Lebesgue.Integral
@@ -19,25 +21,29 @@ Neerven–Veraar–Weis (HNVW), *Analysis in Banach spaces II* (2017): the least
 109, for a real space, by Definition 7.4.4 and Proposition 7.4.5, p. 111).
 
 `IsTypeTwoBound.isKConvexBound`: a space of type 2 with constant `τ` is K-convex in `L²`, with
-constant `√(π/2) τ` (HNVW II, Proposition 7.4.22, p. 124, with Proposition 7.1.18; B. Maurey and G.
-Pisier, *Séries de variables aléatoires vectorielles indépendantes et propriétés géométriques des
-espaces de Banach*, Studia Math. 58 (1976), Remark 2.10, as quoted by G. Pisier, Astérisque 247
-(1998), p. 106). The steps are HNVW's:
+constant `√(π/2) τ`. B. Maurey and G. Pisier, *Séries de variables aléatoires vectorielles
+indépendantes et propriétés géométriques des espaces de Banach*, Studia Math. 58 (1976), Remark
+2.10, p. 88, state it without constant and without proof: "On peut montrer facilement que tout
+espace de type 2-Rademacher est K-convexe". The proof is that of HNVW II, Proposition 7.4.22, p.
+124, with the results it cites, for `p = 2` and real Gaussian variables:
 
-* type 2 gives Gaussian type 2 with the same constant (Proposition 7.1.18 from Proposition 7.1.16,
-  pp. 66–68): `IsTypeTwoBound.integral_stdGaussian_le`;
-* Rademacher sums are dominated by Gaussian sums, with the factor `1 / E |g| = √(π/2)` (Proposition
-  6.1.15, pp. 10–11): `avg_norm_sq_le_integral_stdGaussian`;
-* the Gaussian sum over the signs is dominated by the Gaussian sum over a complete orthonormal
-  system, `integral_stdGaussian_rademacherCoeff_le`: the contraction principle in the proof of
-  Proposition 7.4.22 and the rotation in the proof of Theorem 7.1.20, pp. 69–71.
+* Proposition 7.1.18 (1) from Proposition 7.1.16 (1), pp. 66–68: type 2 gives Gaussian type 2 with
+  the same constant (`IsTypeTwoBound.integral_stdGaussian_le`);
+* Proposition 6.1.15, pp. 10–11: Rademacher sums are dominated by Gaussian sums, with the factor
+  `1 / E |g| = √(π/2)` (`avg_norm_sq_le_integral_stdGaussian`);
+* Theorem 6.1.13 (i), pp. 9–10: Kahane's contraction principle for Gaussian sums
+  (`integral_stdGaussian_smul_le`);
+* Theorem 7.1.20 (2), pp. 69–71, for an orthonormal system on a finite set with a measure: in a
+  space of type 2 the Gaussian sums are dominated by the sums over the system
+  (`IsTypeTwoBound.integral_stdGaussian_le_of_orthonormal`).
 
-Departure from the source, in form: Proposition 7.4.22 expands `f = Σ_α w_α x_α` in Walsh functions,
-drops those of degree `≠ 1` from the Gaussian sum `Σ_α g_α x_α` by the contraction principle, and
-passes from the Walsh functions to the indicators of the points of the cube by a rotation. Here the
-two steps are one, by the reflection `2P − 1`, where `P` is the orthogonal projection on the span of
-the signs; the Walsh functions of degree `≠ 1` are not introduced. The resulting inequality is the
-covariance domination (Theorem 6.1.25, p. 16) as used in the proof of Proposition 7.4.21, p. 123.
+With the Walsh expansion `f = Σ_α w_α x_α` of (7.35), p. 123, `π_N f = Σ_n w_{n} x_{n}`
+(`rademacherProj_eq_sum_walsh`), and the chain of the proof of Proposition 7.4.22 is, in `L²`,
+`‖Σ_n w_{n} x_{n}‖ ≤ √(π/2) ‖Σ_n g_{n} x_{n}‖ ≤ √(π/2) ‖Σ_α g_α x_α‖ ≤ √(π/2) τ ‖Σ_α w_α x_α‖`.
+
+A shorter argument, not used here: the contraction principle and the rotation in Theorem 7.1.20 are
+one step, without Walsh functions, by the reflection `2P − 1`, `P` the orthogonal projection on the
+span of the signs.
 -/
 
 @[expose] public section
@@ -59,6 +65,16 @@ noncomputable def rademacherCoeff (f : (Fin N → Bool) → V) (k : Fin N) : V :
 /-- The Rademacher projection `Σ_k ε_k E (ε_k f)`. -/
 noncomputable def rademacherProj (f : (Fin N → Bool) → V) (ε : Fin N → Bool) : V :=
   ∑ k, coin (ε k) • rademacherCoeff f k
+
+/-- `E (ε_k f)` is the Walsh coefficient `x_{k}` of `f`. -/
+theorem rademacherCoeff_eq_walshCoeff (f : (Fin N → Bool) → V) (k : Fin N) :
+    rademacherCoeff f k = walshCoeff f {k} := by
+  simp only [rademacherCoeff, walshCoeff, walsh_singleton]
+
+/-- `π_N f = Σ_n w_{n} x_{n}` for `f = Σ_α w_α x_α` (HNVW II, (7.35), p. 123). -/
+theorem rademacherProj_eq_sum_walsh (f : (Fin N → Bool) → V) (ε : Fin N → Bool) :
+    rademacherProj f ε = ∑ k, walsh {k} ε • walshCoeff f {k} := by
+  simp only [rademacherProj, rademacherCoeff_eq_walshCoeff, walsh_singleton]
 
 end Projection
 
@@ -150,7 +166,7 @@ private theorem kc_integral_abs : ∫ x, |x| ∂gaussianReal 0 1 = √(2 / Real.
   rw [mul_left_comm, h2, mul_comm, div_eq_mul_inv]
 
 /-- If `e_1, …, e_N` are orthonormal then `(⟨g, e_k⟩)_k` is a standard Gaussian vector, for a
-standard Gaussian vector `g`. -/
+standard Gaussian vector `g`: the adjoint of an isometry preserves standard Gaussian vectors. -/
 private theorem kc_map_adjoint (L : F →ₗᵢ[ℝ] E) :
     (stdGaussian E).map (ContinuousLinearMap.adjoint L.toContinuousLinearMap) = stdGaussian F := by
   apply Measure.ext_of_charFun
@@ -161,65 +177,48 @@ private theorem kc_map_adjoint (L : F →ₗᵢ[ℝ] E) :
   rw [charFun_apply, L.norm_map] at h
   exact h
 
-/-- The contraction principle and the rotation in the proofs of HNVW II, Proposition 7.4.22, p. 124,
-and Theorem 7.1.20, p. 71, in one step: for orthonormal `e_1, …, e_N` in `E`,
-`E ‖Σ_k g_k T (e_k)‖² ≤ E ‖T g‖²`. The vector `(⟨g, e_k⟩)_k` is standard Gaussian,
-`Σ_k ⟨g, e_k⟩ e_k = P g` is the projection of `g`, and `P g = (g + R g) / 2`, where the reflection
-`R = 2P − 1` changes the signs of the coordinates of `g` in the orthogonal complement of the `e_k`.
--/
-private theorem kc_integral_orthonormal_le (T : E →L[ℝ] X) {e : Fin N → E}
-    (he : Orthonormal ℝ e) :
-    ∫ g, ‖∑ k, g k • T (e k)‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ (Fin N)) ≤
-      ∫ g, ‖T g‖ ^ 2 ∂stdGaussian E := by
-  set b := EuclideanSpace.basisFun (Fin N) ℝ
-  have hb : ∀ k, kcSum e (b k) = e k := fun k => by
+/-- The transformed sequence in the proof of HNVW II, Theorem 7.1.20, p. 71: if the rows of
+`(q_{is})` are orthonormal then `γ̃_i = Σ_s q_{is} γ_s` is another standard Gaussian sequence. -/
+private theorem kc_integral_orthonormal [DecidableEq ι] {κ : Type*} [Fintype κ] {q : ι → κ → ℝ}
+    (hq : ∀ i j, ∑ s, q i s * q j s = if i = j then 1 else 0) (x : ι → X) :
+    ∫ g, ‖∑ i, (∑ s, q i s * g s) • x i‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ κ) =
+      ∫ g, ‖∑ i, g i • x i‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ ι) := by
+  set b := EuclideanSpace.basisFun ι ℝ
+  set e : ι → EuclideanSpace ℝ κ := fun i => WithLp.toLp 2 (q i)
+  have he : Orthonormal ℝ e := by
+    rw [orthonormal_iff_ite]
+    intro i j
+    rw [← hq i j, PiLp.inner_apply]
+    refine Finset.sum_congr rfl fun s _ => ?_
+    simp only [e, RCLike.inner_apply, conj_trivial, mul_comm]
+  have hb : ∀ i, kcSum e (b i) = e i := fun i => by
     rw [kcSum_apply]
     simp [b, EuclideanSpace.basisFun_apply, PiLp.single_apply]
-  set L : EuclideanSpace ℝ (Fin N) →ₗᵢ[ℝ] E :=
+  -- the isometry `b_i ↦ q_i`, whose adjoint is `γ ↦ γ̃`
+  set L : EuclideanSpace ℝ ι →ₗᵢ[ℝ] EuclideanSpace ℝ κ :=
     (kcSum e).toLinearMap.isometryOfOrthonormal (v := b.toBasis) (by simp)
-      (by simpa [Function.comp_def, hb] using he) with hL
-  have hLs : ∀ g : EuclideanSpace ℝ (Fin N), T (L g) = ∑ k, g k • T (e k) := fun g => by
-    have : L g = kcSum e g := rfl
-    rw [this, kcSum_apply, map_sum]
-    simp only [map_smul]
-  set A := ContinuousLinearMap.adjoint L.toContinuousLinearMap with hA
-  have hAi : ∀ x y, inner ℝ (L x) y = inner ℝ x (A y) := fun x y =>
-    (ContinuousLinearMap.adjoint_inner_right L.toContinuousLinearMap x y).symm
-  -- the reflection
-  set R₀ : E →ₗᵢ[ℝ] E :=
-    { toLinearMap := (2 : ℝ) • (L.toLinearMap ∘ₗ A.toLinearMap) - LinearMap.id
-      norm_map' := fun g => by
-        have h1 : ‖(2 : ℝ) • L (A g) - g‖ ^ 2 = ‖g‖ ^ 2 := by
-          rw [norm_sub_sq_real, norm_smul, mul_pow, L.norm_map, real_inner_smul_left, hAi,
-            real_inner_self_eq_norm_sq]
-          norm_num
-          ring
-        exact (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).1 h1 }
-  set R : E ≃ₗᵢ[ℝ] E := R₀.toLinearIsometryEquiv rfl
-  have hR : ∀ g, T (L (A g)) = (2 : ℝ)⁻¹ • (T g + T (R g)) := fun g => by
-    have : R g = (2 : ℝ) • L (A g) - g := rfl
-    rw [← map_add, this, add_sub_cancel, map_smul, smul_smul]
-    norm_num
-  have hint := kc_integrable_norm_sq T
-  have hintR : Integrable (fun g => ‖T (R g)‖ ^ 2) (stdGaussian E) :=
-    kc_integrable_norm_sq (T ∘L R.toContinuousLinearEquiv.toContinuousLinearMap)
-  calc ∫ g, ‖∑ k, g k • T (e k)‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ (Fin N))
-      = ∫ g, ‖T (L (A g))‖ ^ 2 ∂stdGaussian E := by
-        simp only [← hLs]
-        rw [← kc_map_adjoint L, integral_map (by fun_prop)
-          (Continuous.aestronglyMeasurable (by fun_prop))]
-    _ ≤ ∫ g, (2 : ℝ)⁻¹ * (‖T g‖ ^ 2 + ‖T (R g)‖ ^ 2) ∂stdGaussian E := by
-        refine integral_mono ?_ ((hint.add hintR).const_mul _) fun g => ?_
-        · exact kc_integrable_norm_sq (T ∘L L.toContinuousLinearMap ∘L A)
-        · rw [hR, norm_smul, mul_pow]
-          have h1 := norm_add_le (T g) (T (R g))
-          have h2 := pow_le_pow_left₀ (norm_nonneg _) h1 2
-          norm_num
-          nlinarith [sq_nonneg (‖T g‖ - ‖T (R g)‖)]
-    _ = ∫ g, ‖T g‖ ^ 2 ∂stdGaussian E := by
-        rw [integral_const_mul, integral_add hint hintR,
-          kc_integral_comp R fun g => ‖T g‖ ^ 2]
-        ring
+      (by simpa [Function.comp_def, hb] using he)
+  have hL : ∀ (g : EuclideanSpace ℝ κ) (i : ι),
+      ContinuousLinearMap.adjoint L.toContinuousLinearMap g i = ∑ s, q i s * g s := fun g i => by
+    have h1 : L (b i) = e i := hb i
+    have h2 := ContinuousLinearMap.adjoint_inner_right L.toContinuousLinearMap (b i) g
+    rw [EuclideanSpace.basisFun_inner, LinearIsometry.coe_toContinuousLinearMap, h1,
+      PiLp.inner_apply] at h2
+    rw [h2]
+    refine Finset.sum_congr rfl fun s _ => ?_
+    simp only [e, RCLike.inner_apply, conj_trivial, mul_comm]
+  rw [← kc_map_adjoint L, integral_map (by fun_prop)
+    (Continuous.aestronglyMeasurable (by fun_prop))]
+  simp only [hL]
+
+/-- Gaussian sums do not depend on the enumeration of the index set. -/
+private theorem kc_integral_equiv {κ : Type*} [Fintype κ] (e : ι ≃ κ) (y : ι → X) :
+    ∫ g, ‖∑ i, g i • y i‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ ι) =
+      ∫ g, ‖∑ k, g k • y (e.symm k)‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ κ) := by
+  rw [← kc_integral_comp (LinearIsometryEquiv.piLpCongrLeft 2 ℝ ℝ e)]
+  refine integral_congr_ae (ae_of_all _ fun g => congrArg (fun z => ‖z‖ ^ 2) ?_)
+  rw [← e.symm.sum_comp]
+  exact Finset.sum_congr rfl fun k _ => by simp [Equiv.piCongrLeft']
 
 end Gaussian
 
@@ -288,13 +287,9 @@ theorem IsTypeTwoBound.integral_stdGaussian_le {τ : ℝ} (h : IsTypeTwoBound X 
     [Fintype ι] (y : ι → X) :
     ∫ g, ‖∑ i, g i • y i‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ ι) ≤ τ ^ 2 * ∑ i, ‖y i‖ ^ 2 := by
   set e := Fintype.equivFin ι
-  have h1 := kc_integral_fin_le h fun k => y (e.symm k)
-  rw [e.symm.sum_comp fun i => ‖y i‖ ^ 2] at h1
-  refine le_trans (le_of_eq ?_) h1
-  rw [← kc_integral_comp (LinearIsometryEquiv.piLpCongrLeft 2 ℝ ℝ e)]
-  refine integral_congr_ae (ae_of_all _ fun g => congrArg (fun z => ‖z‖ ^ 2) ?_)
-  rw [← e.symm.sum_comp]
-  exact Finset.sum_congr rfl fun k _ => by simp [Equiv.piCongrLeft']
+  rw [kc_integral_equiv e y]
+  refine (kc_integral_fin_le h fun k => y (e.symm k)).trans_eq ?_
+  rw [e.symm.sum_comp fun i => ‖y i‖ ^ 2]
 
 /-- `E |g_k| = √(2/π)`. -/
 private theorem kc_integral_abs_eval (k : Fin N) :
@@ -391,41 +386,89 @@ theorem avg_norm_sq_le_integral_stdGaussian (x : Fin N → X) :
     _ = Real.pi / 2 * ∫ g, ‖∑ k, g k • x k‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ (Fin N)) := by
         rw [← kc_integral_eq_integral_avg]
 
-/-- With `x_k = E (ε_k f)`, `E ‖Σ_k g_k x_k‖² ≤ E ‖Σ_η g_η 2^{−N/2} f (η)‖²`. The statement is the
-instance of the covariance domination, HNVW II, Theorem 6.1.25, p. 16, used in the proof of
-Proposition 7.4.21, p. 123, for the orthonormal system of the signs. Departure from the source, in
-form: the proof does not go through Theorem 6.1.25, nor through the Walsh functions, as that of
-Proposition 7.4.22 does; it is the contraction principle of the proof of Proposition 7.4.22, p. 124,
-and the rotation of the proof of Theorem 7.1.20, p. 71, merged into one step by the reflection
-`2P − 1`, `P` the orthogonal projection on the span of the signs (`kc_integral_orthonormal_le`). -/
-theorem integral_stdGaussian_rademacherCoeff_le (f : (Fin N → Bool) → X) :
-    ∫ g, ‖∑ k, g k • rademacherCoeff f k‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ (Fin N)) ≤
-      ∫ g, ‖∑ η, g η • √((2 : ℝ) ^ N)⁻¹ • f η‖ ^ 2
-        ∂stdGaussian (EuclideanSpace ℝ (Fin N → Bool)) := by
-  set E := EuclideanSpace ℝ (Fin N → Bool)
-  set c : ℝ := √((2 : ℝ) ^ N)⁻¹ with hc
-  have hc2 : c * c = ((2 : ℝ) ^ N)⁻¹ := Real.mul_self_sqrt (by positivity)
-  -- the orthonormal system `e_k = 2^{-N/2} ε_k`
-  set e : Fin N → E := fun k => WithLp.toLp 2 fun η => c * coin (η k) with he
-  have hon : Orthonormal ℝ e := by
-    rw [orthonormal_iff_ite]
-    intro i j
-    rw [← avg_coin_mul_coin i j, PiLp.inner_apply, avg, div_eq_inv_mul, Finset.mul_sum, ← hc2]
-    refine Finset.sum_congr rfl fun η _ => ?_
-    simp only [he, RCLike.inner_apply, conj_trivial]
-    ring
-  have hT : ∀ k, kcSum (fun η => c • f η) (e k) = rademacherCoeff f k := fun k => by
-    rw [kcSum_apply, rademacherCoeff, Finset.smul_sum, ← hc2]
-    refine Finset.sum_congr rfl fun η _ => ?_
-    simp only [he, smul_smul]
-    congr 1
-    ring
-  have h := kc_integral_orthonormal_le (kcSum fun η => c • f η) hon
-  simpa only [hT, kcSum_apply] using h
+/-- Kahane's contraction principle for Gaussian sums, finite sequences. -/
+private theorem kc_integral_smul_fin_le {c : Fin N → ℝ} (hc : ∀ k, |c k| ≤ 1) (y : Fin N → X) :
+    ∫ g, ‖∑ k, g k • c k • y k‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ (Fin N)) ≤
+      ∫ g, ‖∑ k, g k • y k‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ (Fin N)) := by
+  -- randomisation
+  rw [kc_integral_eq_integral_avg, kc_integral_eq_integral_avg]
+  refine integral_mono (kc_integrable_avg _) (kc_integrable_avg _) fun g => ?_
+  -- the contraction principle for the Rademacher sums of the `g_k y_k`
+  have h := lpNorm_sum_coin_smul_le one_le_two hc fun k => g k • y k
+  have h2 := pow_le_pow_left₀ (lpNorm_nonneg (fun _ => norm_nonneg _) _ _) h 2
+  rw [← Real.rpow_two, ← Real.rpow_two, lpNorm_rpow (fun _ => norm_nonneg _) two_pos,
+    lpNorm_rpow (fun _ => norm_nonneg _) two_pos] at h2
+  simpa only [Real.rpow_two, smul_comm (c _)] using h2
+
+/-- **Kahane's contraction principle** for Gaussian sums (HNVW II, Theorem 6.1.13 (i), pp. 9–10, for
+`ξ_i = g_i y_i`, `p = 2`): `E ‖Σ g_i c_i y_i‖² ≤ E ‖Σ g_i y_i‖²` for real `|c_i| ≤ 1`, by
+randomisation from the case of Rademacher sums. -/
+theorem integral_stdGaussian_smul_le {ι : Type*} [Fintype ι] {c : ι → ℝ} (hc : ∀ i, |c i| ≤ 1)
+    (y : ι → X) :
+    ∫ g, ‖∑ i, g i • c i • y i‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ ι) ≤
+      ∫ g, ‖∑ i, g i • y i‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ ι) := by
+  set e := Fintype.equivFin ι
+  rw [kc_integral_equiv e fun i => c i • y i, kc_integral_equiv e y]
+  exact kc_integral_smul_fin_le (fun k => hc (e.symm k)) fun k => y (e.symm k)
+
+/-- HNVW II, Theorem 7.1.20 (2), pp. 69–71, for an orthonormal system `(f_i)` of functions on a
+finite set `S` with a measure `μ`: in a space of type 2,
+`E ‖Σ_i g_i x_i‖² ≤ τ² Σ_s μ (s) ‖Σ_i f_i (s) x_i‖²`. These are the simple functions of the proof in
+the book, p. 71, which reduces to them a general orthogonal system in `L²`, by normalisation and by
+Lemma 7.1.21; neither step is needed here. -/
+theorem IsTypeTwoBound.integral_stdGaussian_le_of_orthonormal {τ : ℝ} (h : IsTypeTwoBound X τ)
+    {S ι : Type*} [Fintype S] [Fintype ι] [DecidableEq ι] (μ : S → ℝ) (hμ : ∀ s, 0 ≤ μ s)
+    (f : ι → S → ℝ) (hf : ∀ i j, ∑ s, μ s * f i s * f j s = if i = j then 1 else 0) (x : ι → X) :
+    ∫ g, ‖∑ i, g i • x i‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ ι) ≤
+      τ ^ 2 * ∑ s, μ s * ‖∑ i, f i s • x i‖ ^ 2 := by
+  -- `q_{is} = μ(s)^{1/2} f_i (s)` satisfies `Σ_s q_{is} q_{js} = δ_{ij}`
+  have hq : ∀ i j, ∑ s, (√(μ s) * f i s) * (√(μ s) * f j s) = if i = j then 1 else 0 :=
+    fun i j => by
+      rw [← hf i j]
+      refine Finset.sum_congr rfl fun s _ => ?_
+      rw [mul_mul_mul_comm, Real.mul_self_sqrt (hμ s), mul_assoc]
+  calc ∫ g, ‖∑ i, g i • x i‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ ι)
+      = ∫ g, ‖∑ i, (∑ s, √(μ s) * f i s * g s) • x i‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ S) :=
+        (kc_integral_orthonormal hq x).symm
+    _ = ∫ g, ‖∑ s, g s • √(μ s) • ∑ i, f i s • x i‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ S) := by
+        refine integral_congr_ae (ae_of_all _ fun g => congrArg (fun z => ‖z‖ ^ 2) ?_)
+        simp only [Finset.sum_smul, Finset.smul_sum, smul_smul]
+        rw [Finset.sum_comm]
+        refine Finset.sum_congr rfl fun s _ => Finset.sum_congr rfl fun i _ => ?_
+        rw [mul_comm]
+    _ ≤ τ ^ 2 * ∑ s, ‖√(μ s) • ∑ i, f i s • x i‖ ^ 2 :=
+        h.integral_stdGaussian_le fun s => √(μ s) • ∑ i, f i s • x i
+    _ = τ ^ 2 * ∑ s, μ s * ‖∑ i, f i s • x i‖ ^ 2 := by
+        simp only [norm_smul, mul_pow, Real.norm_eq_abs, sq_abs, Real.sq_sqrt (hμ _)]
+
+/-- The second inequality in the proof of HNVW II, Proposition 7.4.22, p. 124,
+`‖Σ_n g_{n} x_{n}‖ ≤ ‖Σ_α g_α x_α‖` in `L²`: the contraction principle with the coefficients `1` at
+the singletons and `0` at the other `α`. -/
+private theorem kc_integral_singleton_le (x : Finset (Fin N) → X) :
+    ∫ g, ‖∑ k, g k • x {k}‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ (Fin N)) ≤
+      ∫ g, ‖∑ α, g α • x α‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ (Finset (Fin N))) := by
+  set s : Finset (Finset (Fin N)) := Finset.univ.image fun k => {k} with hs
+  set c : Finset (Fin N) → ℝ := fun α => if α ∈ s then 1 else 0
+  have hc : ∀ α, |c α| ≤ 1 := fun α => by
+    by_cases h : α ∈ s <;> simp [c, h]
+  -- `(g_{n})_n` is a standard Gaussian sequence
+  have hq : ∀ i j : Fin N, ∑ α : Finset (Fin N), (if α = {i} then (1 : ℝ) else 0) *
+      (if α = {j} then 1 else 0) = if i = j then 1 else 0 := fun i j => by
+    simp [Finset.singleton_inj, eq_comm (a := j)]
+  rw [← kc_integral_orthonormal hq fun k => x {k}]
+  refine (le_of_eq ?_).trans (integral_stdGaussian_smul_le hc x)
+  refine integral_congr_ae (ae_of_all _ fun g => congrArg (fun z => ‖z‖ ^ 2) ?_)
+  have h1 : ∀ α, g α • c α • x α = if α ∈ s then g α • x α else 0 := fun α => by
+    by_cases h : α ∈ s <;> simp [c, h]
+  simp only [h1]
+  rw [Finset.sum_ite_mem, Finset.univ_inter, hs,
+    Finset.sum_image fun _ _ _ _ h => Finset.singleton_injective h]
+  simp
 
 /-- **Type 2 implies K-convexity** in `L²`, with the constant `√(π/2) τ` (HNVW II, Proposition
-7.4.22, p. 124, with Proposition 7.1.18, p. 67; Maurey–Pisier (1976), Remark 2.10, as quoted by
-Pisier (1998), p. 106). -/
+7.4.22, p. 124, with Proposition 7.1.18, p. 67; without proof, Maurey–Pisier (1976), Remark 2.10,
+p. 88). (In the proof in the book, "cotype 2 implies Gaussian cotype 2" is a misprint for type 2.)
+-/
 theorem IsTypeTwoBound.isKConvexBound {τ : ℝ} (h : IsTypeTwoBound X τ) :
     IsKConvexBound X 2 (√(Real.pi / 2) * τ) := by
   intro N f
@@ -440,22 +483,24 @@ theorem IsTypeTwoBound.isKConvexBound {τ : ℝ} (h : IsTypeTwoBound X τ) :
       √(avg fun ε => ‖g ε‖ ^ 2) := fun g => by
     rw [SignCube.lpNorm, ← Real.sqrt_eq_rpow]
     simp only [Real.rpow_two]
+  have hw : ∀ α β : Finset (Fin N), ∑ ε, ((2 : ℝ) ^ N)⁻¹ * walsh α ε * walsh β ε =
+      if α = β then 1 else 0 := fun α β => by
+    simp only [← avg_walsh_mul_walsh α β, avg, mul_assoc, ← Finset.mul_sum, div_eq_inv_mul]
   have h1 : (avg fun ε => ‖rademacherProj f ε‖ ^ 2) ≤
       Real.pi / 2 * (τ ^ 2 * avg fun ε => ‖f ε‖ ^ 2) := by
     calc (avg fun ε => ‖rademacherProj f ε‖ ^ 2)
-        ≤ Real.pi / 2 * ∫ g, ‖∑ k, g k • rademacherCoeff f k‖ ^ 2
-            ∂stdGaussian (EuclideanSpace ℝ (Fin N)) :=
-          avg_norm_sq_le_integral_stdGaussian (rademacherCoeff f)
-      _ ≤ Real.pi / 2 * ∫ g, ‖∑ η, g η • √((2 : ℝ) ^ N)⁻¹ • f η‖ ^ 2
-            ∂stdGaussian (EuclideanSpace ℝ (Fin N → Bool)) :=
-          mul_le_mul_of_nonneg_left (integral_stdGaussian_rademacherCoeff_le f) (by positivity)
-      _ ≤ Real.pi / 2 * (τ ^ 2 * ∑ η, ‖√((2 : ℝ) ^ N)⁻¹ • f η‖ ^ 2) :=
-          mul_le_mul_of_nonneg_left
-            (h.integral_stdGaussian_le fun η => √((2 : ℝ) ^ N)⁻¹ • f η) (by positivity)
+        ≤ Real.pi / 2 * ∫ g, ‖∑ k, g k • walshCoeff f {k}‖ ^ 2
+            ∂stdGaussian (EuclideanSpace ℝ (Fin N)) := by
+          simp only [rademacherProj_eq_sum_walsh, walsh_singleton]
+          exact avg_norm_sq_le_integral_stdGaussian fun k => walshCoeff f {k}
+      _ ≤ Real.pi / 2 * ∫ g, ‖∑ α, g α • walshCoeff f α‖ ^ 2
+            ∂stdGaussian (EuclideanSpace ℝ (Finset (Fin N))) :=
+          mul_le_mul_of_nonneg_left (kc_integral_singleton_le (walshCoeff f)) (by positivity)
+      _ ≤ Real.pi / 2 * (τ ^ 2 * ∑ ε, ((2 : ℝ) ^ N)⁻¹ * ‖∑ α, walsh α ε • walshCoeff f α‖ ^ 2) :=
+          mul_le_mul_of_nonneg_left (h.integral_stdGaussian_le_of_orthonormal
+            (fun _ => ((2 : ℝ) ^ N)⁻¹) (fun _ => by positivity) walsh hw _) (by positivity)
       _ = Real.pi / 2 * (τ ^ 2 * avg fun ε => ‖f ε‖ ^ 2) := by
-          congr 2
-          simp only [avg, norm_smul, mul_pow, Real.norm_eq_abs, sq_abs]
-          rw [← Finset.mul_sum, Real.sq_sqrt (by positivity), div_eq_inv_mul]
+          simp only [sum_walsh_smul_walshCoeff, avg, ← Finset.mul_sum, div_eq_inv_mul]
   rw [h0, h0]
   calc √(avg fun ε => ‖rademacherProj f ε‖ ^ 2)
       ≤ √(Real.pi / 2 * (τ ^ 2 * avg fun ε => ‖f ε‖ ^ 2)) := Real.sqrt_le_sqrt h1

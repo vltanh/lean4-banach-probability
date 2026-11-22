@@ -40,6 +40,8 @@ Works cited in the README, in [SHORTER_PROOFS.md](SHORTER_PROOFS.md) and in the 
   https://doi.org/10.1016/0047-259X(71)90027-3
 - S. Fehr, *Quantum Information Theory*, lecture notes (2021), Chapter 7.
   https://homepages.cwi.nl/~fehr/QIT2021/Chap7.pdf
+- I. C. Gohberg, M. G. Krein, *Introduction to the theory of linear nonselfadjoint operators in Hilbert
+  space*, Moscow (1965), in Russian; as cited by Tomczak-Jaegermann (1974).
 - L. Gross, *Logarithmic Sobolev inequalities*, Amer. J. Math. 97 (1975) 1061–1083.
   https://doi.org/10.2307/2373688
 - U. Haagerup, *The best constants in the Khintchine inequality*, Studia Math. 70 (1981) 231–283.
@@ -91,6 +93,8 @@ Works cited in the README, in [SHORTER_PROOFS.md](SHORTER_PROOFS.md) and in the 
   1459–1517. https://doi.org/10.1016/s1874-5849(03)80041-4
 - N. Randrianantoanina, *Non-commutative martingale transforms*, J. Funct. Anal. 194 (2002) 181–212.
   https://doi.org/10.1006/jfan.2002.3952, [arXiv:math/0111264](https://arxiv.org/abs/math/0111264)
+- D. Sutter, M. Berta, M. Tomamichel, *Multivariate trace inequalities*, Comm. Math. Phys. 352 (2017)
+  37–58. https://doi.org/10.1007/s00220-016-2778-5, [arXiv:1604.03023](https://arxiv.org/abs/1604.03023)
 - N. Tomczak-Jaegermann, *The moduli of smoothness and convexity and the Rademacher averages of trace
   classes `S_p`*, Studia Math. 50 (1974) 163–182.
 - I. Yaroslavtsev, *Even Fourier multipliers and martingale transforms in infinite dimensions*, Indag.

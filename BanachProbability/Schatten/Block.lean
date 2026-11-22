@@ -141,23 +141,32 @@ theorem norm_sum_trace_mul_le [DecidableEq m] {q q' : ℝ} (hq : q.HolderConjuga
   rw [← Matrix.trace_sum, ← blockRow_mul_blockCol]
   exact norm_trace_mul_le hq _ _
 
-/-- The duality of `C_q (ℓ²_L)` and `C_{q'} (ℓ²_L)` (Lust-Piquard–Pisier (1991), p. 246):
+/-- The bound in the duality of `C_q (ℓ²_L)` and `C_{q'} (ℓ²_L)` (Lust-Piquard–Pisier (1991), p.
+246, who write it for `ℓ²_R`; by adjoints):
 `|Σ tr (a_k b_kᴴ)| ≤ ‖(Σ a_k a_kᴴ)^{1/2}‖_{S_q} ‖(Σ b_k b_kᴴ)^{1/2}‖_{S_{q'}}`. -/
 theorem norm_sum_trace_mul_conjTranspose_le_blockRow {q q' : ℝ} (hq : q.HolderConjugate q')
     (a b : Fin K → Matrix m n ℂ) :
     ‖∑ k, (a k * (b k)ᴴ).trace‖ ≤
       complexSchattenNorm (ENNReal.ofReal q) (blockRow a) *
         complexSchattenNorm (ENNReal.ofReal q') (blockRow b) := by
-  sorry
+  classical
+  rw [← Matrix.trace_sum, ← blockRow_mul_conjTranspose_blockRow,
+    ← complexSchattenNorm_conjTranspose _ (blockRow b)]
+  exact norm_trace_mul_le hq _ _
 
-/-- The duality of `C_q (ℓ²_R)` and `C_{q'} (ℓ²_R)` (Lust-Piquard–Pisier (1991), p. 246):
-`|Σ tr (a_k b_kᴴ)| ≤ ‖(Σ a_kᴴ a_k)^{1/2}‖_{S_q} ‖(Σ b_kᴴ b_k)^{1/2}‖_{S_{q'}}`. -/
+/-- The bound in the duality of `C_q (ℓ²_R)` and `C_{q'} (ℓ²_R)` (Lust-Piquard–Pisier (1991), p.
+246): `|Σ tr (a_k b_kᴴ)| ≤ ‖(Σ a_kᴴ a_k)^{1/2}‖_{S_q} ‖(Σ b_kᴴ b_k)^{1/2}‖_{S_{q'}}`. -/
 theorem norm_sum_trace_mul_conjTranspose_le_blockCol {q q' : ℝ} (hq : q.HolderConjugate q')
     (a b : Fin K → Matrix m n ℂ) :
     ‖∑ k, (a k * (b k)ᴴ).trace‖ ≤
       complexSchattenNorm (ENNReal.ofReal q) (blockCol a) *
         complexSchattenNorm (ENNReal.ofReal q') (blockCol b) := by
-  sorry
+  classical
+  -- `tr (a_k b_kᴴ) = tr (b_kᴴ a_k)`
+  simp only [Matrix.trace_mul_comm (a _)]
+  rw [← Matrix.trace_sum, ← conjTranspose_blockCol_mul_blockCol, Matrix.trace_mul_comm,
+    ← complexSchattenNorm_conjTranspose _ (blockCol b)]
+  exact norm_trace_mul_le hq _ _
 
 omit [Fintype n] [DecidableEq n] in
 /-- Orthonormality of the signs: `E [Yᴴ Y] = Σ a_kᴴ a_k` for `Y = Σ ε_k a_k`. -/
