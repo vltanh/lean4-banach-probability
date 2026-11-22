@@ -4,6 +4,8 @@ public import BanachProbability.Hypercontractivity.Binomial
 public import BanachProbability.Hypercontractivity.HeatSemigroup
 public import BanachProbability.Hypercontractivity.TwoPoint
 public import BanachProbability.Hypercontractivity.Vector
+public import BanachProbability.KConvexity.Basic
+public import BanachProbability.KConvexity.Schatten
 public import BanachProbability.KahaneKhintchine.Basic
 public import BanachProbability.Martingale.Burkholder.Function
 public import BanachProbability.Martingale.Burkholder.Inequality
@@ -25,9 +27,14 @@ public import BanachProbability.Noncommutative.WeakType
 public import BanachProbability.NoncommutativeKhintchine.Basic
 public import BanachProbability.NoncommutativeKhintchine.Lower
 public import BanachProbability.NoncommutativeKhintchine.Symmetric
+public import BanachProbability.RandomSums.Contraction
 public import BanachProbability.Schatten.Basic
+public import BanachProbability.Schatten.Block
+public import BanachProbability.Schatten.Complex
+public import BanachProbability.Schatten.CubeDuality
 public import BanachProbability.Schatten.Dilation
 public import BanachProbability.Schatten.Holder
+public import BanachProbability.Schatten.Horn
 public import BanachProbability.Schatten.Measurable
 public import BanachProbability.Schatten.Space
 public import BanachProbability.Schatten.Spectral
@@ -37,6 +44,8 @@ public import BanachProbability.SignCube.Basic
 public import BanachProbability.SignCube.Bridge
 public import BanachProbability.SignCube.LpSeminorm
 public import BanachProbability.SignCube.PaleyWalsh
+public import BanachProbability.TypeTwo.Basic
+public import BanachProbability.TypeTwo.Schatten
 public import BanachProbability.UMD.Complex
 public import BanachProbability.UMD.ConvexHull
 public import BanachProbability.UMD.CubeTransform
@@ -53,9 +62,3 @@ public import BanachProbability.UMD.Maurey.StepApprox
 public import BanachProbability.ZigZag.Basic
 public import BanachProbability.ZigZag.Bellman
 public import BanachProbability.ZigZag.Concave
-
-/-!
-# Probability in Banach spaces
-
-The root module: imports every module of the library.
--/

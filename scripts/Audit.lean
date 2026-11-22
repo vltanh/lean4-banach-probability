@@ -8,6 +8,8 @@ import all BanachProbability.Hypercontractivity.Binomial
 import all BanachProbability.Hypercontractivity.HeatSemigroup
 import all BanachProbability.Hypercontractivity.TwoPoint
 import all BanachProbability.Hypercontractivity.Vector
+import all BanachProbability.KConvexity.Basic
+import all BanachProbability.KConvexity.Schatten
 import all BanachProbability.KahaneKhintchine.Basic
 import all BanachProbability.Martingale.Burkholder.Function
 import all BanachProbability.Martingale.Burkholder.Inequality
@@ -29,9 +31,14 @@ import all BanachProbability.Noncommutative.WeakType
 import all BanachProbability.NoncommutativeKhintchine.Basic
 import all BanachProbability.NoncommutativeKhintchine.Lower
 import all BanachProbability.NoncommutativeKhintchine.Symmetric
+import all BanachProbability.RandomSums.Contraction
 import all BanachProbability.Schatten.Basic
+import all BanachProbability.Schatten.Block
+import all BanachProbability.Schatten.Complex
+import all BanachProbability.Schatten.CubeDuality
 import all BanachProbability.Schatten.Dilation
 import all BanachProbability.Schatten.Holder
+import all BanachProbability.Schatten.Horn
 import all BanachProbability.Schatten.Measurable
 import all BanachProbability.Schatten.Space
 import all BanachProbability.Schatten.Spectral
@@ -41,6 +48,8 @@ import all BanachProbability.SignCube.Basic
 import all BanachProbability.SignCube.Bridge
 import all BanachProbability.SignCube.LpSeminorm
 import all BanachProbability.SignCube.PaleyWalsh
+import all BanachProbability.TypeTwo.Basic
+import all BanachProbability.TypeTwo.Schatten
 import all BanachProbability.UMD.Complex
 import all BanachProbability.UMD.ConvexHull
 import all BanachProbability.UMD.CubeTransform
