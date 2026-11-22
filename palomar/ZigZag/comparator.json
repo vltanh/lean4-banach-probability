@@ -1,0 +1,17 @@
+{
+  "challenge_module": "ZigZag.Challenge",
+  "solution_module": "ZigZag.Solution",
+  "theorem_names": [
+    "ZigZagChallenge.umd_iff_signZigZag",
+    "ZigZagChallenge.isLeast_signZigZag",
+    "ZigZagChallenge.umd_iff_zigZag",
+    "ZigZagChallenge.isLeast_zigZag",
+    "ZigZagChallenge.complexUMD_iff_signZigZag",
+    "ZigZagChallenge.isLeast_complexSignZigZag",
+    "ZigZagChallenge.complexUMD_iff_zigZag",
+    "ZigZagChallenge.isLeast_complexZigZag"
+  ],
+  "definition_names": [],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "enable_nanoda": true
+}

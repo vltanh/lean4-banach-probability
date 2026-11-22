@@ -1,0 +1,208 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "Burkholder's characterization of UMD spaces by zig-zag concave functions, in Lean"
+  description: >-
+    Lean 4 proofs, from Mathlib alone, of Burkholder's theorem in the form of Hytönen, van Neerven,
+    Veraar and Weis, "Analysis in Banach Spaces I", Theorem 4.5.6, for real and for complex scalars
+    and each p in (1, infinity): the UMD_p constant of a Banach space X is finite if and only if
+    there are beta >= 1 and a function u on X x X with u(x, y) >= ||y||^p - beta^p ||x||^p that is
+    zig-zag concave, that is, z -> u(x + z, y + eps z) is concave for all x, y and all scalars |eps|
+    = 1; and if X is not 0, the least such beta is the UMD_p constant.
+
+
+    The same is proved for functions that are concave along these lines for all |eps| <= 1 and
+    vanish at (0, 0), as in Yaroslavtsev (2018), Proposition 3.7.
+  authors:
+    - "The-Anh Vu-Le"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "The-Anh Vu-Le"
+
+classification:
+  arxiv: ["math.FA", "math.PR"]
+  msc2020: ["46B09", "60G42", "60G46", "26B25", "68V20"]
+
+sources:
+  - title: "Analysis in Banach Spaces, Volume I: Martingales and Littlewood-Paley Theory"
+    authors:
+      - "Tuomas Hytönen"
+      - "Jan van Neerven"
+      - "Mark Veraar"
+      - "Lutz Weis"
+    id: "Ergebnisse der Mathematik und ihrer Grenzgebiete (3) 63, Springer (2016)"
+    type: "book"
+    location: "https://doi.org/10.1007/978-3-319-48520-1"
+    relationship: "formalizes"
+    note: >-
+      Theorem 4.5.6 (p. 332): (1)<=>(3) for a fixed p and the final clause, with its proof (pp.
+      332-337, Lemmas 4.5.2, 4.5.4, 4.5.5 and the homogenisation (4.31)), for real and complex
+      scalars; zig-zag concavity is Definition 4.5.3, the constants Definition 4.2.1. The theorem is
+      Burkholder's.
+    author_endorsement: "not-contacted"
+  - title: "Even Fourier multipliers and martingale transforms in infinite dimensions"
+    authors:
+      - "Ivan Yaroslavtsev"
+    id: "Indag. Math. 29 (2018), 1290-1309"
+    type: "paper"
+    location: "https://doi.org/10.1016/j.indag.2018.05.014"
+    relationship: "formalizes"
+    note: >-
+      Proposition 3.7, for the closed unit disc of C as the set of scalars: the functions that are
+      concave for all |eps| <= 1 and vanish at (0, 0), and the best constant. Proved as Theorem
+      4.5.6 of HNVW, with multipliers in the closed unit ball.
+    author_endorsement: "not-contacted"
+  - title: "A geometrical characterization of Banach spaces in which martingale difference sequences are unconditional"
+    authors:
+      - "Donald L. Burkholder"
+    id: "Ann. Probab. 9 (1981), 997-1011"
+    type: "paper"
+    location: "https://doi.org/10.1214/aop/1176994270"
+    relationship: "background"
+    note: >-
+      The origin of the geometric characterization, in another form.
+    author_endorsement: "not-contacted"
+  - title: "Martingales and Fourier analysis in Banach spaces"
+    authors:
+      - "Donald L. Burkholder"
+    id: "Lecture Notes in Math. 1206, Springer (1986), 61-108"
+    type: "paper"
+    location: "https://doi.org/10.1007/bfb0076300"
+    relationship: "background"
+    note: >-
+      The origin of the proof, followed in the form of HNVW.
+    author_endorsement: "not-contacted"
+
+related_formalizations:
+  - id: "https://github.com/elorist/UMD_Hilberttransform"
+    relationship: "independent"
+    note: >-
+      Lean 4. A UMD constant and Burkholder's inequality at p = 3 for dyadic martingales; no
+      characterization of UMD by zig-zag concave functions was seen there. (Search of 22 November
+      2026; read as text, not built. No code of it is used.)
+
+status:
+  scope: >-
+    Formalized (the 8 theorems that Comparator checks): for real and for complex scalars and a fixed
+    p in (1, infinity), the equivalence of (1) and (3) of HNVW's Theorem 4.5.6 and its final clause,
+    and both for functions concave for all |eps| <= 1 that vanish at (0, 0).
+
+
+    Not formalized: the universality of one probability space with a Rademacher sequence ((2) of the
+    theorem), in this entry; the independence of p of the finiteness (the entry UMD of this
+    repository has it for real scalars); the biconcave form of Burkholder 1981.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: []
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["claude-opus-5-5"]
+      framework: "Claude Code 2.1.330 (VS Code extension, Claude Agent SDK)"
+      tool_setup: >-
+        The formalize-math-paper skill (https://github.com/vltanh/formalize-math-paper, version
+        4.3.2, commit 8e884d5); Claude Code sessions and sub-agents that wrote the statements and
+        the proofs of the library and compared them with the sources; the number of agents was not
+        tracked for this library alone. This entry by one agent, with an independent reviewer agent.
+        Lean v4.36.0-rc2, Mathlib v4.36.0-rc2.
+      cost:
+        wall_time: >-
+          about 13 hours between the library's first commit and the commit on which this entry is
+          based (21-22 November 2026, git log), not continuous and with other work in parallel, and
+          about 3 hours for the eight entries of the package together; agent time not tracked
+        spend_usd: "not tracked"
+        hardware: "local machine (20 cores, 62 GB RAM) and API"
+      prompting_notes: >-
+        Instructions: state the theorems of the cited sources in their general form as far as
+        feasible, follow the sources' proofs, record every deviation, use only Mathlib.
+  spend_usd: "not tracked"
+  notes: >-
+    The AI system wrote the code and the documents. No person has reviewed the statements or the
+    proofs; Lean has checked the proofs. Independent AI agents compared the proofs of the library
+    with the cited sources, and one compared the statements of this entry with them.
+
+fidelity:
+  divergences: >-
+    Statements. Probability spaces instead of sigma-finite measure spaces, in the universe Type
+    where a definition quantifies over them; martingales are Mathlib's, indexed by the natural
+    numbers. The martingales in the definition of the constants start at 0, and the signs
+    (multipliers) are predictable, where the book has deterministic ones; the constants are the same
+    (HNVW I, Theorem 4.2.25, a theorem of the entry UMD of this repository). The theorems are for a
+    fixed p, where the book has "for some (equivalently, all) p". The assertion (2), the dyadic UMD
+    property, is used in the proofs and is not stated here. The final clause needs X other than 0,
+    since the book's beta is at least 1 and the constant of the space 0 is 0 here. In the second
+    form, the functions are concave along the lines for all |eps| <= 1, vanish at (0, 0), and beta >
+    0 (beta >= 0 in the clause on the least one).
+
+
+    Proofs. The book's, with two departures: in (2)=>(3) the multipliers are constants in the closed
+    unit ball instead of signs, which gives the concavity for all |eps| <= 1 (as in Yaroslavtsev
+    2018); and midpoint concavity comes before the finiteness of the function, since Lemma 4.5.2 is
+    for real-valued functions (Steps 2 and 3 are reordered and phrased with sets of values). In
+    (3)=>(1) the signs are predictable, and the martingales start at 0, so that (4.32) and (4.33)
+    are not needed.
+
+review:
+  status: "agent-reviewed"
+  reviewers:
+    - "Claude Opus 5.5 (independent agents)"
+  notes: >-
+    No human review. Independent AI agents compared the proofs of the library with the cited
+    sources, and another one compared the statements of this entry with them.
+
+alignment:
+  namespace: "ZigZagChallenge"
+  statements:
+    - source: "HNVW I, Theorem 4.5.6, (1)<=>(3), real scalars"
+      lean: "ZigZagChallenge.umd_iff_signZigZag"
+      module: "ZigZag.Challenge"
+      status: "proved"
+      note: >-
+        For a fixed p.
+    - source: "HNVW I, Theorem 4.5.6, last clause, real scalars"
+      lean: "ZigZagChallenge.isLeast_signZigZag"
+      module: "ZigZag.Challenge"
+      status: "proved"
+      note: >-
+        For X other than 0; the infimum is attained.
+    - source: "HNVW I, Theorem 4.5.6, (1)<=>(3), with a stronger concavity, real scalars"
+      lean: "ZigZagChallenge.umd_iff_zigZag"
+      module: "ZigZag.Challenge"
+      status: "adapted"
+      note: >-
+        Functions concave for all |eps| <= 1 that vanish at (0, 0), beta > 0.
+    - source: "HNVW I, Theorem 4.5.6, last clause, with a stronger concavity, real scalars"
+      lean: "ZigZagChallenge.isLeast_zigZag"
+      module: "ZigZag.Challenge"
+      status: "adapted"
+      note: >-
+        The least beta >= 0, for the functions of umd_iff_zigZag.
+    - source: "HNVW I, Theorem 4.5.6, (1)<=>(3), complex scalars"
+      lean: "ZigZagChallenge.complexUMD_iff_signZigZag"
+      module: "ZigZag.Challenge"
+      status: "proved"
+      note: >-
+        For a fixed p.
+    - source: "HNVW I, Theorem 4.5.6, last clause, complex scalars"
+      lean: "ZigZagChallenge.isLeast_complexSignZigZag"
+      module: "ZigZag.Challenge"
+      status: "proved"
+      note: >-
+        For X other than 0; the infimum is attained.
+    - source: "Yaroslavtsev 2018, Proposition 3.7 (the closed unit disc)"
+      lean: "ZigZagChallenge.complexUMD_iff_zigZag"
+      module: "ZigZag.Challenge"
+      status: "adapted"
+      note: >-
+        Functions concave for all |eps| <= 1 that vanish at (0, 0), beta > 0.
+    - source: "Yaroslavtsev 2018, Proposition 3.7 (the closed unit disc)"
+      lean: "ZigZagChallenge.isLeast_complexZigZag"
+      module: "ZigZag.Challenge"
+      status: "adapted"
+      note: >-
+        The least beta >= 0, for the functions of complexUMD_iff_zigZag.
+
+acknowledgements: >-
+  Mathlib; Lean's Comparator and the NanoDa kernel; Palomar's validation scripts.

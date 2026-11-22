@@ -1,0 +1,210 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "Burkholder's inequality for Hilbert-space-valued martingales, in Lean"
+  description: >-
+    Lean 4 proofs, from Mathlib alone, of Burkholder's sharp inequality for martingales with values
+    in a real Hilbert space: if g is differentially subordinate to f, then ||g||_p <= (p* - 1)
+    ||f||_p for 1 < p < infinity and p* = max(p, p/(p - 1)) (Burkholder 1988; Osękowski 2012,
+    Theorem 3.5 (ii)). The constant is the best possible, already for real dyadic (Paley-Walsh)
+    martingales and their transforms by deterministic signs.
+
+
+    Also: the square function inequality with the same constant in both directions (Osękowski,
+    Theorem 8.6; Burkholder, Theorem 3.1), and the two properties of Burkholder's function u_p(x, y)
+    = p (1 - 1/p*)^(p-1) (|y| - (p* - 1)|x|) (|x| + |y|)^(p-1): it majorizes |y|^p - (p* - 1)^p
+    |x|^p, and it is concave along the lines whose direction in y is at most the one in x
+    (Burkholder, (1.10) and Remark 1.2).
+  authors:
+    - "The-Anh Vu-Le"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "The-Anh Vu-Le"
+
+classification:
+  arxiv: ["math.PR", "math.FA"]
+  msc2020: ["60G42", "60G46", "60E15", "68V20"]
+
+sources:
+  - title: "Sharp Martingale and Semimartingale Inequalities"
+    authors:
+      - "Adam Osękowski"
+    id: "Monografie Matematyczne 72, Birkhäuser (2012)"
+    type: "book"
+    location: "https://doi.org/10.1007/978-3-0348-0370-0"
+    relationship: "formalizes"
+    note: >-
+      Theorem 3.5 (ii), the inequality (3.59), by its proof (pp. 53-54 and 58), the integration
+      method (Sections 2.1 and 2.3, Theorem 2.7, Lemmas 3.1 and 3.2); its sharpness, by the second
+      approach (pp. 56-57) for p <= 2 and by the duality of p. 59 for p > 2, run on the function W^0
+      of the proof of Theorem 3.34, so that it holds for dyadic martingales (Remark 3.8, p. 138);
+      the inequalities (8.28) of Theorem 8.6 (pp. 413-414, by the device of Section 2.1.3). Not
+      formalized: Theorem 3.5 (i), Theorem 3.34 itself, and the sharpness clauses of Theorem 8.6.
+    author_endorsement: "not-contacted"
+  - title: "Sharp inequalities for martingales and stochastic integrals"
+    authors:
+      - "Donald L. Burkholder"
+    id: "Astérisque 157-158 (1988), 75-94"
+    type: "paper"
+    location: "https://www.numdam.org/item/AST_1988__157-158__75_0/"
+    relationship: "formalizes"
+    note: >-
+      The function (1.6), its majorization (1.10) with (1.11), and Remark 1.2, (1.17), by the
+      arguments of Section 1 (the remark is stated without proof and is completed from (1.14)). The
+      inequalities of Theorems 1.1 and 3.1 are those of Osękowski's Theorems 3.5 (ii) and 8.6, and
+      are proved by the latter's arguments. Not formalized: the case of equality in Theorem 1.1, the
+      sharpness clauses of Theorem 3.1, and stochastic integrals.
+    author_endorsement: "not-contacted"
+  - title: "Boundary value problems and sharp inequalities for martingale transforms"
+    authors:
+      - "Donald L. Burkholder"
+    id: "Ann. Probab. 12 (1984), 647-702"
+    type: "paper"
+    location: "https://doi.org/10.1214/aop/1176993220"
+    relationship: "background"
+    note: >-
+      The origin of the sharp constant, for real martingales and their transforms.
+    author_endorsement: "not-contacted"
+
+related_formalizations:
+  - id: "https://github.com/SmaniaD/Burkholder"
+    relationship: "independent"
+    note: >-
+      Lean 4. The inequality ||w * f||_p <= (p* - 1) ||f||_p for real martingales on finite measure
+      spaces and predictable |w| <= 1; no Hilbert-space-valued martingales, differential
+      subordination, square function or sharpness was seen there. (Search of 22 November 2026; read
+      as text, not built. No code of it is used.)
+  - id: "https://github.com/elorist/UMD_Hilberttransform"
+    relationship: "independent"
+    note: >-
+      Lean 4. Burkholder's inequality at p = 3 (constant 2) for dyadic Hilbert-space-valued
+      martingales, and a UMD constant. (Search of 22 November 2026; read as text, not built. No code
+      of it is used.)
+  - id: "https://github.com/TauCetiProject/TauCeti"
+    relationship: "independent"
+    note: >-
+      Lean 4. The constant p* - 1 for real signed Haar sums; Doob's L^p inequality. (Search of 22
+      November 2026; read as text, not built. No code of it is used.)
+
+status:
+  scope: >-
+    Formalized (the 6 theorems that Comparator checks): Burkholder's inequality for differentially
+    subordinate martingales in a real Hilbert space, 1 < p < infinity; that no constant below p* - 1
+    holds, for real Paley-Walsh martingales and their transforms by deterministic signs; the two
+    square function inequalities; the majorization and the concavity of Burkholder's function; and
+    that the Paley-Walsh processes are martingales and their norms L^p norms, a check of the
+    definitions.
+
+
+    Not formalized: the case of equality; the sharpness of the square function inequalities (in [O,
+    Theorem 8.6] two of the four cases); continuous time and stochastic integrals; p <= 1.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: []
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["claude-opus-5-5"]
+      framework: "Claude Code 2.1.330 (VS Code extension, Claude Agent SDK)"
+      tool_setup: >-
+        The formalize-math-paper skill (https://github.com/vltanh/formalize-math-paper, version
+        4.3.2, commit 8e884d5); Claude Code sessions and sub-agents that wrote the statements and
+        the proofs of the library and compared them with the sources; the number of agents was not
+        tracked for this library alone. This entry by one agent, with an independent reviewer agent.
+        Lean v4.36.0-rc2, Mathlib v4.36.0-rc2.
+      cost:
+        wall_time: >-
+          about 13 hours between the library's first commit and the commit on which this entry is
+          based (21-22 November 2026, git log), not continuous and with other work in parallel, and
+          about 3 hours for the eight entries of the package together; agent time not tracked
+        spend_usd: "not tracked"
+        hardware: "local machine (20 cores, 62 GB RAM) and API"
+      prompting_notes: >-
+        Instructions: state the theorems of the cited sources in their general form as far as
+        feasible, follow the sources' proofs, record every deviation, use only Mathlib.
+  spend_usd: "not tracked"
+  notes: >-
+    The AI system wrote the code and the documents. No person has reviewed the statements or the
+    proofs; Lean has checked the proofs. Independent AI agents compared the proofs of the library
+    with the cited sources, and one compared the statements of this entry with them.
+
+fidelity:
+  divergences: >-
+    Statements. Martingales on probability spaces, indexed by the natural numbers; the norms at a
+    fixed time n, where the sources have the supremum over n, which follows; H is a real Hilbert
+    space, not assumed separable (Burkholder: real or complex; Osękowski: separable); the
+    subordination holds almost surely (Burkholder: for every omega). Sharpness: Osękowski says that
+    p* - 1 is the best constant in (3.59), shown with transforms of real martingales by
+    deterministic signs, and in Remark 3.8 that dyadic martingales have the same constant; here for
+    real Paley-Walsh martingales on finitely many fair signs, and deterministic signs. (His dyadic
+    martingales are the partial sums of Haar series, whose deterministic signs are predictable signs
+    of Paley-Walsh martingales; the deterministic signs here are fewer.) In Theorem 8.6 the square
+    function is that of f up to the time n, with the term of f_0.
+
+
+    Proofs. Osękowski's, with these repairs and completions: in the majorization the convex and the
+    concave part of the function F of p. 54 are exchanged in the book, and with the right order one
+    also needs the endpoint inequality (1.11) of Burkholder 1988; the two integral formulas for
+    Burkholder's function, stated without proof, are proved, one of them with a corrected constant
+    (p. 54 has a factor p - 1 too many); the second approach to the sharpness is run on the dyadic
+    function W^0 itself, where the book uses U^0 and then Theorem 3.34; deterministic signs in the
+    sharpness come from predictable ones by the theorem that they have the same dyadic constants
+    (compare Hytönen-van Neerven-Veraar-Weis, Analysis in Banach Spaces I, Theorem 4.2.25). In
+    Theorem 8.6 the proof works in H^(n+2) instead of l^2(H), n being fixed. Remark 1.2 of
+    Burkholder 1988 is proved from (1.14) and the shift of his proof of (1.8).
+
+review:
+  status: "agent-reviewed"
+  reviewers:
+    - "Claude Opus 5.5 (independent agents)"
+  notes: >-
+    No human review. Independent AI agents compared the proofs of the library with the cited
+    sources, and another one compared the statements of this entry with them.
+
+alignment:
+  namespace: "BurkholderChallenge"
+  statements:
+    - source: "Osękowski 2012, Theorem 3.5 (ii); Burkholder 1988, Theorem 1.1 (the inequality)"
+      lean: "BurkholderChallenge.burkholder_inequality"
+      module: "Burkholder.Challenge"
+      status: "proved"
+      note: >-
+        At every fixed time, for every real Hilbert space and 1 < p < infinity.
+    - source: "Osękowski 2012, Theorem 8.6, (8.28); Burkholder 1988, Theorem 3.1 (the inequalities)"
+      lean: "BurkholderChallenge.squareFunction_inequality"
+      module: "Burkholder.Challenge"
+      status: "proved"
+      note: >-
+        Without the sharpness clauses.
+    - source: "Osękowski 2012, Theorem 3.5 (ii) (the constant is best possible) and Remark 3.8"
+      lean: "BurkholderChallenge.burkholder_sharp"
+      module: "Burkholder.Challenge"
+      status: "proved"
+      note: >-
+        For K < p* - 1, a real Paley-Walsh martingale and a transform of it by deterministic signs
+        for which the inequality with K fails.
+    - source: "a check of the definitions"
+      lean: "BurkholderChallenge.martingale_paleyWalsh"
+      module: "Burkholder.Challenge"
+      status: "proved"
+      note: >-
+        Paley-Walsh processes are martingales for a filtration whose measurable functions are those
+        of the first signs, and the norm of the sign cube is the L^p norm.
+    - source: "Burkholder 1988, (1.10)"
+      lean: "BurkholderChallenge.burkholderFun_majorizes"
+      module: "Burkholder.Challenge"
+      status: "proved"
+      note: >-
+        u_p majorizes |y|^p - (p* - 1)^p |x|^p, in every normed group.
+    - source: "Burkholder 1988, Remark 1.2, (1.17)"
+      lean: "BurkholderChallenge.burkholderFun_concave"
+      module: "Burkholder.Challenge"
+      status: "proved"
+      note: >-
+        Concavity of t -> u_p(x + t h, y + t k) for |k| <= |h| in a real inner product space. The
+        remark's other assertions (the least majorant) are not formalized.
+
+acknowledgements: >-
+  Mathlib; Lean's Comparator and the NanoDa kernel; Palomar's validation scripts.

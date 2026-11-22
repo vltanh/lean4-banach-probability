@@ -38,12 +38,19 @@ DOCS = ['README.md', 'docs/SHORTER_PROOFS.md']
 NAMESPACES = []
 NAMESPACES_BY_DIR = {'': ['BanachProbability', 'BanachProbability.Osekowski',
                           'BanachProbability.Burkholder', 'BanachProbability.ZigZag']}
-# Top-level module names.
-MODULE_ROOTS = ('BanachProbability',)
-# The modules whose declarations win when a name is declared in several.
-PREFERRED_MODULE = 'BanachProbability'
+# Top-level module names: the library's and the Palomar entries'.
+MODULE_ROOTS = ('BanachProbability', 'Burkholder', 'Decoupling', 'KahaneKhintchine',
+                'NoncommutativeKhintchine', 'SchattenClasses', 'TypeTwo', 'UMD', 'ZigZag')
+# The modules whose declarations win when a name is declared in several, the first of them first: the
+# Challenges repeat definitions of `BanachProbability.Defs`, and the Solutions repeat their theorems.
+PREFERRED_MODULE = ('BanachProbability.Defs', 'Burkholder.Challenge', 'Decoupling.Challenge',
+                    'KahaneKhintchine.Challenge', 'NoncommutativeKhintchine.Challenge',
+                    'SchattenClasses.Challenge', 'TypeTwo.Challenge', 'UMD.Challenge',
+                    'ZigZag.Challenge')
 # The source directory of each module root whose `lean_lib` has a `srcDir`.
-SOURCE_DIRS = {}
+SOURCE_DIRS = {'Burkholder': 'palomar', 'Decoupling': 'palomar', 'KahaneKhintchine': 'palomar',
+               'NoncommutativeKhintchine': 'palomar', 'SchattenClasses': 'palomar',
+               'TypeTwo': 'palomar', 'UMD': 'palomar', 'ZigZag': 'palomar'}
 # Directories, besides the repository root, against which paths in the documents are resolved.
 PATH_BASES = {'': ['.github/workflows', 'scripts', 'BanachProbability'],
               'docs': ['BanachProbability']}

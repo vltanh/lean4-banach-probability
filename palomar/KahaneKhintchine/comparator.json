@@ -1,0 +1,18 @@
+{
+  "challenge_module": "KahaneKhintchine.Challenge",
+  "solution_module": "KahaneKhintchine.Solution",
+  "theorem_names": [
+    "KahaneKhintchineChallenge.lpNorm_eq_eLpNorm",
+    "KahaneKhintchineChallenge.heatSemigroup_walsh",
+    "KahaneKhintchineChallenge.heatSemigroup_hypercontractive",
+    "KahaneKhintchineChallenge.bonami",
+    "KahaneKhintchineChallenge.hypercontractive_affine",
+    "KahaneKhintchineChallenge.kahaneKhintchine",
+    "KahaneKhintchineChallenge.exists_kahaneKhintchine",
+    "KahaneKhintchineChallenge.contraction_real",
+    "KahaneKhintchineChallenge.contraction_complex"
+  ],
+  "definition_names": [],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "enable_nanoda": true
+}

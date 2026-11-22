@@ -1,0 +1,21 @@
+{
+  "challenge_module": "SchattenClasses.Challenge",
+  "solution_module": "SchattenClasses.Solution",
+  "theorem_names": [
+    "SchattenClassesChallenge.schattenNorm_eq_singularValues",
+    "SchattenClassesChallenge.complexSchattenNorm_eq_singularValues",
+    "SchattenClassesChallenge.schattenNorm_triangle",
+    "SchattenClassesChallenge.horn_prod",
+    "SchattenClassesChallenge.horn_sum",
+    "SchattenClassesChallenge.schattenNorm_holder",
+    "SchattenClassesChallenge.abs_trace_mul_le",
+    "SchattenClassesChallenge.weakType_posSemidef",
+    "SchattenClassesChallenge.weakType",
+    "SchattenClassesChallenge.transform_bounded",
+    "SchattenClassesChallenge.umd_schatten",
+    "SchattenClassesChallenge.umd_two_schatten"
+  ],
+  "definition_names": [],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "enable_nanoda": true
+}

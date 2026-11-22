@@ -1,0 +1,13 @@
+{
+  "challenge_module": "Decoupling.Challenge",
+  "solution_module": "Decoupling.Solution",
+  "theorem_names": [
+    "DecouplingChallenge.randomisedUMD",
+    "DecouplingChallenge.umd_of_randomised",
+    "DecouplingChallenge.decoupling",
+    "DecouplingChallenge.eLpNorm_uniformOn"
+  ],
+  "definition_names": [],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "enable_nanoda": true
+}

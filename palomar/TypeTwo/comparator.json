@@ -1,0 +1,19 @@
+{
+  "challenge_module": "TypeTwo.Challenge",
+  "solution_module": "TypeTwo.Solution",
+  "theorem_names": [
+    "TypeTwoChallenge.typeTwo_hilbert",
+    "TypeTwoChallenge.gaussianTypeTwo_of_typeTwo",
+    "TypeTwoChallenge.typeTwo_of_gaussianTypeTwo",
+    "TypeTwoChallenge.kConvex_of_gaussianTypeTwo",
+    "TypeTwoChallenge.kConvex_of_typeTwo",
+    "TypeTwoChallenge.kConvex_of_piLp",
+    "TypeTwoChallenge.typeTwo_schatten_interp",
+    "TypeTwoChallenge.typeTwo_schatten",
+    "TypeTwoChallenge.rademacherProj_schatten",
+    "TypeTwoChallenge.rademacherProj_schatten_conj"
+  ],
+  "definition_names": [],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "enable_nanoda": true
+}

@@ -1,0 +1,161 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "The randomised UMD property and decoupling, in Lean"
+  description: >-
+    Lean 4 proofs, from Mathlib alone, of the randomised UMD property of a real Banach space X
+    (Hytönen, van Neerven, Veraar and Weis, "Analysis in Banach Spaces I", Proposition 4.2.3): a
+    UMD_p constant beta of X satisfies beta^(-1) ||Y_n||_p <= ||sum_k eps_k (Y_{k+1} - Y_k)||_p <=
+    beta ||Y_n||_p for all martingales Y started at 0 and independent fair signs eps_k on a further
+    probability space, and two such inequalities with the constants beta^- and beta^+ give the UMD_p
+    constant beta^- beta^+.
+
+
+    Applied to Paley-Walsh martingales Y_n = sum_k eps_k xi_k, it is the decoupling inequality: Y_n
+    is comparable in L^p, with the constant UMD_p(X) in both directions, to the sum sum_k eps~_k
+    xi_k with an independent copy eps~ of the signs.
+  authors:
+    - "The-Anh Vu-Le"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "The-Anh Vu-Le"
+
+classification:
+  arxiv: ["math.FA", "math.PR"]
+  msc2020: ["46B09", "60G42", "60G46", "68V20"]
+
+sources:
+  - title: "Analysis in Banach Spaces, Volume I: Martingales and Littlewood-Paley Theory"
+    authors:
+      - "Tuomas Hytönen"
+      - "Jan van Neerven"
+      - "Mark Veraar"
+      - "Lutz Weis"
+    id: "Ergebnisse der Mathematik und ihrer Grenzgebiete (3) 63, Springer (2016)"
+    type: "book"
+    location: "https://doi.org/10.1007/978-3-319-48520-1"
+    relationship: "formalizes"
+    note: >-
+      Proposition 4.2.3 (p. 282) with the constants after it, for real scalars, by the book's proof
+      (Proposition 4.1.16, (1)=>(2) and (2)=>(1), pp. 279-280). Of its version for Paley-Walsh
+      martingales, the two inequalities only.
+    author_endorsement: "not-contacted"
+  - title: "Decoupling and stochastic integration in UMD Banach spaces"
+    authors:
+      - "Terry R. McConnell"
+    id: "Probab. Math. Statist. 10 (1989), 283-295"
+    type: "paper"
+    location: "https://zbmath.org/?q=an:0718.60050"
+    relationship: "background"
+    note: >-
+      An origin of decoupling for tangent sequences in UMD spaces, of which the decoupling of
+      Paley-Walsh martingales is a case.
+    author_endorsement: "not-contacted"
+
+related_formalizations:
+  - id: "https://github.com/elorist/UMD_Hilberttransform"
+    relationship: "independent"
+    note: >-
+      Lean 4. A UMD constant, for sigma-finite filtrations, and the reduction to dyadic martingales
+      at p = 2; no other exponents, extrapolation, randomised UMD property, comparison of real and
+      complex constants or zig-zag functions were seen there. (Search of 22 November 2026; read as
+      text, not built. No code of it is used.)
+
+status:
+  scope: >-
+    Formalized (the 4 theorems that Comparator checks): for a real Banach space and 1 < p <
+    infinity, the two inequalities of the randomised UMD property with the UMD constant, the
+    converse with the product of the two constants, the decoupling inequalities for Paley-Walsh
+    martingales, and that the norms in the latter are L^p norms on the sign cube and on the product
+    of two sign cubes.
+
+
+    Not formalized: complex scalars; the converse for Paley-Walsh martingales only; general tangent
+    sequences; sigma-finite measure spaces.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: []
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["claude-opus-5-5"]
+      framework: "Claude Code 2.1.330 (VS Code extension, Claude Agent SDK)"
+      tool_setup: >-
+        The formalize-math-paper skill (https://github.com/vltanh/formalize-math-paper, version
+        4.3.2, commit 8e884d5); Claude Code sessions and sub-agents that wrote the statements and
+        the proofs of the library and compared them with the sources; the number of agents was not
+        tracked for this library alone. This entry by one agent, with an independent reviewer agent.
+        Lean v4.36.0-rc2, Mathlib v4.36.0-rc2.
+      cost:
+        wall_time: >-
+          about 13 hours between the library's first commit and the commit on which this entry is
+          based (21-22 November 2026, git log), not continuous and with other work in parallel, and
+          about 3 hours for the eight entries of the package together; agent time not tracked
+        spend_usd: "not tracked"
+        hardware: "local machine (20 cores, 62 GB RAM) and API"
+      prompting_notes: >-
+        Instructions: state the theorems of the cited sources in their general form as far as
+        feasible, follow the sources' proofs, record every deviation, use only Mathlib.
+  spend_usd: "not tracked"
+  notes: >-
+    The AI system wrote the code and the documents. No person has reviewed the statements or the
+    proofs; Lean has checked the proofs. Independent AI agents compared the proofs of the library
+    with the cited sources, and one compared the statements of this entry with them.
+
+fidelity:
+  divergences: >-
+    Statements. Probability spaces instead of sigma-finite measure spaces, in the universe Type
+    where a definition quantifies over them; martingales are Mathlib's, indexed by the natural
+    numbers. Real scalars, hence real Rademacher variables (the book: real or complex). The UMD
+    inequality has predictable signs, where Definition 4.2.1 has deterministic ones (the same
+    constants, HNVW I, Theorem 4.2.25, which is a theorem of the entry UMD of this repository). The
+    martingales start at 0, as only the differences enter. The book's proposition is an equivalence
+    with constants for all p; here it is stated for a fixed p with explicit constants, which its
+    proof gives (max(beta^-, beta^+) <= beta <= beta^- beta^+). For Paley-Walsh martingales only the
+    two inequalities, with the constant UMD_p(X), are stated, not the converse.
+
+
+    Proofs. Those of the book; for the converse the signs are predictable, and for each omega the
+    families (sigma_k(omega) eps_k) and (eps_k) have the same law. The decoupling inequalities are
+    proved directly for Paley-Walsh martingales, by the same argument.
+
+review:
+  status: "agent-reviewed"
+  reviewers:
+    - "Claude Opus 5.5 (independent agents)"
+  notes: >-
+    No human review. Independent AI agents compared the proofs of the library with the cited
+    sources, and another one compared the statements of this entry with them.
+
+alignment:
+  namespace: "DecouplingChallenge"
+  statements:
+    - source: "HNVW I, Proposition 4.2.3, beta^- <= beta and beta^+ <= beta (real scalars)"
+      lean: "DecouplingChallenge.randomisedUMD"
+      module: "Decoupling.Challenge"
+      status: "proved"
+      note: >-
+        For a fixed p, with the UMD constant, on probability spaces.
+    - source: "HNVW I, Proposition 4.2.3, beta <= beta^- beta^+ (real scalars)"
+      lean: "DecouplingChallenge.umd_of_randomised"
+      module: "Decoupling.Challenge"
+      status: "proved"
+      note: >-
+        For a fixed p, on probability spaces.
+    - source: "HNVW I, Proposition 4.2.3 for Paley-Walsh martingales (real scalars)"
+      lean: "DecouplingChallenge.decoupling"
+      module: "Decoupling.Challenge"
+      status: "partial"
+      note: >-
+        The two inequalities, with the constant UMD_p(X); not the converse.
+    - source: "a check of the definitions"
+      lean: "DecouplingChallenge.eLpNorm_uniformOn"
+      module: "Decoupling.Challenge"
+      status: "proved"
+      note: >-
+        The norms in decoupling are the L^p norms on the sign cube and on the product of two.
+
+acknowledgements: >-
+  Mathlib; Lean's Comparator and the NanoDa kernel; Palomar's validation scripts.

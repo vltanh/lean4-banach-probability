@@ -1,0 +1,256 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "Type 2, K-convexity and the Schatten classes, in Lean"
+  description: >-
+    Lean 4 proofs, from Mathlib alone, of results on type 2 and K-convexity of normed spaces. Type 2
+    and Gaussian type 2 are equivalent, with constants tau and (pi/2)^(1/2) tau, and a space of
+    Gaussian type 2 with constant tau is K-convex in L^2 with constant (pi/2)^(1/2) tau (Hytönen,
+    van Neerven, Veraar and Weis, "Analysis in Banach Spaces II", Propositions 7.1.18 (1) and
+    7.4.22, for p = 2 and real Gaussian variables).
+
+
+    The Schatten class S_q, q >= 2, has type 2 with the constant (q + 1)^(1/2), for real and complex
+    square matrices of every size, even with the norm of L^q(S_q) on the left (Tomczak-Jaegermann
+    1974, Theorem 3.1 (ii), with her constants M_{2k}^(1-theta) M_{2k+2}^theta). Hence the
+    Rademacher projection on L^q(S_q) and on the dual space has norm at most (pi/2)^(1/2) (q +
+    1)^(1/2), for real matrices of every size (Pisier 1998).
+  authors:
+    - "The-Anh Vu-Le"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "The-Anh Vu-Le"
+
+classification:
+  arxiv: ["math.FA", "math.PR"]
+  msc2020: ["46B09", "46B20", "47B10", "60B11", "68V20"]
+
+sources:
+  - title: "Analysis in Banach Spaces, Volume II: Probabilistic Methods and Operator Theory"
+    authors:
+      - "Tuomas Hytönen"
+      - "Jan van Neerven"
+      - "Mark Veraar"
+      - "Lutz Weis"
+    id: "Ergebnisse der Mathematik und ihrer Grenzgebiete (3) 67, Springer (2017)"
+    type: "book"
+    location: "https://doi.org/10.1007/978-3-319-69808-3"
+    relationship: "formalizes"
+    note: >-
+      Proposition 7.1.18 (1) (pp. 67-68) for p = 2 and real Gaussian variables, with Propositions
+      6.1.11, 6.1.15 and 7.1.16 (1) for them; Proposition 7.4.22 (p. 124), by its proof, with
+      Theorems 6.1.13 (i) and 7.1.20 (2) in the cases that it uses; Example 7.1.2 (type 2 of Hilbert
+      spaces). The definitions are 7.1.1, 7.1.17, 7.4.1 and 7.4.4.
+    author_endorsement: "not-contacted"
+  - title: "The moduli of smoothness and convexity and the Rademacher averages of trace classes S_p (1 <= p < infinity)"
+    authors:
+      - "Nicole Tomczak-Jaegermann"
+    id: "Studia Math. 50 (1974), 163-182"
+    type: "paper"
+    location: "https://zbmath.org/?q=an:0282.46016"
+    relationship: "formalizes"
+    note: >-
+      Theorem 3.1 (ii) (p. 172), by its proof (pp. 176-179), with Lemma 1.1 (the general Horn
+      inequality) and Proposition 1.2 (the three lines theorem), for square matrices.
+    author_endorsement: "not-contacted"
+  - title: "Non-commutative vector valued L_p-spaces and completely p-summing maps"
+    authors:
+      - "Gilles Pisier"
+    id: "Astérisque 247 (1998)"
+    type: "book"
+    location: "https://www.numdam.org/item/AST_1998__247__R1_0/"
+    relationship: "formalizes"
+    note: >-
+      Page 106: the boundedness of the Rademacher projection on L^q(S_q) from type 2, by its
+      argument (averaging, the embedding of l_q(S_q) in S_q, type 2), with explicit constants; the
+      statement on the dual space is implicit there.
+    author_endorsement: "not-contacted"
+  - title: "Séries de variables aléatoires vectorielles indépendantes et propriétés géométriques des espaces de Banach"
+    authors:
+      - "Bernard Maurey"
+      - "Gilles Pisier"
+    id: "Studia Math. 58 (1976), 45-90"
+    type: "paper"
+    location: "https://doi.org/10.4064/sm-58-1-45-90"
+    relationship: "background"
+    note: >-
+      Remark 2.10 (p. 88) states without proof that spaces of type 2 are K-convex.
+    author_endorsement: "not-contacted"
+  - title: "Multivariate trace inequalities"
+    authors:
+      - "David Sutter"
+      - "Mario Berta"
+      - "Marco Tomamichel"
+    id: "Comm. Math. Phys. 352 (2017), 37-58; arXiv:1604.03023"
+    type: "paper"
+    location: "https://arxiv.org/abs/1604.03023"
+    relationship: "background"
+    note: >-
+      The argument of its Theorem 3.1 proves the three lines theorem for Schatten norms that
+      Tomczak-Jaegermann quotes from Gohberg and Krein.
+    author_endorsement: "not-contacted"
+
+related_formalizations:
+  - id: "https://github.com/openai/math"
+    relationship: "independent"
+    note: >-
+      Lean 4. Pisier's theorem that spaces of type p > 1 are K-convex, which contains, without
+      constants, that spaces of type 2 are. (Search of 22 November 2026; read as text, not built. No
+      code of it is used.)
+  - id: "https://github.com/facebookresearch/atlas-lean"
+    relationship: "independent"
+    note: >-
+      Lean 4. Type and cotype 2 of Hilbert spaces. (Search of 22 November 2026; read as text, not
+      built. No code of it is used.)
+  - id: "https://github.com/tchen-research/NLAlib"
+    relationship: "independent"
+    note: >-
+      Lean 4. 2-uniform smoothness of S_{2r}; the noncommutative Khintchine inequality in S_{2p}, p
+      a natural number, for complex Hermitian matrices. (Search of 22 November 2026; read as text,
+      not built. No code of it is used.)
+
+status:
+  scope: >-
+    Formalized (the theorems that Comparator checks, listed under alignment): for real signs and
+    real Gaussian variables, type 2 of Hilbert spaces with constant 1; that type 2 and Gaussian type
+    2 are equivalent, with constants; that Gaussian type 2, or type 2, gives K-convexity in L^2,
+    with constants; type 2 of S_q, q >= 2, for real and complex square matrices of every size; the
+    averaging from K-convexity of l_p(X) in L^2 to K-convexity of X in L^p; the Rademacher
+    projection on L^q(S_q) and its dual, for real square matrices.
+
+
+    Not formalized: complex Rademacher and Gaussian variables; types and exponents other than 2
+    (Pisier's theorem that non-trivial type gives K-convexity, in particular); cotype;
+    infinite-dimensional Schatten classes; q < 2 for type 2; complex matrices in the last two
+    theorems; the identity of the two definitions of K-convexity (Proposition 7.4.5).
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: []
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["claude-opus-5-5"]
+      framework: "Claude Code 2.1.330 (VS Code extension, Claude Agent SDK)"
+      tool_setup: >-
+        The formalize-math-paper skill (https://github.com/vltanh/formalize-math-paper, version
+        4.3.2, commit 8e884d5); Claude Code sessions and sub-agents that wrote the statements and
+        the proofs of the library and compared them with the sources; the number of agents was not
+        tracked for this library alone. This entry by one agent, with an independent reviewer agent.
+        Lean v4.36.0-rc2, Mathlib v4.36.0-rc2.
+      cost:
+        wall_time: >-
+          about 13 hours between the library's first commit and the commit on which this entry is
+          based (21-22 November 2026, git log), not continuous and with other work in parallel, and
+          about 3 hours for the eight entries of the package together; agent time not tracked
+        spend_usd: "not tracked"
+        hardware: "local machine (20 cores, 62 GB RAM) and API"
+      prompting_notes: >-
+        Instructions: state the theorems of the cited sources in their general form as far as
+        feasible, follow the sources' proofs, record every deviation, use only Mathlib.
+  spend_usd: "not tracked"
+  notes: >-
+    The AI system wrote the code and the documents. No person has reviewed the statements or the
+    proofs; Lean has checked the proofs. Independent AI agents compared the proofs of the library
+    with the cited sources, and one compared the statements of this entry with them.
+
+fidelity:
+  divergences: >-
+    Statements. Real signs and real Gaussian variables, also for complex spaces, whose constants are
+    then those of the underlying real space (p. 56); finitely many variables, the coordinates of the
+    sign cube and of a standard Gaussian vector; normed spaces, not assumed complete. Proposition
+    7.1.18 (1) and the Gaussian type only for p = 2 and real standard Gaussian variables, where
+    ||g||_2 = 1 and ||g||_1 = (2/pi)^(1/2); the two implications are stated for bounds and not for
+    best constants. K-convexity is the boundedness of the Rademacher projections, Definition 7.4.4,
+    for one exponent p; that its constant is the one of Definition 7.4.1 is Proposition 7.4.5, which
+    is not formalized. Proposition 7.4.22 is stated for spaces of Gaussian type 2, as its proof
+    gives, and for spaces of type 2. (In its proof in the book, "cotype 2 implies Gaussian cotype 2"
+    is a misprint for type 2.) Theorem 3.1 (ii) of Tomczak-Jaegermann: square matrices of a finite
+    size; the norm of L^q(S_q) is on the left, where her definition of type has that of L^1, with
+    the constant of her proof; the constant (q + 1)^(1/2) is an upper bound for it. Pisier's p. 106:
+    real square matrices, with the explicit constants; the dual statement is implicit there.
+
+
+    Proofs. Those of the sources. In the even case of Theorem 3.1 (ii) the complex matrices are
+    treated by realification; the additive Horn inequality, quoted there, is deduced from the
+    multiplicative one; the three lines theorem needs a boundedness hypothesis that the source
+    omits, and is proved by the argument of Sutter-Berta-Tomamichel. Theorem 7.1.20 (2) is used for
+    orthonormal systems on finite sets with weights, and the rotation invariance of the Gaussian
+    measure replaces the symmetry of the variables for fixed signs.
+
+review:
+  status: "agent-reviewed"
+  reviewers:
+    - "Claude Opus 5.5 (independent agents)"
+  notes: >-
+    No human review. Independent AI agents compared the proofs of the library with the cited
+    sources, and another one compared the statements of this entry with them.
+
+alignment:
+  namespace: "TypeTwoChallenge"
+  statements:
+    - source: "HNVW II, Example 7.1.2"
+      lean: "TypeTwoChallenge.typeTwo_hilbert"
+      module: "TypeTwo.Challenge"
+      status: "proved"
+      note: >-
+        Type 2 with constant 1, for real signs; cotype is not formalized.
+    - source: "HNVW II, Proposition 7.1.18 (1), p = 2"
+      lean: "TypeTwoChallenge.gaussianTypeTwo_of_typeTwo"
+      module: "TypeTwo.Challenge"
+      status: "partial"
+      note: >-
+        The upper bound, for p = 2 and real Gaussian variables.
+    - source: "HNVW II, Proposition 7.1.18 (1), p = 2"
+      lean: "TypeTwoChallenge.typeTwo_of_gaussianTypeTwo"
+      module: "TypeTwo.Challenge"
+      status: "partial"
+      note: >-
+        The lower bound, for p = 2 and real Gaussian variables.
+    - source: "HNVW II, Proposition 7.4.22"
+      lean: "TypeTwoChallenge.kConvex_of_gaussianTypeTwo"
+      module: "TypeTwo.Challenge"
+      status: "proved"
+      note: >-
+        For real signs and Gaussian variables; K-convexity as the norm of the projections in L^2.
+    - source: "HNVW II, Propositions 7.4.22 and 7.1.18 (1); Maurey-Pisier 1976, Remark 2.10"
+      lean: "TypeTwoChallenge.kConvex_of_typeTwo"
+      module: "TypeTwo.Challenge"
+      status: "proved"
+      note: >-
+        With the constant (pi/2)^(1/2) tau.
+    - source: "Pisier 1998, p. 106 (averaging)"
+      lean: "TypeTwoChallenge.kConvex_of_piLp"
+      module: "TypeTwo.Challenge"
+      status: "adapted"
+      note: >-
+        From K-convexity of l_p({-1,1}^M; X) in L^2, for all M, to K-convexity of X in L^p, with the
+        same constant; counting measure instead of the uniform probability.
+    - source: "Tomczak-Jaegermann 1974, Theorem 3.1 (ii), end of the proof"
+      lean: "TypeTwoChallenge.typeTwo_schatten_interp"
+      module: "TypeTwo.Challenge"
+      status: "proved"
+      note: >-
+        The constant of the source, complex square matrices.
+    - source: "Tomczak-Jaegermann 1974, Theorem 3.1 (ii)"
+      lean: "TypeTwoChallenge.typeTwo_schatten"
+      module: "TypeTwo.Challenge"
+      status: "proved"
+      note: >-
+        The constant (q + 1)^(1/2), real and complex square matrices.
+    - source: "Pisier 1998, p. 106"
+      lean: "TypeTwoChallenge.rademacherProj_schatten"
+      module: "TypeTwo.Challenge"
+      status: "adapted"
+      note: >-
+        Real square matrices of every size, with an explicit constant of the order q^(1/2).
+    - source: "Pisier 1998, p. 106 (implicit)"
+      lean: "TypeTwoChallenge.rademacherProj_schatten_conj"
+      module: "TypeTwo.Challenge"
+      status: "adapted"
+      note: >-
+        The dual statement, real square matrices.
+
+acknowledgements: >-
+  Mathlib; Lean's Comparator and the NanoDa kernel; Palomar's validation scripts.

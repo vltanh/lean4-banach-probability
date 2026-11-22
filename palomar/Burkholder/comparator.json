@@ -1,0 +1,15 @@
+{
+  "challenge_module": "Burkholder.Challenge",
+  "solution_module": "Burkholder.Solution",
+  "theorem_names": [
+    "BurkholderChallenge.burkholder_inequality",
+    "BurkholderChallenge.squareFunction_inequality",
+    "BurkholderChallenge.burkholder_sharp",
+    "BurkholderChallenge.martingale_paleyWalsh",
+    "BurkholderChallenge.burkholderFun_majorizes",
+    "BurkholderChallenge.burkholderFun_concave"
+  ],
+  "definition_names": [],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "enable_nanoda": true
+}

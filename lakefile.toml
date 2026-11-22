@@ -1,7 +1,7 @@
 name = "BanachProbability"
 version = "0.1.0"
 keywords = ["math"]
-defaultTargets = ["BanachProbability"]
+defaultTargets = ["BanachProbability", "Palomar"]
 
 [leanOptions]
 pp.unicode.fun = true
@@ -19,3 +19,19 @@ rev = "v4.36.0-rc2"
 [[lean_lib]]
 name = "BanachProbability"
 globs = ["BanachProbability.*"]
+
+# The Challenge and the Solution of each Palomar entry, as the modules `Burkholder.Challenge`,
+# `Burkholder.Solution`, ... of the source directory `palomar/`.
+[[lean_lib]]
+name = "Palomar"
+srcDir = "palomar"
+globs = [
+  "Burkholder.+",
+  "Decoupling.+",
+  "KahaneKhintchine.+",
+  "NoncommutativeKhintchine.+",
+  "SchattenClasses.+",
+  "TypeTwo.+",
+  "UMD.+",
+  "ZigZag.+",
+]

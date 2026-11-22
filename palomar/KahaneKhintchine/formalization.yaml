@@ -1,0 +1,246 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "Hypercontractivity on the cube and the Kahane-Khintchine inequality, in Lean"
+  description: >-
+    Lean 4 proofs, from Mathlib alone, of inequalities for functions of independent fair signs with
+    values in a seminormed space: hypercontractivity of the discrete heat semigroup, ||T(t) f||_q <=
+    ||f||_p for 1 < p <= q and e^(-t) <= ((p - 1)/(q - 1))^(1/2), with Bonami's inequality for one
+    sign (Hytönen, van Neerven, Veraar and Weis, "Analysis in Banach Spaces II", Theorem 6.2.2 and
+    Lemma 6.2.3); the Kahane-Khintchine inequality, with the constant ((q - 1)/(p - 1))^(1/2) for 1
+    < p <= q, and with some constant for all exponents 0 < p, q < infinity (Theorem 6.2.4); and
+    Borell's inequality ||c + rho S||_q <= ||c + S||_p for Rademacher sums S.
+
+
+    Also Kahane's contraction principle for Rademacher sums with real coefficients, and with complex
+    ones and the factor pi/2 ("Analysis in Banach Spaces I", Proposition 3.2.10).
+  authors:
+    - "The-Anh Vu-Le"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "The-Anh Vu-Le"
+
+classification:
+  arxiv: ["math.PR", "math.FA"]
+  msc2020: ["46B09", "60E15", "60B11", "47D07", "68V20"]
+
+sources:
+  - title: "Analysis in Banach Spaces, Volume II: Probabilistic Methods and Operator Theory"
+    authors:
+      - "Tuomas Hytönen"
+      - "Jan van Neerven"
+      - "Mark Veraar"
+      - "Lutz Weis"
+    id: "Ergebnisse der Mathematik und ihrer Grenzgebiete (3) 67, Springer (2017)"
+    type: "book"
+    location: "https://doi.org/10.1007/978-3-319-69808-3"
+    relationship: "formalizes"
+    note: >-
+      Theorem 6.2.2 and Lemma 6.2.3 (pp. 19-21, the "if" parts), by their proofs, with (6.6), (6.7)
+      and Lemma 6.2.1; Theorem 6.2.4 (pp. 21-22), for real Rademacher variables, by its proof.
+    author_endorsement: "not-contacted"
+  - title: "Analysis in Banach Spaces, Volume I: Martingales and Littlewood-Paley Theory"
+    authors:
+      - "Tuomas Hytönen"
+      - "Jan van Neerven"
+      - "Mark Veraar"
+      - "Lutz Weis"
+    id: "Ergebnisse der Mathematik und ihrer Grenzgebiete (3) 63, Springer (2016)"
+    type: "book"
+    location: "https://doi.org/10.1007/978-3-319-48520-1"
+    relationship: "formalizes"
+    note: >-
+      Proposition 3.2.10 (pp. 181-182), Kahane's contraction principle, for real Rademacher
+      variables and p < infinity, with its proof (Lemma 3.2.11, Proposition 3.2.14).
+    author_endorsement: "not-contacted"
+  - title: "On the integrability of Banach space valued Walsh polynomials"
+    authors:
+      - "Christer Borell"
+    id: "Séminaire de Probabilités XIII, Lecture Notes in Math. 721 (1979), 1-3"
+    type: "paper"
+    location: "https://doi.org/10.1007/bfb0070847"
+    relationship: "formalizes"
+    note: >-
+      The inequality (2.1) for Walsh polynomials of degree at most 1, by the argument of Section 2;
+      the two results that it cites (the two-point inequality and the tensorisation) are proved
+      after O'Donnell's book. Polynomials of higher degree are not formalized.
+    author_endorsement: "not-contacted"
+  - title: "Analysis of Boolean Functions"
+    authors:
+      - "Ryan O'Donnell"
+    id: "Cambridge University Press (2014)"
+    type: "book"
+    location: "https://doi.org/10.1017/CBO9781139814782"
+    relationship: "background"
+    note: >-
+      The arguments for the two-point inequality and the tensorisation (Section 10.1, Exercises 9.7,
+      10.1 and 10.3) that complete Borell's proof.
+    author_endorsement: "not-contacted"
+
+related_formalizations:
+  - id: "https://github.com/TauCetiProject/TauCeti"
+    relationship: "independent"
+    note: >-
+      Lean 4. The Kahane-Khintchine inequality for all exponents p, q > 0 in real normed spaces:
+      this overlaps with exists_kahaneKhintchine. Vector-valued hypercontractivity was not seen
+      there. (Search of 22 November 2026; read as text, not built. No code of it is used.)
+  - id: "https://github.com/Polarnova/FABL"
+    relationship: "independent"
+    note: >-
+      Lean 4. The Kahane-Khintchine inequality between L^2 and L^1 in real normed spaces with the
+      sharp constant sqrt 2; scalar hypercontractivity for 1 <= p <= 2 <= q. (Search of 22 November
+      2026; read as text, not built. No code of it is used.)
+  - id: "https://github.com/Shilun-Allan-Li/tcslib"
+    relationship: "independent"
+    note: >-
+      Lean 4. Scalar hypercontractivity on the cube for 1 <= p <= q, and other forms. (Search of 22
+      November 2026; read as text, not built. No code of it is used.)
+  - id: "https://github.com/openai/math"
+    relationship: "independent"
+    note: >-
+      Lean 4. A Banach-space-valued Khintchine inequality between L^2 and L^1 with the constant 4.
+      (Search of 22 November 2026; read as text, not built. No code of it is used.)
+  - id: "https://github.com/roos-j/lean-trilinearht"
+    relationship: "independent"
+    note: >-
+      Lean 4. Khintchine's upper bound in Hilbert spaces. (Search of 22 November 2026; read as text,
+      not built. No code of it is used.)
+  - id: "https://github.com/ZephyrZhng/khintchine-lean"
+    relationship: "independent"
+    note: >-
+      Lean 4. Sharp scalar constants between L^p and L^1. (Search of 22 November 2026; read as text,
+      not built. No code of it is used.)
+
+status:
+  scope: >-
+    Formalized (the 9 theorems that Comparator checks): the discrete heat semigroup on Walsh
+    functions; its hypercontractivity and Bonami's inequality; affine hypercontractivity of
+    Rademacher sums; the Kahane-Khintchine inequality with an explicit constant for 1 < p <= q and
+    with some constant for all positive exponents; Kahane's contraction principle with real and with
+    complex coefficients; that the norm used is the L^p norm for the uniform probability on the
+    cube.
+
+
+    Not formalized: the necessity of the conditions on the exponents; Walsh polynomials of degree at
+    least 2; complex Rademacher variables and the constants for them; the case p = infinity of the
+    contraction principle, and the optimality of pi/2; sharp constants.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: []
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["claude-opus-5-5"]
+      framework: "Claude Code 2.1.330 (VS Code extension, Claude Agent SDK)"
+      tool_setup: >-
+        The formalize-math-paper skill (https://github.com/vltanh/formalize-math-paper, version
+        4.3.2, commit 8e884d5); Claude Code sessions and sub-agents that wrote the statements and
+        the proofs of the library and compared them with the sources; the number of agents was not
+        tracked for this library alone. This entry by one agent, with an independent reviewer agent.
+        Lean v4.36.0-rc2, Mathlib v4.36.0-rc2.
+      cost:
+        wall_time: >-
+          about 13 hours between the library's first commit and the commit on which this entry is
+          based (21-22 November 2026, git log), not continuous and with other work in parallel, and
+          about 3 hours for the eight entries of the package together; agent time not tracked
+        spend_usd: "not tracked"
+        hardware: "local machine (20 cores, 62 GB RAM) and API"
+      prompting_notes: >-
+        Instructions: state the theorems of the cited sources in their general form as far as
+        feasible, follow the sources' proofs, record every deviation, use only Mathlib.
+  spend_usd: "not tracked"
+  notes: >-
+    The AI system wrote the code and the documents. No person has reviewed the statements or the
+    proofs; Lean has checked the proofs. Independent AI agents compared the proofs of the library
+    with the cited sources, and one compared the statements of this entry with them.
+
+fidelity:
+  divergences: >-
+    Statements. The Rademacher variables are real and are the coordinates of the finite sign cube
+    with the uniform probability, for finitely many variables. The values are in a real vector space
+    with a seminorm (the books: Banach spaces); for the contraction principle in a normed space. The
+    discrete heat semigroup is defined as the tensor power of Borell's operator, (6.7), and its
+    action on the Walsh functions, (6.6), by which the book defines it, is a theorem. Theorem 6.2.2
+    and Lemma 6.2.3: only the "if" parts, the former as the inequality for every function, for every
+    real t with e^(-t) at most the bound (so t >= 0), the latter for p <= q. Theorem 6.2.4: the real
+    case; the constants kappa_{q,p} for the exponents outside 1 < p <= q are not made explicit, and
+    the trivial case q <= p is included. Proposition 3.2.10: real signs, so for real coefficients
+    the first estimate with real Rademacher variables and for complex ones the second; p < infinity;
+    max |a_n| is replaced by any bound of the coefficients. Borell's (2.1): for polynomials of
+    degree at most 1, and for the largest admissible parameter.
+
+
+    Proofs. Those of HNVW; an edge case of Lemma 6.2.3 (|y| = 1), where the book uses the binomial
+    series on the boundary of its disc, is obtained by continuity. Borell's inequality by his
+    argument, with the results that he cites proved after O'Donnell.
+
+review:
+  status: "agent-reviewed"
+  reviewers:
+    - "Claude Opus 5.5 (independent agents)"
+  notes: >-
+    No human review. Independent AI agents compared the proofs of the library with the cited
+    sources, and another one compared the statements of this entry with them.
+
+alignment:
+  namespace: "KahaneKhintchineChallenge"
+  statements:
+    - source: "a check of the definitions"
+      lean: "KahaneKhintchineChallenge.lpNorm_eq_eLpNorm"
+      module: "KahaneKhintchine.Challenge"
+      status: "proved"
+      note: >-
+        The norm of the sign cube is the L^p norm for the uniform probability.
+    - source: "HNVW II, (6.6)"
+      lean: "KahaneKhintchineChallenge.heatSemigroup_walsh"
+      module: "KahaneKhintchine.Challenge"
+      status: "proved"
+      note: >-
+        T(t)(w_alpha x) = e^(-t #alpha) w_alpha x; the book's definition.
+    - source: "HNVW II, Theorem 6.2.2 (the 'if' part)"
+      lean: "KahaneKhintchineChallenge.heatSemigroup_hypercontractive"
+      module: "KahaneKhintchine.Challenge"
+      status: "partial"
+      note: >-
+        The 'only if' part is not formalized. Seminormed values.
+    - source: "HNVW II, Lemma 6.2.3 (the 'if' part)"
+      lean: "KahaneKhintchineChallenge.bonami"
+      module: "KahaneKhintchine.Challenge"
+      status: "partial"
+      note: >-
+        The 'only if' part is not formalized. Seminormed values.
+    - source: "Borell 1979, (2.1) for degree at most 1"
+      lean: "KahaneKhintchineChallenge.hypercontractive_affine"
+      module: "KahaneKhintchine.Challenge"
+      status: "partial"
+      note: >-
+        Walsh polynomials of degree at most 1, with the largest admissible parameter.
+    - source: "HNVW II, Theorem 6.2.4, 1 < p <= q, real signs"
+      lean: "KahaneKhintchineChallenge.kahaneKhintchine"
+      module: "KahaneKhintchine.Challenge"
+      status: "partial"
+      note: >-
+        The bound ((q - 1)/(p - 1))^(1/2) of the book for real Rademacher variables.
+    - source: "HNVW II, Theorem 6.2.4, all exponents, real signs"
+      lean: "KahaneKhintchineChallenge.exists_kahaneKhintchine"
+      module: "KahaneKhintchine.Challenge"
+      status: "partial"
+      note: >-
+        Real Rademacher variables.
+    - source: "HNVW I, Proposition 3.2.10 (real scalars)"
+      lean: "KahaneKhintchineChallenge.contraction_real"
+      module: "KahaneKhintchine.Challenge"
+      status: "partial"
+      note: >-
+        Real coefficients and signs, 1 <= p < infinity.
+    - source: "HNVW I, Proposition 3.2.10, (3.15)"
+      lean: "KahaneKhintchineChallenge.contraction_complex"
+      module: "KahaneKhintchine.Challenge"
+      status: "partial"
+      note: >-
+        Complex coefficients and real signs, 1 <= p < infinity; not the optimality of pi/2.
+
+acknowledgements: >-
+  Mathlib; Lean's Comparator and the NanoDa kernel; Palomar's validation scripts.

@@ -1,0 +1,273 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "Schatten classes and noncommutative martingale transforms, in Lean"
+  description: >-
+    Lean 4 proofs, from Mathlib alone, for finite matrices. Schatten norms: the triangle inequality,
+    Horn's inequalities for the singular values of products, Hölder's inequality (Hytönen, van
+    Neerven, Veraar and Weis, "Analysis in Banach Spaces I", Appendix D; Tomczak-Jaegermann 1974,
+    Lemma 1.1; Bourin and Zhang 2026).
+
+
+    Martingale transforms by predictable scalar multipliers on L^infinity(Omega) tensor M_n(R),
+    after Randrianantoanina (2002): they are of weak type (1, 1), with the constant 52 (26 for
+    positive semidefinite functions), and bounded on L^r(S_r), 1 < r < infinity, by an absolute
+    constant times r* = max(r, r/(r - 1)). Consequently the Schatten classes S_q of real and complex
+    n x n matrices are UMD with UMD_q(S_q) <= K q* and UMD_2(S_q) <= C (q* - 1), with constants that
+    do not depend on q and n.
+  authors:
+    - "The-Anh Vu-Le"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "The-Anh Vu-Le"
+
+classification:
+  arxiv: ["math.OA", "math.FA", "math.PR"]
+  msc2020: ["46L53", "46L52", "47B10", "15A18", "15A60", "60G42", "68V20"]
+
+sources:
+  - title: "Non-commutative martingale transforms"
+    authors:
+      - "Narcisse Randrianantoanina"
+    id: "J. Funct. Anal. 194 (2002), 181-212; arXiv:math/0111264"
+    type: "paper"
+    location: "https://doi.org/10.1006/jfan.2002.3952"
+    relationship: "formalizes"
+    note: >-
+      Theorem 3.1, Theorem 4.3, Corollary 4.5 and Remark 4.6 (1) for the von Neumann algebras
+      L^infinity(Omega, mu) tensor M_n(R), mu a probability, with scalar multipliers, by their
+      proofs (read in the arXiv version). General semifinite von Neumann algebras are not
+      formalized.
+    author_endorsement: "not-contacted"
+  - title: "Analysis in Banach Spaces, Volume I: Martingales and Littlewood-Paley Theory"
+    authors:
+      - "Tuomas Hytönen"
+      - "Jan van Neerven"
+      - "Mark Veraar"
+      - "Lutz Weis"
+    id: "Ergebnisse der Mathematik und ihrer Grenzgebiete (3) 63, Springer (2016)"
+    type: "book"
+    location: "https://doi.org/10.1007/978-3-319-48520-1"
+    relationship: "formalizes"
+    note: >-
+      Appendix D: Proposition D.2.3 (p. 571), the inequality of Corollary D.2.4 (p. 572), and one
+      inequality of Theorem D.2.6 (pp. 572-573, the first line of its proof), by their proofs, for
+      real matrices; Hölder's inequality also for complex ones.
+    author_endorsement: "not-contacted"
+  - title: "The moduli of smoothness and convexity and the Rademacher averages of trace classes S_p (1 <= p < infinity)"
+    authors:
+      - "Nicole Tomczak-Jaegermann"
+    id: "Studia Math. 50 (1974), 163-182"
+    type: "paper"
+    location: "https://zbmath.org/?q=an:0282.46016"
+    relationship: "formalizes"
+    note: >-
+      Lemma 1.1 (pp. 165-166), by its proof, for real square matrices.
+    author_endorsement: "not-contacted"
+  - title: "Matrix triangle inequalities: past, present, and future"
+    authors:
+      - "Jean-Christophe Bourin"
+      - "Teng Zhang"
+    id: "arXiv:2610.30538 (2026)"
+    type: "paper"
+    location: "https://arxiv.org/abs/2610.30538"
+    relationship: "formalizes"
+    note: >-
+      Proposition 3.13 by the third proof of Remark 3.14 (the Hermitian dilation), for real
+      rectangular matrices; von Neumann's convexity inequality, which is quoted there, is proved by
+      Peierls's argument.
+    author_endorsement: "not-contacted"
+
+related_formalizations:
+  - id: "https://github.com/TauCetiProject/TauCeti"
+    relationship: "independent"
+    note: >-
+      Lean 4. The triangle inequality for Schatten norms. (Search of 22 November 2026; read as text,
+      not built. No code of it is used.)
+  - id: "https://github.com/Timeroot/Lean-QuantumInfo"
+    relationship: "independent"
+    note: >-
+      Lean 4. Schatten norms of complex square matrices with Hölder's inequality, and the trace
+      norm; the triangle inequality for all exponents was not seen there. (Search of 22 November
+      2026; read as text, not built. No code of it is used.)
+  - id: "https://github.com/savarin/hlawka-schatten"
+    relationship: "independent"
+    note: >-
+      Lean 4. Schatten norms of linear maps and the Hermitian dilation. (Search of 22 November 2026;
+      read as text, not built. No code of it is used.)
+  - id: "https://github.com/openai/math"
+    relationship: "independent"
+    note: >-
+      Lean 4. The triangle and Hölder inequalities for Schatten norms with even exponents. (Search
+      of 22 November 2026; read as text, not built. No code of it is used.)
+
+status:
+  scope: >-
+    Formalized (the 12 theorems that Comparator checks), for finite matrices: the Schatten norms in
+    terms of Mathlib's singular values; the triangle inequality for 1 <= q <= infinity, real and
+    complex rectangular matrices; Horn's inequality for two real matrices and the general one for
+    several real square matrices; Hölder's inequality for real and complex rectangular matrices and
+    all positive finite exponents; the trace inequality; on L^infinity(Omega) tensor M_n(R), the
+    weak type (1, 1) inequality and the bound on L^r(S_r) for transforms by predictable scalar
+    multipliers; the UMD inequality of S_q in L^q and in L^2, for real and complex n x n matrices,
+    uniformly in n.
+
+
+    Not formalized: infinite-dimensional Schatten classes; general semifinite von Neumann algebras,
+    complex matrices in the weak type inequality and in the bound of the transforms, and multipliers
+    that are not scalar; the factorisation in Corollary D.2.4 and the surjectivity and isometry in
+    Theorem D.2.6; infinite exponents in Hölder's inequality. The noncommutative L^p spaces are not
+    constructed: the statements are about matrix-valued functions.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: []
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["claude-opus-5-5"]
+      framework: "Claude Code 2.1.330 (VS Code extension, Claude Agent SDK)"
+      tool_setup: >-
+        The formalize-math-paper skill (https://github.com/vltanh/formalize-math-paper, version
+        4.3.2, commit 8e884d5); Claude Code sessions and sub-agents that wrote the statements and
+        the proofs of the library and compared them with the sources; the number of agents was not
+        tracked for this library alone. This entry by one agent, with an independent reviewer agent.
+        Lean v4.36.0-rc2, Mathlib v4.36.0-rc2.
+      cost:
+        wall_time: >-
+          about 13 hours between the library's first commit and the commit on which this entry is
+          based (21-22 November 2026, git log), not continuous and with other work in parallel, and
+          about 3 hours for the eight entries of the package together; agent time not tracked
+        spend_usd: "not tracked"
+        hardware: "local machine (20 cores, 62 GB RAM) and API"
+      prompting_notes: >-
+        Instructions: state the theorems of the cited sources in their general form as far as
+        feasible, follow the sources' proofs, record every deviation, use only Mathlib.
+  spend_usd: "not tracked"
+  notes: >-
+    The AI system wrote the code and the documents. No person has reviewed the statements or the
+    proofs; Lean has checked the proofs. Independent AI agents compared the proofs of the library
+    with the cited sources, and one compared the statements of this entry with them.
+
+fidelity:
+  divergences: >-
+    Statements. Randrianantoanina: the algebra is L^infinity(Omega, mu) tensor M_n(R), with
+    conditional expectations of any filtration applied entrywise (the source's proof of Corollary
+    4.5), real matrices instead of complex ones; the multipliers are scalar functions, predictable
+    and bounded by 1, which for this algebra are the ones of Theorem 3.1 (i) that are self-adjoint
+    (its multipliers are elements of the algebra at time n - 1 that commute with the algebra at time
+    n). The martingales are finite, x_k = E_k x for an integrable x. The weak L^1 quasi-norm is
+    written out, with the distribution function as the integral of the number of singular values
+    above the level. The constants are explicit: 26 for positive semidefinite x and 52 for all x,
+    where the source has an unspecified C and, in the proof for x >= 0, the infimum of 24/(alpha
+    beta^2) + 2/(1 - alpha), printed as 14 sqrt(3)/3 + 28 (its value is 26 + 8 sqrt(3)). Theorem
+    4.3: transforms by predictable scalar multipliers of modulus at most 1 instead of constant
+    signs; the bound K r* with K = 192 * 864^3 instead of C r^2/(r - 1), which it implies; x is
+    measurable for the last algebra. Corollary 4.5 and Remark 4.6 (1): the UMD inequality for
+    matrix-valued martingales (every entry a martingale) started at 0, with predictable signs, on
+    probability spaces in the universe Type, for n x n matrices with n in Type; Remark 4.6 (1) has
+    the order O(p) for the constant in L^2 as p tends to infinity, here C (q* - 1) for all 1 < q <
+    infinity. HNVW: Proposition D.2.3 and Theorem D.2.6 for finite real matrices (compact operators
+    there); Corollary D.2.4 for all positive exponents (there at least 1), real and complex. (Its
+    display has a misprint: the second norm is that of C^r.) Tomczak-Jaegermann's Lemma 1.1 for real
+    square matrices. The triangle inequality: Proposition 3.13 of Bourin-Zhang is about complex
+    square matrices; here for real and complex rectangular ones, the complex ones by realification,
+    and for the operator norm, q = infinity.
+
+
+    Proofs. Those of the sources, with these departures: a rank count in place of Lemma 3.2 of
+    Randrianantoanina, hence the constants; general matrices by the Hermitian dilation; the
+    interpolation and the duality in Theorem 4.3, which the source does not write out, in three
+    regimes so that the constant stays uniform near r = 2; Corollary 4.5 for martingales on any
+    filtered probability space; UMD_2 <= 200 UMD_q (HNVW I, Theorem 4.2.7) for Remark 4.6 (1). In
+    Corollary D.2.4 the vanishing singular values are treated separately. The additive Horn
+    inequality, quoted by Tomczak-Jaegermann, is deduced from the multiplicative one.
+
+review:
+  status: "agent-reviewed"
+  reviewers:
+    - "Claude Opus 5.5 (independent agents)"
+  notes: >-
+    No human review. Independent AI agents compared the proofs of the library with the cited
+    sources, and another one compared the statements of this entry with them.
+
+alignment:
+  namespace: "SchattenClassesChallenge"
+  statements:
+    - source: "a check of the definitions"
+      lean: "SchattenClassesChallenge.schattenNorm_eq_singularValues"
+      module: "SchattenClasses.Challenge"
+      status: "proved"
+      note: >-
+        The Schatten norms of a real matrix in terms of Mathlib's singular values.
+    - source: "a check of the definitions"
+      lean: "SchattenClassesChallenge.complexSchattenNorm_eq_singularValues"
+      module: "SchattenClasses.Challenge"
+      status: "proved"
+      note: >-
+        The Schatten norms of a complex matrix in terms of Mathlib's singular values.
+    - source: "Bourin-Zhang 2026, Proposition 3.13"
+      lean: "SchattenClassesChallenge.schattenNorm_triangle"
+      module: "SchattenClasses.Challenge"
+      status: "adapted"
+      note: >-
+        Real and complex rectangular matrices, 1 <= q <= infinity.
+    - source: "HNVW I, Proposition D.2.3"
+      lean: "SchattenClassesChallenge.horn_prod"
+      module: "SchattenClasses.Challenge"
+      status: "partial"
+      note: >-
+        Finite real matrices.
+    - source: "Tomczak-Jaegermann 1974, Lemma 1.1"
+      lean: "SchattenClassesChallenge.horn_sum"
+      module: "SchattenClasses.Challenge"
+      status: "partial"
+      note: >-
+        Finite real square matrices, any number of factors.
+    - source: "HNVW I, Corollary D.2.4"
+      lean: "SchattenClassesChallenge.schattenNorm_holder"
+      module: "SchattenClasses.Challenge"
+      status: "partial"
+      note: >-
+        The inequality, for finite real and complex matrices and all positive finite exponents; not
+        the factorisation.
+    - source: "HNVW I, Theorem D.2.6"
+      lean: "SchattenClassesChallenge.abs_trace_mul_le"
+      module: "SchattenClasses.Challenge"
+      status: "partial"
+      note: >-
+        One inequality of the duality, for finite real matrices.
+    - source: "Randrianantoanina 2002, Theorem 3.1 (the positive case in its proof)"
+      lean: "SchattenClassesChallenge.weakType_posSemidef"
+      module: "SchattenClasses.Challenge"
+      status: "partial"
+      note: >-
+        L^infinity(Omega) tensor M_n(R), scalar multipliers, positive semidefinite x; constant 26.
+    - source: "Randrianantoanina 2002, Theorem 3.1"
+      lean: "SchattenClassesChallenge.weakType"
+      module: "SchattenClasses.Challenge"
+      status: "partial"
+      note: >-
+        L^infinity(Omega) tensor M_n(R), scalar multipliers; constant 52.
+    - source: "Randrianantoanina 2002, Theorem 4.3"
+      lean: "SchattenClassesChallenge.transform_bounded"
+      module: "SchattenClasses.Challenge"
+      status: "partial"
+      note: >-
+        L^infinity(Omega) tensor M_n(R), predictable scalar multipliers; constant K r*.
+    - source: "Randrianantoanina 2002, Corollary 4.5"
+      lean: "SchattenClassesChallenge.umd_schatten"
+      module: "SchattenClasses.Challenge"
+      status: "partial"
+      note: >-
+        For the Schatten classes of real and complex n x n matrices; constant K q*.
+    - source: "Randrianantoanina 2002, Remark 4.6 (1)"
+      lean: "SchattenClassesChallenge.umd_two_schatten"
+      module: "SchattenClasses.Challenge"
+      status: "adapted"
+      note: >-
+        For the Schatten classes of real and complex n x n matrices and all 1 < q < infinity.
+
+acknowledgements: >-
+  Mathlib; Lean's Comparator and the NanoDa kernel; Palomar's validation scripts.

@@ -15,22 +15,39 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: leanprover/lean-action@v1
-      # The audit sees a module's proofs only through its own `import all` line.
-      - name: Check that the audit imports every module of the library
+      # The audit sees a module's proofs only through its own `import all` line: every module of the
+      # library and every Solution in palomar/, but no Challenge (each holds a copy of definitions of
+      # the library).
+      - name: Check that the audit imports every module of the library and every Solution
         run: >-
-          diff <(find BanachProbability -name '*.lean'
-          | sed 's/\.lean$//; s#/#.#g' | sort)
-          <(grep -E '^import all BanachProbability\.' scripts/Audit.lean
-          | sed 's/^import all //' | sort)
+          diff <({ find BanachProbability -name '*.lean'; cd palomar && find . -name Solution.lean; }
+          | sed 's#^\./##; s/\.lean$//; s#/#.#g' | sort)
+          <(grep -E '^import all ' scripts/Audit.lean | sed 's/^import all //' | sort)
       - name: Check that the root module imports every module of the library
         run: >-
           diff <(find BanachProbability -name '*.lean'
           | sed 's/\.lean$//; s#/#.#g' | sort)
           <(grep -E '^public import BanachProbability\.' BanachProbability.lean
           | sed 's/^public import //' | sort)
+      # It fails on any `sorry` and on any other axiom than the standard ones.
       - name: Audit axioms
         run: lake env lean scripts/Audit.lean
+      - name: Check that the Challenges' copies of the definitions are current
+        run: python3 scripts/sync_challenge_defs.py --check
       - name: Check that the documents' links to the code are current
         run: python3 scripts/linkify_docs.py --check
       - name: Check the Markdown tables
         run: python3 scripts/check_md_tables.py README.md docs/SHORTER_PROOFS.md
+      - name: Check that no line exceeds 100 characters
+        shell: python3 {0}
+        run: |
+          import glob, sys
+          files = ["BanachProbability.lean",
+                   *glob.glob("BanachProbability/**/*.lean", recursive=True),
+                   *glob.glob("palomar/**/*.lean", recursive=True),
+                   *glob.glob("scripts/*.lean")]
+          long = [f"{f}:{i}" for f in files
+                  for i, line in enumerate(open(f, encoding="utf-8").read().split("\n"), 1)
+                  if len(line) > 100]
+          print("\n".join(long))
+          sys.exit(1 if long else 0)
