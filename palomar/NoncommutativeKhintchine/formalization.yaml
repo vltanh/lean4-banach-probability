@@ -13,7 +13,8 @@ project:
 
 
     The upper bound is proved by the method of exchangeable pairs of Mackey, Jordan, Chen, Farrell
-    and Tropp (2014), whose constant (q - 1)^(1/2) for symmetric matrices and q >= 3 is also proved.
+    and Tropp (2014), whose constant (q - 1)^(1/2) for symmetric matrices, q = 2 and q >= 3 is also
+    proved, and extended to all real square matrices.
   authors:
     - "The-Anh Vu-Le"
   license: "Apache-2.0"
@@ -39,8 +40,9 @@ sources:
     note: >-
       The Khintchine case of the matrix Burkholder-Davis-Gundy inequality: Corollary 7.3, (7.2), for
       real symmetric matrices, by its proof (Lemmas 2.4 and 3.4, Proposition 7.5), Remark 7.2 for 2
-      <= q < 3, with the variant of Lemma 3.4 that it needs and does not prove, and the Hermitian
-      dilation of Section 8.
+      < q < 3, with the variant of Lemma 3.4 that it needs and does not prove, and the Hermitian
+      dilation of Section 8. Not formalized: the first inequality of Corollary 7.3 (independent
+      Hermitian summands), and Theorem 7.1 itself.
     author_endorsement: "not-contacted"
   - title: "Non-commutative L^p-spaces"
     authors:
@@ -99,15 +101,17 @@ related_formalizations:
 
 status:
   scope: >-
-    Formalized (the 4 theorems that Comparator checks): the two-sided inequality for real square
+    Formalized (the 5 theorems that Comparator checks): the two-sided inequality for real square
     matrices of every size and q >= 2, with the constants 1 and (2 (q - 1))^(1/2); the upper bound
-    with the constant (q - 1)^(1/2) for real symmetric matrices and q >= 3; two identities for
-    Schatten norms that identify the square functions and the norm of S_2.
+    with the constant (q - 1)^(1/2) for q = 2 and q >= 3, for real symmetric and for all real square
+    matrices; two identities for Schatten norms that identify the square functions and the norm of
+    S_2.
 
 
     Not formalized: complex and rectangular matrices; exponents below 2 (Theorem 6.1 (ii)); infinite
     families; infinite-dimensional Schatten classes and general von Neumann algebras; the optimal
-    constants.
+    constants, and the optimality of the order; sums of other independent matrices (Theorem 7.1 and
+    the first inequality of Corollary 7.3 of Mackey et al.).
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: []
@@ -127,7 +131,7 @@ automation:
         wall_time: >-
           about 13 hours between the library's first commit and the commit on which this entry is
           based (21-22 November 2026, git log), not continuous and with other work in parallel, and
-          about 3 hours for the eight entries of the package together; agent time not tracked
+          about 2 hours for the eight entries of the package together; agent time not tracked
         spend_usd: "not tracked"
         hardware: "local machine (20 cores, 62 GB RAM) and API"
       prompting_notes: >-
@@ -144,10 +148,14 @@ fidelity:
     Statements. Theorem 6.1 (i) of Pisier and Xu is for semifinite von Neumann algebras and has a
     constant that depends only on p; here for the algebra of real n x n matrices with the trace
     (Schatten norms), finite families, real signs, and the constant (2 (q - 1))^(1/2), of the order
-    of the best one. The S_q norms of the square functions are written as the square roots of the
-    S_{q/2} norms of the sums of squares, and the maximum of the two is the norm of the source's
-    intersection space. The signs are the coordinates of the finite sign cube. Corollary 7.3 of
-    Mackey et al.: real symmetric matrices instead of complex Hermitian ones, q = 2p.
+    of the best one by the remarks after Theorem 6.1; the factor 2^(1/2) is needed only for 2 < q <
+    3: the bound with (q - 1)^(1/2) for the other q is a separate theorem. The S_q norms of the
+    square functions are written as the square roots of the S_{q/2} norms of the sums of squares,
+    and the maximum of the two is the norm of the source's intersection space. The signs are the
+    coordinates of the finite sign cube. Corollary 7.3 of Mackey et al.: only (7.2), the Rademacher
+    sums, for real symmetric matrices instead of complex Hermitian ones, q = 2p, in the source's
+    range q = 2 or q >= 3; its extension to all real square matrices is the dilation of their
+    Section 8.
 
 
     Proofs. The upper bound by the method of exchangeable pairs (Mackey et al.), not by the
@@ -164,7 +172,9 @@ review:
     - "Claude Opus 5.5 (independent agents)"
   notes: >-
     No human review. Independent AI agents compared the proofs of the library with the cited
-    sources, and another one compared the statements of this entry with them.
+    sources. Another one compared the statements of this entry and this file with them; it found no
+    wrong and no vacuous statement, and its remarks on generality, citations and wording were
+    followed and then checked again.
 
 alignment:
   namespace: "NoncommutativeKhintchineChallenge"
@@ -175,12 +185,19 @@ alignment:
       status: "partial"
       note: >-
         For real square matrices and Schatten norms, with an explicit constant; another proof.
+    - source: "Mackey et al. 2014, Corollary 7.3, (7.2), and Section 8"
+      lean: "NoncommutativeKhintchineChallenge.khintchine_of_eq_two_or_three_le"
+      module: "NoncommutativeKhintchine.Challenge"
+      status: "adapted"
+      note: >-
+        All real square matrices, the constant (q - 1)^(1/2), q = 2 or q >= 3.
     - source: "Mackey et al. 2014, Corollary 7.3, (7.2)"
       lean: "NoncommutativeKhintchineChallenge.khintchine_symmetric"
       module: "NoncommutativeKhintchine.Challenge"
-      status: "proved"
+      status: "partial"
       note: >-
-        Real symmetric matrices, the source's constant (q - 1)^(1/2), q >= 3.
+        Real symmetric matrices, the source's constant (q - 1)^(1/2) and range q = 2 or q >= 3; not
+        the first inequality of the corollary.
     - source: "a check of the definitions"
       lean: "NoncommutativeKhintchineChallenge.schattenNorm_transpose_mul_self"
       module: "NoncommutativeKhintchine.Challenge"

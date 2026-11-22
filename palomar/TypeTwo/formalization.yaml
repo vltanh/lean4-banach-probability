@@ -15,7 +15,7 @@ project:
     square matrices of every size, even with the norm of L^q(S_q) on the left (Tomczak-Jaegermann
     1974, Theorem 3.1 (ii), with her constants M_{2k}^(1-theta) M_{2k+2}^theta). Hence the
     Rademacher projection on L^q(S_q) and on the dual space has norm at most (pi/2)^(1/2) (q +
-    1)^(1/2), for real matrices of every size (Pisier 1998).
+    1)^(1/2), for real square matrices of every size (Pisier 1998).
   authors:
     - "The-Anh Vu-Le"
   license: "Apache-2.0"
@@ -113,17 +113,18 @@ related_formalizations:
 status:
   scope: >-
     Formalized (the theorems that Comparator checks, listed under alignment): for real signs and
-    real Gaussian variables, type 2 of Hilbert spaces with constant 1; that type 2 and Gaussian type
-    2 are equivalent, with constants; that Gaussian type 2, or type 2, gives K-convexity in L^2,
-    with constants; type 2 of S_q, q >= 2, for real and complex square matrices of every size; the
-    averaging from K-convexity of l_p(X) in L^2 to K-convexity of X in L^p; the Rademacher
-    projection on L^q(S_q) and its dual, for real square matrices.
+    real Gaussian variables, type 2 of real inner product spaces with constant 1; that type 2 and
+    Gaussian type 2 are equivalent, with constants; that Gaussian type 2, or type 2, gives
+    K-convexity in L^2, with constants; type 2 of S_q, q >= 2, for real and complex square matrices
+    of every size; the averaging from K-convexity of l_p(X) in L^2 to K-convexity of X in L^p; the
+    Rademacher projection on L^q(S_q) and its dual, for real square matrices.
 
 
     Not formalized: complex Rademacher and Gaussian variables; types and exponents other than 2
-    (Pisier's theorem that non-trivial type gives K-convexity, in particular); cotype;
-    infinite-dimensional Schatten classes; q < 2 for type 2; complex matrices in the last two
-    theorems; the identity of the two definitions of K-convexity (Proposition 7.4.5).
+    (Pisier's theorem that non-trivial type gives K-convexity, in particular); cotype, in particular
+    Theorem 3.1 (i) of Tomczak-Jaegermann (cotype 2 of S_q, q <= 2); infinite-dimensional Schatten
+    classes; complex matrices in the last two theorems; the identity of the two definitions of
+    K-convexity (Proposition 7.4.5).
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: []
@@ -143,7 +144,7 @@ automation:
         wall_time: >-
           about 13 hours between the library's first commit and the commit on which this entry is
           based (21-22 November 2026, git log), not continuous and with other work in parallel, and
-          about 3 hours for the eight entries of the package together; agent time not tracked
+          about 2 hours for the eight entries of the package together; agent time not tracked
         spend_usd: "not tracked"
         hardware: "local machine (20 cores, 62 GB RAM) and API"
       prompting_notes: >-
@@ -185,7 +186,9 @@ review:
     - "Claude Opus 5.5 (independent agents)"
   notes: >-
     No human review. Independent AI agents compared the proofs of the library with the cited
-    sources, and another one compared the statements of this entry with them.
+    sources. Another one compared the statements of this entry and this file with them; it found no
+    wrong and no vacuous statement, and its remarks on generality, citations and wording were
+    followed and then checked again.
 
 alignment:
   namespace: "TypeTwoChallenge"
@@ -193,9 +196,10 @@ alignment:
     - source: "HNVW II, Example 7.1.2"
       lean: "TypeTwoChallenge.typeTwo_hilbert"
       module: "TypeTwo.Challenge"
-      status: "proved"
+      status: "partial"
       note: >-
-        Type 2 with constant 1, for real signs; cotype is not formalized.
+        Real inner product spaces have type 2 with constant 1 (the upper bound), for real signs; the
+        lower bound and cotype 2 are not formalized.
     - source: "HNVW II, Proposition 7.1.18 (1), p = 2"
       lean: "TypeTwoChallenge.gaussianTypeTwo_of_typeTwo"
       module: "TypeTwo.Challenge"
@@ -230,15 +234,16 @@ alignment:
     - source: "Tomczak-Jaegermann 1974, Theorem 3.1 (ii), end of the proof"
       lean: "TypeTwoChallenge.typeTwo_schatten_interp"
       module: "TypeTwo.Challenge"
-      status: "proved"
+      status: "partial"
       note: >-
-        The constant of the source, complex square matrices.
+        The constant of the source, complex square matrices (the source: compact operators).
     - source: "Tomczak-Jaegermann 1974, Theorem 3.1 (ii)"
       lean: "TypeTwoChallenge.typeTwo_schatten"
       module: "TypeTwo.Challenge"
-      status: "proved"
+      status: "partial"
       note: >-
-        The constant (q + 1)^(1/2), real and complex square matrices.
+        The constant (q + 1)^(1/2), real and complex square matrices (the source: compact
+        operators).
     - source: "Pisier 1998, p. 106"
       lean: "TypeTwoChallenge.rademacherProj_schatten"
       module: "TypeTwo.Challenge"

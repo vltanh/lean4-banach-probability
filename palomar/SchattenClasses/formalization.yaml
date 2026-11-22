@@ -53,7 +53,8 @@ sources:
     note: >-
       Appendix D: Proposition D.2.3 (p. 571), the inequality of Corollary D.2.4 (p. 572), and one
       inequality of Theorem D.2.6 (pp. 572-573, the first line of its proof), by their proofs, for
-      real matrices; Hölder's inequality also for complex ones.
+      real matrices; Hölder's inequality also for complex ones. In the proof of the bound in L^2,
+      also Theorem 4.2.7 (p. 283; the entry UMD of this repository).
     author_endorsement: "not-contacted"
   - title: "The moduli of smoothness and convexity and the Rademacher averages of trace classes S_p (1 <= p < infinity)"
     authors:
@@ -75,8 +76,8 @@ sources:
     relationship: "formalizes"
     note: >-
       Proposition 3.13 by the third proof of Remark 3.14 (the Hermitian dilation), for real
-      rectangular matrices; von Neumann's convexity inequality, which is quoted there, is proved by
-      Peierls's argument.
+      rectangular matrices, and for complex ones by realification; von Neumann's convexity
+      inequality, which is quoted there, is proved by Peierls's argument.
     author_endorsement: "not-contacted"
 
 related_formalizations:
@@ -115,8 +116,9 @@ status:
 
 
     Not formalized: infinite-dimensional Schatten classes; general semifinite von Neumann algebras,
-    complex matrices in the weak type inequality and in the bound of the transforms, and multipliers
-    that are not scalar; the factorisation in Corollary D.2.4 and the surjectivity and isometry in
+    complex matrices in the weak type inequality and in the bound of the transforms, and complex or
+    non-scalar multipliers; the optimality of the orders of the constants (Remark 4.4 of
+    Randrianantoanina); the factorisation in Corollary D.2.4 and the surjectivity and isometry in
     Theorem D.2.6; infinite exponents in Hölder's inequality. The noncommutative L^p spaces are not
     constructed: the statements are about matrix-valued functions.
   sorry_count: 0
@@ -138,7 +140,7 @@ automation:
         wall_time: >-
           about 13 hours between the library's first commit and the commit on which this entry is
           based (21-22 November 2026, git log), not continuous and with other work in parallel, and
-          about 3 hours for the eight entries of the package together; agent time not tracked
+          about 2 hours for the eight entries of the package together; agent time not tracked
         spend_usd: "not tracked"
         hardware: "local machine (20 cores, 62 GB RAM) and API"
       prompting_notes: >-
@@ -155,32 +157,36 @@ fidelity:
     Statements. Randrianantoanina: the algebra is L^infinity(Omega, mu) tensor M_n(R), with
     conditional expectations of any filtration applied entrywise (the source's proof of Corollary
     4.5), real matrices instead of complex ones; the multipliers are scalar functions, predictable
-    and bounded by 1, which for this algebra are the ones of Theorem 3.1 (i) that are self-adjoint
-    (its multipliers are elements of the algebra at time n - 1 that commute with the algebra at time
-    n). The martingales are finite, x_k = E_k x for an integrable x. The weak L^1 quasi-norm is
-    written out, with the distribution function as the integral of the number of singular values
-    above the level. The constants are explicit: 26 for positive semidefinite x and 52 for all x,
-    where the source has an unspecified C and, in the proof for x >= 0, the infimum of 24/(alpha
-    beta^2) + 2/(1 - alpha), printed as 14 sqrt(3)/3 + 28 (its value is 26 + 8 sqrt(3)). Theorem
-    4.3: transforms by predictable scalar multipliers of modulus at most 1 instead of constant
-    signs; the bound K r* with K = 192 * 864^3 instead of C r^2/(r - 1), which it implies; x is
-    measurable for the last algebra. Corollary 4.5 and Remark 4.6 (1): the UMD inequality for
-    matrix-valued martingales (every entry a martingale) started at 0, with predictable signs, on
-    probability spaces in the universe Type, for n x n matrices with n in Type; Remark 4.6 (1) has
-    the order O(p) for the constant in L^2 as p tends to infinity, here C (q* - 1) for all 1 < q <
-    infinity. HNVW: Proposition D.2.3 and Theorem D.2.6 for finite real matrices (compact operators
-    there); Corollary D.2.4 for all positive exponents (there at least 1), real and complex. (Its
-    display has a misprint: the second norm is that of C^r.) Tomczak-Jaegermann's Lemma 1.1 for real
-    square matrices. The triangle inequality: Proposition 3.13 of Bourin-Zhang is about complex
-    square matrices; here for real and complex rectangular ones, the complex ones by realification,
-    and for the operator norm, q = infinity.
+    and bounded by 1, which for this algebra are the ones of Theorem 3.1 (its multipliers are
+    elements of the algebra at time n - 1 that commute with the algebra at time n); for complex
+    matrices those are the complex scalar functions, of which only the real ones are treated here.
+    The martingales are finite, x_k = E_k x for an integrable x, and the weak type inequality has
+    the norm (or the trace) of x on the right, where the source has x_N = E_N x; x need not be
+    measurable for the last algebra. The weak L^1 quasi-norm is written out, with the distribution
+    function as the integral of the number of singular values above the level. The constants are
+    explicit: 26 for positive semidefinite x and 52 for all x, where the source has an unspecified C
+    and, in the proof for x >= 0, the infimum of 24/(alpha beta^2) + 2/(1 - alpha), printed as 14
+    sqrt(3)/3 + 28 (its value is 26 + 8 sqrt(3)). Theorem 4.3: transforms by predictable scalar
+    multipliers of modulus at most 1 instead of constant signs; the bound K r* with K = 192 * 864^3
+    instead of C r^2/(r - 1), which it implies; x is measurable for the last algebra. Corollary 4.5
+    and Remark 4.6 (1): the UMD inequality for matrix-valued martingales (every entry a martingale)
+    started at 0, with predictable signs, on probability spaces in the universe Type, for n x n
+    matrices with n in Type; Remark 4.6 (1) has the order O(p) for the constant in L^2 as p tends to
+    infinity, here C (q* - 1) for all 1 < q < infinity. HNVW: Proposition D.2.3 and Theorem D.2.6
+    for finite real matrices (compact operators there); Corollary D.2.4 for all positive exponents
+    (there at least 1), real and complex. (Its display has a misprint: the second norm is that of
+    C^r.) Tomczak-Jaegermann's Lemma 1.1 for real square matrices. The triangle inequality:
+    Proposition 3.13 of Bourin-Zhang is about complex square matrices; here for real and complex
+    rectangular ones.
 
 
     Proofs. Those of the sources, with these departures: a rank count in place of Lemma 3.2 of
     Randrianantoanina, hence the constants; general matrices by the Hermitian dilation; the
     interpolation and the duality in Theorem 4.3, which the source does not write out, in three
-    regimes so that the constant stays uniform near r = 2; Corollary 4.5 for martingales on any
-    filtered probability space; UMD_2 <= 200 UMD_q (HNVW I, Theorem 4.2.7) for Remark 4.6 (1). In
+    regimes so that the constant stays uniform near r = 2; complex matrices by realification (also
+    in the triangle inequality and in Hölder's inequality); UMD_2 <= 200 UMD_q (HNVW I, Theorem
+    4.2.7, in place of the source's Theorem 4.2) for Remark 4.6 (1). In the triangle inequality the
+    case q = infinity, which the source calls well known, is the first of Weyl's inequalities. In
     Corollary D.2.4 the vanishing singular values are treated separately. The additive Horn
     inequality, quoted by Tomczak-Jaegermann, is deduced from the multiplicative one.
 
@@ -190,7 +196,9 @@ review:
     - "Claude Opus 5.5 (independent agents)"
   notes: >-
     No human review. Independent AI agents compared the proofs of the library with the cited
-    sources, and another one compared the statements of this entry with them.
+    sources. Another one compared the statements of this entry and this file with them; it found no
+    wrong and no vacuous statement, and its remarks on generality, citations and wording were
+    followed and then checked again.
 
 alignment:
   namespace: "SchattenClassesChallenge"
@@ -210,9 +218,10 @@ alignment:
     - source: "Bourin-Zhang 2026, Proposition 3.13"
       lean: "SchattenClassesChallenge.schattenNorm_triangle"
       module: "SchattenClasses.Challenge"
-      status: "adapted"
+      status: "proved"
       note: >-
-        Real and complex rectangular matrices, 1 <= q <= infinity.
+        For real and complex rectangular matrices, 1 <= q <= infinity (the source: complex square
+        ones).
     - source: "HNVW I, Proposition D.2.3"
       lean: "SchattenClassesChallenge.horn_prod"
       module: "SchattenClasses.Challenge"

@@ -4,19 +4,20 @@ version: "v0.4"
 project:
   name: "UMD constants of Banach spaces, in Lean"
   description: >-
-    Lean 4 proofs, from Mathlib alone, of the basic theorems on the UMD constants UMD_p(X) of a
-    Banach space X, 1 < p < infinity, after Hytönen, van Neerven, Veraar and Weis, "Analysis in
-    Banach Spaces I": dyadic (Paley-Walsh) martingales give the same constant, for real signs and
-    for complex unimodular multipliers (Theorem 4.2.5); so do deterministic and predictable
-    multipliers, and the constant bounds the transforms by all predictable multipliers of modulus at
-    most one (Theorem 4.2.25); the constants for two exponents are comparable, UMD_p <= 100 (p/q +
-    p'/q') UMD_q (Theorem 4.2.7, real scalars); the real and the complex constant of a complex space
-    satisfy UMD_p <= UMD_{C,p} <= (pi/2) UMD_p (Proposition 4.2.10); and UMD_p(L^p(mu; X)) =
-    UMD_p(X) (Proposition 4.2.15).
+    Lean 4 proofs, from Mathlib alone, of the basic theorems on the UMD constants UMD_p(X) of a real
+    or complex Banach space X, 1 < p < infinity, for martingales on probability spaces, after
+    Hytönen, van Neerven, Veraar and Weis, "Analysis in Banach Spaces I": dyadic (Paley-Walsh)
+    martingales give the same constant, for real signs and for complex unimodular multipliers
+    (Theorem 4.2.5); so do deterministic and predictable multipliers, and the constant bounds the
+    transforms by all predictable multipliers of modulus at most one (Theorem 4.2.25); the constants
+    for two exponents are comparable, UMD_p <= 100 (p/q + p'/q') UMD_q (Theorem 4.2.7, real
+    scalars); the real and the complex constant of a complex space satisfy UMD_p <= UMD_{C,p} <=
+    (pi/2) UMD_p (Proposition 4.2.10); and UMD_p(L^p(mu; X)) = UMD_p(X) if there is a set of finite
+    positive measure (Proposition 4.2.15).
 
 
     For a real Hilbert space H other than 0, UMD_p(H) = p* - 1, p* = max(p, p/(p - 1)), also for
-    dyadic martingales (Burkholder; Osękowski 2012, Theorem 3.5 and Remark 3.8).
+    dyadic martingales (Burkholder; Osękowski 2012, Theorem 3.5 and Remark 3.8), for real signs.
   authors:
     - "The-Anh Vu-Le"
   license: "Apache-2.0"
@@ -42,10 +43,11 @@ sources:
       Theorem 4.2.5 (p. 282; real and complex scalars; by the alternative proof of p. 334, through
       Theorem 4.5.6), Theorem 4.2.7 (p. 283; real scalars; by its proof, with Theorem 3.5.4, (3.49),
       and Lemmas 3.5.13 to 3.5.15 for Paley-Walsh martingales), Proposition 4.2.10 (p. 286, with
-      Proposition 3.2.14), Proposition 4.2.15 (2) (by its proof), Theorem 4.2.25 (pp. 300-301, with
-      Lemmas 3.6.17 and 3.6.18). The definition of the constants is Definition 4.2.1. Theorem 4.5.7
-      (the real line) is contained in the theorem on Hilbert spaces, which is proved by the
-      arguments of Osękowski's book.
+      Proposition 3.2.14), Proposition 4.2.15 (2) (p. 291; by its proof), Theorem 4.2.25 (pp.
+      300-301, with Lemmas 3.6.17 and 3.6.18). The definition of the constants is Definition 4.2.1.
+      Corollary 4.5.15 (p. 346), for real Hilbert spaces, and Theorem 4.5.7 (the real line) are
+      contained in the theorem on Hilbert spaces, which is proved by the arguments of Osękowski's
+      book.
     author_endorsement: "not-contacted"
   - title: "Sharp Martingale and Semimartingale Inequalities"
     authors:
@@ -55,8 +57,9 @@ sources:
     location: "https://doi.org/10.1007/978-3-0348-0370-0"
     relationship: "formalizes"
     note: >-
-      Theorem 3.5 (ii) with its sharpness and Remark 3.8 (p. 138): the UMD constants of Hilbert
-      spaces, by its proofs (pp. 53-59) as in the entry Burkholder of this repository.
+      Theorem 3.5 (ii) with its sharpness and Remark 3.8 (p. 137), and Section 3.11.2 (p. 121: the
+      constant of a Hilbert space is p* - 1), by the proofs of pp. 53-59, as in the entry Burkholder
+      of this repository.
     author_endorsement: "not-contacted"
   - title: "Martingales in Banach Spaces"
     authors:
@@ -66,7 +69,7 @@ sources:
     location: "https://doi.org/10.1017/CBO9781316480588"
     relationship: "background"
     note: >-
-      Another monograph on UMD spaces; Corollary 5.22 there is that L^p is UMD.
+      Another monograph on UMD spaces and their constants.
     author_endorsement: "not-contacted"
   - title: "Martingales and Fourier analysis in Banach spaces"
     authors:
@@ -97,16 +100,17 @@ related_formalizations:
 
 status:
   scope: >-
-    Formalized (the theorems that Comparator checks, listed under alignment): for 1 < p < infinity,
-    the equality of the dyadic and the general constants and of the constants for deterministic and
-    for predictable multipliers, over real and complex scalars; the bound for the transforms by
-    predictable multipliers of modulus at most one; extrapolation, for real scalars; the comparison
-    of the real and the complex constant; L^p(mu; X); Hilbert spaces.
+    Formalized (the 11 theorems that Comparator checks): for 1 < p < infinity and martingales on
+    probability spaces, the equality of the constants for dyadic and for general martingales and of
+    those for deterministic and for predictable multipliers, over real and complex scalars; the
+    bound for the transforms by predictable multipliers of modulus at most one; extrapolation, for
+    real scalars; the comparison of the real and the complex constant; L^p(mu; X), over real and
+    complex scalars; real Hilbert spaces with real signs.
 
 
     Not formalized: sigma-finite measure spaces and filtrations; extrapolation for complex scalars;
-    complex Hilbert spaces with complex multipliers; the Hilbert transform; duality and the other
-    permanence properties of UMD spaces.
+    complex multipliers for Hilbert spaces; the Hilbert transform; duality and the other permanence
+    properties of UMD spaces.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: []
@@ -126,7 +130,7 @@ automation:
         wall_time: >-
           about 13 hours between the library's first commit and the commit on which this entry is
           based (21-22 November 2026, git log), not continuous and with other work in parallel, and
-          about 3 hours for the eight entries of the package together; agent time not tracked
+          about 2 hours for the eight entries of the package together; agent time not tracked
         spend_usd: "not tracked"
         hardware: "local machine (20 cores, 62 GB RAM) and API"
       prompting_notes: >-
@@ -143,25 +147,27 @@ fidelity:
     Statements. Probability spaces instead of sigma-finite measure spaces, in the universe Type
     where a definition quantifies over them; martingales are Mathlib's, indexed by the natural
     numbers. The martingales start at 0, which does not matter, as only the differences enter
-    (Definition 4.2.1). The constant is defined with predictable signs (for complex scalars,
-    predictable unimodular multipliers), where Definition 4.2.1 has deterministic ones; that this is
-    the same is one of the theorems. The constants take values in [0, infinity], are infinite for
-    spaces that are not UMD, and are 0 for the space 0. Theorem 4.2.5 is stated for a fixed p as the
-    equality of the constants in [0, infinity], which contains the equivalence of finiteness.
-    Theorem 4.2.7 only for real scalars; its first assertion (one p suffices) is contained in the
-    inequality. Proposition 4.2.10 for the constants with predictable multipliers. Proposition
-    4.2.15 (2): the inequality for every measure, and the equality if there is a set of finite
-    positive measure (the book's equality fails for L^p(mu) = 0); (1) is the case of scalar X.
-    Theorem 4.2.25 for finite sums of differences of martingales started at 0, and for real or
-    complex scalars in the universe Type. The transforms act at a fixed time n.
+    (Definition 4.2.1). The constants umdConst and complexUMDConst are defined with predictable
+    signs or unimodular multipliers, where Definition 4.2.1 has deterministic ones; that this is the
+    same is one of the theorems. The dyadic UMD property is stated with deterministic multipliers,
+    as in the book, for Paley-Walsh martingales on finitely many fair signs, at every time n. The
+    constants take values in [0, infinity], are infinite for spaces that are not UMD, and are 0 for
+    the space 0. Theorem 4.2.5 is stated for a fixed p, as the equality of the sets of the
+    constants. Theorem 4.2.7 only for real scalars; its first assertion (one p suffices) is
+    contained in the inequality. Proposition 4.2.10 for the constants with predictable multipliers.
+    Proposition 4.2.15 (2): the inequality for every measure, and the equality if there is a set of
+    finite positive measure (the book's equality fails for L^p(mu) = 0); (1) is the case of scalar
+    X. Theorem 4.2.25 for finite sums of differences of martingales started at 0, multipliers of
+    modulus at most 1 everywhere (the book: almost everywhere), and scalar fields R or C in the
+    universe Type. The transforms act at a fixed time n.
 
 
     Proofs. Those of the book, with differences of detail recorded in the module docstrings: Theorem
     4.2.5 by the alternative proof (Theorem 4.5.6), in which the multipliers lie in the closed unit
     ball and Steps 2 and 3 are reordered; the finite models are carried to finite probability spaces
     by the law of the generating functions; (3.49) for transforms of Paley-Walsh martingales.
-    Hilbert spaces: Osękowski's proofs (see the entry Burkholder), not those of Theorem 4.5.7 and of
-    the book's Section 4.5.
+    Hilbert spaces: Osękowski's proofs (see the entry Burkholder), not those of the book's Section
+    4.5.
 
 review:
   status: "agent-reviewed"
@@ -169,7 +175,9 @@ review:
     - "Claude Opus 5.5 (independent agents)"
   notes: >-
     No human review. Independent AI agents compared the proofs of the library with the cited
-    sources, and another one compared the statements of this entry with them.
+    sources. Another one compared the statements of this entry and this file with them; it found no
+    wrong and no vacuous statement, and its remarks on generality, citations and wording were
+    followed and then checked again.
 
 alignment:
   namespace: "UMDChallenge"
@@ -180,44 +188,41 @@ alignment:
       status: "proved"
       note: >-
         The bounds for deterministic and for predictable signs are the same, for martingales on
-        probability spaces.
+        probability spaces (the book: sigma-finite filtrations).
     - source: "HNVW I, Theorem 4.2.5 (real scalars)"
-      lean: "UMDChallenge.dyadicUMDConst_eq_umdConst"
+      lean: "UMDChallenge.isUMDBound_iff_dyadic"
       module: "UMD.Challenge"
       status: "proved"
       note: >-
-        Equality of the constants for a fixed p, in [0, infinity].
+        The constants for a fixed p are the same, for martingales on probability spaces (the book:
+        sigma-finite filtrations).
     - source: "HNVW I, Theorem 4.2.7 (real scalars)"
       lean: "UMDChallenge.umdConst_extrapolation"
       module: "UMD.Challenge"
       status: "partial"
       note: >-
-        Real scalars only; the constant 100 (p/q + p'/q') of the book.
+        Real scalars only, on probability spaces; the constant 100 (p/q + p'/q') of the book.
     - source: "HNVW I, after Theorem 4.2.7 (real scalars)"
       lean: "UMDChallenge.umdConst_two_comparison"
       module: "UMD.Challenge"
       status: "partial"
       note: >-
-        The exponent 2, with the book's constants; real scalars only.
-    - source: "HNVW I, Proposition 4.2.15 (2)"
-      lean: "UMDChallenge.umdConst_Lp_le"
+        The exponent 2, with the book's constants; real scalars only, on probability spaces.
+    - source: "HNVW I, Proposition 4.2.15 (2) (real scalars)"
+      lean: "UMDChallenge.umdConst_Lp"
       module: "UMD.Challenge"
       status: "proved"
       note: >-
-        The inequality, for every measure.
-    - source: "HNVW I, Proposition 4.2.15 (2)"
-      lean: "UMDChallenge.umdConst_Lp_eq"
-      module: "UMD.Challenge"
-      status: "proved"
-      note: >-
-        The equality, if there is a measurable set of finite positive measure.
-    - source: "Osękowski 2012, Theorem 3.5 (ii), Remark 3.8; HNVW I, Theorem 4.5.7"
+        The inequality for every measure, and the equality if there is a measurable set of finite
+        positive measure; constants over probability spaces.
+    - source: "Osękowski 2012, Theorem 3.5 (ii), Remark 3.8, Section 3.11.2; HNVW I, Corollary 4.5.15 and Theorem 4.5.7"
       lean: "UMDChallenge.umdConst_hilbert"
       module: "UMD.Challenge"
-      status: "proved"
+      status: "partial"
       note: >-
-        UMD_p(H) = p* - 1, and the same for dyadic martingales, for every real Hilbert space H other
-        than 0.
+        UMD_p(H) = p* - 1, and the same for dyadic martingales and deterministic signs, for every
+        real Hilbert space H other than 0; complex multipliers (the complex case of Corollary
+        4.5.15) are not formalized.
     - source: "HNVW I, Theorem 4.2.25"
       lean: "UMDChallenge.deterministic_transform_le"
       module: "UMD.Challenge"
@@ -233,17 +238,24 @@ alignment:
         The bounds for deterministic and for predictable unimodular multipliers are the same, for
         martingales on probability spaces.
     - source: "HNVW I, Theorem 4.2.5 (complex scalars)"
-      lean: "UMDChallenge.complexDyadicUMDConst_eq_complexUMDConst"
+      lean: "UMDChallenge.isComplexUMDBound_iff_dyadic"
       module: "UMD.Challenge"
       status: "proved"
       note: >-
-        Equality of the constants for a fixed p, in [0, infinity].
+        The constants for a fixed p are the same, for martingales on probability spaces.
     - source: "HNVW I, Proposition 4.2.10"
       lean: "UMDChallenge.umdConst_le_complexUMDConst_le"
       module: "UMD.Challenge"
       status: "proved"
       note: >-
-        UMD_p <= UMD_{C,p} <= (pi/2) UMD_p for a complex Banach space.
+        UMD_p <= UMD_{C,p} <= (pi/2) UMD_p for a complex Banach space; constants over probability
+        spaces.
+    - source: "HNVW I, Proposition 4.2.15 (2) (complex scalars)"
+      lean: "UMDChallenge.complexUMDConst_Lp"
+      module: "UMD.Challenge"
+      status: "proved"
+      note: >-
+        As umdConst_Lp, with the complex constants.
 
 acknowledgements: >-
   Mathlib; Lean's Comparator and the NanoDa kernel; Palomar's validation scripts.

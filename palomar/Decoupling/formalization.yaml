@@ -12,9 +12,9 @@ project:
     constant beta^- beta^+.
 
 
-    Applied to Paley-Walsh martingales Y_n = sum_k eps_k xi_k, it is the decoupling inequality: Y_n
-    is comparable in L^p, with the constant UMD_p(X) in both directions, to the sum sum_k eps~_k
-    xi_k with an independent copy eps~ of the signs.
+    For Paley-Walsh martingales Y_n = sum_k eps_k xi_k it gives the decoupling inequality (Theorem
+    4.4.1 for Rademacher variables): Y_n is comparable in L^p, with the constant UMD_p(X) in both
+    directions, to the sum sum_k eps~_k xi_k with an independent copy eps~ of the signs.
   authors:
     - "The-Anh Vu-Le"
   license: "Apache-2.0"
@@ -38,8 +38,9 @@ sources:
     relationship: "formalizes"
     note: >-
       Proposition 4.2.3 (p. 282) with the constants after it, for real scalars, by the book's proof
-      (Proposition 4.1.16, (1)=>(2) and (2)=>(1), pp. 279-280). Of its version for Paley-Walsh
-      martingales, the two inequalities only.
+      (Proposition 4.1.16, (1)=>(2) and (2)=>(1), pp. 279-280); Theorem 4.4.1, (4.26) (p. 319), for
+      X = R and Rademacher variables, by the argument of Remark 4.4.2 (p. 320) from Proposition
+      4.2.3, not by the book's proof of Theorem 4.4.1.
     author_endorsement: "not-contacted"
   - title: "Decoupling and stochastic integration in UMD Banach spaces"
     authors:
@@ -50,7 +51,8 @@ sources:
     relationship: "background"
     note: >-
       An origin of decoupling for tangent sequences in UMD spaces, of which the decoupling of
-      Paley-Walsh martingales is a case.
+      Paley-Walsh martingales is a case. For independent copies the notes of HNVW I (p. 364) credit
+      Burkholder (1983) and Garling (1986).
     author_endorsement: "not-contacted"
 
 related_formalizations:
@@ -71,8 +73,9 @@ status:
     of two sign cubes.
 
 
-    Not formalized: complex scalars; the converse for Paley-Walsh martingales only; general tangent
-    sequences; sigma-finite measure spaces.
+    Not formalized: complex scalars; the converse for Paley-Walsh martingales only; Theorem 4.4.1
+    for operator-valued v_n and general independent mean-zero xi_n, and Theorem 4.4.11 (tangent
+    sequences); sigma-finite measure spaces.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: []
@@ -92,7 +95,7 @@ automation:
         wall_time: >-
           about 13 hours between the library's first commit and the commit on which this entry is
           based (21-22 November 2026, git log), not continuous and with other work in parallel, and
-          about 3 hours for the eight entries of the package together; agent time not tracked
+          about 2 hours for the eight entries of the package together; agent time not tracked
         spend_usd: "not tracked"
         hardware: "local machine (20 cores, 62 GB RAM) and API"
       prompting_notes: >-
@@ -113,13 +116,18 @@ fidelity:
     constants, HNVW I, Theorem 4.2.25, which is a theorem of the entry UMD of this repository). The
     martingales start at 0, as only the differences enter. The book's proposition is an equivalence
     with constants for all p; here it is stated for a fixed p with explicit constants, which its
-    proof gives (max(beta^-, beta^+) <= beta <= beta^- beta^+). For Paley-Walsh martingales only the
-    two inequalities, with the constant UMD_p(X), are stated, not the converse.
+    proof gives (max(beta^-, beta^+) <= beta <= beta^- beta^+). For Paley-Walsh martingales only two
+    inequalities are stated, those of Theorem 4.4.1, (4.26), for X = R, xi_n = r_n (signs) and v_n =
+    phi_n(r_1, ..., r_{n-1}), with the constant UMD_p(X): the sum with an independent copy of the
+    signs, in place of the randomised sum of Proposition 4.2.3, which has the same law (Remark
+    4.4.2). The converse of Proposition 4.2.3 for Paley-Walsh martingales is not stated.
 
 
     Proofs. Those of the book; for the converse the signs are predictable, and for each omega the
     families (sigma_k(omega) eps_k) and (eps_k) have the same law. The decoupling inequalities are
-    proved directly for Paley-Walsh martingales, by the same argument.
+    proved for Paley-Walsh martingales by the same argument and the equidistribution of (eps~_k
+    eps_k) and (eps~_k), as in Remark 4.4.2; the book proves Theorem 4.4.1 by an auxiliary
+    martingale.
 
 review:
   status: "agent-reviewed"
@@ -127,7 +135,9 @@ review:
     - "Claude Opus 5.5 (independent agents)"
   notes: >-
     No human review. Independent AI agents compared the proofs of the library with the cited
-    sources, and another one compared the statements of this entry with them.
+    sources. Another one compared the statements of this entry and this file with them; it found no
+    wrong and no vacuous statement, and its remarks on generality, citations and wording were
+    followed and then checked again.
 
 alignment:
   namespace: "DecouplingChallenge"
@@ -144,12 +154,12 @@ alignment:
       status: "proved"
       note: >-
         For a fixed p, on probability spaces.
-    - source: "HNVW I, Proposition 4.2.3 for Paley-Walsh martingales (real scalars)"
+    - source: "HNVW I, Theorem 4.4.1, (4.26), for X = R and Rademacher variables; Remark 4.4.2"
       lean: "DecouplingChallenge.decoupling"
       module: "Decoupling.Challenge"
       status: "partial"
       note: >-
-        The two inequalities, with the constant UMD_p(X); not the converse.
+        Paley-Walsh martingales and an independent copy of the signs, with the constant UMD_p(X).
     - source: "a check of the definitions"
       lean: "DecouplingChallenge.eLpNorm_uniformOn"
       module: "Decoupling.Challenge"
