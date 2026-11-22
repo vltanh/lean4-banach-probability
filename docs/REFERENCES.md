@@ -68,6 +68,9 @@ Works cited in the README, in [SHORTER_PROOFS.md](SHORTER_PROOFS.md) and in the 
   Zbl 0021.01601
 - B. Maurey, *Système de Haar*, Séminaire Maurey–Schwartz 1974–1975, exposés 1 and 2.
   http://www.numdam.org/item?id=SAF_1974-1975____A1_0
+- B. Maurey, G. Pisier, *Séries de variables aléatoires vectorielles indépendantes et propriétés
+  géométriques des espaces de Banach*, Studia Math. 58 (1976) 45–90.
+  https://doi.org/10.4064/sm-58-1-45-90
 - T. R. McConnell, *Decoupling and stochastic integration in UMD Banach spaces*, Probab. Math. Statist.
   10 (1989) 283–295. Zbl 0718.60050
 - S. Montgomery-Smith, *Concrete representation of martingales*, Electron. J. Probab. 3 (1998).
@@ -80,11 +83,15 @@ Works cited in the README, in [SHORTER_PROOFS.md](SHORTER_PROOFS.md) and in the 
   https://doi.org/10.1017/CBO9781316480588
 - G. Pisier, *Martingales in Banach spaces (in connection with type and cotype)*, lecture notes, IHP
   (2011). https://webusers.imj-prg.fr/~gilles.pisier/ihp-pisier.pdf
+- G. Pisier, *Non-commutative vector valued `L_p`-spaces and completely `p`-summing maps*, Astérisque
+  247 (1998). https://www.numdam.org/item/AST_1998__247__R1_0/
 - G. Pisier, Q. Xu, *Non-commutative martingale inequalities*, Comm. Math. Phys. 189 (1997) 667–698.
   https://doi.org/10.1007/s002200050224
 - G. Pisier, Q. Xu, *Non-commutative `L^p`-spaces*, Handbook of the Geometry of Banach Spaces 2 (2003)
   1459–1517. https://doi.org/10.1016/s1874-5849(03)80041-4
 - N. Randrianantoanina, *Non-commutative martingale transforms*, J. Funct. Anal. 194 (2002) 181–212.
   https://doi.org/10.1006/jfan.2002.3952, arXiv:math/0111264
+- N. Tomczak-Jaegermann, *The moduli of smoothness and convexity and the Rademacher averages of trace
+  classes `S_p`*, Studia Math. 50 (1974) 163–182.
 - I. Yaroslavtsev, *Even Fourier multipliers and martingale transforms in infinite dimensions*, Indag.
   Math. 29 (2018) 1290–1309. https://doi.org/10.1016/j.indag.2018.05.014

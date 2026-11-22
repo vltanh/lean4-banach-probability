@@ -46,4 +46,16 @@ Full references are in [REFERENCES.md](REFERENCES.md); HNVW is Hytönen–van Ne
 
 | # | Result | Shorter proof | Status |
 | --- | --- | --- | --- |
-| 1 | the noncommutative Khintchine inequality in `S_q`, `q ≥ 2`, real matrices (Lust-Piquard 1986; Lust-Piquard–Pisier 1991; Pisier–Xu 2003, Theorem 6.1) | exchangeable pairs (Mackey–Jordan–Chen–Farrell–Tropp 2014): Lemma 2.4, the mean-value trace inequality of Lemma 3.4, trace Hölder; non-symmetric matrices by the Hermitian dilation. Remark 7.2 needs a variant of Lemma 3.4 for `2 < q < 3` which the source does not prove; it is `trace_mean_value` | in the library; a proof along the original route is planned in a separate package |
+| 1 | the noncommutative Khintchine inequality in `S_q`, `q ≥ 2`, real matrices (Lust-Piquard 1986; Lust-Piquard–Pisier 1991; Pisier–Xu 2003, Theorem 6.1) | exchangeable pairs (Mackey–Jordan–Chen–Farrell–Tropp 2014): Lemma 2.4, the mean-value trace inequality of Lemma 3.4, trace Hölder; non-symmetric matrices by the Hermitian dilation. Remark 7.2 needs a variant of Lemma 3.4 for `2 < q < 3` which the source does not prove; it is `trace_mean_value` | in the library; the original route is followed in the package `VectorValuedHarmonicAnalysis` |
+
+## Schatten classes, type 2, K-convexity (HNVW I, Appendix D; HNVW II, Chapter 7; Pisier 1998)
+
+| # | Result | Shorter proof | Size | Status |
+| --- | --- | --- | --- | --- |
+| 1 | type 2 of `S_q`, `q ≥ 2` (HNVW II, Proposition 7.1.11) | `ncKhintchine_symmetric_upper` for the dilations, and `‖Σ D_k²‖_{S_{q/2}} ≤ Σ ‖D_k‖²_{S_q}`; the factors `2^{1/q}` cancel. Constants `√(q − 1)` for `q ≥ 3` and `√(2 (q − 1))` for `q < 3`, both at most `√(q + 1)`, even in `L^q`. No Hölder, interpolation or complex matrices. (Pisier deduces the Khintchine inequality from type 2, so this reverses his order) | about 40 against 680 | on paper |
+| 2 | the Rademacher projection on `L^q (S_q)`, `q ≥ 2` (Pisier 1998, p. 106) | `ncKhintchine_upper` and the operator Bessel inequality `Σ z_kᵀ z_k ⪯ E fᵀ f`: constant `√(2 (q − 1))`. The same caveat | about 40 | on paper |
+| 3 | HNVW I, Lemma D.1.4 | take `c_j` the right derivative of `f` at `a_j`: `f (b_j) − f (a_j) ≥ c_j (b_j − a_j)`, and `c` is nonincreasing; no equal entries to remove, no monotonicity of `b` | about 60 less | on paper |
+| 4 | HNVW I, Proposition D.2.5 | `\|tr A\| = \|Σ ⟨e_k, A e_k⟩\| ≤ Σ ‖A e_k‖ = Σ s_k` in the eigenbasis of `Aᵀ A` | a few lines | on paper |
+| 5 | `\|tr (A B)\| ≤ ‖A‖_{S_q} ‖B‖_{S_{q'}}` for rectangular matrices | the symmetric case (`abs_trace_mul_le_of_isHermitian`) applied to the dilations of `A` and `Bᵀ`; no Horn's inequality | a few lines | on paper |
+| 6 | HNVW II, Propositions 7.4.21, 7.4.22, the covariance domination | for `P` an orthogonal projection, `T (P g) = ½ (T (g) + T (R g))` with the reflection `R = 2P − 1`, which preserves the Gaussian measure, so `‖T ∘ P‖_{L²} ≤ ‖T‖_{L²}`; no Walsh functions of degree `≠ 1` | (in the code) | in the library |
+| 7 | `ncKhintchine_lower_col` | from `complexSchattenNorm_blockCol_sq_le_avg`, `complexSchattenNorm_map_ofReal` and `L² ≤ L^q` | about 10 against 65 | on paper |

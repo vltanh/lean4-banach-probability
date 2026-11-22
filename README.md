@@ -10,8 +10,10 @@ A Lean 4 library of probability in Banach spaces:
   property and decoupling, real against complex constants, and Burkholder's zig-zag concave
   functions;
 - hypercontractivity on the cube and the Kahane–Khintchine inequality in seminormed spaces;
-- Schatten classes: the Schatten norms, the noncommutative Khintchine inequality, martingale
-  transforms with values in matrices, and the UMD property of `S_q`, uniformly in the dimension.
+- Schatten classes: the Schatten norms, Hölder's inequality, the noncommutative Khintchine inequality,
+  martingale transforms with values in matrices, and the UMD property and type 2 of `S_q`, uniformly in
+  the dimension;
+- random sums: Kahane's contraction principle, type 2, K-convexity.
 
 **Status.** Every result below is proved, and no theorem takes an unproved result as a hypothesis.
 The library builds with no `sorry` and no axiom beyond Lean's standard `propext`, `Classical.choice`
@@ -27,9 +29,10 @@ exponents below `2` in the noncommutative Khintchine inequality; general semifin
 algebras and non-scalar multipliers in the noncommutative martingale results.
 
 **Planned extensions.** Kahane–Khintchine for Rademacher sums on a probability space; the
-noncommutative Khintchine inequality for rectangular and complex matrices, and, in a separate package,
-a proof of it along the route of Lust-Piquard and Pisier; Randrianantoanina's Theorem 3.1 for general
-semifinite von Neumann algebras and non-scalar multipliers.
+noncommutative Khintchine inequality for rectangular and complex matrices (a proof of it along the route
+of Lust-Piquard and Pisier is in the package `VectorValuedHarmonicAnalysis`, *placeholder: not published
+yet*); Randrianantoanina's Theorem 3.1 for general semifinite von Neumann algebras and non-scalar
+multipliers.
 
 ## Results
 
@@ -76,15 +79,30 @@ The values are in a real vector space with a seminorm; completeness is not neede
 | Borell's operator `⊗ⁿ K̄` (kernel `Π_i (1 + ρ x_i y_i)`, `ρ = √((p−1)/(q−1))`), `1 < p ≤ q`: `‖(⊗ⁿ K̄) f‖_q ≤ ‖f‖_p`, hence `‖c + ρ Σ ε_i x_i‖_q ≤ ‖c + Σ ε_i x_i‖_p` | `kBarTensor_lpNorm_le`, `hypercontractive_affine` | Borell (1979), (2.1) | `Hypercontractivity/Vector` |
 | Kahane–Khintchine: `‖Σ ε_i x_i‖_q ≤ √((q−1)/(p−1)) ‖Σ ε_i x_i‖_p` for `1 < p ≤ q`; `‖Σ ε_i x_i‖_p ≤ max (1, √((p−1)/(q−1))) ‖Σ ε_i x_i‖_q` for all `p, q > 1`; with some constant depending only on `p` and `q` for all `p, q ∈ (0, ∞)` | `kahaneKhintchine_hypercontractive`, `kahaneKhintchine`, `exists_kahaneKhintchine` | Kahane (1964); HNVW II, Thm 6.2.4 | `KahaneKhintchine/Basic` |
 
+### Random sums, type 2, K-convexity
+
+`X` is a normed space (complex where the scalars are), `E` the average over independent fair signs.
+
+| Theorem | Lean | Source | Module |
+| --- | --- | --- | --- |
+| Kahane's contraction principle, `1 ≤ p < ∞`: `‖Σ ε_k c_k x_k‖_p ≤ ‖Σ ε_k x_k‖_p` for real `\|c_k\| ≤ 1`; with the factor `π/2` for complex `\|c_k\| ≤ 1` | `lpNorm_sum_coin_smul_le`, `lpNorm_sum_coin_smul_le_pi_div_two_mul` | HNVW I, Prop 3.2.10; HNVW II, Thm 6.1.13 | `RandomSums/Contraction` |
+| Type 2 of the Schatten classes of real square matrices, every size: `(E ‖Σ ε_k x_k‖²_{S_q})^{1/2} ≤ √(q + 1) (Σ ‖x_k‖²_{S_q})^{1/2}`, `q ≥ 2`; for `q = 2m` with `√(2m − 1)`, even in `L^{2m}` | `isTypeTwoBound_schattenSpace`, `lpNorm_schattenNorm_le_of_even` | HNVW II, Prop 7.1.11, Lemma 7.1.12 | `TypeTwo/Schatten` |
+| A space of type 2 with constant `τ` is K-convex in `L²` with constant `√(π/2) τ` | `IsTypeTwoBound.isKConvexBound` | HNVW II, Prop 7.4.22 | `KConvexity/Basic` |
+| The Rademacher projection on `L^q (Ω; S_q)`, `q ≥ 2`, real matrices: norm at most `√(π/2) √(q + 1)`; the same on `L^{q'} (Ω; S_{q'})` for symmetric matrices | `lpNorm_rademacherProj_schattenNorm_le`, `lpNorm_rademacherProj_schattenNorm_conj_le` | Pisier (1998), p. 106 | `KConvexity/Schatten` |
+
 ### Schatten classes
 
-The matrices are real; `S_q` is the norm `schattenNorm`, defined from the eigenvalues of `Aᵀ A`. On
+The matrices are real where not said otherwise; `S_q` is the norm `schattenNorm`, defined from the
+eigenvalues of `Aᵀ A` (`complexSchattenNorm` for complex matrices). On
 `L^∞ (Ω) ⊗ M_n (ℝ)`, `τ = ∫ tr`, and `T_c x = E_0 x + Σ_{k<N} c_k (E_{k+1} x − E_k x)` is the martingale
 transform by predictable scalar multipliers `|c_k| ≤ 1`, for a general filtration.
 
 | Theorem | Lean | Source | Module |
 | --- | --- | --- | --- |
 | `‖A + B‖_{S_q} ≤ ‖A‖_{S_q} + ‖B‖_{S_q}`, `q ∈ [1, ∞]`, `m × n` matrices | `schattenNorm_add_le` | Bourin–Zhang (2026), Prop 3.13, Rem 3.14 | `Schatten/Triangle` |
+| Horn's inequality `Π_{k<N} s_k (A B) ≤ Π_{k<N} s_k (A) s_k (B)`; Hölder's inequality `‖A B‖_{S_p} ≤ ‖A‖_{S_q} ‖B‖_{S_r}`, `1/p = 1/q + 1/r`, `0 < q, r < ∞`, real and complex rectangular matrices; `\|tr (A B)\| ≤ ‖A‖_{S_q} ‖B‖_{S_{q'}}` | `prod_sortedSingularValue_mul_le`, `schattenNorm_mul_le`, `complexSchattenNorm_mul_le`, `abs_trace_mul_le` | HNVW I, Prop D.2.3, Cor D.2.4, Thm D.2.6 | `Schatten/Horn`, `Schatten/Complex` |
+| Complex matrices: `‖A‖_{S_q} = 2^{−1/q} ‖realify A‖_{S_q}`, the norm axioms, `UMD₂ (S_q) ≤ C (q* − 1)` | `complexSchattenNorm_eq_realify`, `umdConst_two_complexSchattenSpace_le` | — | `Schatten/Complex`, `Noncommutative/ComplexSchattenUMD` |
+| Row and column square functions as norms of block rows and columns; `‖(Σ a_kᴴ a_k)^{1/2}‖²_{S_q} ≤ E ‖Σ ε_k a_k‖²_{S_q}`, `q ≥ 2`, and for rows | `complexSchattenNorm_blockCol_sq`, `complexSchattenNorm_blockCol_sq_le_avg`, `complexSchattenNorm_blockRow_sq_le_avg` | Lust-Piquard–Pisier (1991), (I.2)–(I.7) | `Schatten/Block` |
 | `\|tr (A B)\| ≤ ‖A‖_{S_r} ‖B‖_{S_{r'}}` for symmetric `A`, `B` and `r > 1` | `abs_trace_mul_le_of_isHermitian` | Mackey et al. (2014), Prop 7.5 | `Schatten/Holder` |
 | Noncommutative Khintchine, upper bound, `q ≥ 2`: `‖Σ ε_i x_i‖_{L^q (S_q)} ≤ √(2(q−1)) max (‖Σ x_i x_iᵀ‖_{S_{q/2}}, ‖Σ x_iᵀ x_i‖_{S_{q/2}})^{1/2}`; the constant is `√(q−1)` for symmetric `x_i` and `q ≥ 3` | `ncKhintchine_upper`, `ncKhintchine_symmetric_upper`, `ncKhintchine_symmetric_upper_of_three_le` | Lust-Piquard (1986), Pisier–Xu (2003), Thm 6.1; proof of Mackey et al. (2014), Cor 7.3 | `NoncommutativeKhintchine/Basic`, `NoncommutativeKhintchine/Symmetric` |
 | Lower bound with constant `1`, rows and columns, `q ≥ 2`; both bounds for normal `x_i`, the upper one with `√2 √q` | `ncKhintchine_lower_row`, `ncKhintchine_lower_col`, `ncKhintchine_normal`, `pisierXu_khintchine` | Lust-Piquard (1986); Pisier–Xu (2003), Thm 6.1 | `NoncommutativeKhintchine/Lower`, `NoncommutativeKhintchine/Basic` |
@@ -116,8 +134,13 @@ or completes that source.
 - **Noncommutative Khintchine.** Exchangeable pairs (Mackey–Jordan–Chen–Farrell–Tropp) for symmetric
   matrices, then the Hermitian dilation. For `2 < q < 3` their Remark 7.2 needs a variant of their
   Lemma 3.4 that they do not prove; it is proved here (`trace_mean_value`). This is a shorter proof
-  than the original one (Lust-Piquard; Lust-Piquard and Pisier); a proof along the original route is
-  planned in a separate package.
+  than the original one (Lust-Piquard; Lust-Piquard and Pisier), which is followed in the package
+  `VectorValuedHarmonicAnalysis`.
+- **Type 2 and K-convexity.** HNVW II: for even `q` the trace is expanded and compared with the scalar
+  Khintchine inequality by Hölder's inequality; the other exponents by the three lines theorem and
+  duality; type 2 passes to Gaussian sums, which the rotation invariance of the Gaussian measure
+  compares with `L²` norms. Hölder's inequality: Horn's, by determinants of compressions (HNVW I,
+  Appendix D). Complex matrices by realification.
 - **Schatten norms.** The triangle inequality by the Hermitian dilation and von Neumann's convexity
   inequality (Bourin and Zhang, Remark 3.14), the latter by Peierls's argument. Weyl's inequalities
   for singular values by the Courant–Fischer dimension count.
@@ -136,8 +159,10 @@ says otherwise.
 | --- | --- | --- | --- |
 | Osękowski (2012) | the book | Burkholder's inequality, its sharpness, the square function | the two integral formulas, stated there without proof, are proved, one of them with a corrected constant; Theorem 3.34 itself is not formalized, only its function `W⁰` |
 | Burkholder (1988) | Numdam, `AST_1988__157-158__75_0` | Burkholder's function: (1.10), Remark 1.2 | Remark 1.2, stated there without proof, is completed from (1.14) |
-| HNVW I (2016) | the book | Props 4.2.3, 4.2.10; Thms 4.2.5, 4.2.7, 4.2.25, 4.5.6 | in Theorem 4.5.6, Steps 2 and 3 are reordered, and the multipliers lie in the closed unit ball, as in Yaroslavtsev (2018) |
-| HNVW II (2017) | the book | Thms 6.2.2, 6.2.4 | an edge case of Lemma 6.2.3 by continuity |
+| HNVW I (2016) | the book | Props 4.2.3, 4.2.10; Thms 4.2.5, 4.2.7, 4.2.25, 4.5.6; Prop 3.2.10; Appendix D | in Theorem 4.5.6, Steps 2 and 3 are reordered, and the multipliers lie in the closed unit ball, as in Yaroslavtsev (2018); Corollary D.2.4 is completed for zero singular values and holds for all positive exponents |
+| HNVW II (2017) | the book | Thms 6.2.2, 6.2.4; 6.1.13, 6.1.15; Prop 7.1.11, Lemma 7.1.12; Props 7.1.18, 7.4.21, 7.4.22 | an edge case of Lemma 6.2.3 by continuity; the interpolation of type 2 by duality and the three lines theorem instead of the complex interpolation functor, symmetric matrices first, then the dilation; the covariance domination in Proposition 7.4.21 by a reflection |
+| Lust-Piquard–Pisier (1991) | Ark. Mat. 29 | (I.1)–(I.7) | finite matrices; the trace form of (I.3); (I.7) with signs |
+| Pisier (1998) | Numdam, `AST_1998__247__R1_0` | p. 106 | the dual statement for symmetric matrices is implicit there |
 | Borell (1979) | Numdam, `SPS_1979__13__1_0` | `⊗ⁿ K̄`, the affine inequality | the two results that Borell cites (Gross; Beckner) are proved by O'Donnell's arguments |
 | O'Donnell (2014) | the book | two-point inequality and tensorisation (§10.1, Exercises 9.7, 10.1, 10.3) | none |
 | Randrianantoanina (2002) | arXiv:math/0111264 | Thms 3.1, 4.3, Cor 4.5, Rem 4.6 (1) | a rank count for Lemma 3.2; the interpolation is written out |
@@ -146,8 +171,8 @@ says otherwise.
 | Burkholder (1973, 1981) | Ann. Probab. | origin of the good-λ method and of the characterization of UMD | not followed: the proofs are HNVW's |
 
 Cited for a statement or its origin, with another argument here: Maurey (1974–75); Burkholder
-(1984); Kahane (1964); Bonami (1970); Lust-Piquard (1986); Lust-Piquard–Pisier (1991); Pisier–Xu
-(2003), which states its Theorem 6.1 without proof; Pisier (2016), Cor 5.22, proved here on
+(1984); Kahane (1964); Bonami (1970); Tomczak-Jaegermann (1974); Maurey–Pisier (1976);
+Lust-Piquard (1986); Lust-Piquard–Pisier (1991), for the Khintchine inequality; Pisier–Xu (2003), which states its Theorem 6.1 without proof; Pisier (2016), Cor 5.22, proved here on
 Paley–Walsh martingales. Burkholder (1986) is followed through HNVW I. Not used: Bhatia (1997) and
 Carlen (2010), the usual references for the triangle inequality, Weyl's inequalities and Peierls's
 inequality. Not obtained: Gross (1975) and Beckner (1975), which Borell cites.
@@ -225,7 +250,8 @@ and `Quot.sound`).
 | `Martingale/` | martingale transforms, Doob's inequality, Burkholder's function and inequality, Osękowski's method |
 | `UMD/`, `ZigZag/` | UMD constants; zig-zag concave functions |
 | `Hypercontractivity/`, `KahaneKhintchine/` | two-point inequality, heat semigroup, Borell's operator; Kahane–Khintchine |
-| `Schatten/` | singular values, Schatten norms and spaces, Hermitian dilation, trace inequalities, measurability |
+| `Schatten/` | singular values, Schatten norms and spaces (real and complex), Horn's and Hölder's inequalities, block rows and columns, Hermitian dilation, trace inequalities, duality on the sign cube, measurability |
+| `RandomSums/`, `TypeTwo/`, `KConvexity/` | the contraction principle; type 2, the Schatten classes; K-convexity, the Rademacher projection on `L^q (S_q)` |
 | `NoncommutativeKhintchine/`, `Noncommutative/` | the noncommutative Khintchine inequality; conditional expectations, Cuculescu's projections, transforms, interpolation, Schatten UMD |
 
 ## Credits
