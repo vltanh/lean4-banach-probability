@@ -11,19 +11,21 @@ import all BanachProbability.KahaneKhintchine.Basic
 import all BanachProbability.Martingale.Burkholder.Inequality
 import all BanachProbability.Martingale.Doob
 import all BanachProbability.Martingale.Transform
+import all BanachProbability.Noncommutative.CondExp
 import all BanachProbability.Noncommutative.Cuculescu
 import all BanachProbability.Noncommutative.Distribution
 import all BanachProbability.Noncommutative.Duality
 import all BanachProbability.Noncommutative.Interpolation
+import all BanachProbability.Noncommutative.SchattenUMD
+import all BanachProbability.Noncommutative.Transform
+import all BanachProbability.Noncommutative.WeakType
 import all BanachProbability.NoncommutativeKhintchine.Basic
 import all BanachProbability.NoncommutativeKhintchine.Lower
 import all BanachProbability.NoncommutativeKhintchine.Symmetric
-import all BanachProbability.Noncommutative.MatrixCube
-import all BanachProbability.Noncommutative.SchattenUMD
-import all BanachProbability.Noncommutative.WeakType
 import all BanachProbability.Schatten.Basic
 import all BanachProbability.Schatten.Dilation
 import all BanachProbability.Schatten.Holder
+import all BanachProbability.Schatten.Measurable
 import all BanachProbability.Schatten.Space
 import all BanachProbability.Schatten.Spectral
 import all BanachProbability.Schatten.Trace
@@ -51,8 +53,8 @@ Run with `lake env lean scripts/Audit.lean` after `lake build`.
 
 Checks every declaration of the library: the run fails if one depends on an axiom other than
 Lean's standard `propext`, `Classical.choice` and `Quot.sound`. A `sorry` shows up as the axiom
-`sorryAx`. While proofs are still open (`allowSorry := true`) the declarations that depend on
-`sorryAx` are listed instead of failing the run; set `allowSorry` to `false` before publishing.
+`sorryAx`, and fails the run too (`allowSorry := false`); with `allowSorry := true`, for work in
+progress, the declarations that depend on `sorryAx` are listed instead.
 -/
 
 open Lean Elab Command
@@ -60,7 +62,7 @@ open Lean Elab Command
 namespace Audit
 
 /-- Whether declarations may still depend on `sorryAx`. -/
-meta def allowSorry : Bool := true
+meta def allowSorry : Bool := false
 
 /-- Lean's standard axioms. -/
 meta def standardAxioms : List Name := [``propext, ``Classical.choice, ``Quot.sound]

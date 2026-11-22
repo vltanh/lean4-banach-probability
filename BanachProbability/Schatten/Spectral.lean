@@ -10,14 +10,21 @@ public import Mathlib.LinearAlgebra.Matrix.Rank
 
 Functional calculus on real symmetric matrices is Mathlib's `cfc`
 (`Matrix.IsHermitian.instContinuousFunctionalCalculus`); since the spectrum is finite, every
-function is continuous on it. This file collects what the Schatten-valued inequalities use:
+function is continuous on it (`continuousOn_spectrum`), and `f (A)` is symmetric
+(`isHermitian_cfc`; it is `0` when `A` is not symmetric). This file collects what the
+Schatten-valued inequalities use:
 
 * the eigenvalues of `f (A)` are a permutation of the `f (λ_i (A))`
   (`exists_equiv_eigenvalues_cfc_eq`, from the characteristic polynomial), so
-  `tr f (A) = Σ f (λ_i (A))`;
+  `Σ_i F (λ_i (f (A))) = Σ_i F (f (λ_i (A)))` (`sum_comp_eigenvalues_cfc`) and
+  `tr f (A) = Σ f (λ_i (A))` (`trace_cfc_eq_sum`);
+* `f (A) ⪰ 0` when `f ≥ 0` on the spectrum of `A` (`posSemidef_cfc`), and the spectrum of a
+  positive semidefinite matrix is nonnegative (`spectrum_nonneg_of_posSemidef`);
 * singular values of a symmetric matrix are the absolute values of its eigenvalues (since
-  `Aᵀ A = A²`), so `‖A‖_{S_q}^q = Σ |λ_i (A)|^q = tr (A h (A))` with `h (t) = t |t|^{q−2}`
-  (`schattenNorm_rpow_eq_trace`);
+  `Aᵀ A = A²`), so `‖A‖_{S_q}^q = Σ |λ_i (A)|^q` (`schattenNorm_rpow_of_isHermitian`,
+  `schattenNorm_eq_of_isHermitian`), `‖f (A)‖_{S_r}^r = Σ |f (λ_i (A))|^r`
+  (`schattenNorm_cfc_rpow`), `‖A‖_{S_1} = tr A` for `A ⪰ 0` (`schattenNorm_one_of_posSemidef`) and
+  `‖A‖_{S_q}^q = tr (A h (A))` with `h (t) = t |t|^{q−2}` (`schattenNorm_rpow_eq_trace`);
 * spectral projections `spectralProj A S = 1_S (A)`;
 * the counting function `countAbove s A = #{i : s_i (A) > s}` (the distribution function of the
   singular values), with the rank perturbation bound
@@ -56,6 +63,15 @@ section Square
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
+/-- Every function is continuous on the real spectrum of a matrix, which is finite. -/
+theorem continuousOn_spectrum (A : Matrix n n ℝ) (f : ℝ → ℝ) : ContinuousOn f (spectrum ℝ A) :=
+  Matrix.finite_real_spectrum.continuousOn f
+
+/-- A function of a matrix is symmetric (for a non-symmetric matrix it is `0`, the junk value of
+`cfc`). -/
+theorem isHermitian_cfc (f : ℝ → ℝ) (A : Matrix n n ℝ) : (cfc f A).IsHermitian :=
+  cfc_predicate f A
+
 open Polynomial in
 /-- The eigenvalues of a symmetric matrix with characteristic polynomial `∏ (X − g i)` are a
 permutation of `g`. -/
@@ -73,13 +89,40 @@ theorem exists_equiv_eigenvalues_cfc_eq {A : Matrix n n ℝ} (hA : A.IsHermitian
     ∃ e : n ≃ n, ∀ i, hB.eigenvalues (e i) = f (hA.eigenvalues i) :=
   exists_equiv_eigenvalues_eq_of_charpoly_eq hB (by simpa using hA.charpoly_cfc_eq f)
 
-/-- `tr f (A) = Σ f (λ_i (A))`. -/
-private theorem trace_cfc_eq_sum {A : Matrix n n ℝ} (hA : A.IsHermitian) (f : ℝ → ℝ) :
+/-- Sums over the eigenvalues of `f (A)` are sums over the `f (λ_i (A))`:
+`Σ_i F (λ_i (f (A))) = Σ_i F (f (λ_i (A)))`. -/
+theorem sum_comp_eigenvalues_cfc {A : Matrix n n ℝ} (hA : A.IsHermitian) (f : ℝ → ℝ)
+    (hf : (cfc f A).IsHermitian) (F : ℝ → ℝ) :
+    ∑ i, F (hf.eigenvalues i) = ∑ i, F (f (hA.eigenvalues i)) := by
+  obtain ⟨e, he⟩ := exists_equiv_eigenvalues_cfc_eq hA f hf
+  rw [← e.sum_comp]
+  simp [he]
+
+/-- The trace of a function of a symmetric matrix: `tr f (A) = Σ_i f (λ_i (A))`. -/
+theorem trace_cfc_eq_sum {A : Matrix n n ℝ} (hA : A.IsHermitian) (f : ℝ → ℝ) :
     (cfc f A).trace = ∑ i, f (hA.eigenvalues i) := by
-  have hB : (cfc f A).IsHermitian := cfc_predicate f A
+  have hB : (cfc f A).IsHermitian := isHermitian_cfc f A
   obtain ⟨e, he⟩ := exists_equiv_eigenvalues_cfc_eq hA f hB
   rw [hB.trace_eq_sum_eigenvalues, ← e.sum_comp]
   simp [he]
+
+/-- The spectrum of a positive semidefinite matrix is nonnegative. -/
+theorem spectrum_nonneg_of_posSemidef {A : Matrix n n ℝ} (hA : A.PosSemidef) {t : ℝ}
+    (ht : t ∈ spectrum ℝ A) : 0 ≤ t := by
+  rw [hA.isHermitian.spectrum_real_eq_range_eigenvalues] at ht
+  obtain ⟨i, rfl⟩ := ht
+  exact hA.eigenvalues_nonneg i
+
+/-- A function of a matrix that is nonnegative on its spectrum is positive semidefinite:
+`f (A) = h (A)ᵀ h (A)` with `h = √f`. -/
+theorem posSemidef_cfc {A : Matrix n n ℝ} {f : ℝ → ℝ} (hf : ∀ t ∈ spectrum ℝ A, 0 ≤ f t) :
+    (cfc f A).PosSemidef := by
+  have hC := isHermitian_cfc (fun t => Real.sqrt (f t)) A
+  have hCC : cfc (fun t => Real.sqrt (f t)) A * cfc (fun t => Real.sqrt (f t)) A = cfc f A := by
+    rw [← cfc_mul _ _ A (continuousOn_spectrum _ _) (continuousOn_spectrum _ _)]
+    exact cfc_congr fun t ht => Real.mul_self_sqrt (hf t ht)
+  have h := Matrix.posSemidef_conjTranspose_mul_self (cfc (fun t => Real.sqrt (f t)) A)
+  rwa [hC.eq, hCC] at h
 
 /-- The singular values of a symmetric matrix are the absolute values of its eigenvalues, up to
 a permutation. -/
@@ -87,8 +130,7 @@ theorem exists_equiv_singularValue_eq_abs_eigenvalues {A : Matrix n n ℝ} (hA :
     ∃ e : n ≃ n, ∀ i, singularValue A (e i) = |hA.eigenvalues i| := by
   -- `Aᵀ A = A² = (t ↦ t²) (A)`, whose eigenvalues are a permutation of the `λ_i²`.
   have hsq : Aᴴ * A = cfc (fun t : ℝ => t ^ 2) A := by
-    have h := cfc_pow (id : ℝ → ℝ) 2 A (Matrix.finite_real_spectrum.continuousOn _)
-      hA.isSelfAdjoint
+    have h := cfc_pow (id : ℝ → ℝ) 2 A (continuousOn_spectrum _ _) hA.isSelfAdjoint
     rw [cfc_id ℝ A hA.isSelfAdjoint] at h
     rw [hA.eq, ← sq]
     exact h.symm
@@ -105,14 +147,40 @@ theorem schattenNorm_rpow_of_isHermitian {A : Matrix n n ℝ} (hA : A.IsHermitia
   rw [h, ← e.sum_comp]
   simp [he]
 
+/-- The Schatten `q`-norm of a symmetric matrix from its eigenvalues:
+`‖A‖_{S_q} = (Σ_i |λ_i|^q)^{1/q}`, `q > 0`. -/
+theorem schattenNorm_eq_of_isHermitian {A : Matrix n n ℝ} (hA : A.IsHermitian) {q : ℝ}
+    (hq : 0 < q) :
+    schattenNorm (ENNReal.ofReal q) A = (∑ i, |hA.eigenvalues i| ^ q) ^ (1 / q) := by
+  rw [← schattenNorm_rpow_of_isHermitian hA hq, ← Real.rpow_mul (schattenNorm_nonneg _ _),
+    mul_one_div_cancel hq.ne', Real.rpow_one]
+
+/-- `‖f (A)‖_{S_r}^r = Σ_i |f (λ_i (A))|^r` for a symmetric `A` and `r > 0`. -/
+theorem schattenNorm_cfc_rpow {A : Matrix n n ℝ} (hA : A.IsHermitian) (f : ℝ → ℝ) {r : ℝ}
+    (hr : 0 < r) :
+    schattenNorm (ENNReal.ofReal r) (cfc f A) ^ r = ∑ i, |f (hA.eigenvalues i)| ^ r := by
+  have hB := isHermitian_cfc f A
+  rw [schattenNorm_rpow_of_isHermitian hB hr, sum_comp_eigenvalues_cfc hA f hB fun t => |t| ^ r]
+
+/-- The `S_1` norm of a positive semidefinite matrix is its trace. -/
+theorem schattenNorm_one_of_posSemidef {W : Matrix n n ℝ} (hW : W.PosSemidef) :
+    schattenNorm (ENNReal.ofReal 1) W = W.trace := by
+  have h := schattenNorm_rpow_of_isHermitian hW.isHermitian one_pos
+  have h2 := trace_cfc_eq_sum hW.isHermitian id
+  rw [cfc_id ℝ W (show IsSelfAdjoint W from hW.isHermitian)] at h2
+  rw [Real.rpow_one] at h
+  rw [h, h2]
+  exact Finset.sum_congr rfl fun i _ => by
+    rw [Real.rpow_one, abs_of_nonneg (hW.eigenvalues_nonneg i), id]
+
 /-- `‖A‖_{S_q}^q = tr (A h (A))` with `h (t) = t |t|^{q−2}`, for a symmetric `A`. -/
 theorem schattenNorm_rpow_eq_trace {A : Matrix n n ℝ} (hA : A.IsHermitian) {q : ℝ} (hq : 0 < q) :
     schattenNorm (ENNReal.ofReal q) A ^ q = (A * cfc (fun t : ℝ => t * |t| ^ (q - 2)) A).trace := by
   -- `A h (A) = (t ↦ t · h t) (A)` and `t · t |t|^{q−2} = |t|^q` (also at `t = 0`, as `q > 0`).
   have hmul : A * cfc (fun t : ℝ => t * |t| ^ (q - 2)) A =
       cfc (fun t : ℝ => t * (t * |t| ^ (q - 2))) A := by
-    have h := cfc_mul id (fun t : ℝ => t * |t| ^ (q - 2)) A
-      (Matrix.finite_real_spectrum.continuousOn _) (Matrix.finite_real_spectrum.continuousOn _)
+    have h := cfc_mul id (fun t : ℝ => t * |t| ^ (q - 2)) A (continuousOn_spectrum _ _)
+      (continuousOn_spectrum _ _)
     rw [cfc_id ℝ A hA.isSelfAdjoint] at h
     exact h.symm
   rw [hmul, trace_cfc_eq_sum hA, schattenNorm_rpow_of_isHermitian hA hq]
@@ -128,27 +196,26 @@ theorem schattenNorm_rpow_eq_trace {A : Matrix n n ℝ} (hA : A.IsHermitian) {q 
 noncomputable def spectralProj (A : Matrix n n ℝ) (S : Set ℝ) : Matrix n n ℝ :=
   cfc (S.indicator (1 : ℝ → ℝ)) A
 
--- `hA` is not used: `cfc` is multiplicative for every matrix.
-set_option linter.unusedVariables false in
-theorem spectralProj_mul_self {A : Matrix n n ℝ} (hA : A.IsHermitian) (S : Set ℝ) :
+theorem spectralProj_mul_self (A : Matrix n n ℝ) (S : Set ℝ) :
     spectralProj A S * spectralProj A S = spectralProj A S := by
-  rw [spectralProj, ← cfc_mul _ _ A (Matrix.finite_real_spectrum.continuousOn _)
-    (Matrix.finite_real_spectrum.continuousOn _)]
+  rw [spectralProj, ← cfc_mul _ _ A (continuousOn_spectrum _ _) (continuousOn_spectrum _ _)]
   congr 1
   ext t
   by_cases ht : t ∈ S <;> simp [ht]
 
--- `hA` is not used: a real `cfc` is always self-adjoint.
-set_option linter.unusedVariables false in
-theorem spectralProj_transpose {A : Matrix n n ℝ} (hA : A.IsHermitian) (S : Set ℝ) :
+theorem spectralProj_transpose (A : Matrix n n ℝ) (S : Set ℝ) :
     (spectralProj A S)ᵀ = spectralProj A S := by
-  have h : (spectralProj A S).IsHermitian := cfc_predicate _ A
+  have h : (spectralProj A S).IsHermitian := isHermitian_cfc _ A
   rw [← Matrix.conjTranspose_eq_transpose_of_trivial, h.eq]
 
-theorem commute_spectralProj {A : Matrix n n ℝ} (hA : A.IsHermitian) (S : Set ℝ) :
-    Commute A (spectralProj A S) := by
-  have h := cfc_commute_cfc (id : ℝ → ℝ) (S.indicator (1 : ℝ → ℝ)) A
-  rwa [cfc_id ℝ A hA.isSelfAdjoint] at h
+/-- A matrix commutes with its spectral projections: for a symmetric matrix by the functional
+calculus, and otherwise the spectral projection is `0` (the junk value of `cfc`). -/
+theorem commute_spectralProj (A : Matrix n n ℝ) (S : Set ℝ) : Commute A (spectralProj A S) := by
+  by_cases hA : A.IsHermitian
+  · have h := cfc_commute_cfc (id : ℝ → ℝ) (S.indicator (1 : ℝ → ℝ)) A
+    rwa [cfc_id ℝ A hA.isSelfAdjoint] at h
+  · rw [spectralProj, cfc_apply_of_not_predicate A (show ¬ IsSelfAdjoint A from hA)]
+    exact Commute.zero_right A
 
 open scoped Classical in
 theorem trace_spectralProj {A : Matrix n n ℝ} (hA : A.IsHermitian) (S : Set ℝ) :
@@ -179,26 +246,18 @@ theorem trace_mul_nonneg_of_posSemidef {A B : Matrix n n ℝ} (hA : A.PosSemidef
     (hB : B.PosSemidef) : 0 ≤ (A * B).trace := by
   classical
   set C := cfc Real.sqrt B
-  have hC : C.IsHermitian := cfc_predicate _ B
+  have hC : C.IsHermitian := isHermitian_cfc _ B
   have hCC : C * C = B := by
-    rw [← cfc_mul _ _ B (Matrix.finite_real_spectrum.continuousOn _)
-      (Matrix.finite_real_spectrum.continuousOn _)]
+    rw [← cfc_mul _ _ B (continuousOn_spectrum _ _) (continuousOn_spectrum _ _)]
     conv_rhs => rw [← cfc_id ℝ B hB.isHermitian.isSelfAdjoint]
-    refine cfc_congr fun t ht => ?_
-    rw [hB.isHermitian.spectrum_real_eq_range_eigenvalues] at ht
-    obtain ⟨i, rfl⟩ := ht
-    refine Real.mul_self_sqrt ?_
-    rw [hB.isHermitian.eigenvalues_eq]
-    exact hB.dotProduct_mulVec_nonneg _
+    exact cfc_congr fun t ht => Real.mul_self_sqrt (spectrum_nonneg_of_posSemidef hB ht)
   rw [← hCC, ← mul_assoc, Matrix.trace_mul_cycle]
   have := hA.conjTranspose_mul_mul_same C
   rw [hC.eq] at this
   exact this.trace_nonneg
 
--- `hA` is not used: `tr ((c − A) B) ≥ 0` is all the proof needs.
-set_option linter.unusedVariables false in
-/-- `tr (A B) ≤ c tr B` for `0 ⪯ A ⪯ c` and `B ⪰ 0`. -/
-theorem trace_mul_le_of_le_smul_one {A B : Matrix n n ℝ} {c : ℝ} (hA : A.PosSemidef)
+/-- `tr (A B) ≤ c tr B` for `A ⪯ c` and `B ⪰ 0`. -/
+theorem trace_mul_le_of_le_smul_one {A B : Matrix n n ℝ} {c : ℝ}
     (hAc : (c • (1 : Matrix n n ℝ) - A).PosSemidef) (hB : B.PosSemidef) :
     (A * B).trace ≤ c * B.trace := by
   have h := trace_mul_nonneg_of_posSemidef hAc hB

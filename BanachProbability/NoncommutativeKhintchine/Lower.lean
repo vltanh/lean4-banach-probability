@@ -3,7 +3,6 @@ module
 public import BanachProbability.Schatten.Holder
 public import BanachProbability.SignCube.LpSeminorm
 public import Mathlib.Algebra.Order.Star.Real
-public import Mathlib.Analysis.MeanInequalitiesPow
 
 /-!
 # The lower noncommutative Khintchine inequality
@@ -21,8 +20,9 @@ for `t ↦ t^{q/2}`, then the convexity of the `S_{q/2}` norm on positive semide
 `E Sᵀ S = Σ_i x_iᵀ x_i` by the orthonormality of the signs. The row version follows from the
 column version applied to the `x_iᵀ`, by `‖Sᵀ‖_{S_q} = ‖S‖_{S_q}`.
 
-The elementary facts about the average over the sign cube that the proof uses (orthonormality of
-the signs, flip invariance, Jensen's inequality) are proved here as private lemmas.
+The elementary facts about the average over the sign cube that the proof uses are those of
+`BanachProbability.SignCube.Basic` (orthonormality of the signs, `avg_coin_mul_coin`) and
+`BanachProbability.SignCube.LpSeminorm` (Jensen's inequality, `avg_le_rpow_avg_rpow`).
 -/
 
 @[expose] public section
@@ -34,51 +34,6 @@ namespace BanachProbability
 open SignCube
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
-
-/-! ### Elementary facts about the average over the sign cube -/
-
-section Cube
-
-variable {N : ℕ}
-
-private theorem avg_const' (c : ℝ) : avg (fun _ : Fin N → Bool => c) = c := by
-  simp only [avg, Finset.sum_const, Finset.card_univ, Fintype.card_fun, Fintype.card_bool,
-    Fintype.card_fin, nsmul_eq_mul]
-  push_cast
-  field_simp
-
-/-- Flip invariance of the uniform measure on the cube. -/
-private theorem avg_comp_flip (k : Fin N) (g : (Fin N → Bool) → ℝ) :
-    avg (fun ε => g (SignCube.flip k ε)) = avg g := by
-  unfold avg
-  congr 1
-  exact Equiv.sum_comp ((flip_involutive k).toPerm _) g
-
-/-- The signs are orthonormal: `E [ε_i ε_j] = δ_{ij}`. -/
-private theorem avg_coin_mul_coin (i j : Fin N) :
-    avg (fun ε => coin (ε i) * coin (ε j)) = if i = j then 1 else 0 := by
-  split_ifs with h
-  · subst h
-    simp only [coin_mul_self]
-    exact avg_const' 1
-  · have h1 := avg_comp_flip i (fun ε => coin (ε i) * coin (ε j))
-    simp only [flip_apply_self, flip_apply_of_ne (Ne.symm h), coin_not] at h1
-    have h2 := avg_const_mul (-1) (fun ε => coin (ε i) * coin (ε j))
-    simp only [neg_one_mul, ← neg_mul] at h2
-    linarith
-
-/-- Jensen's inequality for the average: `avg X ≤ (avg X^p)^{1/p}` for `X ≥ 0`, `p ≥ 1`. -/
-private theorem avg_le_avg_rpow_rpow {X : (Fin N → Bool) → ℝ} (hX : ∀ ε, 0 ≤ X ε) {p : ℝ}
-    (hp : 1 ≤ p) : avg X ≤ avg (fun ε => X ε ^ p) ^ (1 / p) := by
-  have h := Real.arith_mean_le_rpow_mean Finset.univ (fun _ => ((2 : ℝ) ^ N)⁻¹) X
-    (fun _ _ => by positivity) (by
-      simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fun, Fintype.card_bool,
-        Fintype.card_fin, nsmul_eq_mul]
-      push_cast
-      field_simp) (fun ε _ => hX ε) hp
-  simpa only [avg, div_eq_inv_mul, Finset.mul_sum] using h
-
-end Cube
 
 /-- **Lower noncommutative Khintchine inequality** (column square function):
 `‖Σ_i x_iᵀ x_i‖_{S_{q/2}}^{1/2} ≤ (E ‖Σ_i ε_i x_i‖_{S_q}^q)^{1/q}`, `q ≥ 2`. -/
@@ -127,7 +82,7 @@ theorem ncKhintchine_lower_col {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (x : Fin k →
         abs_of_pos (by positivity), div_eq_inv_mul]
   -- Jensen's inequality for `t ↦ t^{q/2}`
   have h2 : avg (fun ε => schattenNorm (ENNReal.ofReal q) (Y ε) ^ 2) ≤ M ^ (2 / q) := by
-    have := avg_le_avg_rpow_rpow (X := fun ε => schattenNorm (ENNReal.ofReal q) (Y ε) ^ 2)
+    have := avg_le_rpow_avg_rpow (X := fun ε => schattenNorm (ENNReal.ofReal q) (Y ε) ^ 2)
       (fun ε => by positivity) hr
     convert this using 2
     · rw [hM]

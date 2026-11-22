@@ -375,10 +375,8 @@ theorem goodLambda {p u : ℝ} (hp : 0 < p) (hu0 : 0 ≤ u)
   rw [← ENNReal.ofReal_mul hu0, ENNReal.ofReal_le_ofReal_iff
     (mul_nonneg hu0 (lpNorm_nonneg (fun x => norm_nonneg x) p _))] at hUMD
   have hpow : ∀ Y : (Fin N → Bool) → X,
-      SignCube.lpNorm (fun x => ‖x‖) p Y ^ p = avg fun ε => ‖Y ε‖ ^ p := by
-    intro Y
-    rw [SignCube.lpNorm, ← Real.rpow_mul (avg_nonneg fun ε => Real.rpow_nonneg (norm_nonneg _) _),
-      one_div_mul_cancel hp.ne', Real.rpow_one]
+      SignCube.lpNorm (fun x => ‖x‖) p Y ^ p = avg fun ε => ‖Y ε‖ ^ p :=
+    lpNorm_rpow (fun x => norm_nonneg x) hp
   have hTH : (avg fun ε => ‖paleyWalsh (fun k ε => σ k ε • h k ε) n ε‖ ^ p) ≤
       u ^ p * avg fun ε => ‖paleyWalsh h n ε‖ ^ p := by
     rw [← hpow, ← hpow, ← Real.mul_rpow hu0 (lpNorm_nonneg (fun x => norm_nonneg x) p _)]

@@ -765,12 +765,12 @@ where they vanish (`fpa_exists_dyadic_laws`, laws `μ'_m` with `μ'_m {ω} → �
 martingale correction of Remark 2.18 under `μ'_m`: `Y'_k = Y_k − Σ_{j<k} E' [Y_{j+1} − Y_j | ℱ_j]`.
 At a point of positive `μ`-mass, the corrections tend to `E [Y_{j+1} − Y_j | ℱ_j] = 0`
 (`condExp_eq_atom_average`), so `Y'_k → Y_k` on the support of `μ`, and both `L^p` norms, finite
-sums, converge; `m` is taken large. The predictability of `φ` is not needed for this step. -/
+sums, converge; `m` is taken large. The multipliers `φ` are arbitrary: the perturbation does not
+involve them. -/
 theorem exists_hasDyadicTransitions_approx_gen {𝕜 : Type} [RCLike 𝕜] [NormedSpace 𝕜 X]
     [IsScalarTower ℝ 𝕜 X] {Ω : Type} [Finite Ω] {mΩ : MeasurableSpace Ω}
     [DiscreteMeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ] {ℱ : Filtration ℕ mΩ}
     {Y : ℕ → Ω → X} {φ : ℕ → Ω → 𝕜} (hY : Martingale Y ℱ μ) (hY0 : ∀ ω, Y 0 ω = 0)
-    (hφm : ∀ k, StronglyMeasurable[ℱ k] (φ (k + 1)))
     {p : ℝ} (hp : 1 ≤ p) (n : ℕ) {η : ℝ} (hη : 0 < η) :
     ∃ (μ' : Measure Ω) (_ : IsProbabilityMeasure μ') (Y' : ℕ → Ω → X),
       HasDyadicTransitions μ' ℱ n ∧ Martingale Y' ℱ μ' ∧ (∀ ω, Y' 0 ω = 0) ∧
@@ -779,8 +779,6 @@ theorem exists_hasDyadicTransitions_approx_gen {𝕜 : Type} [RCLike 𝕜] [Norm
       eLpNorm (fun ω => ‖martingaleTransform φ Y n ω‖) (ENNReal.ofReal p) μ ≤
         eLpNorm (fun ω => ‖martingaleTransform φ Y' n ω‖) (ENNReal.ofReal p) μ' +
           ENNReal.ofReal η := by
-  -- the predictability of the multipliers is not used: the perturbation does not involve them
-  have _ := hφm
   have := Fintype.ofFinite Ω
   have hp0 : 0 < p := by linarith
   -- the dyadic laws
@@ -822,11 +820,11 @@ finite space, with dyadic transition probabilities for `ℱ` up to time `n`, and
 for `ℱ` and `μ'` started at `0` (the martingale correction of Remark 2.18 of `Y` under `μ'`,
 `Y'_k = Y_k − Σ_{j<k} E' [Y_{j+1} − Y_j | ℱ_j]`), such that
 `‖Y'_n‖_{L^p (μ')} ≤ ‖Y_n‖_{L^p (μ)} + η` and `‖(σ • Y)_n‖_{L^p (μ)} ≤ ‖(σ • Y')_n‖_{L^p (μ')} + η`.
-The case of signs of `exists_hasDyadicTransitions_approx_gen`. -/
+The case of real multipliers (signs, in the applications) of
+`exists_hasDyadicTransitions_approx_gen`. -/
 theorem exists_hasDyadicTransitions_approx {Ω : Type} [Finite Ω] {mΩ : MeasurableSpace Ω}
     [DiscreteMeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ] {ℱ : Filtration ℕ mΩ}
     {Y : ℕ → Ω → X} {σ : ℕ → Ω → ℝ} (hY : Martingale Y ℱ μ) (hY0 : ∀ ω, Y 0 ω = 0)
-    (hσ : ∀ n ω, σ n ω = 1 ∨ σ n ω = -1) (hσm : ∀ k, StronglyMeasurable[ℱ k] (σ (k + 1)))
     {p : ℝ} (hp : 1 ≤ p) (n : ℕ) {η : ℝ} (hη : 0 < η) :
     ∃ (μ' : Measure Ω) (_ : IsProbabilityMeasure μ') (Y' : ℕ → Ω → X),
       HasDyadicTransitions μ' ℱ n ∧ Martingale Y' ℱ μ' ∧ (∀ ω, Y' 0 ω = 0) ∧
@@ -835,8 +833,6 @@ theorem exists_hasDyadicTransitions_approx {Ω : Type} [Finite Ω] {mΩ : Measur
       eLpNorm (fun ω => ‖martingaleTransform σ Y n ω‖) (ENNReal.ofReal p) μ ≤
         eLpNorm (fun ω => ‖martingaleTransform σ Y' n ω‖) (ENNReal.ofReal p) μ' +
           ENNReal.ofReal η := by
-  -- the values of the signs are not used
-  have _ := hσ
-  exact exists_hasDyadicTransitions_approx_gen (𝕜 := ℝ) hY hY0 hσm hp n hη
+  exact exists_hasDyadicTransitions_approx_gen (𝕜 := ℝ) hY hY0 hp n hη
 
 end BanachProbability

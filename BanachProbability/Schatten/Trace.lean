@@ -286,10 +286,6 @@ theorem mul_sub_le_half_sq_mul_add {q : ℝ} (hq : 3 ≤ q) (a b : ℝ) :
   calc _ ≤ _ := h
     _ = _ := by ring
 
-private theorem continuousOn_spectrum (P : Matrix n n ℝ) (f : ℝ → ℝ) :
-    ContinuousOn f (spectrum ℝ P) :=
-  Matrix.finite_real_spectrum.continuousOn f
-
 /-- The expansion behind the generalized Klein inequality, with a third factor on the `P` side:
 `tr ((f₁ (P) − g₁ (Q))(f₂ (P) − g₂ (Q)) w (P)) =
 Σ_{j,k} c_{jk} (f₁ (λ_j) − g₁ (μ_k))(f₂ (λ_j) − g₂ (μ_k)) w (λ_j)`. -/

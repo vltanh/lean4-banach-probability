@@ -12,7 +12,10 @@ For a function `nrm : E → ℝ` (a norm or seminorm of the values) and `p > 0`,
 `SignCube.lpNorm nrm p X = (E nrm (X ε)^p)^{1/p}` is the `L^p` norm of a random variable `X` on
 the sign cube. For a seminorm `N` on a real vector space and `p ≥ 1` it is a seminorm on
 `(Fin n → Bool) → E` (Minkowski's inequality), `lpSeminorm N p`; it is nondecreasing in `p`
-(the power-mean inequality).
+(the power-mean inequality, `lpNorm_mono_exponent`). Also: `‖X‖_p^p = E nrm (X ε)^p`
+(`lpNorm_rpow`), the norm of a constant (`lpNorm_const`), the splitting along the first sign
+(`lpNorm_succ`), and Jensen's inequality `E X ≤ (E X^p)^{1/p}` for `X ≥ 0`, `p ≥ 1`
+(`avg_le_rpow_avg_rpow`).
 -/
 
 @[expose] public section
@@ -29,6 +32,37 @@ protected noncomputable def lpNorm (nrm : E → ℝ) (p : ℝ) (X : (Fin N → B
 theorem lpNorm_nonneg {nrm : E → ℝ} (hnrm : ∀ x, 0 ≤ nrm x) (p : ℝ) (X : (Fin N → Bool) → E) :
     0 ≤ SignCube.lpNorm nrm p X :=
   Real.rpow_nonneg (avg_nonneg fun _ => Real.rpow_nonneg (hnrm _) p) _
+
+/-- The `p`-th power of the `L^p` norm is the average of the `p`-th powers:
+`‖X‖_p^p = E nrm (X ε)^p`. -/
+theorem lpNorm_rpow {nrm : E → ℝ} (hnrm : ∀ x, 0 ≤ nrm x) {p : ℝ} (hp : 0 < p)
+    (X : (Fin N → Bool) → E) : SignCube.lpNorm nrm p X ^ p = avg (fun ε => nrm (X ε) ^ p) := by
+  rw [SignCube.lpNorm, one_div,
+    Real.rpow_inv_rpow (avg_nonneg fun _ => Real.rpow_nonneg (hnrm _) _) hp.ne']
+
+/-- The `L^p` norm of a constant `c` is `nrm c`. -/
+theorem lpNorm_const {nrm : E → ℝ} {c : E} (hc : 0 ≤ nrm c) {p : ℝ} (hp : 0 < p) :
+    SignCube.lpNorm nrm p (fun _ : Fin N → Bool => c) = nrm c := by
+  rw [SignCube.lpNorm, avg_const, one_div, Real.rpow_rpow_inv hc hp.ne']
+
+/-- Splitting off the first sign: `‖X‖_p = ((‖X (1, ·)‖_p^p + ‖X (−1, ·)‖_p^p) / 2)^{1/p}`. -/
+theorem lpNorm_succ {nrm : E → ℝ} (hnrm : ∀ x, 0 ≤ nrm x) {p : ℝ} (hp : 0 < p)
+    (X : (Fin (N + 1) → Bool) → E) :
+    SignCube.lpNorm nrm p X = ((SignCube.lpNorm nrm p (fun ε => X (Fin.cons true ε)) ^ p +
+      SignCube.lpNorm nrm p (fun ε => X (Fin.cons false ε)) ^ p) / 2) ^ (1 / p) := by
+  rw [lpNorm_rpow hnrm hp, lpNorm_rpow hnrm hp, SignCube.lpNorm, avg_succ]
+
+/-- Jensen's inequality (the power-mean inequality) for the average: `E X ≤ (E X^p)^{1/p}` for
+`X ≥ 0` and `p ≥ 1`. -/
+theorem avg_le_rpow_avg_rpow {X : (Fin N → Bool) → ℝ} (hX : ∀ ε, 0 ≤ X ε) {p : ℝ}
+    (hp : 1 ≤ p) : avg X ≤ avg (fun ε => X ε ^ p) ^ (1 / p) := by
+  have h := Real.arith_mean_le_rpow_mean Finset.univ (fun _ => ((2 : ℝ) ^ N)⁻¹) X
+    (fun _ _ => by positivity) (by
+      simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fun, Fintype.card_bool,
+        Fintype.card_fin, nsmul_eq_mul]
+      push_cast
+      field_simp) (fun ε _ => hX ε) hp
+  simpa only [avg, div_eq_inv_mul, Finset.mul_sum] using h
 
 /-- The `L^p` norm as a normalised `ℓ^p` sum: `(Σ_ε nrm (X ε)^p)^{1/p} / (2^N)^{1/p}`. -/
 theorem scb_lpNorm_eq_sum {nrm : E → ℝ} (hnrm : ∀ x, 0 ≤ nrm x) (p : ℝ)

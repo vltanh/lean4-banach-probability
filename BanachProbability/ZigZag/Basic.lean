@@ -170,13 +170,6 @@ end BernsteinDoetsch
 
 section Cube
 
-/-- `E ‖F‖^p = ‖F‖_p^p`. -/
-private theorem zzg_avg_rpow {E : Type*} [SeminormedAddCommGroup E] {N : ℕ} {p : ℝ} (hp : 0 < p)
-    (F : (Fin N → Bool) → E) :
-    avg (fun ε => ‖F ε‖ ^ p) = SignCube.lpNorm (fun x => ‖x‖) p F ^ p := by
-  rw [SignCube.lpNorm, ← Real.rpow_mul (avg_nonneg fun _ => Real.rpow_nonneg (norm_nonneg _) _),
-    one_div_mul_cancel hp.ne', Real.rpow_one]
-
 variable {E : Type*} [AddCommGroup E] [Module ℝ E]
 
 /-- Midpoint concavity at `0` of a concave function: `g v + g (−v) ≤ 2 g 0`. -/
@@ -234,7 +227,8 @@ private theorem zzg_ofReal_lpNorm_le {F : Type*} [SeminormedAddCommGroup F] {N :
     ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p g) ≤
       ENNReal.ofReal β * ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p f) := by
   have h1 := avg_mono fun ε => hU (f ε) (g ε)
-  rw [avg_sub, avg_const_mul, zzg_avg_rpow hp, zzg_avg_rpow hp] at h1
+  rw [avg_sub, avg_const_mul, ← lpNorm_rpow (fun x : F => norm_nonneg x) hp,
+    ← lpNorm_rpow (fun x : F => norm_nonneg x) hp] at h1
   have hf0 := lpNorm_nonneg (fun x : F => norm_nonneg x) p f
   have hg0 := lpNorm_nonneg (fun x : F => norm_nonneg x) p g
   have h2 : SignCube.lpNorm (fun x => ‖x‖) p g ^ p ≤
@@ -614,7 +608,8 @@ private theorem zzgRep_le {p β u : ℝ} (hp : 1 < p) (hu : 0 ≤ u) (huβ : u <
     have e : (fun ε => x + paleyWalsh ξ N ε + -x) = paleyWalsh ξ N := funext fun ε => by abel
     rwa [e, umdd_lpNorm_of_norm_eq (norm_nonneg x) (fun _ => norm_neg x) hp0] at h
   have hyg := zzg_lpNorm_const_add_le hp.le y (paleyWalsh (fun k ε => a k ε • ξ k ε) N)
-  rw [avg_sub, avg_const_mul, zzg_avg_rpow hp0, zzg_avg_rpow hp0]
+  rw [avg_sub, avg_const_mul, ← lpNorm_rpow (fun x : X => norm_nonneg x) hp0,
+    ← lpNorm_rpow (fun x : X => norm_nonneg x) hp0]
   have ht := lpNorm_nonneg (fun x : X => norm_nonneg x) p (fun ε => x + paleyWalsh ξ N ε)
   have h1 : SignCube.lpNorm (fun x => ‖x‖) p
         (fun ε => y + paleyWalsh (fun k ε => a k ε • ξ k ε) N ε) ≤
@@ -631,7 +626,8 @@ private theorem zzgRep_zero_le {p β u : ℝ} (hp : 1 < p) (hu : 0 ≤ u) (huβ 
   obtain ⟨ξ, a, hξ, ha, ha1, rfl⟩ := h
   have hp0 : 0 < p := by linarith
   simp only [zero_add]
-  rw [avg_sub, avg_const_mul, zzg_avg_rpow hp0, zzg_avg_rpow hp0]
+  rw [avg_sub, avg_const_mul, ← lpNorm_rpow (fun x : X => norm_nonneg x) hp0,
+    ← lpNorm_rpow (fun x : X => norm_nonneg x) hp0]
   have hf0 := lpNorm_nonneg (fun x : X => norm_nonneg x) p (paleyWalsh ξ N)
   have hg := zzg_lpNorm_transform_le hp.le hu hD hξ ha ha1 N
   have h1 := Real.rpow_le_rpow (lpNorm_nonneg (fun x : X => norm_nonneg x) p _) hg hp0.le

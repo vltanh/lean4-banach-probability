@@ -12,15 +12,11 @@ On the sign cube `Fin N → Bool` with the filtration `ℱ_k = σ (ε₀, …, �
 * `paleyWalsh ξ n = Σ_{k<n} ε_k ξ_k`, the Paley–Walsh martingale of a predictable family `ξ`;
 * `condAvg k f`: the conditional expectation `E [f | ℱ_k]`, the average of `f` over the signs
   `ε_j`, `j ≥ k`;
-* `IsCubeMartingale M`: an adapted process with `E [M (n + 1) | ℱ_n] = M n`;
-* `SignCube.IsStoppingTime τ`: the event `{τ ≤ n}` depends only on the signs `ε_j`, `j < n`;
-* `transform σ f`: the martingale transform `E [f | ℱ_0] + Σ_k σ_k (E [f | ℱ_{k+1}] − E [f | ℱ_k])`
-  of the final value `f`.
+* `IsCubeMartingale M`: an adapted process with `E [M (n + 1) | ℱ_n] = M n`.
 
 Every martingale on the cube is a Paley–Walsh martingale started at its constant initial value
-(`exists_paleyWalsh_of_isCubeMartingale`); a Paley–Walsh martingale stopped at a stopping time is
-the Paley–Walsh martingale of a predictable family (`paleyWalsh_stopped`), and its jumps
-`‖ξ_k‖` are predictable (`norm_paleyWalsh_succ_sub`).
+(`exists_paleyWalsh_of_isCubeMartingale`), and its jumps `‖ξ_k‖` are predictable
+(`norm_paleyWalsh_succ_sub`).
 -/
 
 @[expose] public section
@@ -38,11 +34,6 @@ def IsPredictable (ξ : Fin N → (Fin N → Bool) → E) : Prop :=
 `j < n`. -/
 def IsAdapted (M : ℕ → (Fin N → Bool) → E) : Prop :=
   ∀ (n : ℕ) (ε ε' : Fin N → Bool), (∀ j : Fin N, j.val < n → ε j = ε' j) → M n ε = M n ε'
-
-/-- A time `τ : (Fin N → Bool) → ℕ` is a stopping time: whether `τ ≤ n` depends only on the signs
-`ε j` with `j < n`. -/
-protected def IsStoppingTime (τ : (Fin N → Bool) → ℕ) : Prop :=
-  ∀ (n : ℕ) (ε ε' : Fin N → Bool), (∀ j : Fin N, j.val < n → ε j = ε' j) → (τ ε ≤ n ↔ τ ε' ≤ n)
 
 /-- The sign vector that agrees with `ε` on the coordinates `j < k` and with `ε'` on the others. -/
 def splice (k : ℕ) (ε ε' : Fin N → Bool) : Fin N → Bool :=
@@ -125,12 +116,6 @@ noncomputable def paleyWalsh (ξ : Fin N → (Fin N → Bool) → E) (n : ℕ) (
 noncomputable def condAvg (k : ℕ) (f : (Fin N → Bool) → E) (ε : Fin N → Bool) : E :=
   ((2 : ℝ) ^ N)⁻¹ • ∑ ε', f (splice k ε ε')
 
-/-- The martingale transform of `f` by a family `σ` of scalars (predictable signs in the
-applications): `T_σ f = E [f | ℱ_0] + Σ_k σ_k (E [f | ℱ_{k+1}] − E [f | ℱ_k])`. -/
-noncomputable def transform (σ : Fin N → (Fin N → Bool) → ℝ) (f : (Fin N → Bool) → E) :
-    (Fin N → Bool) → E :=
-  fun ε => condAvg 0 f ε + ∑ k : Fin N, σ k ε • (condAvg (k.val + 1) f ε - condAvg k.val f ε)
-
 /-- A martingale on the sign cube for the filtration `ℱ_n = σ (ε₀, …, ε_{n−1})`. -/
 def IsCubeMartingale (M : ℕ → (Fin N → Bool) → E) : Prop :=
   IsAdapted M ∧ ∀ n, condAvg n (M (n + 1)) = M n
@@ -177,19 +162,7 @@ theorem map_paleyWalsh {F : Type*} [AddCommGroup F] [Module ℝ F] (T : E →ₗ
     T (paleyWalsh ξ n ε) = paleyWalsh (fun k ε => T (ξ k ε)) n ε := by
   simp only [paleyWalsh, map_sum, map_smul]
 
-/-- A linear map commutes with the cube conditional expectations. -/
-theorem map_condAvg {F : Type*} [AddCommGroup F] [Module ℝ F] (T : E →ₗ[ℝ] F) (k : ℕ)
-    (f : (Fin N → Bool) → E) (ε : Fin N → Bool) :
-    T (condAvg k f ε) = condAvg k (fun ε => T (f ε)) ε := by
-  simp only [condAvg, map_smul, map_sum]
-
-/-- A linear map commutes with martingale transforms by scalar multipliers. -/
-theorem map_transform {F : Type*} [AddCommGroup F] [Module ℝ F] (T : E →ₗ[ℝ] F)
-    (σ : Fin N → (Fin N → Bool) → ℝ) (f : (Fin N → Bool) → E) (ε : Fin N → Bool) :
-    T (transform σ f ε) = transform σ (fun ε => T (f ε)) ε := by
-  simp only [transform, map_add, map_sum, map_smul, map_sub, map_condAvg]
-
-set_option linter.unusedSectionVars false in
+omit [Module ℝ E] in
 theorem IsPredictable.add {ξ ζ : Fin N → (Fin N → Bool) → E} (hξ : IsPredictable ξ)
     (hζ : IsPredictable ζ) : IsPredictable fun k ε => ξ k ε + ζ k ε := by
   intro k ε ε' h
@@ -326,24 +299,6 @@ theorem IsPredictable.isCubeMartingale_paleyWalsh {ξ : Fin N → (Fin N → Boo
   refine ⟨hξ.isAdapted_paleyWalsh, fun n => ?_⟩
   rw [condAvg_paleyWalsh hξ, min_eq_left (Nat.le_succ n)]
 
-set_option linter.unusedVariables false in
-/-- The transform of the final value of a Paley–Walsh martingale is the Paley–Walsh martingale
-of the transformed family: `T_σ (Σ_k ε_k ξ_k) = Σ_k σ_k ε_k ξ_k`. -/
-theorem transform_paleyWalsh {ξ : Fin N → (Fin N → Bool) → E} (hξ : IsPredictable ξ)
-    {σ : Fin N → (Fin N → Bool) → ℝ} (hσ : IsPredictable σ) :
-    transform σ (paleyWalsh ξ N) = paleyWalsh (fun k ε => σ k ε • ξ k ε) N := by
-  -- the identity holds for every family `σ`; its predictability is not used
-  funext ε
-  have h1 : ∀ k : Fin N, condAvg (k.val + 1) (paleyWalsh ξ N) ε -
-      condAvg k.val (paleyWalsh ξ N) ε = coin (ε k) • ξ k ε := by
-    intro k
-    rw [condAvg_paleyWalsh hξ, condAvg_paleyWalsh hξ, min_eq_left (Nat.succ_le_of_lt k.isLt),
-      min_eq_left k.isLt.le, paleyWalsh_succ, dite_eq_left k.isLt, add_sub_cancel_left]
-  simp only [transform, h1]
-  simp only [condAvg_paleyWalsh hξ, Nat.zero_min, paleyWalsh_zero, zero_add,
-    paleyWalsh_of_le _ le_rfl]
-  exact Finset.sum_congr rfl fun k _ => smul_comm _ _ _
-
 /-- Every martingale on the sign cube is a Paley–Walsh martingale started at its (constant)
 initial value: `M n = M 0 + Σ_{k<n} ε_k ξ_k` with `ξ_k = ε_k (M (k + 1) − M k)` predictable. -/
 theorem exists_paleyWalsh_of_isCubeMartingale {M : ℕ → (Fin N → Bool) → E}
@@ -381,7 +336,7 @@ theorem exists_paleyWalsh_of_isCubeMartingale {M : ℕ → (Fin N → Bool) → 
           rw [show ε = ε' from funext fun j => h j (lt_of_lt_of_le j.isLt (not_lt.mp hn))]
         rw [add_zero, ← ih, ← hC n, hid]
 
-set_option linter.unusedSectionVars false in
+omit [Module ℝ E] in
 /-- The family `ξ` cut off where a predictable event fails: if the event `A k` depends only on the
 signs `ε_j`, `j < k`, then `k ↦ 1_{A k} ξ_k` is predictable. -/
 theorem IsPredictable.indicator {ξ : Fin N → (Fin N → Bool) → E} (hξ : IsPredictable ξ)
@@ -393,30 +348,6 @@ theorem IsPredictable.indicator {ξ : Fin N → (Fin N → Bool) → E} (hξ : I
   by_cases hε : ε ∈ A k
   · rw [Set.indicator_of_mem hε, Set.indicator_of_mem ((hA k ε ε' h).mp hε), hξ k ε ε' h]
   · rw [Set.indicator_of_notMem hε, Set.indicator_of_notMem fun h' => hε ((hA k ε ε' h).mpr h')]
-
-set_option linter.unusedSectionVars false in
-/-- A Paley–Walsh martingale stopped at a stopping time is the Paley–Walsh martingale of the
-predictable family `k ↦ 1_{k < τ} ξ_k`. -/
-theorem IsPredictable.stopped {ξ : Fin N → (Fin N → Bool) → E} (hξ : IsPredictable ξ)
-    {τ : (Fin N → Bool) → ℕ} (hτ : SignCube.IsStoppingTime τ) :
-    IsPredictable fun k ε => if k.val < τ ε then ξ k ε else 0 := by
-  intro k ε ε' h
-  dsimp only
-  have hτk : k.val < τ ε ↔ k.val < τ ε' := by
-    rw [← not_le, ← not_le, hτ k.val ε ε' fun j hj => h j (Fin.lt_def.mpr hj)]
-  by_cases hk : k.val < τ ε
-  · rw [ite_eq_left hk, ite_eq_left (hτk.mp hk), hξ k ε ε' h]
-  · rw [ite_eq_right hk, ite_eq_right fun h' => hk (hτk.mpr h')]
-
-theorem paleyWalsh_stopped (ξ : Fin N → (Fin N → Bool) → E) (τ : (Fin N → Bool) → ℕ) (n : ℕ)
-    (ε : Fin N → Bool) :
-    paleyWalsh ξ (min n (τ ε)) ε =
-      paleyWalsh (fun k ε => if k.val < τ ε then ξ k ε else 0) n ε := by
-  simp only [paleyWalsh, smul_ite, smul_zero]
-  rw [← Finset.sum_filter, Finset.filter_filter]
-  refine Finset.sum_congr ?_ fun _ _ => rfl
-  ext k
-  simp only [Finset.mem_filter, Finset.mem_univ, true_and, lt_min_iff]
 
 end Module
 
