@@ -4,6 +4,7 @@ public import BanachProbability.Hypercontractivity.Binomial
 public import BanachProbability.Hypercontractivity.TwoPoint
 public import BanachProbability.Hypercontractivity.Vector
 public import BanachProbability.KahaneKhintchine.Basic
+public import BanachProbability.Martingale.Burkholder.Function
 public import BanachProbability.Martingale.Burkholder.Inequality
 public import BanachProbability.Martingale.Doob
 public import BanachProbability.Martingale.Transform

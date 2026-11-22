@@ -14,7 +14,7 @@ for every declaration and fails otherwise.
 | Area | Directory | Main declarations |
 | --- | --- | --- |
 | Sign cube | `SignCube/` | `coin`, `avg`, `lpNorm`, `IsPredictable`, `paleyWalsh`, `condAvg`, `filtration` |
-| Martingales | `Martingale/` | `martingaleTransform`, `runningMax`, `Burkholder.inequality`, `Burkholder.squareFunction` |
+| Martingales | `Martingale/` | `martingaleTransform`, `runningMax`, `Burkholder.inequality`, `Burkholder.squareFunction`, `Burkholder.burkholderFun` |
 | UMD | `UMD/` | `umdConst`, `dyadicUMDConst`, `complexUMDConst`, `pStar` |
 | Schatten classes | `Schatten/` | `singularValue`, `schattenNorm`, `SchattenSpace`, `dilation`, `normingElement`, `spectralProj` |
 | Hypercontractivity | `Hypercontractivity/` | `twoPointNorm`, `twoPoint`, `hypercontractive_affine` |
@@ -37,6 +37,7 @@ martingales; `p* = max (p, p / (p − 1))`.
 | Result | Lean | Source | Proof |
 | --- | --- | --- | --- |
 | Burkholder: `‖X_n‖_p ≤ (p* − 1) ‖Y_n‖_p` for differentially subordinate Hilbert-space martingales, and the square function inequality | `Burkholder.inequality_of_subordinate`, `Burkholder.squareFunction_of_martingale` | Burkholder (1984); Osękowski (2012), Thms 3.5, 8.6 | proved |
+| Burkholder's function `u_p (x, y) = p (1 − 1/p*)^{p−1} (‖y‖ − (p* − 1) ‖x‖) (‖x‖ + ‖y‖)^{p−1}`: `u_p (x, y) ≥ ‖y‖^p − (p* − 1)^p ‖x‖^p`, and `t ↦ u_p (x + t h, y + t k)` is concave for `‖k‖ ≤ ‖h‖` in a real inner product space | `Burkholder.burkholderFun_ge`, `Burkholder.burkholderFun_concaveOn_line` | Burkholder (1984); Burkholder (1988), proof of Thm 1.1 | proved |
 | Hilbert spaces: `UMD_p (H) ≤ p* − 1` | `umdConst_le_of_innerProductSpace` | Burkholder (1984) | proved |
 | Maurey: `UMD_p^Δ (X) = UMD_p (X)` | `dyadicUMDConst_eq_umdConst` | Maurey (1975); HNVW I, Thm 4.2.5 | proved |
 | Extrapolation: `UMD_p < ∞` for all `p` once for one; `UMD₂ ≤ 200 UMD_p`, `UMD_p ≤ 100 p* UMD₂` | `umdConst_lt_top_of_lt_top`, `umdConst_two_le_mul`, `umdConst_le_mul_umdConst_two` | HNVW I, Thm 4.2.7; Burkholder's good-λ method (1973, 1981) | proved |

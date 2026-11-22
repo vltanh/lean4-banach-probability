@@ -8,6 +8,7 @@ import all BanachProbability.Hypercontractivity.Binomial
 import all BanachProbability.Hypercontractivity.TwoPoint
 import all BanachProbability.Hypercontractivity.Vector
 import all BanachProbability.KahaneKhintchine.Basic
+import all BanachProbability.Martingale.Burkholder.Function
 import all BanachProbability.Martingale.Burkholder.Inequality
 import all BanachProbability.Martingale.Doob
 import all BanachProbability.Martingale.Transform

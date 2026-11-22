@@ -33,6 +33,7 @@ argument.
   `U (x, y) = p (1 − 1/p*)^{p−1} (|x| − (p* − 1)|y|)(|x| + |y|)^{p−1}`, written as a function of
   `s = |x|`, `r = |y|`; here `x` is the position of the subordinate martingale `X` and `y` that of
   the dominating one `Y`. `burkholderU_ge`: `U ≥ V`, `V (x, y) = |x|^p − (p* − 1)^p |y|^p`.
+  `burkholderU_concaveOn_line`: `t ↦ U (x + t h, y + t k)` is concave on `ℝ` if `|h| ≤ |k|`.
 
 ## The proof
 
@@ -810,6 +811,28 @@ theorem burkholderU_ge {p s r : ℝ} (hp : 1 < p) (hs : 0 ≤ s) (hr : 0 ≤ r) 
   · have hp0 : p - 1 ≠ 0 := by linarith
     rw [U_eq_B hp h2, max_eq_B hp h2, show p / (p - 1) - 1 = 1 / (p - 1) by field_simp; ring]
     exact V_le_U_B hp h2 hs hr
+
+/-- **Concavity of Burkholder's function along lines** (Burkholder 1984; Osękowski 2012, proof of
+Theorem 3.5): for `x, y, h, k` in a real inner product space with `|h| ≤ |k|`,
+`t ↦ U (x + t h, y + t k)` is concave on `ℝ` (`x` the position of the subordinate martingale,
+`y` that of the dominating one). For `p ≥ 2`, `U = α ψ (|x|, |y|)` with `α ≥ 0`, and
+`t ↦ ψ (|x + t h|, |y + t k|)` is concave; for `p ≤ 2`, `U = −α (p − 1)⁻¹ ψ (|y|, |x|)` with
+`α ≥ 0`, and `t ↦ ψ (|y + t k|, |x + t h|)` is convex (`psi_line`). -/
+theorem burkholderU_concaveOn_line {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℝ H]
+    {p : ℝ} (hp : 1 < p) (x y h k : H) (hhk : ‖h‖ ≤ ‖k‖) :
+    ConcaveOn ℝ univ fun t : ℝ => burkholderU p ‖x + t • h‖ ‖y + t • k‖ := by
+  rcases le_total 2 p with h2 | h2
+  · have e : (fun t : ℝ => burkholderU p ‖x + t • h‖ ‖y + t • k‖) =
+        fun t => (p * (1 - 1 / p) ^ (p - 1)) • psiLine p x y h k t := by
+      funext t; rw [U_eq_A h2, psiLine, smul_eq_mul]
+    rw [e]
+    exact ((psi_line hp x y h k).1 ⟨h2, hhk⟩).smul (by linarith [alpha_A h2])
+  · have e : (fun t : ℝ => burkholderU p ‖x + t • h‖ ‖y + t • k‖) =
+        fun t => (p * (1 / p) ^ (p - 1) / (p - 1)) • (-psiLine p y x k h) t := by
+      funext t; rw [U_eq_B hp h2, Pi.neg_apply, psiLine, smul_eq_mul]; ring
+    rw [e]
+    exact ((psi_line hp y x k h).2 ⟨h2, hhk⟩).neg.smul
+      (div_nonneg (by linarith [alpha_B hp h2]) (by linarith))
 
 /-! ### Burkholder's method: `E U (X_n, Y_n) ≤ E U (X_{n−1}, Y_{n−1}) ≤ … ≤ U (0, 0) = 0` -/
 
