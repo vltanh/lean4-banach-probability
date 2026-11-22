@@ -41,68 +41,117 @@ section Algebra
 variable [CommRing 𝕜] [StarRing 𝕜]
 
 theorem conjTranspose_blockRow (a : Fin K → Matrix m n 𝕜) :
-    (blockRow a)ᴴ = blockCol fun k => (a k)ᴴ := by
-  sorry
+    (blockRow a)ᴴ = blockCol fun k => (a k)ᴴ :=
+  rfl
 
+omit [StarRing 𝕜] in
 theorem blockRow_mul_blockCol [Fintype m] (a : Fin K → Matrix l m 𝕜) (b : Fin K → Matrix m n 𝕜) :
     blockRow a * blockCol b = ∑ k, a k * b k := by
-  sorry
+  ext i j
+  simp [blockRow, blockCol, Matrix.mul_apply, Fintype.sum_prod_type, Matrix.sum_apply]
 
 theorem conjTranspose_blockCol_mul_blockCol [Fintype m] (a b : Fin K → Matrix m n 𝕜) :
     (blockCol a)ᴴ * blockCol b = ∑ k, (a k)ᴴ * b k := by
-  sorry
+  ext i j
+  simp [blockCol, Matrix.mul_apply, Fintype.sum_prod_type, Matrix.sum_apply]
 
 theorem blockRow_mul_conjTranspose_blockRow [Fintype n] (a b : Fin K → Matrix m n 𝕜) :
     blockRow a * (blockRow b)ᴴ = ∑ k, a k * (b k)ᴴ := by
-  sorry
+  rw [conjTranspose_blockRow, blockRow_mul_blockCol]
 
+omit [StarRing 𝕜] in
 theorem mul_blockRow [Fintype m] (x : Matrix l m 𝕜) (a : Fin K → Matrix m n 𝕜) :
     x * blockRow a = blockRow fun k => x * a k := by
-  sorry
+  ext i j
+  simp [blockRow, Matrix.mul_apply]
 
+omit [StarRing 𝕜] in
 theorem blockCol_mul [Fintype n] (a : Fin K → Matrix m n 𝕜) {o : Type*} (x : Matrix n o 𝕜) :
     blockCol a * x = blockCol fun k => a k * x := by
-  sorry
+  ext i j
+  simp [blockCol, Matrix.mul_apply]
 
 end Algebra
 
-variable [Fintype m] [Fintype n] [DecidableEq m] [DecidableEq n]
+variable [Fintype m] [Fintype n] [DecidableEq n]
 
 /-- `‖blockCol a‖_{S_q}² = ‖Σ a_kᴴ a_k‖_{S_{q/2}}`. -/
 theorem complexSchattenNorm_blockCol_sq {q : ℝ≥0∞} (hq : q ≠ 0) (a : Fin K → Matrix m n ℂ) :
     complexSchattenNorm q (blockCol a) ^ 2 = complexSchattenNorm (q / 2) (∑ k, (a k)ᴴ * a k) := by
-  sorry
+  rw [← complexSchattenNorm_conjTranspose_mul_self hq, conjTranspose_blockCol_mul_blockCol]
 
 /-- `‖blockRow a‖_{S_q}² = ‖Σ a_k a_kᴴ‖_{S_{q/2}}`. -/
-theorem complexSchattenNorm_blockRow_sq {q : ℝ≥0∞} (hq : q ≠ 0) (a : Fin K → Matrix m n ℂ) :
+theorem complexSchattenNorm_blockRow_sq [DecidableEq m] {q : ℝ≥0∞} (hq : q ≠ 0)
+    (a : Fin K → Matrix m n ℂ) :
     complexSchattenNorm q (blockRow a) ^ 2 = complexSchattenNorm (q / 2) (∑ k, a k * (a k)ᴴ) := by
-  sorry
+  rw [← complexSchattenNorm_mul_conjTranspose_self hq, blockRow_mul_conjTranspose_blockRow]
 
-theorem complexSchattenNorm_blockRow_conjTranspose (q : ℝ≥0∞) (a : Fin K → Matrix m n ℂ) :
+theorem complexSchattenNorm_blockRow_conjTranspose [DecidableEq m] (q : ℝ≥0∞)
+    (a : Fin K → Matrix m n ℂ) :
     complexSchattenNorm q (blockRow fun k => (a k)ᴴ) = complexSchattenNorm q (blockCol a) := by
-  sorry
+  rw [← complexSchattenNorm_conjTranspose q (blockRow _), conjTranspose_blockRow]
+  simp only [Matrix.conjTranspose_conjTranspose]
+
+private theorem star_mul_self_of_norm_eq_one {c : ℂ} (hc : ‖c‖ = 1) : star c * c = 1 := by
+  rw [← starRingEnd_apply, Complex.conj_mul', hc, Complex.ofReal_one, one_pow]
 
 /-- The row square function does not change when the `a_k` are multiplied by unimodular scalars. -/
 theorem complexSchattenNorm_blockRow_smul {q : ℝ≥0∞} (hq : q ≠ 0) (a : Fin K → Matrix m n ℂ)
     {c : Fin K → ℂ} (hc : ∀ k, ‖c k‖ = 1) :
     complexSchattenNorm q (blockRow fun k => c k • a k) = complexSchattenNorm q (blockRow a) := by
-  sorry
+  classical
+  -- `(c a) (c a)ᴴ = a aᴴ` for `|c| = 1`
+  have h : ∀ k, (c k • a k) * (c k • a k)ᴴ = a k * (a k)ᴴ := fun k => by
+    rw [Matrix.conjTranspose_smul, Matrix.smul_mul, Matrix.mul_smul, smul_smul, mul_comm,
+      star_mul_self_of_norm_eq_one (hc k), one_smul]
+  rw [← sq_eq_sq₀ (complexSchattenNorm_nonneg q _) (complexSchattenNorm_nonneg q _),
+    complexSchattenNorm_blockRow_sq hq, complexSchattenNorm_blockRow_sq hq]
+  simp only [h]
 
 /-- The column square function does not change when the `a_k` are multiplied by unimodular scalars.
 -/
 theorem complexSchattenNorm_blockCol_smul {q : ℝ≥0∞} (hq : q ≠ 0) (a : Fin K → Matrix m n ℂ)
     {c : Fin K → ℂ} (hc : ∀ k, ‖c k‖ = 1) :
     complexSchattenNorm q (blockCol fun k => c k • a k) = complexSchattenNorm q (blockCol a) := by
-  sorry
+  -- `(c a)ᴴ (c a) = aᴴ a` for `|c| = 1`
+  have h : ∀ k, (c k • a k)ᴴ * (c k • a k) = (a k)ᴴ * a k := fun k => by
+    rw [Matrix.conjTranspose_smul, Matrix.smul_mul, Matrix.mul_smul, smul_smul,
+      star_mul_self_of_norm_eq_one (hc k), one_smul]
+  rw [← sq_eq_sq₀ (complexSchattenNorm_nonneg q _) (complexSchattenNorm_nonneg q _),
+    complexSchattenNorm_blockCol_sq hq, complexSchattenNorm_blockCol_sq hq]
+  simp only [h]
 
 /-- Lust-Piquard–Pisier (1991), (I.3), for the trace:
 `|Σ tr (a_k b_k)| ≤ ‖(Σ a_k a_kᴴ)^{1/2}‖_{S_q} ‖(Σ b_kᴴ b_k)^{1/2}‖_{S_{q'}}`. -/
-theorem norm_sum_trace_mul_le {q q' : ℝ} (hq : q.HolderConjugate q') (a : Fin K → Matrix n m ℂ)
-    (b : Fin K → Matrix m n ℂ) :
+theorem norm_sum_trace_mul_le [DecidableEq m] {q q' : ℝ} (hq : q.HolderConjugate q')
+    (a : Fin K → Matrix n m ℂ) (b : Fin K → Matrix m n ℂ) :
     ‖∑ k, (a k * b k).trace‖ ≤
       complexSchattenNorm (ENNReal.ofReal q) (blockRow a) *
         complexSchattenNorm (ENNReal.ofReal q') (blockCol b) := by
-  sorry
+  rw [← Matrix.trace_sum, ← blockRow_mul_blockCol]
+  exact norm_trace_mul_le hq _ _
+
+omit [Fintype n] [DecidableEq n] in
+/-- Orthonormality of the signs: `E [Yᴴ Y] = Σ a_kᴴ a_k` for `Y = Σ ε_k a_k`. -/
+private theorem sum_smul_conjTranspose_mul_self (a : Fin K → Matrix m n ℂ) :
+    ∑ ε : Fin K → Bool, ((2 : ℝ) ^ K)⁻¹ •
+        ((∑ k, coin (ε k) • a k)ᴴ * ∑ k, coin (ε k) • a k) = ∑ k, (a k)ᴴ * a k := by
+  have hexp : ∀ ε : Fin K → Bool, (∑ k, coin (ε k) • a k)ᴴ * ∑ k, coin (ε k) • a k =
+      ∑ i, ∑ j, (coin (ε i) * coin (ε j)) • ((a i)ᴴ * a j) := fun ε => by
+    rw [Matrix.conjTranspose_sum, Matrix.sum_mul]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [Matrix.mul_sum]
+    refine Finset.sum_congr rfl fun j _ => ?_
+    rw [Matrix.conjTranspose_smul, star_trivial, Matrix.smul_mul, Matrix.mul_smul, smul_smul]
+  have hcoin : ∀ i j, ∑ ε : Fin K → Bool, ((2 : ℝ) ^ K)⁻¹ * (coin (ε i) * coin (ε j)) =
+      if i = j then 1 else 0 := fun i j => by
+    rw [← avg_coin_mul_coin i j, avg, ← Finset.mul_sum, div_eq_inv_mul]
+  simp only [hexp, Finset.smul_sum, smul_smul]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [Finset.sum_comm]
+  simp only [← Finset.sum_smul, hcoin, ite_smul, one_smul, zero_smul, Finset.sum_ite_eq,
+    Finset.mem_univ, ite_true]
 
 /-- Lust-Piquard–Pisier (1991), (I.7) with signs, column form: for `q ≥ 2`,
 `‖(Σ a_kᴴ a_k)^{1/2}‖_{S_q}² ≤ E ‖Σ ε_k a_k‖_{S_q}²`. -/
@@ -110,7 +159,21 @@ theorem complexSchattenNorm_blockCol_sq_le_avg {q : ℝ} (hq : 2 ≤ q) (a : Fin
     complexSchattenNorm (ENNReal.ofReal q) (blockCol a) ^ 2 ≤
       avg fun ε : Fin K → Bool =>
         complexSchattenNorm (ENNReal.ofReal q) (∑ k, coin (ε k) • a k) ^ 2 := by
-  sorry
+  have hq0 : ENNReal.ofReal q ≠ 0 := (ENNReal.ofReal_pos.2 (by linarith)).ne'
+  have hq1 : 1 ≤ ENNReal.ofReal q / 2 := by
+    rw [ENNReal.le_div_iff_mul_le (Or.inl two_ne_zero) (Or.inl ENNReal.ofNat_ne_top), one_mul]
+    simpa using ENNReal.ofReal_le_ofReal hq
+  have hq2 : ENNReal.ofReal q / 2 ≠ 0 := (zero_lt_one.trans_le hq1).ne'
+  -- `‖blockCol a‖² = ‖E [Yᴴ Y]‖_{S_{q/2}}`, then the triangle inequality in `S_{q/2}`
+  rw [complexSchattenNorm_blockCol_sq hq0, ← sum_smul_conjTranspose_mul_self]
+  refine (Finset.le_sum_of_subadditive _ ((complexSchattenNorm_eq_zero_iff hq2).2 rfl).le
+    (complexSchattenNorm_add_le hq1) _ _).trans (le_of_eq ?_)
+  rw [avg, Finset.sum_div]
+  refine Finset.sum_congr rfl fun ε _ => ?_
+  -- `‖Yᴴ Y‖_{S_{q/2}} = ‖Y‖_{S_q}²`
+  rw [← Complex.coe_smul, complexSchattenNorm_smul hq2,
+    complexSchattenNorm_conjTranspose_mul_self hq0, Complex.norm_real, Real.norm_eq_abs,
+    abs_of_pos (by positivity), div_eq_inv_mul]
 
 /-- Lust-Piquard–Pisier (1991), (I.7) with signs, row form: for `q ≥ 2`,
 `‖(Σ a_k a_kᴴ)^{1/2}‖_{S_q}² ≤ E ‖Σ ε_k a_k‖_{S_q}²`. -/
@@ -118,6 +181,14 @@ theorem complexSchattenNorm_blockRow_sq_le_avg {q : ℝ} (hq : 2 ≤ q) (a : Fin
     complexSchattenNorm (ENNReal.ofReal q) (blockRow a) ^ 2 ≤
       avg fun ε : Fin K → Bool =>
         complexSchattenNorm (ENNReal.ofReal q) (∑ k, coin (ε k) • a k) ^ 2 := by
-  sorry
+  classical
+  -- the column form for the `a_kᴴ`
+  have h := complexSchattenNorm_blockCol_sq_le_avg hq fun k => (a k)ᴴ
+  rw [← conjTranspose_blockRow, complexSchattenNorm_conjTranspose] at h
+  refine h.trans_eq ?_
+  congr 1
+  funext ε
+  rw [← complexSchattenNorm_conjTranspose _ (∑ k, coin (ε k) • a k), Matrix.conjTranspose_sum]
+  simp only [Matrix.conjTranspose_smul, star_trivial]
 
 end BanachProbability
