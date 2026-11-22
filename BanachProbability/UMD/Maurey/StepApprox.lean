@@ -1,6 +1,6 @@
 module
 
-public import BanachProbability.UMD.Maurey.FinitePaths
+public import BanachProbability.UMD.Maurey.FiniteModel
 
 /-!
 # Reduction of the UMD inequality to finite probability spaces
@@ -540,5 +540,275 @@ theorem isUMDBound_of_isFiniteUMDBound {p : ℝ} (hp : 1 ≤ p) {β : ℝ≥0∞
     ← ENNReal.ofReal_add (by positivity) (by positivity), ← ENNReal.ofReal_coe_nnreal]
   congr 1
   field_simp
+
+section Helpers
+
+/-- The limiting step `η → 0`: if `a ≤ β (b + η) + η` for every `η > 0`, then `a ≤ β b`, provided
+`a = 0` when `b = 0` (needed for `β = ∞`). -/
+theorem stp_le_mul {a b β : ℝ≥0∞} (h0 : b = 0 → a = 0)
+    (key : ∀ η : ℝ, 0 < η → a ≤ β * (b + ENNReal.ofReal η) + ENNReal.ofReal η) : a ≤ β * b := by
+  by_cases hβt : β = ⊤
+  · by_cases hb : b = 0
+    · simp [h0 hb]
+    · rw [hβt, ENNReal.top_mul hb]
+      exact le_top
+  lift β to NNReal using hβt
+  refine ENNReal.le_of_forall_pos_le_add fun ε hε _ => ?_
+  have hη : 0 < (ε : ℝ) / (β + 1) := by positivity
+  refine (key _ hη).trans (le_of_eq ?_)
+  rw [mul_add, add_assoc]
+  congr 1
+  rw [← ENNReal.ofReal_coe_nnreal (p := β), ← ENNReal.ofReal_mul (by positivity),
+    ← ENNReal.ofReal_add (by positivity) (by positivity), ← ENNReal.ofReal_coe_nnreal]
+  congr 1
+  field_simp
+
+/-- For a finite `C` and `η > 0`, some `δ > 0` has `δ C ≤ η`. -/
+theorem stp_exists_pos_mul_le {C : ℝ≥0∞} (hC : C ≠ ⊤) {η : ℝ} (hη : 0 < η) :
+    ∃ δ : ℝ, 0 < δ ∧ ENNReal.ofReal δ * C ≤ ENNReal.ofReal η := by
+  lift C to NNReal using hC
+  refine ⟨η / (C + 1), by positivity, ?_⟩
+  rw [← ENNReal.ofReal_coe_nnreal, ← ENNReal.ofReal_mul (by positivity)]
+  refine ENNReal.ofReal_le_ofReal ?_
+  rw [div_mul_eq_mul_div, div_le_iff₀ (by positivity)]
+  nlinarith [C.coe_nonneg]
+
+variable {Ω E : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} {ℱ : Filtration ℕ mΩ}
+  [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+
+/-- The zero corner with norms: if `‖Y_n‖_{L^p} = 0`, the transform at time `n` has `L^p`
+norm `0`. -/
+theorem stp_eLpNorm_norm_transform_eq_zero {𝕜 : Type*} [SMulZeroClass 𝕜 E]
+    {Y : ℕ → Ω → E} (hY : Martingale Y ℱ μ) {p : ℝ≥0∞} (hp : p ≠ 0) {n : ℕ}
+    (hn : eLpNorm (fun ω => ‖Y n ω‖) p μ = 0) (φ : ℕ → Ω → 𝕜) :
+    eLpNorm (fun ω => ‖martingaleTransform φ Y n ω‖) p μ = 0 := by
+  rw [eLpNorm_eq_zero_iff hp] at hn ⊢
+  have hn' : Y n =ᵐ[μ] 0 := by
+    filter_upwards [hn] with ω hω
+    simpa using hω
+  filter_upwards [umdd_transform_ae_eq_zero hY hn' φ] with ω hω
+  simp only [Pi.zero_apply] at hω ⊢
+  rw [martingaleTransform, hω, norm_zero]
+
+omit [CompleteSpace E] in
+/-- A martingale transform by predictable multipliers is strongly measurable. -/
+theorem stp_aestronglyMeasurable_transform {𝕜 : Type*} [RCLike 𝕜] [NormedSpace 𝕜 E]
+    {Y : ℕ → Ω → E} (hY : Martingale Y ℱ μ) {φ : ℕ → Ω → 𝕜}
+    (hφm : ∀ k, StronglyMeasurable[ℱ k] (φ (k + 1))) (n : ℕ) :
+    AEStronglyMeasurable (martingaleTransform φ Y n) μ :=
+  (Finset.stronglyMeasurable_fun_sum _ fun k _ => ((hφm k).mono (ℱ.le k)).smul
+    (((hY.stronglyAdapted (k + 1)).mono (ℱ.le _)).sub
+      ((hY.stronglyAdapted k).mono (ℱ.le _)))).aestronglyMeasurable
+
+/-- Two transforms whose multipliers are `δ`-close differ by at most `2 n δ ‖Y_n‖_{L^p}`:
+`‖Σ_{k<n} (φ − ψ)_{k+1} (Y_{k+1} − Y_k)‖_{L^p} ≤ δ Σ_{k<n} ‖Y_{k+1} − Y_k‖_{L^p}`
+(`eLpNorm_sub_le_two_mul`). -/
+theorem stp_eLpNorm_transform_sub_le [IsFiniteMeasure μ] {𝕜 : Type*} [RCLike 𝕜]
+    [NormedSpace 𝕜 E] {Y : ℕ → Ω → E} (hY : Martingale Y ℱ μ) {φ ψ : ℕ → Ω → 𝕜}
+    (hφm : ∀ k, StronglyMeasurable[ℱ k] (φ (k + 1)))
+    (hψm : ∀ k, StronglyMeasurable[ℱ k] (ψ (k + 1))) {δ : ℝ}
+    (hδ : ∀ n ω, ‖φ n ω - ψ n ω‖ ≤ δ) {p : ℝ≥0∞} (hp : 1 ≤ p) (n : ℕ) :
+    eLpNorm (fun ω => martingaleTransform φ Y n ω - martingaleTransform ψ Y n ω) p μ ≤
+      ENNReal.ofReal δ * (2 * n * eLpNorm (Y n) p μ) := by
+  have e : (fun ω => martingaleTransform φ Y n ω - martingaleTransform ψ Y n ω) =
+      ∑ k ∈ Finset.range n, fun ω => (φ (k + 1) ω - ψ (k + 1) ω) • (Y (k + 1) ω - Y k ω) := by
+    funext ω
+    simp only [martingaleTransform, Finset.sum_apply, ← Finset.sum_sub_distrib, sub_smul]
+  rw [e]
+  refine (eLpNorm_sum_le hp).trans ?_
+  calc ∑ k ∈ Finset.range n,
+        eLpNorm (fun ω => (φ (k + 1) ω - ψ (k + 1) ω) • (Y (k + 1) ω - Y k ω)) p μ
+      ≤ ∑ _k ∈ Finset.range n, ENNReal.ofReal δ * (2 * eLpNorm (Y n) p μ) := by
+        refine Finset.sum_le_sum fun k hk => ?_
+        have hm : AEStronglyMeasurable
+            (fun ω => (φ (k + 1) ω - ψ (k + 1) ω) • (Y (k + 1) ω - Y k ω)) μ :=
+          ((((hφm k).sub (hψm k)).mono (ℱ.le k)).smul
+            (((hY.stronglyAdapted (k + 1)).mono (ℱ.le _)).sub
+              ((hY.stronglyAdapted k).mono (ℱ.le _)))).aestronglyMeasurable
+        refine (eLpNorm_le_mul_eLpNorm_of_ae_le_mul (g := fun ω => Y (k + 1) ω - Y k ω) (c := δ) hm
+          (Filter.Eventually.of_forall fun ω => ?_) p).trans ?_
+        · rw [norm_smul]
+          exact mul_le_mul_of_nonneg_right (hδ _ ω) (norm_nonneg _)
+        · gcongr
+          exact eLpNorm_sub_le_two_mul hY hp (Finset.mem_range.mp hk)
+    _ = ENNReal.ofReal δ * (2 * n * eLpNorm (Y n) p μ) := by
+        rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+        ring
+
+end Helpers
+
+/-- **From finite models to all martingales**, finitely-valued multipliers with values in `A`
+(Pisier, Lemma 8.29): a bound for finite models bounds the transforms on arbitrary probability
+spaces, when `‖Y_n‖_{L^p} < ∞`. The finite models (`exists_finite_model_gen`) give
+`‖(φ • Y)_n‖_p ≤ β (‖Y_n‖_p + η) + η` for every `η > 0`. -/
+theorem stp_of_finite_gen {𝕜 : Type} [RCLike 𝕜] [NormedSpace 𝕜 X]
+    [IsScalarTower ℝ 𝕜 X] {A : Set 𝕜} {p : ℝ} (hp : 1 ≤ p) {β : ℝ≥0∞}
+    (hfin : ∀ (Ω : Type) [Finite Ω] (mΩ : MeasurableSpace Ω) [DiscreteMeasurableSpace Ω]
+      (μ : Measure Ω) [IsProbabilityMeasure μ] (ℱ : Filtration ℕ mΩ) (Y : ℕ → Ω → X)
+      (φ : ℕ → Ω → 𝕜), Martingale Y ℱ μ → (∀ ω, Y 0 ω = 0) → (∀ n ω, φ n ω ∈ A) →
+      (∀ k, StronglyMeasurable[ℱ k] (φ (k + 1))) →
+      ∀ n, eLpNorm (fun ω => ‖martingaleTransform φ Y n ω‖) (ENNReal.ofReal p) μ ≤
+        β * eLpNorm (fun ω => ‖Y n ω‖) (ENNReal.ofReal p) μ)
+    {Ω : Type} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
+    {ℱ : Filtration ℕ mΩ} {Y : ℕ → Ω → X} {φ : ℕ → Ω → 𝕜} (hY : Martingale Y ℱ μ)
+    (hY0 : ∀ ω, Y 0 ω = 0) (hφA : ∀ n ω, φ n ω ∈ A)
+    (hφfin : ∀ k, (Set.range (φ (k + 1))).Finite)
+    (hφm : ∀ k, StronglyMeasurable[ℱ k] (φ (k + 1))) (n : ℕ)
+    (hYn : eLpNorm (Y n) (ENNReal.ofReal p) μ ≠ ⊤) :
+    eLpNorm (fun ω => ‖martingaleTransform φ Y n ω‖) (ENNReal.ofReal p) μ ≤
+      β * eLpNorm (fun ω => ‖Y n ω‖) (ENNReal.ofReal p) μ := by
+  have hp0 : ENNReal.ofReal p ≠ 0 := by simp; linarith
+  refine stp_le_mul (fun h0 => stp_eLpNorm_norm_transform_eq_zero hY hp0 h0 φ) fun η hη => ?_
+  obtain ⟨Ω', _, m', _, μ', _, ℱ', Y', φ', hY', hY'0, hφ'A, hφ'm, h1, h2⟩ :=
+    exists_finite_model_gen hY hY0 hφA hφfin hφm hp n hYn hη
+  calc _ ≤ _ := h2
+    _ ≤ β * eLpNorm (fun ω => ‖Y' n ω‖) (ENNReal.ofReal p) μ' + ENNReal.ofReal η := by
+        gcongr
+        exact hfin Ω' m' μ' ℱ' Y' φ' hY' hY'0 hφ'A hφ'm n
+    _ ≤ _ := by gcongr
+
+/-- **Rounding unimodular multipliers**: for `δ > 0` there is a measurable map `r` of `ℂ` to the
+unit circle with finitely many values and `‖z − r z‖ ≤ δ` on the unit circle,
+`r z = exp (i h ⌊arg z / h⌋)` for a step `h ≤ min (δ / 2) 1`
+(`‖e^{iθ} − e^{iθ'}‖ = ‖e^{i (θ − θ')} − 1‖ ≤ 2 |θ − θ'|`). -/
+theorem stp_exists_round {δ : ℝ} (hδ : 0 < δ) :
+    ∃ r : ℂ → ℂ, Measurable r ∧ (Set.range r).Finite ∧ (∀ z, ‖r z‖ = 1) ∧
+      ∀ z, ‖z‖ = 1 → ‖z - r z‖ ≤ δ := by
+  set h : ℝ := min (δ / 2) 1 with hh
+  have h0 : 0 < h := lt_min (by linarith) one_pos
+  set g : ℤ → ℂ := fun m => Complex.exp (↑(h * m) * Complex.I) with hg
+  refine ⟨fun z => g ⌊Complex.arg z / h⌋, ?_, ?_, fun z => Complex.norm_exp_ofReal_mul_I _, ?_⟩
+  · exact (measurable_of_countable g).comp
+      (Int.floor_mono.measurable.comp (Complex.measurable_arg.div_const h))
+  · refine ((Set.finite_Icc ⌊-Real.pi / h⌋ ⌊Real.pi / h⌋).image g).subset ?_
+    rintro _ ⟨z, rfl⟩
+    refine ⟨⌊Complex.arg z / h⌋, ⟨Int.floor_mono ?_, Int.floor_mono ?_⟩, rfl⟩
+    · exact div_le_div_of_nonneg_right (Complex.neg_pi_lt_arg z).le h0.le
+    · exact div_le_div_of_nonneg_right (Complex.arg_le_pi z) h0.le
+  · intro z hz
+    set θ := Complex.arg z
+    set θ' : ℝ := h * ⌊θ / h⌋
+    have hlo : θ' ≤ θ := by
+      have := Int.floor_le (θ / h)
+      rw [le_div_iff₀ h0] at this
+      simp only [θ']
+      linarith
+    have hhi : θ < θ' + h := by
+      have := Int.lt_floor_add_one (θ / h)
+      rw [div_lt_iff₀ h0] at this
+      simp only [θ']
+      linarith
+    have hz' : z = Complex.exp (↑θ * Complex.I) := by
+      conv_lhs => rw [← Complex.norm_mul_exp_arg_mul_I z]
+      rw [hz, Complex.ofReal_one, one_mul]
+    have e : z - g ⌊θ / h⌋ =
+        Complex.exp (↑θ' * Complex.I) * (Complex.exp (↑(θ - θ') * Complex.I) - 1) := by
+      rw [hz', mul_sub, mul_one, ← Complex.exp_add]
+      simp only [hg, θ']
+      congr 2
+      push_cast
+      ring
+    have hn : ‖(↑(θ - θ') : ℂ) * Complex.I‖ = θ - θ' := by
+      rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Real.norm_eq_abs,
+        abs_of_nonneg (by linarith)]
+    change ‖z - g ⌊θ / h⌋‖ ≤ δ
+    rw [e, norm_mul, Complex.norm_exp_ofReal_mul_I, one_mul]
+    refine (Complex.norm_exp_sub_one_le (by rw [hn]; linarith [min_le_right (δ / 2) 1])).trans ?_
+    rw [hn]
+    linarith [min_le_left (δ / 2) 1]
+
+section Complex
+
+variable (Z : Type*) [NormedAddCommGroup Z] [NormedSpace ℂ Z] [CompleteSpace Z]
+
+/-- The complex UMD inequality restricted to martingales on finite probability spaces. -/
+def IsFiniteComplexUMDBound (p : ℝ) (β : ℝ≥0∞) : Prop :=
+  ∀ (Ω : Type) [Finite Ω] (mΩ : MeasurableSpace Ω) [DiscreteMeasurableSpace Ω] (μ : Measure Ω)
+    [IsProbabilityMeasure μ] (ℱ : Filtration ℕ mΩ) (Y : ℕ → Ω → Z) (c : ℕ → Ω → ℂ),
+    Martingale Y ℱ μ → (∀ ω, Y 0 ω = 0) → (∀ n ω, ‖c n ω‖ = 1) →
+      (∀ k, StronglyMeasurable[ℱ k] (c (k + 1))) →
+      ∀ n, eLpNorm (fun ω => ‖martingaleTransform c Y n ω‖) (ENNReal.ofReal p) μ ≤
+        β * eLpNorm (fun ω => ‖Y n ω‖) (ENNReal.ofReal p) μ
+
+variable {Z}
+
+/-- The cube instance for finite complex models: the martingale `Y_1 = ε_0 x` on the one-sign cube,
+transformed by `c ≡ 1`, shows that a complex UMD bound for finite models of a nonzero space is at
+least `1`. -/
+theorem stp_one_le_of_isFiniteComplexUMDBound [Nontrivial Z] {p : ℝ} (hp : 0 < p) {β : ℝ≥0∞}
+    (h : IsFiniteComplexUMDBound Z p β) : 1 ≤ β := by
+  obtain ⟨x, hx⟩ := exists_ne (0 : Z)
+  have key := h (Fin 1 → Bool) inferInstance (ProbabilityTheory.uniformOn Set.univ)
+    (SignCube.filtration 1) (fun k => SignCube.paleyWalsh (fun _ _ => x) k) (fun _ _ => 1)
+    (SignCube.martingale_paleyWalsh _ (umdd_isPredictable_const x))
+    (fun ω => SignCube.paleyWalsh_zero _ ω) (fun _ _ => norm_one)
+    (fun _ => stronglyMeasurable_const) 1
+  simp only [martingaleTransform, Finset.sum_range_one, one_smul, zero_add,
+    SignCube.paleyWalsh_zero, sub_zero] at key
+  rw [umdd_eLpNorm_norm_uniformOn _ hp,
+    umdd_lpNorm_of_norm_eq (norm_nonneg x) (umdd_norm_paleyWalsh_const x) hp] at key
+  have h0 : ENNReal.ofReal ‖x‖ ≠ 0 := by simpa using hx
+  exact (ENNReal.mul_le_mul_iff_left h0 ENNReal.ofReal_ne_top).mp (by simpa using key)
+
+/-- A complex UMD bound for martingales on finite probability spaces is a complex UMD bound (HNVW
+I, Lemma 3.6.17, for unimodular multipliers). Round the unimodular multipliers `c` to
+finitely-valued unimodular predictable ones `c'` with `‖c − c'‖ ≤ δ` (`stp_exists_round`), which
+moves the transform by at most `2 n δ ‖Y_n‖_p`; for `c'` the finite models
+(`stp_of_finite_gen`) give `‖(c' • Y)_n‖_p ≤ β ‖Y_n‖_p`; then let `δ → 0`. If
+`‖Y_n‖_p = ∞`, the right side is infinite, as `β ≥ 1` on a nonzero space. -/
+theorem isComplexUMDBound_of_isFiniteComplexUMDBound {p : ℝ} (hp : 1 ≤ p) {β : ℝ≥0∞}
+    (h : IsFiniteComplexUMDBound Z p β) : IsComplexUMDBound Z p β := by
+  intro Ω mΩ μ _ ℱ Y c hY hY0 hc hcm n
+  have hp0 : ENNReal.ofReal p ≠ 0 := by simp; linarith
+  have hp1 : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := by simpa using ENNReal.ofReal_le_ofReal hp
+  change eLpNorm (martingaleTransform c Y n) (ENNReal.ofReal p) μ ≤ _
+  have hYnm : AEStronglyMeasurable (Y n) μ :=
+    ((hY.stronglyAdapted n).mono (ℱ.le n)).aestronglyMeasurable
+  -- the bound for finitely-valued unimodular predictable multipliers
+  have hB : ∀ c' : ℕ → Ω → ℂ, (∀ n ω, ‖c' n ω‖ = 1) → (∀ k, (Set.range (c' (k + 1))).Finite) →
+      (∀ k, StronglyMeasurable[ℱ k] (c' (k + 1))) →
+      eLpNorm (Y n) (ENNReal.ofReal p) μ ≠ ⊤ →
+      eLpNorm (martingaleTransform c' Y n) (ENNReal.ofReal p) μ ≤
+        β * eLpNorm (Y n) (ENNReal.ofReal p) μ := by
+    intro c' hc'1 hc'fin hc'm hYn
+    rw [← eLpNorm_norm _ hYnm, ← eLpNorm_norm _ (stp_aestronglyMeasurable_transform hY hc'm n)]
+    exact stp_of_finite_gen (A := {z : ℂ | ‖z‖ = 1}) hp h hY hY0 hc'1 hc'fin hc'm n hYn
+  -- the corner `‖Y_n‖_p = ∞`
+  by_cases hYn : eLpNorm (Y n) (ENNReal.ofReal p) μ = ⊤
+  · by_cases hβ : β = 0
+    · rcases subsingleton_or_nontrivial Z with hZ | hZ
+      · exact (le_of_eq ((eLpNorm_eq_zero_iff hp0).mpr
+          (Filter.Eventually.of_forall fun _ => Subsingleton.elim _ _))).trans zero_le
+      · exact absurd hβ (zero_lt_one.trans_le
+          (stp_one_le_of_isFiniteComplexUMDBound (by linarith) h)).ne'
+    · rw [hYn, ENNReal.mul_top hβ]
+      exact le_top
+  refine stp_le_mul (fun h0 => umdd_eLpNorm_transform_eq_zero hY hp0 h0 c) fun η hη => ?_
+  -- round the multipliers within `δ`, with `2 n δ ‖Y_n‖_p ≤ η`
+  obtain ⟨δ, hδ, hδη⟩ := stp_exists_pos_mul_le (C := 2 * n * eLpNorm (Y n) (ENNReal.ofReal p) μ)
+    (ENNReal.mul_ne_top (ENNReal.mul_ne_top (by norm_num) (ENNReal.natCast_ne_top n)) hYn) hη
+  obtain ⟨r, hrm, hrfin, hr1, hr⟩ := stp_exists_round hδ
+  set c' : ℕ → Ω → ℂ := fun n ω => r (c n ω) with hc'
+  have hc'm : ∀ k, StronglyMeasurable[ℱ k] (c' (k + 1)) := fun k =>
+    (hrm.comp (hcm k).measurable).stronglyMeasurable
+  have hc'fin : ∀ k, (Set.range (c' (k + 1))).Finite := fun k =>
+    hrfin.subset (Set.range_subset_iff.2 fun ω => ⟨_, rfl⟩)
+  have herr := stp_eLpNorm_transform_sub_le hY hcm hc'm (fun n ω => hr _ (hc n ω)) hp1 n
+  have hsplit : martingaleTransform c Y n = martingaleTransform c' Y n +
+      fun ω => martingaleTransform c Y n ω - martingaleTransform c' Y n ω := by
+    funext ω
+    simp
+  calc eLpNorm (martingaleTransform c Y n) (ENNReal.ofReal p) μ
+      ≤ eLpNorm (martingaleTransform c' Y n) (ENNReal.ofReal p) μ +
+          eLpNorm (fun ω => martingaleTransform c Y n ω - martingaleTransform c' Y n ω)
+            (ENNReal.ofReal p) μ :=
+        (le_of_eq (congrArg (eLpNorm · (ENNReal.ofReal p) μ) hsplit)).trans (eLpNorm_add_le hp1)
+    _ ≤ β * eLpNorm (Y n) (ENNReal.ofReal p) μ + ENNReal.ofReal η :=
+        add_le_add (hB c' (fun n ω => hr1 _) hc'fin hc'm hYn) (herr.trans hδη)
+    _ ≤ β * (eLpNorm (Y n) (ENNReal.ofReal p) μ + ENNReal.ofReal η) + ENNReal.ofReal η := by
+        gcongr
+        exact le_self_add
+
+end Complex
 
 end BanachProbability
