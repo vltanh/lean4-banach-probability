@@ -42,8 +42,6 @@ import all BanachProbability.UMD.Extrapolation
 import all BanachProbability.UMD.Hilbert
 import all BanachProbability.UMD.Lp
 import all BanachProbability.UMD.Maurey.Basic
-import all BanachProbability.UMD.Maurey.FinitePaths
-import all BanachProbability.UMD.Maurey.Realization
 import all BanachProbability.UMD.Maurey.StepApprox
 import all BanachProbability.ZigZag.Basic
 

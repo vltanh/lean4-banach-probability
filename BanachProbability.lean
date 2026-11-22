@@ -38,8 +38,6 @@ public import BanachProbability.UMD.Extrapolation
 public import BanachProbability.UMD.Hilbert
 public import BanachProbability.UMD.Lp
 public import BanachProbability.UMD.Maurey.Basic
-public import BanachProbability.UMD.Maurey.FinitePaths
-public import BanachProbability.UMD.Maurey.Realization
 public import BanachProbability.UMD.Maurey.StepApprox
 public import BanachProbability.ZigZag.Basic
 
