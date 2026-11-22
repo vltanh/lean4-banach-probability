@@ -53,7 +53,8 @@ theorem uOne_le_one_sub {s r : ℝ} (hr : 0 ≤ r) : uOne s r ≤ 1 - 2 * s := b
   · nlinarith
   · exact le_rfl
 
-/-- The property 3° of `U₁`: `U₁ (x, y) ≤ 0` if `|y| ≤ |x|`. -/
+/-- The property 3° of `U₁`: `U₁ (x, y) ≤ 0` if `|y| ≤ |x|`, read off from (3.6). (The book calls it
+obvious and, by the symmetry of `V` and Remark 2.1, asks only for `U₁ (0, 0) ≤ 0`.) -/
 theorem uOne_nonpos {s r : ℝ} (hr : 0 ≤ r) (hrs : r ≤ s) : uOne s r ≤ 0 := by
   unfold uOne
   split_ifs with h

@@ -17,9 +17,9 @@ public import Mathlib.Analysis.SpecificLimits.Basic
 
 D. L. Burkholder, *Sharp inequalities for martingales and stochastic integrals*, Colloque Paul
 Lévy sur les processus stochastiques, Astérisque 157–158 (1988), 75–94: the function (1.6), its
-majorization (1.10), and its concavity along lines, (1.12)–(1.14) and Remark 1.2 (1.17), by the
-arguments of the paper (§1). The paper states Remark 1.2 without proof; it is completed from the
-paper's own (1.12)–(1.14) and the shift of its proof of (1.8) (step 4 below).
+majorization (1.10), and its concavity along lines, Remark 1.2 (1.17), by the arguments of the paper
+(§1). The paper states Remark 1.2 without proof; it is completed from the concavity of `G` in the
+paper's proof of (1.12), by (1.14), and the shift of its proof of (1.8) (steps 3 and 4 below).
 
 For `p > 1`, `p* = max (p, p / (p − 1))` and `x`, `y` in a normed group, Burkholder's function is
 `u_p (x, y) = α_p (|y| − (p* − 1) |x|) (|x| + |y|)^{p−1}`, `α_p = p (1 − 1/p*)^{p−1}`
@@ -50,8 +50,8 @@ subordinate position first: `u_p (x, y) = U (|y|, |x|)` (`burkholderFun_eq_burkh
    (1.11). If `p < 2`, `F` is convex on `[0, s₀]` for some `s₀ ≥ 1/p*` and concave on `[s₀, 1]`,
    and `F (1) ≥ 0` by (1.11) (`bF_nonneg`). Burkholder asserts that `s₀` exists; here it is
    `1/(1 + (p* − 1)^{p/(p−2)})`, read off from `F''`.
-3. (1.12)–(1.14): if `x + t h` and `y + t k` never vanish, `G (t) = U (x + t h, y + t k)` is twice
-   differentiable.
+3. The concavity of `G` in the proof of (1.12), by (1.14): if `x + t h` and `y + t k` never vanish,
+   `G (t) = U (x + t h, y + t k)` is twice differentiable.
    For `p ≥ 2`, `U = α_p ψ (|x|, |y|)` with `ψ (s, r) = (s − (p − 1) r)(s + r)^{p−1}` (`psi`, not
    to be confused with Burkholder's gradient `ψ`), and the
    second derivative of `t ↦ ψ (S, R)`, `S = |x + t h|`, `R = |y + t k|`, is
@@ -70,59 +70,6 @@ open Filter Set
 open scoped Topology InnerProductSpace RealInnerProductSpace
 
 namespace BanachProbability.Burkholder
-
-/-! ### Gluing concave functions through one-sided derivatives -/
-
-/-- **Gluing concave functions through one-sided derivatives.** If `f : ℝ → ℝ` is concave on the
-two parts `s ∩ Iic a` and `s ∩ Ici a` of a convex set `s`, and its left derivative `dl` and right
-derivative `dr` at `a` satisfy `dr ≤ dl`, then `f` is concave on `s`. (With `s = univ`: concave on
-`Iic a` and on `Ici a`. The convex case follows by applying this to `-f`.) -/
-theorem bkh_concaveOn_glue {s : Set ℝ} {f : ℝ → ℝ} {a dl dr : ℝ} (hs : Convex ℝ s)
-    (hl : ConcaveOn ℝ (s ∩ Iic a) f) (hr : ConcaveOn ℝ (s ∩ Ici a) f)
-    (hdl : HasDerivWithinAt f dl (Iic a) a) (hdr : HasDerivWithinAt f dr (Ici a) a)
-    (hd : dr ≤ dl) : ConcaveOn ℝ s f := by
-  refine concaveOn_of_slope_anti_adjacent hs ?_
-  intro x y z hx hz hxy hyz
-  rcases le_or_gt z a with hza | haz
-  · exact hl.slope_anti_adjacent ⟨hx, (hxy.trans hyz).le.trans hza⟩ ⟨hz, hza⟩ hxy hyz
-  rcases le_or_gt a x with hax | hxa
-  · exact hr.slope_anti_adjacent ⟨hx, hax⟩ ⟨hz, hax.trans (hxy.trans hyz).le⟩ hxy hyz
-  -- `x < a < z`: the slopes of chords ending at `a` are `≥ dl`, those starting at `a` are `≤ dr`
-  have ha : a ∈ s := hs.ordConnected.out hx hz ⟨hxa.le, haz.le⟩
-  have hL : ∀ u ∈ s, u < a → dl * (a - u) ≤ f a - f u := fun u hu hua => by
-    have := hl.le_slope_of_hasDerivWithinAt_Iio ⟨hu, hua.le⟩ ⟨ha, self_mem_Iic⟩ hua
-      (hdl.mono Iio_subset_Iic_self)
-    rwa [slope_def_field, le_div_iff₀ (sub_pos.2 hua)] at this
-  have hR : ∀ v ∈ s, a < v → f v - f a ≤ dr * (v - a) := fun v hv hav => by
-    have := hr.slope_le_of_hasDerivWithinAt_Ioi ⟨ha, self_mem_Ici⟩ ⟨hv, hav.le⟩ hav
-      (hdr.mono Ioi_subset_Ici_self)
-    rwa [slope_def_field, div_le_iff₀ (sub_pos.2 hav)] at this
-  rcases lt_trichotomy y a with hya | rfl | hay
-  · -- `x < y < a < z`
-    have h1 := hl.slope_anti_adjacent ⟨hx, hxa.le⟩ ⟨ha, self_mem_Iic⟩ hxy hya
-    have h2 := hL y (hs.ordConnected.out hx ha ⟨hxy.le, hya.le⟩) hya
-    have h3 := hR z hz haz
-    refine le_trans ?_ h1
-    rw [div_le_div_iff₀ (sub_pos.2 hyz) (sub_pos.2 hya)]
-    nlinarith [mul_le_mul_of_nonneg_right h3 (sub_pos.2 hya).le,
-      mul_le_mul_of_nonneg_right hd (mul_pos (sub_pos.2 haz) (sub_pos.2 hya)).le,
-      mul_le_mul_of_nonneg_right h2 (sub_pos.2 haz).le]
-  · -- `y = a`
-    have h2 := hL x hx hxa
-    have h3 := hR z hz haz
-    rw [div_le_div_iff₀ (sub_pos.2 hyz) (sub_pos.2 hxa)]
-    nlinarith [mul_le_mul_of_nonneg_right h3 (sub_pos.2 hxa).le,
-      mul_le_mul_of_nonneg_right hd (mul_pos (sub_pos.2 hyz) (sub_pos.2 hxa)).le,
-      mul_le_mul_of_nonneg_right h2 (sub_pos.2 hyz).le]
-  · -- `x < a < y < z`
-    have h1 := hr.slope_anti_adjacent ⟨ha, self_mem_Ici⟩ ⟨hz, haz.le⟩ hay hyz
-    have h2 := hL x hx hxa
-    have h3 := hR y (hs.ordConnected.out ha hz ⟨hay.le, hyz.le⟩) hay
-    refine h1.trans ?_
-    rw [div_le_div_iff₀ (sub_pos.2 hay) (sub_pos.2 hxy)]
-    nlinarith [mul_le_mul_of_nonneg_right h3 (sub_pos.2 hxa).le,
-      mul_le_mul_of_nonneg_right hd (mul_pos (sub_pos.2 hay) (sub_pos.2 hxa)).le,
-      mul_le_mul_of_nonneg_right h2 (sub_pos.2 hay).le]
 
 /-! ### The function `ψ (s, r) = (s − (p − 1) r) (s + r)^{p−1}` and its derivatives -/
 
@@ -290,10 +237,10 @@ private theorem psi_line_smooth {p : ℝ} (hp : 1 < p) (x y h k : H) {t : ℝ}
   · rw [hH, hK]; exact pow_le_pow_left₀ (norm_nonneg _) hhk 2
   · rw [hH, hK]; exact pow_le_pow_left₀ (norm_nonneg _) hhk 2
 
-/-- **(1.13), (1.14)**: if `x + t h ≠ 0` and `y + t k ≠ 0` for every `t`,
-`G (t) = ψ (|x + t h|, |y + t k|)` is twice differentiable on `ℝ` (`psi_line_smooth`), with
-`G'' ≤ 0` if `p ≥ 2` and `|h| ≤ |k|` and `G'' ≥ 0` if `p ≤ 2` and `|k| ≤ |h|`: `G` is concave,
-resp. convex, on `ℝ`. -/
+/-- **The concavity of `G`** in the proof of (1.12), by (1.14): if `x + t h ≠ 0` and `y + t k ≠ 0`
+for every `t`, `G (t) = ψ (|x + t h|, |y + t k|)` is twice differentiable on `ℝ`
+(`psi_line_smooth`), with `G'' ≤ 0` if `p ≥ 2` and `|h| ≤ |k|` and `G'' ≥ 0` if `p ≤ 2` and
+`|k| ≤ |h|`: `G` is concave, resp. convex, on `ℝ`. -/
 private theorem psi_line_of_ne {p : ℝ} (hp : 1 < p) (x y h k : H)
     (hx : ∀ t : ℝ, x + t • h ≠ 0) (hy : ∀ t : ℝ, y + t • k ≠ 0) :
     ((2 ≤ p ∧ ‖h‖ ≤ ‖k‖) → ConcaveOn ℝ univ (psiLine p x y h k)) ∧
@@ -726,15 +673,16 @@ theorem burkholderU_ge {p s r : ℝ} (hp : 1 < p) (hs : 0 ≤ s) (hr : 0 ≤ r) 
       ring
     nlinarith [mul_nonneg hwp.le hF]
 
-/-! ### The concavity of `U` along lines: (1.12)–(1.14) and Remark 1.2 -/
+/-! ### The concavity of `U` along lines: the proof of (1.12), and Remark 1.2 -/
 
 /-- `α_p = p (1 − 1/p)^{p−1} ≥ 0`. -/
 private theorem alpha_nonneg {p : ℝ} (hp : 1 < p) : 0 ≤ p * (1 - 1 / p) ^ (p - 1) := by
   have h : 0 ≤ 1 - 1 / p := by rw [sub_nonneg, div_le_one (by linarith)]; linarith
   exact mul_nonneg (by linarith) (Real.rpow_nonneg h _)
 
-/-- **(1.13), (1.14)** for `U`: if `x + t h ≠ 0`, `y + t k ≠ 0` for every `t` and `|h| ≤ |k|`,
-`t ↦ U (x + t h, y + t k)` is concave on `ℝ` (`psi_line_of_ne`). -/
+/-- **The concavity of `G`** in the proof of (1.12), by (1.14), for `U`: if `x + t h ≠ 0`,
+`y + t k ≠ 0` for every `t` and `|h| ≤ |k|`, `t ↦ U (x + t h, y + t k)` is concave on `ℝ`
+(`psi_line_of_ne`). -/
 private theorem burkholderU_concaveOn_line_of_ne {H : Type*} [NormedAddCommGroup H]
     [InnerProductSpace ℝ H] {p : ℝ} (hp : 1 < p) (x y h k : H) (hhk : ‖h‖ ≤ ‖k‖)
     (hx : ∀ t : ℝ, x + t • h ≠ 0) (hy : ∀ t : ℝ, y + t • k ≠ 0) :

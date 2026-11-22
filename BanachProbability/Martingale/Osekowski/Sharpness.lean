@@ -9,10 +9,13 @@ public import BanachProbability.ZigZag.Basic
 A. Osękowski, *Sharp Martingale and Semimartingale Inequalities*, Monografie Matematyczne 72,
 Birkhäuser 2012: Theorem 3.5 (the constant `p* − 1` of the moment inequality for `±1`-transforms is
 the best possible), by the second approach of p. 56–57 for `1 < p ≤ 2` and by the duality of p. 59
-for `p > 2`, and Theorem 3.34 (the best constants of the dyadic case are the same). For a real
-Hilbert space `H ≠ 0` and `1 < p < ∞`, `UMD_p (H) = UMD_p^Δ (H) = p* − 1`,
-`p* = max (p, p / (p − 1))`; the upper bound is Burkholder's theorem
-(`umdConst_le_of_innerProductSpace`).
+for `p > 2`, run on the function `W⁰` of the proof of Theorem 3.34, so that the constant is the best
+possible already for dyadic martingales (Remark 3.8 and p. 138). For a real Hilbert space `H ≠ 0`
+and `1 < p < ∞`, `UMD_p (H) = UMD_p^Δ (H) = p* − 1`, `p* = max (p, p / (p − 1))`; the upper bound is
+Burkholder's theorem (`umdConst_le_of_innerProductSpace`). Theorem 3.34 itself (for any `V` locally
+bounded from below, the inequality for dyadic pairs implies the one for all simple pairs) is not
+formalized: only its function `W⁰`, with the properties 1°, 2°, 3°, and the consequence for
+`V (x, y) = |y|^p − β^p |x|^p`.
 
 ## Main results
 
@@ -159,8 +162,11 @@ theorem self_mem_dyadicValues (V : X → X → ℝ) (x y : X) : V x y ∈ dyadic
   ⟨0, fun _ _ => 0, fun _ _ => 1, umdd_isPredictable_const 0, umdd_isPredictable_const 1,
     fun _ _ => Or.inl rfl, by simp⟩
 
-/-- **Splicing** (the proof of Theorem 2.2): if `v₁` is a value at `(x − d, y − e d)` and `v₂` one
-at `(x + d, y + e d)`, `e = ±1`, then `(v₁ + v₂) / 2` is a value at `(x, y)`. -/
+/-- **Splicing** (Theorem 3.34's modification of the splicing of Theorem 2.2): if `v₁` is a value at
+`(x − d, y − e d)` and `v₂` one at `(x + d, y + e d)`, `e = ±1`, then `(v₁ + v₂) / 2` is a value at
+`(x, y)`. (In the proof of Theorem 2.2, p. 11, the spliced pair need not be in `M (x, y)`, whose
+signs are deterministic, if the two pairs have different signs at the same time. Here a sign for
+each Haar function, as in Theorem 3.34, is a predictable sign, and the splice is in the class.) -/
 theorem midpoint_mem_dyadicValues {x y d : X} {e : ℝ} (he : e = 1 ∨ e = -1) {v₁ v₂ : ℝ}
     (h₁ : v₁ ∈ dyadicValues V (x - d) (y - e • d)) (h₂ : v₂ ∈ dyadicValues V (x + d) (y + e • d)) :
     (v₁ + v₂) / 2 ∈ dyadicValues V x y := by
@@ -429,10 +435,11 @@ private theorem inv_sub_one_le_of_concaveOn {p β : ℝ} (hp : 1 < p) (hβ : 0 <
   by_contra! h
   nlinarith [mul_pos_of_neg_of_neg (sub_neg.mpr h) hw1]
 
-/-- **Sharpness for `1 < p ≤ 2`** (Theorem 3.5, the second approach; Theorem 3.34): a dyadic
-`UMD_p` constant `β` of `ℝ` is at least `1 / (p − 1)`. The bound holds for every `p > 1` and is the
-sharp one for `1 < p ≤ 2`. With `U⁰ = W⁰` for `V (x, y) = |y|^p − β^p |x|^p`, the function
-`w (x) = U⁰ (x, 1 − x)` (3.64) satisfies the hypotheses of `inv_sub_one_le_of_concaveOn`. -/
+/-- **Sharpness for `1 < p ≤ 2`** (Theorem 3.5, the second approach, with the `W⁰` of Theorem 3.34):
+a dyadic `UMD_p` constant `β` of `ℝ` is at least `1 / (p − 1)`. The bound holds for every `p > 1`
+and is the sharp one for `1 < p ≤ 2`. With `U⁰ = W⁰` for `V (x, y) = |y|^p − β^p |x|^p`, the
+function `w (x) = U⁰ (x, 1 − x)` (3.64) satisfies the hypotheses of
+`inv_sub_one_le_of_concaveOn`. -/
 theorem inv_sub_one_le_of_isDyadicUMDBound {p : ℝ} (hp : 1 < p) {β : ℝ} (hβ0 : 0 ≤ β)
     (hβ : IsDyadicUMDBound ℝ p (ENNReal.ofReal β)) : (p - 1)⁻¹ ≤ β := by
   have hp0 : 0 < p := by linarith
@@ -612,9 +619,9 @@ private theorem conjExponent_sub_one {p : ℝ} (hp : 1 < p) : p / (p - 1) - 1 = 
   field_simp
   ring
 
-/-- **Sharpness for `p ≥ 2`** (Theorem 3.5, p. 59; Theorem 3.34): a dyadic `UMD_p` constant `β` of
-`ℝ` is at least `p − 1`: it is a constant for the conjugate exponent `q`, so
-`β ≥ 1 / (q − 1) = p − 1`. The bound holds for every `p > 1`. -/
+/-- **Sharpness for `p ≥ 2`** (Theorem 3.5, p. 59): a dyadic `UMD_p` constant `β` of `ℝ` is at
+least `p − 1`: it is a constant for the conjugate exponent `q`, so `β ≥ 1 / (q − 1) = p − 1`. The
+bound holds for every `p > 1`. -/
 theorem sub_one_le_of_isDyadicUMDBound {p : ℝ} (hp : 1 < p) {β : ℝ} (hβ0 : 0 ≤ β)
     (hβ : IsDyadicUMDBound ℝ p (ENNReal.ofReal β)) : p - 1 ≤ β := by
   have hq : (p / (p - 1)).HolderConjugate p := (Real.HolderConjugate.conjExponent hp).symm
@@ -632,7 +639,7 @@ private theorem pStar_sub_one_le {p : ℝ} (hp : 1 < p) {β : ℝ} (hβ0 : 0 ≤
   exact max_le (sub_one_le_of_isDyadicUMDBound hp hβ0 hβ)
     (inv_sub_one_le_of_isDyadicUMDBound hp hβ0 hβ)
 
-/-- `UMD_p^Δ (ℝ) ≥ p* − 1` (Theorems 3.5 and 3.34). -/
+/-- `UMD_p^Δ (ℝ) ≥ p* − 1` (Theorem 3.5 and Remark 3.8). -/
 theorem le_dyadicUMDConst_real {p : ℝ} (hp : 1 < p) :
     ENNReal.ofReal (pStar p - 1) ≤ dyadicUMDConst ℝ p := by
   rcases eq_or_ne (dyadicUMDConst ℝ p) ⊤ with h | h
@@ -641,7 +648,7 @@ theorem le_dyadicUMDConst_real {p : ℝ} (hp : 1 < p) :
     rw [ENNReal.ofReal_toReal h]
     exact isDyadicUMDBound_dyadicUMDConst (by linarith)
 
-/-- **The dyadic `UMD_p` constant of `ℝ`** is `p* − 1` (Theorem 3.34, Remark 3.8). -/
+/-- **The dyadic `UMD_p` constant of `ℝ`** is `p* − 1` (Remark 3.8 and p. 138). -/
 theorem dyadicUMDConst_real {p : ℝ} (hp : 1 < p) :
     dyadicUMDConst ℝ p = ENNReal.ofReal (pStar p - 1) :=
   le_antisymm (dyadicUMDConst_le_of_innerProductSpace hp) (le_dyadicUMDConst_real hp)
@@ -656,8 +663,8 @@ section Hilbert
 variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℝ H] [CompleteSpace H]
   [Nontrivial H]
 
-/-- `UMD_p^Δ (H) = p* − 1` for a real Hilbert space `H ≠ 0` (Theorem 3.34, Remark 3.8): `ℝ` embeds
-isometrically, by a unit vector. -/
+/-- `UMD_p^Δ (H) = p* − 1` for a real Hilbert space `H ≠ 0` (p. 138, "both in the real and the
+Hilbert-space-valued case"): `ℝ` embeds isometrically, by a unit vector. -/
 theorem dyadicUMDConst_of_innerProductSpace {p : ℝ} (hp : 1 < p) :
     dyadicUMDConst H p = ENNReal.ofReal (pStar p - 1) := by
   obtain ⟨v, hv⟩ := exists_norm_eq H zero_le_one
@@ -673,7 +680,7 @@ theorem umdConst_of_innerProductSpace {p : ℝ} (hp : 1 < p) :
 end Hilbert
 
 /-- **No constant below `p* − 1`** holds in the moment inequality, even for dyadic martingales
-(Theorems 3.5 and 3.34): for `K < p* − 1` there are a real Paley–Walsh martingale `f = Σ ε_k φ_k`
+(Theorem 3.5, Remark 3.8): for `K < p* − 1` there are a real Paley–Walsh martingale `f = Σ ε_k φ_k`
 and a transform `g = Σ σ_k ε_k φ_k` of `f` by predictable signs with `K ‖f‖_p < ‖g‖_p`. -/
 theorem exists_lt_lpNorm_transform {p K : ℝ} (hp : 1 < p) (hK : K < pStar p - 1) :
     ∃ (N : ℕ) (φ σ : Fin N → (Fin N → Bool) → ℝ), IsPredictable φ ∧ IsPredictable σ ∧

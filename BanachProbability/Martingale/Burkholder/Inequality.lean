@@ -26,7 +26,8 @@ sur les processus stochastiques, Astérisque 157–158 (1988), whose function (1
 * `squareFunction` (Theorem 8.6):
   `‖𝒮_n X‖_{L^p} ≤ (p* − 1) ‖X_n‖_{L^p}` and `‖X_n‖_{L^p} ≤ (p* − 1) ‖𝒮_n X‖_{L^p}`,
   `𝒮_n X = (Σ_{k < n} ‖X_{k+1} − X_k‖²)^{1/2}` (`squareFunction_of_martingale` without
-  separability).
+  separability). The clauses of Theorem 8.6 on the sharpness of the two constants are not
+  formalized.
 
 ## The proofs
 
@@ -220,10 +221,11 @@ values in a separable real Hilbert space, started at `0`, `p > 1` and
 `‖𝒮_n X‖_{L^p} ≤ (p* − 1) ‖X_n‖_{L^p}` and `‖X_n‖_{L^p} ≤ (p* − 1) ‖𝒮_n X‖_{L^p}`.
 
 The argument of the book (p. 414 and Section 2.1.3, p. 16): in the Hilbert space `H^{n+1}` with the
-`ℓ²` norm, the martingale `Z_m = Σ_{k < n} dX_{k+1} 1_{k < m} e_k` has `‖Z_n‖ = 𝒮_n X` and
-`‖dZ_m‖ = ‖dX_{m+1}‖ 1_{m < n}`, which is also the norm of the increments of `A_m = X_{n ∧ m} e_n`;
-each of the two martingales is differentially subordinate to the other, and Theorem 3.5
-(`inequality_of_subordinate`) applies to both pairs.
+`ℓ²` norm, the martingale `Z_m = Σ_{k < n} 1_{k < m} (X_{k+1} − X_k) e_k` has `‖Z_n‖ = 𝒮_n X` and
+`‖Z_{m+1} − Z_m‖ = 1_{m < n} ‖X_{m+1} − X_m‖`, which is also `‖A_{m+1} − A_m‖` for
+`A_m = X_{n ∧ m} e_n`; each of the two martingales is differentially subordinate to the other, and
+Theorem 3.5 (`inequality_of_subordinate`) applies to both pairs. The clauses of the theorem on the
+sharpness of the constants are not formalized.
 
 Up to time `n`, the martingales of the book take values in the first `n + 1` coordinates of
 `ℓ² (H)`; the proof works in that subspace, `H^{n+1}` (`PiLp 2`), with `X` in the last coordinate

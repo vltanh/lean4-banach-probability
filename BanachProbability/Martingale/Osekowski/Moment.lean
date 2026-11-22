@@ -176,7 +176,8 @@ private theorem integral_uInfty_nonpos (hf : Martingale f ℱ μ) (hg : Martinga
 
 /-- The case `p = 2` (p. 25): `E |g_n|² ≤ E |f_n|²` if `f_n ∈ L²` for every `n` and `g` is
 differentially subordinate to `f`, by the orthogonality of the martingale differences: Theorem 2.7
-for `|y|² − |x|²`, with `A = −2 x`, `B = 2 y`. -/
+for `|y|² − |x|²`, with `A = −2 x`, `B = 2 y`. (The book sums the orthogonality,
+`E |g_n|² = E Σ_k |dg_k|² ≤ E Σ_k |df_k|² = E |f_n|²`; this is the same step by step.) -/
 private theorem integral_sq_sub_sq_nonpos (hf : Martingale f ℱ μ) (hg : Martingale g ℱ μ)
     (hsub0 : ∀ᵐ ω ∂μ, ‖g 0 ω‖ ≤ ‖f 0 ω‖)
     (hsub : ∀ n, ∀ᵐ ω ∂μ, ‖g (n + 1) ω - g n ω‖ ≤ ‖f (n + 1) ω - f n ω‖)
