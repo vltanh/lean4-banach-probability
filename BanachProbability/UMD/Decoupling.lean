@@ -70,31 +70,6 @@ section Randomised
 
 variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
 
-/-- The randomised sum `Σ_{k<n} ε_k (Y_{k+1} − Y_k)` of the differences of a process `Y` on `Ω`, on
-the product `Ω × {−1, 1}^n`. -/
-noncomputable def randomisedSum {Ω : Type*} (Y : ℕ → Ω → X) (n : ℕ) (z : Ω × (Fin n → Bool)) : X :=
-  ∑ k : Fin n, coin (z.2 k) • (Y (k + 1) z.1 - Y k z.1)
-
-variable (X) in
-/-- The right-hand inequality of the randomised UMD property (HNVW I, (4.10), p. 282), with constant
-`β⁺ = β`: `‖Σ_{k<n} ε_k (Y_{k+1} − Y_k)‖_p ≤ β ‖Y_n‖_p` for all martingales `Y` started at `0`. -/
-def IsUpperRandomisedUMDBound [CompleteSpace X] (p : ℝ) (β : ℝ≥0∞) : Prop :=
-  ∀ (Ω : Type) (mΩ : MeasurableSpace Ω) (μ : Measure Ω) [IsProbabilityMeasure μ]
-    (ℱ : Filtration ℕ mΩ) (Y : ℕ → Ω → X), Martingale Y ℱ μ → (∀ ω, Y 0 ω = 0) →
-    ∀ n, eLpNorm (randomisedSum Y n) (ENNReal.ofReal p)
-        (μ.prod (ProbabilityTheory.uniformOn Set.univ)) ≤
-      β * eLpNorm (Y n) (ENNReal.ofReal p) μ
-
-variable (X) in
-/-- The left-hand inequality of the randomised UMD property (HNVW I, (4.10), p. 282), with constant
-`β⁻ = β`: `‖Y_n‖_p ≤ β ‖Σ_{k<n} ε_k (Y_{k+1} − Y_k)‖_p` for all martingales `Y` started at `0`. -/
-def IsLowerRandomisedUMDBound [CompleteSpace X] (p : ℝ) (β : ℝ≥0∞) : Prop :=
-  ∀ (Ω : Type) (mΩ : MeasurableSpace Ω) (μ : Measure Ω) [IsProbabilityMeasure μ]
-    (ℱ : Filtration ℕ mΩ) (Y : ℕ → Ω → X), Martingale Y ℱ μ → (∀ ω, Y 0 ω = 0) →
-    ∀ n, eLpNorm (Y n) (ENNReal.ofReal p) μ ≤
-      β * eLpNorm (randomisedSum Y n) (ENNReal.ofReal p)
-        (μ.prod (ProbabilityTheory.uniformOn Set.univ))
-
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} {p : ℝ}
 
 /-- The randomised sum of a measurable process is measurable on the product. -/
@@ -282,11 +257,6 @@ end Randomised
 section PaleyWalsh
 
 variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
-
-/-- The `L^p` norm `(E_ε E_{ε̃} ‖Σ_{k<n} ε̃_k ξ_k (ε)‖^p)^{1/p}` of the decoupled sum of a
-predictable family `ξ`. -/
-noncomputable def decoupledLpNorm {N : ℕ} (p : ℝ) (ξ : Fin N → (Fin N → Bool) → X) (n : ℕ) : ℝ :=
-  avg (fun ε => avg fun ε' => ‖paleyWalsh (fun k _ => ξ k ε) n ε'‖ ^ p) ^ (1 / p)
 
 variable {N : ℕ} {p : ℝ}
 

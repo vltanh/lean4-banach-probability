@@ -12,7 +12,8 @@ martingale (`martingale_martingaleTransform`), by the pull-out property of the c
 expectation. The multipliers may take values in any `RCLike` field acting on the space.
 
 Also: the image of a martingale under a continuous linear map is a martingale
-(`martingale_map_continuousLinearMap`), and `‖Y_{k+1} − Y_k‖_{L^p} ≤ 2 ‖Y_n‖_{L^p}` for
+(`martingale_map_continuousLinearMap`), so is a finite sum of martingales (`martingale_finsetSum`),
+and `‖Y_{k+1} − Y_k‖_{L^p} ≤ 2 ‖Y_n‖_{L^p}` for
 `k < n` and `p ≥ 1` (`eLpNorm_sub_le_two_mul`), since conditional expectations are `L^p`
 contractions.
 -/
@@ -82,6 +83,20 @@ theorem martingale_map_continuousLinearMap {F : Type*} [NormedAddCommGroup F] [N
     with ω h1 h2
   change μ[T ∘ M j | ℱ i] ω = T (M i ω)
   rw [← h1, Function.comp_apply, h2]
+
+/-- A finite sum of martingales is a martingale. -/
+theorem martingale_finsetSum {ι : Type*} (s : Finset ι) {M : ι → ℕ → Ω → E}
+    (hM : ∀ i ∈ s, Martingale (M i) ℱ μ) : Martingale (fun m ω => ∑ i ∈ s, M i m ω) ℱ μ := by
+  classical
+  induction s using Finset.induction_on with
+  | empty =>
+    convert martingale_zero E ℱ μ using 1
+    funext m ω; simp
+  | insert a s ha ih =>
+    have := (hM a (Finset.mem_insert_self a s)).add
+      (ih fun i hi => hM i (Finset.mem_insert_of_mem hi))
+    convert this using 1
+    funext m ω; simp [Finset.sum_insert ha]
 
 /-- The increments of a martingale are bounded in `L^p`, `p ≥ 1`, by twice its last value:
 `‖Y_{k+1} − Y_k‖_{L^p} ≤ 2 ‖Y_n‖_{L^p}` for `k < n`. -/

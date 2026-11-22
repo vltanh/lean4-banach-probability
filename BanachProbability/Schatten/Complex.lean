@@ -85,19 +85,22 @@ section Norm
 
 variable [DecidableEq n]
 
-/-- The singular values of `A ∈ ℂ^{m×n}`, indexed by the columns: `s_i = √λ_i (Aᴴ A)`. -/
-noncomputable def complexSingularValue (A : Matrix m n ℂ) (i : n) : ℝ :=
-  √((Matrix.isHermitian_conjTranspose_mul_self A).eigenvalues i)
-
-/-- The Schatten `q`-norm of a complex matrix: `‖A‖_{S_q} = (Σ_i s_i^q)^{1/q}` for `q < ∞`,
-`‖A‖_{S_∞} = max_i s_i`. -/
-noncomputable def complexSchattenNorm (q : ℝ≥0∞) (A : Matrix m n ℂ) : ℝ :=
-  if q = ⊤ then ⨆ i, complexSingularValue A i
-  else (∑ i, complexSingularValue A i ^ q.toReal) ^ (1 / q.toReal)
-
 /-- The singular values are nonnegative. -/
 theorem complexSingularValue_nonneg (A : Matrix m n ℂ) (i : n) : 0 ≤ complexSingularValue A i :=
   Real.sqrt_nonneg _
+
+/-- The Schatten norm in terms of Mathlib's singular values, `0 < q < ∞`. -/
+theorem complexSchattenNorm_eq_sum_singularValues {q : ℝ} (hq : 0 < q) (A : Matrix m n ℂ) :
+    complexSchattenNorm (ENNReal.ofReal q) A = (∑ k ∈ Finset.range (Fintype.card n),
+      (Matrix.toEuclideanLin A).singularValues k ^ q) ^ (1 / q) := by
+  rw [complexSchattenNorm, ite_eq_right ENNReal.ofReal_ne_top, ENNReal.toReal_ofReal hq.le]
+  exact congrArg (· ^ (1 / q)) (sum_comp_sqrt_eigenvalues_eq A (· ^ q))
+
+/-- `‖A‖_{S_∞}` is Mathlib's largest singular value. -/
+theorem complexSchattenNorm_top_eq_singularValues (A : Matrix m n ℂ) :
+    complexSchattenNorm ⊤ A = (Matrix.toEuclideanLin A).singularValues 0 := by
+  rw [complexSchattenNorm, ite_eq_left rfl]
+  exact iSup_sqrt_eigenvalues_eq A
 
 /-- `‖A‖_{S_q}^q = Σ_i s_i^q`. -/
 theorem complexSchattenNorm_ofReal_rpow {q : ℝ} (hq : 0 < q) (A : Matrix m n ℂ) :

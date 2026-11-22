@@ -1,9 +1,8 @@
 module
 
-public import Mathlib.Analysis.Matrix.Spectrum
+public import BanachProbability.Defs
 public import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
 public import Mathlib.LinearAlgebra.UnitaryGroup
-public import Mathlib.Analysis.Matrix.PosDef
 public import Mathlib.Algebra.Order.Star.Real
 public import Mathlib.Analysis.MeanInequalities
 
@@ -44,16 +43,67 @@ namespace BanachProbability
 
 variable {m n : Type*} [Fintype m] [Fintype n] [DecidableEq n]
 
-/-- The singular values of `A ∈ ℝ^{m×n}`, indexed by the columns: `s_i = √λ_i (Aᵀ A)`. -/
-noncomputable def singularValue (A : Matrix m n ℝ) (i : n) : ℝ :=
-  √((Matrix.isHermitian_conjTranspose_mul_self A).eigenvalues i)
-
-/-- The Schatten `q`-norm: `‖A‖_{S_q} = (Σ_i s_i^q)^{1/q}` for `q < ∞`, `‖A‖_{S_∞} = max_i s_i`. -/
-noncomputable def schattenNorm (q : ℝ≥0∞) (A : Matrix m n ℝ) : ℝ :=
-  if q = ⊤ then ⨆ i, singularValue A i else (∑ i, singularValue A i ^ q.toReal) ^ (1 / q.toReal)
-
 theorem singularValue_nonneg (A : Matrix m n ℝ) (i : n) : 0 ≤ singularValue A i :=
   Real.sqrt_nonneg _
+
+/-! ### Mathlib's singular values -/
+
+section SingularValues
+
+variable {𝕜 : Type*} [RCLike 𝕜]
+
+/-- Mathlib's singular values of the linear map of a real or complex matrix between Euclidean
+spaces. -/
+theorem singularValues_toEuclideanLin_fin (A : Matrix m n 𝕜) (k : Fin (Fintype.card n)) :
+    (Matrix.toEuclideanLin A).singularValues k =
+      √((Matrix.isHermitian_conjTranspose_mul_self A).eigenvalues₀ k) := by
+  classical
+  rw [LinearMap.singularValues_fin _ finrank_euclideanSpace, Matrix.IsHermitian.eigenvalues₀]
+  congr
+  rw [← Matrix.toEuclideanLin_conjTranspose_eq_adjoint, ← Matrix.toLpLin_mul_same]
+
+/-- A sum over the singular values `√λ_i (Aᴴ A)` in terms of Mathlib's. -/
+theorem sum_comp_sqrt_eigenvalues_eq (A : Matrix m n 𝕜) (F : ℝ → ℝ) :
+    ∑ i, F √((Matrix.isHermitian_conjTranspose_mul_self A).eigenvalues i) =
+      ∑ k ∈ Finset.range (Fintype.card n), F ((Matrix.toEuclideanLin A).singularValues k) := by
+  rw [Finset.sum_range, ← (Fintype.equivOfCardEq (Fintype.card_fin (Fintype.card n))).sum_comp]
+  refine Finset.sum_congr rfl fun k _ => ?_
+  rw [singularValues_toEuclideanLin_fin, Matrix.IsHermitian.eigenvalues, Equiv.symm_apply_apply]
+
+/-- The largest singular value `max_i √λ_i (Aᴴ A)` in terms of Mathlib's. -/
+theorem iSup_sqrt_eigenvalues_eq (A : Matrix m n 𝕜) :
+    ⨆ i, √((Matrix.isHermitian_conjTranspose_mul_self A).eigenvalues i) =
+      (Matrix.toEuclideanLin A).singularValues 0 := by
+  rcases isEmpty_or_nonempty n with h | h
+  · rw [Real.iSup_of_isEmpty, LinearMap.singularValues_of_finrank_le]
+    rw [finrank_euclideanSpace, Fintype.card_eq_zero]
+  · have h0 : 0 < Fintype.card n := Fintype.card_pos
+    set e := Fintype.equivOfCardEq (Fintype.card_fin (Fintype.card n)) with he
+    have hk : ∀ k, √((Matrix.isHermitian_conjTranspose_mul_self A).eigenvalues (e k)) =
+        (Matrix.toEuclideanLin A).singularValues k := fun k => by
+      rw [singularValues_toEuclideanLin_fin, Matrix.IsHermitian.eigenvalues, he,
+        Equiv.symm_apply_apply]
+    refine le_antisymm (ciSup_le fun i => ?_) ?_
+    · rw [← e.apply_symm_apply i, hk]
+      exact LinearMap.singularValues_antitone _ (Nat.zero_le _)
+    · rw [show (0 : ℕ) = ((⟨0, h0⟩ : Fin (Fintype.card n)) : ℕ) from rfl, ← hk]
+      exact le_ciSup (f := fun i => √((Matrix.isHermitian_conjTranspose_mul_self A).eigenvalues i))
+        (Set.finite_range _).bddAbove _
+
+end SingularValues
+
+/-- The Schatten norm in terms of Mathlib's singular values, `0 < q < ∞`. -/
+theorem schattenNorm_eq_sum_singularValues {q : ℝ} (hq : 0 < q) (A : Matrix m n ℝ) :
+    schattenNorm (ENNReal.ofReal q) A = (∑ k ∈ Finset.range (Fintype.card n),
+      (Matrix.toEuclideanLin A).singularValues k ^ q) ^ (1 / q) := by
+  rw [schattenNorm, ite_eq_right ENNReal.ofReal_ne_top, ENNReal.toReal_ofReal hq.le]
+  exact congrArg (· ^ (1 / q)) (sum_comp_sqrt_eigenvalues_eq A (· ^ q))
+
+/-- `‖A‖_{S_∞}` is Mathlib's largest singular value. -/
+theorem schattenNorm_top_eq_singularValues (A : Matrix m n ℝ) :
+    schattenNorm ⊤ A = (Matrix.toEuclideanLin A).singularValues 0 := by
+  rw [schattenNorm, ite_eq_left rfl]
+  exact iSup_sqrt_eigenvalues_eq A
 
 /-- `s_i (A)² = λ_i (Aᵀ A)`. -/
 theorem singularValue_sq (A : Matrix m n ℝ) (i : n) :
@@ -223,16 +273,33 @@ theorem schattenNorm_eq_of_filter_map_singularValue_eq {m' n' : Type*} [Fintype 
 
 open Polynomial in
 /-- If the characteristic polynomials of `Aᵀ A` and `Bᵀ B` agree up to powers of `X`, then `A` and
+`B` have the same nonzero singular values. -/
+theorem filter_map_singularValue_eq_of_X_pow_mul_charpoly_eq {m' n' : Type*} [Fintype m']
+    [Fintype n'] [DecidableEq n'] {A : Matrix m n ℝ} {B : Matrix m' n' ℝ} {a b : ℕ}
+    (h : X ^ a * (Aᵀ * A).charpoly = X ^ b * (Bᵀ * B).charpoly) :
+    (Multiset.map (singularValue A) Finset.univ.val).filter (· ≠ 0) =
+      (Multiset.map (singularValue B) Finset.univ.val).filter (· ≠ 0) := by
+  have h' : X ^ a * (Aᴴ * A).charpoly = X ^ b * (Bᴴ * B).charpoly := by
+    simpa only [Matrix.conjTranspose_eq_transpose_of_trivial] using h
+  rw [filter_map_singularValue, filter_map_singularValue,
+    filter_map_eigenvalues_eq_of_X_pow_mul_charpoly_eq _ _ h']
+
+open Polynomial in
+/-- If the characteristic polynomials of `Aᵀ A` and `Bᵀ B` agree up to powers of `X`, then `A` and
 `B` have the same Schatten norms. -/
 theorem schattenNorm_eq_of_X_pow_mul_charpoly_eq {m' n' : Type*} [Fintype m'] [Fintype n']
     [DecidableEq n'] {A : Matrix m n ℝ} {B : Matrix m' n' ℝ} {a b : ℕ}
     (h : X ^ a * (Aᵀ * A).charpoly = X ^ b * (Bᵀ * B).charpoly) (q : ℝ≥0∞) :
-    schattenNorm q A = schattenNorm q B := by
-  have h' : X ^ a * (Aᴴ * A).charpoly = X ^ b * (Bᴴ * B).charpoly := by
-    simpa only [Matrix.conjTranspose_eq_transpose_of_trivial] using h
-  refine schattenNorm_eq_of_filter_map_singularValue_eq ?_ q
-  rw [filter_map_singularValue, filter_map_singularValue,
-    filter_map_eigenvalues_eq_of_X_pow_mul_charpoly_eq _ _ h']
+    schattenNorm q A = schattenNorm q B :=
+  schattenNorm_eq_of_filter_map_singularValue_eq
+    (filter_map_singularValue_eq_of_X_pow_mul_charpoly_eq h) q
+
+/-- `Aᵀ` and `A` have the same nonzero singular values: the sums of `F (s_i)` agree if
+`F (0) = 0`. -/
+theorem sum_comp_singularValue_transpose [DecidableEq m] (A : Matrix m n ℝ) {F : ℝ → ℝ}
+    (hF : F 0 = 0) : ∑ i, F (singularValue Aᵀ i) = ∑ i, F (singularValue A i) :=
+  sum_comp_eq_of_filter_map_eq (filter_map_singularValue_eq_of_X_pow_mul_charpoly_eq
+    (by simpa only [Matrix.transpose_transpose] using Matrix.charpoly_mul_comm' A Aᵀ)) hF
 
 /-! ### Finite `ℓ^p` sums -/
 

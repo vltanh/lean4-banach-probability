@@ -10,8 +10,8 @@ public import Mathlib.Analysis.Complex.Basic
 A Banach space `X` has the UMD property (unconditional martingale differences) for an exponent
 `p ∈ (1, ∞)` when martingale transforms by predictable signs are bounded in `L^p (X)`:
 `‖Σ_{k<n} σ_{k+1} (Y_{k+1} − Y_k)‖_{L^p} ≤ β ‖Y_n‖_{L^p}` for every `X`-valued martingale `Y`
-started at `0` and every sequence of signs `σ_k ∈ {±1}` with `σ_{k+1}` `ℱ_k`-measurable. This
-file defines:
+started at `0` and every sequence of signs `σ_k ∈ {±1}` with `σ_{k+1}` `ℱ_k`-measurable. The
+constants, defined in `BanachProbability.Defs`:
 
 * `IsUMDBound X p β` and `umdConst X p`, the best constant `UMD_p (X) ∈ [0, ∞]`, for martingales
   on arbitrary probability spaces (Hytönen–van Neerven–Veraar–Weis, *Analysis in Banach spaces I*
@@ -23,8 +23,9 @@ file defines:
 * `IsDyadicUMDBound X p β` and `dyadicUMDConst X p`, the same for Paley–Walsh martingales on the
   sign cube, `UMD_p^Δ (X)`;
 * `IsComplexUMDBound X p β`, `complexUMDConst X p` and their dyadic versions, for a complex
-  Banach space and predictable unimodular complex multipliers, `UMD_{ℂ,p} (X)`;
-* `pStar p = max (p, p / (p − 1))`, Burkholder's exponent.
+  Banach space and predictable unimodular complex multipliers, `UMD_{ℂ,p} (X)`.
+
+Burkholder's exponent is `pStar p = max (p, p / (p − 1))`, defined here.
 
 Basic facts: the constants are attained (`isUMDBound_umdConst`), they do not increase under linear
 isometric embeddings (`umdConst_le_of_linearIsometry`), they are at least `1` on a nonzero space
@@ -99,40 +100,7 @@ end Helpers
 
 section Real
 
-variable (X : Type*) [NormedAddCommGroup X] [NormedSpace ℝ X]
-
-/-- `β` is a `UMD_p` constant of the Banach space `X`: for every probability space and filtration,
-every `X`-valued martingale `Y` with `Y₀ = 0` and every sequence of predictable signs
-`σ_k ∈ {±1}` (`σ_{k+1}` is `ℱ_k`-measurable),
-`‖Σ_{k<n} σ_{k+1} (Y_{k+1} − Y_k)‖_{L^p} ≤ β ‖Y_n‖_{L^p}`. The probability spaces range over
-`Type`. -/
-def IsUMDBound [CompleteSpace X] (p : ℝ) (β : ℝ≥0∞) : Prop :=
-  ∀ (Ω : Type) (mΩ : MeasurableSpace Ω) (μ : Measure Ω) [IsProbabilityMeasure μ]
-    (ℱ : Filtration ℕ mΩ) (Y : ℕ → Ω → X) (σ : ℕ → Ω → ℝ),
-    Martingale Y ℱ μ → (∀ ω, Y 0 ω = 0) → (∀ n ω, σ n ω = 1 ∨ σ n ω = -1) →
-      (∀ k, StronglyMeasurable[ℱ k] (σ (k + 1))) →
-      ∀ n, eLpNorm (fun ω => ‖∑ k ∈ Finset.range n, σ (k + 1) ω • (Y (k + 1) ω - Y k ω)‖)
-          (ENNReal.ofReal p) μ ≤
-        β * eLpNorm (fun ω => ‖Y n ω‖) (ENNReal.ofReal p) μ
-
-/-- `UMD_p (X)`: the best `UMD_p` constant of `X` (`∞` if there is none). -/
-noncomputable def umdConst [CompleteSpace X] (p : ℝ) : ℝ≥0∞ :=
-  sInf {β | IsUMDBound X p β}
-
-/-- `β` bounds the `±1`-transforms of Paley–Walsh martingales with values in `X`:
-`‖Σ_{k<n} σ_k ε_k ξ_k‖_{L^p} ≤ β ‖Σ_{k<n} ε_k ξ_k‖_{L^p}` for predictable `ξ_k` and predictable
-signs `σ_k`. -/
-def IsDyadicUMDBound (p : ℝ) (β : ℝ≥0∞) : Prop :=
-  ∀ (N : ℕ) (ξ : Fin N → (Fin N → Bool) → X) (σ : Fin N → (Fin N → Bool) → ℝ),
-    IsPredictable ξ → IsPredictable σ → (∀ k ε, σ k ε = 1 ∨ σ k ε = -1) → ∀ n : ℕ,
-      ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh (fun k ε => σ k ε • ξ k ε) n)) ≤
-        β * ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh ξ n))
-
-/-- The dyadic `UMD_p` constant `UMD_p^Δ (X)`. -/
-noncomputable def dyadicUMDConst (p : ℝ) : ℝ≥0∞ :=
-  sInf {β | IsDyadicUMDBound X p β}
-
-variable {X}
+variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
 
 theorem IsUMDBound.mono [CompleteSpace X] {p : ℝ} {β β' : ℝ≥0∞} (h : IsUMDBound X p β)
     (hβ : β ≤ β') : IsUMDBound X p β' := by
@@ -412,36 +380,7 @@ end Real
 
 section Complex
 
-variable (X : Type*) [NormedAddCommGroup X] [NormedSpace ℂ X]
-
-/-- `β` is a complex `UMD_p` constant of the complex Banach space `X`: for every `X`-valued
-martingale `Y` with `Y₀ = 0` and every predictable sequence of unimodular `c_k ∈ ℂ`,
-`‖Σ_{k<n} c_{k+1} (Y_{k+1} − Y_k)‖_{L^p} ≤ β ‖Y_n‖_{L^p}`. -/
-def IsComplexUMDBound [CompleteSpace X] (p : ℝ) (β : ℝ≥0∞) : Prop :=
-  ∀ (Ω : Type) (mΩ : MeasurableSpace Ω) (μ : Measure Ω) [IsProbabilityMeasure μ]
-    (ℱ : Filtration ℕ mΩ) (Y : ℕ → Ω → X) (c : ℕ → Ω → ℂ),
-    Martingale Y ℱ μ → (∀ ω, Y 0 ω = 0) → (∀ n ω, ‖c n ω‖ = 1) →
-      (∀ k, StronglyMeasurable[ℱ k] (c (k + 1))) →
-      ∀ n, eLpNorm (fun ω => ∑ k ∈ Finset.range n, c (k + 1) ω • (Y (k + 1) ω - Y k ω))
-          (ENNReal.ofReal p) μ ≤ β * eLpNorm (Y n) (ENNReal.ofReal p) μ
-
-/-- `UMD_{ℂ,p} (X)`: the best complex `UMD_p` constant (`∞` if there is none). -/
-noncomputable def complexUMDConst [CompleteSpace X] (p : ℝ) : ℝ≥0∞ :=
-  sInf {β | IsComplexUMDBound X p β}
-
-/-- The dyadic complex `UMD_p` bound: predictable unimodular complex multipliers of Paley–Walsh
-martingales. -/
-def IsComplexDyadicUMDBound (p : ℝ) (β : ℝ≥0∞) : Prop :=
-  ∀ (N : ℕ) (ξ : Fin N → (Fin N → Bool) → X) (c : Fin N → (Fin N → Bool) → ℂ),
-    IsPredictable ξ → IsPredictable c → (∀ k ε, ‖c k ε‖ = 1) → ∀ n : ℕ,
-      ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh (fun k ε => c k ε • ξ k ε) n)) ≤
-        β * ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh ξ n))
-
-/-- The dyadic complex `UMD_p` constant `UMD_{ℂ,p}^Δ (X)`. -/
-noncomputable def complexDyadicUMDConst (p : ℝ) : ℝ≥0∞ :=
-  sInf {β | IsComplexDyadicUMDBound X p β}
-
-variable {X}
+variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℂ X]
 
 theorem complexUMDConst_le_of_isComplexUMDBound [CompleteSpace X] {p : ℝ} {β : ℝ≥0∞}
     (h : IsComplexUMDBound X p β) : complexUMDConst X p ≤ β :=
@@ -475,6 +414,11 @@ theorem isComplexUMDBound_complexUMDConst [CompleteSpace X] {p : ℝ} (hp : 1 < 
   · have : 1 ≤ complexUMDConst X p :=
       le_sInf fun _ hβ => umdd_one_le_of_isComplexUMDBound (by linarith) hβ
     exact absurd hS (zero_lt_one.trans_le this).ne'
+
+/-- `UMD_{ℂ,p} (X) ≥ 1` on a nonzero space. -/
+theorem one_le_complexUMDConst [CompleteSpace X] [Nontrivial X] {p : ℝ} (hp : 1 < p) :
+    1 ≤ complexUMDConst X p :=
+  le_sInf fun _ hβ => umdd_one_le_of_isComplexUMDBound (by linarith) hβ
 
 /-- Every complex `UMD_p` constant is a dyadic one: a Paley–Walsh martingale is a martingale on
 the probability space `Fin N → Bool`, and its transform by predictable unimodular multipliers is

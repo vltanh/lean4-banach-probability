@@ -35,10 +35,6 @@ variable {N : ℕ} {n : Type*} [Fintype n] [DecidableEq n]
 
 /-! ### The constant `M_{2k}` -/
 
-/-- The constant `M_{2k} = ((2k)! / (2^k k!))^{1/2k}` (Tomczak-Jaegermann (1974), p. 177). -/
-noncomputable def evenKhintchineConst (k : ℕ) : ℝ :=
-  (((2 * k).factorial : ℝ) / (2 ^ k * k.factorial)) ^ (1 / (2 * k : ℝ))
-
 /-- `M_{2k} ≥ 0`. -/
 theorem evenKhintchineConst_nonneg (k : ℕ) : 0 ≤ evenKhintchineConst k :=
   Real.rpow_nonneg (by positivity) _

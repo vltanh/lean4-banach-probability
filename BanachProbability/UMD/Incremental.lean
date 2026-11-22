@@ -487,22 +487,7 @@ end Lemma3618
 
 section Deterministic
 
-variable (𝕜 X : Type*) [RCLike 𝕜] [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedSpace 𝕜 X]
-
-/-- `β` is a UMD constant of `X` for *deterministic* multipliers (HNVW I, Definition 4.2.1,
-p. 281): for every `X`-valued martingale `Y` with `Y_0 = 0` on a probability space and all scalars
-`ε_k ∈ 𝕜` with `|ε_k| = 1`, `‖Σ_{k<n} ε_{k+1} (Y_{k+1} − Y_k)‖_{L^p} ≤ β ‖Y_n‖_{L^p}`. In the book
-the martingales are on σ-finite measure spaces, and do not have to start at `0`; but only their
-increments enter the inequality, so this is the inequality for `f_n − f_0`. -/
-def IsDeterministicUMDBound (p : ℝ) (β : ℝ≥0∞) : Prop :=
-  ∀ (Ω : Type) (mΩ : MeasurableSpace Ω) (μ : Measure Ω) [IsProbabilityMeasure μ]
-    (ℱ : Filtration ℕ mΩ) (Y : ℕ → Ω → X) (ε : ℕ → 𝕜),
-    Martingale Y ℱ μ → (∀ ω, Y 0 ω = 0) → (∀ n, ‖ε n‖ = 1) →
-      ∀ n, eLpNorm (fun ω => ‖∑ k ∈ Finset.range n, ε (k + 1) • (Y (k + 1) ω - Y k ω)‖)
-          (ENNReal.ofReal p) μ ≤
-        β * eLpNorm (fun ω => ‖Y n ω‖) (ENNReal.ofReal p) μ
-
-variable {𝕜 X}
+variable {𝕜 X : Type*} [RCLike 𝕜] [NormedAddCommGroup X] [NormedSpace ℝ X] [NormedSpace 𝕜 X]
 
 /-- The cube instance: the martingale `Y_1 = ε_0 x` on the one-sign cube, transformed by `1`,
 shows that every UMD constant for deterministic multipliers of a nonzero space is at least `1`. -/

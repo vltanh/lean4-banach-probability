@@ -283,11 +283,6 @@ section Count
 
 variable {m n : Type*} [Fintype m] [Fintype n] [DecidableEq n]
 
-/-- The number of singular values of `A` larger than `s`, `#{i : s_i (A) > s}`; for a symmetric
-matrix, the number of eigenvalues with `|λ_i| > s`, the trace of `1_{(s, ∞)} (|A|)`. -/
-noncomputable def countAbove (s : ℝ) (A : Matrix m n ℝ) : ℕ :=
-  (Finset.univ.filter fun i => s < singularValue A i).card
-
 theorem countAbove_anti {s t : ℝ} (hst : s ≤ t) (A : Matrix m n ℝ) :
     countAbove t A ≤ countAbove s A :=
   Finset.card_le_card fun i hi => by

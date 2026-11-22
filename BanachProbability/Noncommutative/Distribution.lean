@@ -27,10 +27,6 @@ namespace BanachProbability
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} {n : Type*} [Fintype n]
   [DecidableEq n]
 
-/-- The distribution function `λ_s (x) = ∫ #{i : s_i (x ω) > s} dμ (ω)`. -/
-noncomputable def ncDistribution (μ : Measure Ω) (s : ℝ) (x : Ω → Matrix n n ℝ) : ℝ :=
-  ∫ ω, (countAbove s (x ω) : ℝ) ∂μ
-
 private theorem mcd_rpow_ite_eq_indicator (r a : ℝ) :
     (fun s : ℝ => r * s ^ (r - 1) * (if s < a then 1 else 0)) =
       (Set.Iio a).indicator fun s => r * s ^ (r - 1) := by

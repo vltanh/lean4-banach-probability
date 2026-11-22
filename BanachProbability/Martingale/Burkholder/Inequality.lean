@@ -23,10 +23,11 @@ sur les processus stochastiques, Astérisque 157–158 (1988), whose function (1
   `Osekowski.eLpNorm_le_of_subordinate` is the theorem in the form of the book (`‖X_0‖ ≤ ‖Y_0‖`
   instead of a start at `0`), and the constant `p* − 1` is the best possible
   (`Martingale/Osekowski/Sharpness.lean`).
-* `squareFunction` (Theorem 8.6):
-  `‖𝒮_n X‖_{L^p} ≤ (p* − 1) ‖X_n‖_{L^p}` and `‖X_n‖_{L^p} ≤ (p* − 1) ‖𝒮_n X‖_{L^p}`,
-  `𝒮_n X = (Σ_{k < n} ‖X_{k+1} − X_k‖²)^{1/2}` (`squareFunction_of_martingale` without
-  separability). The clauses of Theorem 8.6 on the sharpness of the two constants are not
+* `squareFunction_with_start` (Theorem 8.6):
+  `‖S_n X‖_{L^p} ≤ (p* − 1) ‖X_n‖_{L^p}` and `‖X_n‖_{L^p} ≤ (p* − 1) ‖S_n X‖_{L^p}`,
+  `S_n X = (‖X_0‖² + Σ_{k < n} ‖X_{k+1} − X_k‖²)^{1/2}`; started at `0`, with
+  `𝒮_n X = (Σ_{k < n} ‖X_{k+1} − X_k‖²)^{1/2}`, `squareFunction` (`squareFunction_of_martingale`
+  without separability). The clauses of Theorem 8.6 on the sharpness of the two constants are not
   formalized.
 
 ## The proofs
@@ -40,15 +41,14 @@ sur les processus stochastiques, Astérisque 157–158 (1988), whose function (1
    Theorem 2.7); so `E (|X_n|^p − (p* − 1)^p |Y_n|^p) ≤ E U_p (Y_n, X_n) ≤ 0` by Fubini's theorem.
    The case `p = 2` is orthogonality.
 2. Theorem 8.6 (p. 414, by the device of Section 2.1.3, p. 16): in `K = ℓ² (H)`, the martingale
-   `(X_m, 0, 0, …)` and `(dX_1, …, dX_m, 0, …)` have increments of equal norm, so each is
-   differentially subordinate to the other, and the norm of the second is `𝒮_m X`; Theorem 3.5
-   applies to both pairs.
+   `(X_m, 0, 0, …)` and `(X_0, dX_1, …, dX_m, 0, …)` have starts and increments of equal norm, so
+   each is differentially subordinate to the other, and the norm of the second is `S_m X`; Theorem
+   3.5 applies to both pairs.
 
-The statements are for martingales that start at `0`, so the term `‖X_0‖²` of the square function of
-the book vanishes, and are at a fixed time `n` rather than for `sup_n ‖·‖_p`. In step 2, up to time
-`n` the two martingales take values in the first `n + 1` coordinates of `ℓ² (H)`; the proof works in
-that subspace, `H^{n+1}` (`PiLp 2`), with `X` in the last coordinate and its increments in the first
-`n`, and with both martingales stopped at `n`, which does not change them up to time `n`.
+The statements are at a fixed time `n` rather than for `sup_n ‖·‖_p`. In step 2, up to time `n` the
+two martingales take values in a subspace `H^{n+2}` (`PiLp 2`) of `ℓ² (H)`; the proof works in that
+subspace, with `X` in the last coordinate, `X_0` in the first and the increments in the others, and
+with both martingales stopped at `n`, which does not change them up to time `n`.
 -/
 
 @[expose] public section
@@ -94,22 +94,6 @@ section SquareFunction
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
   {ℱ : Filtration ℕ mΩ}
 
-omit [IsProbabilityMeasure μ] in
-private theorem martingale_finset_sum {E ι : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [CompleteSpace E] (s : Finset ι) {M : ι → ℕ → Ω → E}
-    (hM : ∀ i ∈ s, Martingale (M i) ℱ μ) :
-    Martingale (fun m ω => ∑ i ∈ s, M i m ω) ℱ μ := by
-  classical
-  induction s using Finset.induction_on with
-  | empty =>
-    convert martingale_zero E ℱ μ using 1
-    funext m ω; simp
-  | insert a s ha ih =>
-    have := (hM a (Finset.mem_insert_self a s)).add
-      (ih fun i hi => hM i (Finset.mem_insert_of_mem hi))
-    convert this using 1
-    funext m ω; simp [Finset.sum_insert ha]
-
 variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℝ H] [CompleteSpace H]
 
 omit [InnerProductSpace ℝ H] [CompleteSpace H] in
@@ -123,33 +107,46 @@ private theorem norm_sum_single {n : ℕ} (v : Fin n → H) :
     Fin.castSucc_inj, Finset.sum_ite_eq, Finset.mem_univ, ite_true]
   simp [(Fin.castSucc_ne_last _).symm]
 
-/-- Burkholder's square function inequality without the separability of `H`. -/
-theorem squareFunction_of_martingale {X : ℕ → Ω → H} {p : ℝ} (hp : 1 < p)
-    (hX : Martingale X ℱ μ) (hX0 : ∀ ω, X 0 ω = 0) (n : ℕ) :
-    eLpNorm (fun ω => √(∑ k ∈ Finset.range n, ‖X (k + 1) ω - X k ω‖ ^ 2)) (ENNReal.ofReal p) μ ≤
+/-- **Burkholder's square function inequality** for martingales with any start (Osękowski 2012,
+Theorem 8.6, (8.28); Burkholder 1988, Theorem 3.1), with
+`S_n X = (‖X_0‖² + Σ_{k < n} ‖X_{k+1} − X_k‖²)^{1/2}`; the separability of `H` is not assumed. See
+`squareFunction` for the argument. -/
+theorem squareFunction_with_start {X : ℕ → Ω → H} {p : ℝ} (hp : 1 < p) (hX : Martingale X ℱ μ)
+    (n : ℕ) :
+    eLpNorm (fun ω => √(‖X 0 ω‖ ^ 2 + ∑ k ∈ Finset.range n, ‖X (k + 1) ω - X k ω‖ ^ 2))
+          (ENNReal.ofReal p) μ ≤
         ENNReal.ofReal (max p (p / (p - 1)) - 1) * eLpNorm (X n) (ENNReal.ofReal p) μ ∧
       eLpNorm (X n) (ENNReal.ofReal p) μ ≤
         ENNReal.ofReal (max p (p / (p - 1)) - 1) *
-          eLpNorm (fun ω => √(∑ k ∈ Finset.range n, ‖X (k + 1) ω - X k ω‖ ^ 2))
+          eLpNorm (fun ω => √(‖X 0 ω‖ ^ 2 + ∑ k ∈ Finset.range n, ‖X (k + 1) ω - X k ω‖ ^ 2))
             (ENNReal.ofReal p) μ := by
   classical
-  -- the Hilbert space `H^{n+1}` with the `ℓ²` norm, and its coordinate embeddings
-  let L : Fin (n + 1) → H →L[ℝ] PiLp 2 (fun _ : Fin (n + 1) => H) := fun i =>
-    (PiLp.continuousLinearEquiv 2 ℝ (fun _ : Fin (n + 1) => H)).symm.toContinuousLinearMap.comp
-      (ContinuousLinearMap.single ℝ (fun _ : Fin (n + 1) => H) i)
-  have hL : ∀ i x, L i x = PiLp.single 2 (β := fun _ : Fin (n + 1) => H) i x := fun _ _ => rfl
-  -- `A_m = X_{n ∧ m} e_n` and `Z_m = Σ_{i < n} (X_{(i+1) ∧ m} − X_{i ∧ m}) e_i`
-  set A : ℕ → Ω → PiLp 2 (fun _ : Fin (n + 1) => H) :=
-    fun m ω => L (Fin.last n) (X (min n m) ω) with hAdef
-  set Z : ℕ → Ω → PiLp 2 (fun _ : Fin (n + 1) => H) := fun m ω =>
-    ∑ i : Fin n, L (Fin.castSucc i) (X (min ((i : ℕ) + 1) m) ω - X (min (i : ℕ) m) ω) with hZdef
+  -- the Hilbert space `H^{n+2}` with the `ℓ²` norm, and its coordinate embeddings
+  let L : Fin (n + 2) → H →L[ℝ] PiLp 2 (fun _ : Fin (n + 2) => H) := fun i =>
+    (PiLp.continuousLinearEquiv 2 ℝ (fun _ : Fin (n + 2) => H)).symm.toContinuousLinearMap.comp
+      (ContinuousLinearMap.single ℝ (fun _ : Fin (n + 2) => H) i)
+  have hL : ∀ i x, L i x = PiLp.single 2 (β := fun _ : Fin (n + 2) => H) i x := fun _ _ => rfl
+  -- `A_m = X_{n ∧ m} e_{n+1}` and `Z_m = X_0 e_0 + Σ_{i < n} (X_{(i+1) ∧ m} − X_{i ∧ m}) e_{i+1}`
+  set v : ℕ → Ω → Fin (n + 1) → H := fun m ω => Fin.cons (X 0 ω) fun i : Fin n =>
+    X (min ((i : ℕ) + 1) m) ω - X (min (i : ℕ) m) ω with hvdef
+  set A : ℕ → Ω → PiLp 2 (fun _ : Fin (n + 2) => H) :=
+    fun m ω => L (Fin.last (n + 1)) (X (min n m) ω) with hAdef
+  set Z : ℕ → Ω → PiLp 2 (fun _ : Fin (n + 2) => H) :=
+    fun m ω => ∑ i : Fin (n + 1), L (Fin.castSucc i) (v m ω i) with hZdef
   have hA : Martingale A ℱ μ :=
     martingale_map_continuousLinearMap (Osekowski.martingale_min hX n) _
-  have hZ : Martingale Z ℱ μ := martingale_finset_sum Finset.univ fun i _ =>
-    martingale_map_continuousLinearMap ((Osekowski.martingale_min hX ((i : ℕ) + 1)).sub
-      (Osekowski.martingale_min hX i)) _
-  have hA0 : ∀ ω, A 0 ω = 0 := fun ω => by simp [hAdef, hX0]
-  have hZ0 : ∀ ω, Z 0 ω = 0 := fun ω => by simp [hZdef]
+  have hZ : Martingale Z ℱ μ := martingale_finsetSum Finset.univ fun i _ => by
+    refine martingale_map_continuousLinearMap (M := fun m ω => v m ω i) ?_ _
+    refine Fin.cases ?_ (fun i => ?_) i
+    · exact (by simpa only [Nat.zero_min] using Osekowski.martingale_min hX 0 :
+        Martingale (fun _ => X 0) ℱ μ)
+    · exact (Osekowski.martingale_min hX ((i : ℕ) + 1)).sub (Osekowski.martingale_min hX i)
+  -- the start: `‖Z_0‖ = ‖A_0‖ = ‖X_0‖`
+  have hA0 : ∀ ω, ‖A 0 ω‖ = ‖X 0 ω‖ := fun ω => by simp [hAdef, hL, PiLp.norm_single]
+  have hZ0 : ∀ ω, ‖Z 0 ω‖ = ‖X 0 ω‖ := fun ω => by
+    simp only [hZdef, hL]
+    rw [norm_sum_single, Fin.sum_univ_succ]
+    simp [hvdef, Real.sqrt_sq (norm_nonneg _)]
   -- the increments: `‖dZ_m‖ = ‖dA_m‖ = 1_{m < n} ‖dX_m‖`
   have hinc : ∀ m ω, ‖Z (m + 1) ω - Z m ω‖ = ‖A (m + 1) ω - A m ω‖ := by
     intro m ω
@@ -168,11 +165,17 @@ theorem squareFunction_of_martingale {X : ℕ → Ω → H} {p : ℝ} (hp : 1 < 
           min_eq_right (by omega : m + 1 ≤ i), min_eq_right (by omega : m ≤ i + 1),
           min_eq_right (by omega : m ≤ i)]
         simp
-    have hZd : Z (m + 1) ω - Z m ω = ∑ i : Fin n, PiLp.single 2 (β := fun _ : Fin (n + 1) => H)
-        (Fin.castSucc i) (if (i : ℕ) = m then X (m + 1) ω - X m ω else 0) := by
-      simp only [hZdef, ← Finset.sum_sub_distrib, hL, ← PiLp.single_sub, hw]
-    rw [hZd, norm_sum_single]
-    simp only [hAdef, hL, ← PiLp.single_sub, PiLp.norm_single]
+    have hZd : Z (m + 1) ω - Z m ω = ∑ i : Fin (n + 1),
+        PiLp.single 2 (β := fun _ : Fin (n + 2) => H) (Fin.castSucc i)
+          (v (m + 1) ω i - v m ω i) := by
+      simp only [hZdef, ← Finset.sum_sub_distrib, hL, ← PiLp.single_sub]
+    have hv0 : v (m + 1) ω 0 - v m ω 0 = 0 := by simp [hvdef]
+    have hvs : ∀ i : Fin n, v (m + 1) ω i.succ - v m ω i.succ =
+        if (i : ℕ) = m then X (m + 1) ω - X m ω else 0 := fun i => by
+      simp only [hvdef, Fin.cons_succ, hw]
+    rw [hZd, norm_sum_single, Fin.sum_univ_succ, hv0]
+    simp only [hvs, norm_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, zero_add,
+      hAdef, hL, ← PiLp.single_sub, PiLp.norm_single]
     rcases lt_or_ge m n with h | h
     · rw [min_eq_right (by omega : m + 1 ≤ n), min_eq_right h.le]
       have : ∑ i : Fin n, ‖(if (i : ℕ) = m then X (m + 1) ω - X m ω else 0)‖ ^ 2 =
@@ -188,13 +191,16 @@ theorem squareFunction_of_martingale {X : ℕ → Ω → H} {p : ℝ} (hp : 1 < 
           have := i.isLt
           simp [show (i : ℕ) ≠ m by omega]
       rw [this]; simp
-  -- at time `n`: `‖A_n‖ = ‖X_n‖` and `‖Z_n‖ = 𝒮_n X`
+  -- at time `n`: `‖A_n‖ = ‖X_n‖` and `‖Z_n‖ = S_n X`
   have hAn : ∀ ω, ‖A n ω‖ = ‖X n ω‖ := fun ω => by simp [hAdef, hL, PiLp.norm_single]
-  have hZn : ∀ ω, ‖Z n ω‖ = √(∑ k ∈ Finset.range n, ‖X (k + 1) ω - X k ω‖ ^ 2) := by
+  have hZn : ∀ ω, ‖Z n ω‖ =
+      √(‖X 0 ω‖ ^ 2 + ∑ k ∈ Finset.range n, ‖X (k + 1) ω - X k ω‖ ^ 2) := by
     intro ω
     simp only [hZdef, hL]
-    rw [norm_sum_single, ← Fin.sum_univ_eq_sum_range (fun k => ‖X (k + 1) ω - X k ω‖ ^ 2) n]
-    congr 1
+    rw [norm_sum_single, Fin.sum_univ_succ,
+      ← Fin.sum_univ_eq_sum_range (fun k => ‖X (k + 1) ω - X k ω‖ ^ 2) n]
+    simp only [hvdef, Fin.cons_zero, Fin.cons_succ]
+    congr 2
     refine Finset.sum_congr rfl fun i _ => ?_
     have := i.isLt
     rw [min_eq_left (by omega : (i : ℕ) + 1 ≤ n), min_eq_left (by omega : (i : ℕ) ≤ n)]
@@ -203,16 +209,31 @@ theorem squareFunction_of_martingale {X : ℕ → Ω → H} {p : ℝ} (hp : 1 < 
       ← eLpNorm_norm (X n) (hX.integrable n).aestronglyMeasurable]
     simp only [hAn]
   have eZ : eLpNorm (Z n) (ENNReal.ofReal p) μ = eLpNorm
-      (fun ω => √(∑ k ∈ Finset.range n, ‖X (k + 1) ω - X k ω‖ ^ 2)) (ENNReal.ofReal p) μ := by
+      (fun ω => √(‖X 0 ω‖ ^ 2 + ∑ k ∈ Finset.range n, ‖X (k + 1) ω - X k ω‖ ^ 2))
+        (ENNReal.ofReal p) μ := by
     rw [← eLpNorm_norm (Z n) (hZ.integrable n).aestronglyMeasurable]
     simp only [hZn]
   refine ⟨?_, ?_⟩
-  · have := inequality_of_subordinate hp hZ hA hZ0 hA0
+  · have := Osekowski.eLpNorm_le_of_subordinate hp hA hZ
+      (Eventually.of_forall fun ω => by rw [hZ0, hA0])
       (fun m => Eventually.of_forall fun ω => (hinc m ω).le) n
     rwa [eZ, eA] at this
-  · have := inequality_of_subordinate hp hA hZ hA0 hZ0
+  · have := Osekowski.eLpNorm_le_of_subordinate hp hZ hA
+      (Eventually.of_forall fun ω => by rw [hZ0, hA0])
       (fun m => Eventually.of_forall fun ω => (hinc m ω).ge) n
     rwa [eZ, eA] at this
+
+/-- Burkholder's square function inequality without the separability of `H`, for martingales started
+at `0`. -/
+theorem squareFunction_of_martingale {X : ℕ → Ω → H} {p : ℝ} (hp : 1 < p)
+    (hX : Martingale X ℱ μ) (hX0 : ∀ ω, X 0 ω = 0) (n : ℕ) :
+    eLpNorm (fun ω => √(∑ k ∈ Finset.range n, ‖X (k + 1) ω - X k ω‖ ^ 2)) (ENNReal.ofReal p) μ ≤
+        ENNReal.ofReal (max p (p / (p - 1)) - 1) * eLpNorm (X n) (ENNReal.ofReal p) μ ∧
+      eLpNorm (X n) (ENNReal.ofReal p) μ ≤
+        ENNReal.ofReal (max p (p / (p - 1)) - 1) *
+          eLpNorm (fun ω => √(∑ k ∈ Finset.range n, ‖X (k + 1) ω - X k ω‖ ^ 2))
+            (ENNReal.ofReal p) μ := by
+  simpa [hX0] using squareFunction_with_start hp hX n
 
 /-- **Burkholder's square function inequality** (Osękowski, *Sharp Martingale and Semimartingale
 Inequalities* (2012), Theorem 8.6, (8.28); Burkholder 1988, Theorem 3.1): for a martingale `X` with
@@ -220,17 +241,17 @@ values in a separable real Hilbert space, started at `0`, `p > 1` and
 `𝒮_n X = (Σ_{k < n} ‖X_{k+1} − X_k‖²)^{1/2}`,
 `‖𝒮_n X‖_{L^p} ≤ (p* − 1) ‖X_n‖_{L^p}` and `‖X_n‖_{L^p} ≤ (p* − 1) ‖𝒮_n X‖_{L^p}`.
 
-The argument of the book (p. 414 and Section 2.1.3, p. 16): in the Hilbert space `H^{n+1}` with the
-`ℓ²` norm, the martingale `Z_m = Σ_{k < n} 1_{k < m} (X_{k+1} − X_k) e_k` has `‖Z_n‖ = 𝒮_n X` and
-`‖Z_{m+1} − Z_m‖ = 1_{m < n} ‖X_{m+1} − X_m‖`, which is also `‖A_{m+1} − A_m‖` for
-`A_m = X_{n ∧ m} e_n`; each of the two martingales is differentially subordinate to the other, and
-Theorem 3.5 (`inequality_of_subordinate`) applies to both pairs. The clauses of the theorem on the
-sharpness of the constants are not formalized.
+The argument of the book (p. 414 and Section 2.1.3, p. 16): in the Hilbert space `H^{n+2}` with the
+`ℓ²` norm, the martingale `Z_m = X_0 e_0 + Σ_{k < n} 1_{k < m} (X_{k+1} − X_k) e_{k+1}` has
+`‖Z_n‖ = S_n X`, `‖Z_0‖ = ‖X_0‖` and `‖Z_{m+1} − Z_m‖ = 1_{m < n} ‖X_{m+1} − X_m‖`, and
+`A_m = X_{n ∧ m} e_{n+1}` has a start and increments of the same norms; each of the two martingales
+is differentially subordinate to the other, and Theorem 3.5 (`Osekowski.eLpNorm_le_of_subordinate`)
+applies to both pairs (`squareFunction_with_start`). Here `X_0 = 0` and `S_n X = 𝒮_n X`. The clauses
+of the theorem on the sharpness of the constants are not formalized.
 
-Up to time `n`, the martingales of the book take values in the first `n + 1` coordinates of
-`ℓ² (H)`; the proof works in that subspace, `H^{n+1}` (`PiLp 2`), with `X` in the last coordinate
-rather than the first and both martingales stopped at `n`, which leaves them unchanged up to time
-`n`.
+Up to time `n`, the martingales of the book take values in finitely many coordinates of `ℓ² (H)`;
+the proof works in that subspace, `H^{n+2}` (`PiLp 2`), with `X` in the last coordinate rather than
+the first and both martingales stopped at `n`, which leaves them unchanged up to time `n`.
 The separability of `H` is not used. -/
 theorem squareFunction {X : ℕ → Ω → H} [TopologicalSpace.SeparableSpace H] {p : ℝ} (hp : 1 < p)
     (hX : Martingale X ℱ μ) (hX0 : ∀ ω, X 0 ω = 0) (n : ℕ) :

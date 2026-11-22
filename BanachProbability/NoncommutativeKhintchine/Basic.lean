@@ -13,7 +13,8 @@ For real `n × n` matrices `x_1, …, x_k`, `q ∈ [2, ∞)` and independent fai
   `(E ‖Σ_i ε_i x_i‖_{S_q}^q)^{1/q} ≤ √(2 (q − 1)) max (‖Σ_i x_i x_iᵀ‖_{S_{q/2}},
   ‖Σ_i x_iᵀ x_i‖_{S_{q/2}})^{1/2}`, from the symmetric case applied to the Hermitian dilations
   `D (x_i) = [[0, x_i], [x_iᵀ, 0]]` (Mackey–Jordan–Chen–Farrell–Tropp, Ann. Probab. 42 (2014),
-  §8): `‖D (S)‖_q^q = 2 ‖S‖_q^q` and `Σ_i D (x_i)² = diag (Σ_i x_i x_iᵀ, Σ_i x_iᵀ x_i)`;
+  §8): `‖D (S)‖_q^q = 2 ‖S‖_q^q` and `Σ_i D (x_i)² = diag (Σ_i x_i x_iᵀ, Σ_i x_iᵀ x_i)`; with the
+  lower bounds of `NoncommutativeKhintchine/Lower.lean`, the two-sided inequality (`ncKhintchine`);
 * for normal `x_i` (`x_i x_iᵀ = x_iᵀ x_i`), both bounds together (`ncKhintchine_normal`):
   `‖(Σ_i x_i x_iᵀ)^{1/2}‖_{S_q} ≤ (E ‖Σ_i ε_i x_i‖_{S_q}^q)^{1/q} ≤
   √2 √q ‖(Σ_i x_i x_iᵀ)^{1/2}‖_{S_q}`; this is the noncommutative Khintchine inequality of
@@ -114,6 +115,27 @@ theorem ncKhintchine_upper {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (x : Fin k → Mat
     _ ≤ √(2 * (q - 1)) * ((2 : ℝ) ^ (1 / q) * √m) :=
         mul_le_mul_of_nonneg_left hsqrt (Real.sqrt_nonneg _)
     _ = (2 : ℝ) ^ (1 / q) * (√(2 * (q - 1)) * √m) := by ring
+
+/-- **The noncommutative Khintchine inequality** for real square matrices, `q ≥ 2`, both bounds
+(Pisier–Xu 2003, Theorem 6.1 (i); Lust-Piquard 1986): with
+`m = max (‖Σ x_i x_iᵀ‖_{S_{q/2}}, ‖Σ x_iᵀ x_i‖_{S_{q/2}})^{1/2}`,
+`m ≤ (E ‖Σ_i ε_i x_i‖_{S_q}^q)^{1/q} ≤ √(2 (q − 1)) m`. -/
+theorem ncKhintchine {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (x : Fin k → Matrix n n ℝ) :
+    √(max (schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, x i * (x i)ᵀ))
+          (schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, (x i)ᵀ * x i))) ≤
+        SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
+          (fun ε : Fin k → Bool => ∑ i, coin (ε i) • x i) ∧
+      SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
+          (fun ε : Fin k → Bool => ∑ i, coin (ε i) • x i) ≤
+        √(2 * (q - 1)) * √(max (schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, x i * (x i)ᵀ))
+          (schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, (x i)ᵀ * x i))) := by
+  refine ⟨?_, ncKhintchine_upper hq x⟩
+  rcases max_choice (schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, x i * (x i)ᵀ))
+    (schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, (x i)ᵀ * x i)) with h | h
+  · rw [h]
+    exact ncKhintchine_lower_row hq x
+  · rw [h]
+    exact ncKhintchine_lower_col hq x
 
 /-- **Noncommutative Khintchine inequality for normal matrices**, both bounds:
 `‖Σ x_i x_iᵀ‖_{S_{q/2}}^{1/2} ≤ (E ‖Σ_i ε_i x_i‖_{S_q}^q)^{1/q}` and

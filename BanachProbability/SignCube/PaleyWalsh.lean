@@ -5,7 +5,8 @@ public import BanachProbability.SignCube.LpSeminorm
 /-!
 # Paley–Walsh martingales on the sign cube
 
-On the sign cube `Fin N → Bool` with the filtration `ℱ_k = σ (ε₀, …, ε_{k−1})`:
+On the sign cube `Fin N → Bool` with the filtration `ℱ_k = σ (ε₀, …, ε_{k−1})` (`IsPredictable`
+and `paleyWalsh` are defined in `BanachProbability.Defs`):
 
 * `IsPredictable ξ`: the `k`-th term of a family `ξ` depends only on the signs `ε_j`, `j < k`;
 * `IsAdapted M`: `M n` depends only on the signs `ε_j`, `j < n`;
@@ -24,11 +25,6 @@ Every martingale on the cube is a Paley–Walsh martingale started at its consta
 namespace BanachProbability.SignCube
 
 variable {N : ℕ} {E : Type*}
-
-/-- A family `ξ k` of functions of the signs is predictable: `ξ k` depends only on the signs
-`ε j` with `j < k`. -/
-def IsPredictable (ξ : Fin N → (Fin N → Bool) → E) : Prop :=
-  ∀ (k : Fin N) (ε ε' : Fin N → Bool), (∀ j, j < k → ε j = ε' j) → ξ k ε = ξ k ε'
 
 /-- A process `M n` on the signs is adapted: `M n` depends only on the signs `ε j` with
 `j < n`. -/
@@ -105,11 +101,6 @@ private theorem sum_eq_zero_of_flip (k : Fin N) {g : (Fin N → Bool) → E}
     nth_rewrite 2 [h]
     exact add_neg_cancel _
   rw [← inv_smul_smul₀ (two_ne_zero : (2 : ℝ) ≠ 0) (∑ ε, g ε), h2, smul_zero]
-
-/-- The Paley–Walsh martingale `n ↦ Σ_{k < n} ε_k ξ_k` of a family `ξ` (predictable in the
-applications), started at `0`, at time `n`. -/
-noncomputable def paleyWalsh (ξ : Fin N → (Fin N → Bool) → E) (n : ℕ) (ε : Fin N → Bool) : E :=
-  ∑ k ∈ Finset.univ.filter (fun k : Fin N => k.val < n), coin (ε k) • ξ k ε
 
 /-- The conditional expectation `E [f | ℱ_k]` on the sign cube: the average of `f` over the signs
 `ε_j` with `j ≥ k`, the signs `ε_j`, `j < k`, being fixed. -/

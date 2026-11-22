@@ -1,5 +1,6 @@
 module
 
+public import BanachProbability.Defs
 public import Mathlib.Analysis.InnerProductSpace.Calculus
 public import Mathlib.Analysis.InnerProductSpace.PiL2
 public import Mathlib.Analysis.InnerProductSpace.ProdL2
@@ -775,14 +776,6 @@ theorem burkholderU_concaveOn_line {H : Type*} [NormedAddCommGroup H] [InnerProd
 section Fun
 
 variable {H : Type*} [NormedAddCommGroup H]
-
-/-- **Burkholder's function** (Burkholder 1988, (1.6)):
-`u_p (x, y) = α_p (|y| − (p* − 1) |x|) (|x| + |y|)^{p−1}`, `α_p = p (1 − 1/p*)^{p−1}`,
-`p* = max (p, p / (p − 1))`; `x` is the position of the dominating martingale and `y` that of the
-subordinate one. -/
-noncomputable def burkholderFun (p : ℝ) (x y : H) : ℝ :=
-  p * (1 - 1 / max p (p / (p - 1))) ^ (p - 1) * (‖y‖ - (max p (p / (p - 1)) - 1) * ‖x‖) *
-    (‖x‖ + ‖y‖) ^ (p - 1)
 
 /-- `u_p (x, y) = U (|y|, |x|)`, `U = burkholderU`. -/
 theorem burkholderFun_eq_burkholderU (p : ℝ) (x y : H) :

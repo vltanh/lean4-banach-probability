@@ -38,20 +38,6 @@ namespace BanachProbability
 variable {Ω : Type*} {m mΩ : MeasurableSpace Ω} {μ : Measure Ω} {n : Type*} [Fintype n]
   [DecidableEq n]
 
-/-- Every entry of the matrix-valued function `x` is in `L^p (μ)`. -/
-def MatrixMemLp (x : Ω → Matrix n n ℝ) (p : ℝ≥0∞) (μ : Measure Ω) : Prop :=
-  ∀ i j, MemLp (fun ω => x ω i j) p μ
-
-/-- The conditional expectation `E_m = 𝔼 [· | m] ⊗ Id`, applied entrywise. -/
-noncomputable def matrixCondExp (m : MeasurableSpace Ω) {mΩ : MeasurableSpace Ω} (μ : Measure Ω)
-    (x : Ω → Matrix n n ℝ) : Ω → Matrix n n ℝ :=
-  fun ω => Matrix.of fun i j => (μ[fun ω' => x ω' i j | m]) ω
-
-/-- The trace `τ (x) = ∫ tr x dμ` of `L^∞ (Ω, μ) ⊗ M_n`. -/
-noncomputable def matrixTrace {mΩ : MeasurableSpace Ω} (μ : Measure Ω) (x : Ω → Matrix n n ℝ) :
-    ℝ :=
-  ∫ ω, (x ω).trace ∂μ
-
 omit [Fintype n] [DecidableEq n] in
 @[simp]
 theorem matrixCondExp_apply (x : Ω → Matrix n n ℝ) (ω : Ω) (i j : n) :

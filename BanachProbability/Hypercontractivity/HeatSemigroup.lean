@@ -318,12 +318,6 @@ theorem bonami_seminorm (S : Seminorm ℝ E) {p q ρ : ℝ} (hp : 1 < p) (hpq : 
 
 /-! ### The semigroup on `n` signs -/
 
-/-- **The discrete heat semigroup** `T (t) = Π_i T_i (t)` on functions of `n` signs (HNVW II, (6.7),
-p. 19), where `T_i (t) (x + ε_i y) = x + e^{−t} ε_i y`; see `heatSemigroup_walsh` for the form
-(6.6). -/
-noncomputable def heatSemigroup (t : ℝ) {n : ℕ} (f : (Fin n → Bool) → E) : (Fin n → Bool) → E :=
-  kBarTensor (Real.exp (-t)) n f
-
 /-- **(6.6)** (HNVW II, p. 19): `T (t) (w_α x) = e^{−t #α} w_α x` for the Walsh functions
 `w_α = Π_{i ∈ α} ε_i`. -/
 theorem heatSemigroup_walsh (t : ℝ) {n : ℕ} (α : Finset (Fin n)) (x : E) :

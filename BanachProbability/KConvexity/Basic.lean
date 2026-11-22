@@ -69,14 +69,6 @@ section Projection
 
 variable {N : ℕ} {V : Type*} [AddCommGroup V] [Module ℝ V]
 
-/-- The expectation `E (ε_k f)` of a function on the sign cube with values in a vector space. -/
-noncomputable def rademacherCoeff (f : (Fin N → Bool) → V) (k : Fin N) : V :=
-  ((2 : ℝ) ^ N)⁻¹ • ∑ η, coin (η k) • f η
-
-/-- The Rademacher projection `Σ_k ε_k E (ε_k f)`. -/
-noncomputable def rademacherProj (f : (Fin N → Bool) → V) (ε : Fin N → Bool) : V :=
-  ∑ k, coin (ε k) • rademacherCoeff f k
-
 /-- `E (ε_k f)` is the Walsh coefficient `x_{k}` of `f`. -/
 theorem rademacherCoeff_eq_walshCoeff (f : (Fin N → Bool) → V) (k : Fin N) :
     rademacherCoeff f k = walshCoeff f {k} := by
@@ -90,21 +82,6 @@ theorem rademacherProj_eq_sum_walsh (f : (Fin N → Bool) → V) (ε : Fin N →
 end Projection
 
 variable {N : ℕ} {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
-
-variable (X) in
-/-- `X` is K-convex in `L^p` with constant `K`: `‖Σ_k ε_k E (ε_k f)‖_{L^p} ≤ K ‖f‖_{L^p}`, for real
-signs `ε_k` (for `1 < p < ∞` the least `K ≥ 0` is `K^ℝ_{p,X}` of HNVW II, p. 124, line 1). -/
-def IsKConvexBound (p K : ℝ) : Prop :=
-  ∀ (N : ℕ) (f : (Fin N → Bool) → X),
-    SignCube.lpNorm (fun y => ‖y‖) p (rademacherProj f) ≤ K * SignCube.lpNorm (fun y => ‖y‖) p f
-
-variable (X) in
-/-- `X` has Gaussian type 2 with constant `τ`: `E ‖Σ g_k x_k‖² ≤ τ² Σ ‖x_k‖²` for independent real
-standard Gaussian variables `g_k` (HNVW II, Definition 7.1.17 (1), p. 67, with `p = 2` and `ξ = g`;
-the least `τ ≥ 0` is `τ^g_{2,X}`). -/
-def IsGaussianTypeTwoBound (τ : ℝ) : Prop :=
-  ∀ (N : ℕ) (x : Fin N → X),
-    ∫ g, ‖∑ k, g k • x k‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ (Fin N)) ≤ τ ^ 2 * ∑ k, ‖x k‖ ^ 2
 
 /-! ### Gaussian vectors -/
 
@@ -389,6 +366,21 @@ theorem avg_norm_sq_le_integral_stdGaussian (x : Fin N → X) :
         exact avg_mul_left (fun j => decide (0 ≤ g j)) fun ε => ‖∑ k, coin (ε k) • g k • x k‖ ^ 2
     _ = Real.pi / 2 * ∫ g, ‖∑ k, g k • x k‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ (Fin N)) := by
         rw [← kc_integral_eq_integral_avg]
+
+/-- **Gaussian type 2 implies type 2**, with the constant `√(π/2) τ` (HNVW II, Proposition 7.1.18
+(1), pp. 67–68, `‖g‖_1 τ_{2,X} ≤ τ^g_{2,X}`, from Proposition 6.1.15). -/
+theorem IsGaussianTypeTwoBound.isTypeTwoBound {τ : ℝ} (h : IsGaussianTypeTwoBound X τ)
+    (hτ : 0 ≤ τ) : IsTypeTwoBound X (√(Real.pi / 2) * τ) := by
+  intro N x
+  have h1 := (avg_norm_sq_le_integral_stdGaussian x).trans
+    (mul_le_mul_of_nonneg_left (h N x) (by positivity))
+  rw [SignCube.lpNorm, ← Real.sqrt_eq_rpow]
+  simp only [Real.rpow_two]
+  calc √(avg fun ε : Fin N → Bool => ‖∑ k, coin (ε k) • x k‖ ^ 2)
+      ≤ √(Real.pi / 2 * (τ ^ 2 * ∑ k, ‖x k‖ ^ 2)) := Real.sqrt_le_sqrt h1
+    _ = √(Real.pi / 2) * τ * √(∑ k, ‖x k‖ ^ 2) := by
+        rw [Real.sqrt_mul (by positivity), Real.sqrt_mul (by positivity), Real.sqrt_sq hτ,
+          mul_assoc]
 
 /-- Kahane's contraction principle for Gaussian sums, finite sequences. -/
 private theorem kc_integral_smul_fin_le {c : Fin N → ℝ} (hc : ∀ k, |c k| ≤ 1) (y : Fin N → X) :

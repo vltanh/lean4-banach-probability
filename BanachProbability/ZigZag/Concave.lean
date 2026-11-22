@@ -200,18 +200,6 @@ theorem concaveOn_iff_midpoint {E : Type*} [AddCommGroup E] [Module ℝ E] [Topo
 
 end Midpoint
 
-section Defs
-
-variable (𝕜 : Type*) {X : Type*} [RCLike 𝕜] [NormedAddCommGroup X] [NormedSpace 𝕜 X]
-  [NormedSpace ℝ X]
-
-/-- **HNVW I, Definition 4.5.3** (p. 331): `u : X × X → ℝ` is zig-zag concave (for the signs of
-`𝕜`) if `z ↦ u (x + z, y + ε z)` is concave for all `x`, `y` and all `ε ∈ 𝕜` with `‖ε‖ = 1`. -/
-def IsSignZigZagConcave (u : X → X → ℝ) : Prop :=
-  ∀ (x y : X) (ε : 𝕜), ‖ε‖ = 1 → ConcaveOn ℝ Set.univ fun z : X => u (x + z) (y + ε • z)
-
-end Defs
-
 section Jensen
 
 variable {𝕜 X : Type*} [RCLike 𝕜] [NormedAddCommGroup X] [NormedSpace 𝕜 X] [NormedSpace ℝ X]

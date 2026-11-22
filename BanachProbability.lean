@@ -1,5 +1,6 @@
 module
 
+public import BanachProbability.Defs
 public import BanachProbability.Hypercontractivity.Binomial
 public import BanachProbability.Hypercontractivity.HeatSemigroup
 public import BanachProbability.Hypercontractivity.TwoPoint
@@ -22,6 +23,7 @@ public import BanachProbability.Noncommutative.Cuculescu
 public import BanachProbability.Noncommutative.Distribution
 public import BanachProbability.Noncommutative.Duality
 public import BanachProbability.Noncommutative.Interpolation
+public import BanachProbability.Noncommutative.MatrixUMD
 public import BanachProbability.Noncommutative.SchattenUMD
 public import BanachProbability.Noncommutative.Transform
 public import BanachProbability.Noncommutative.WeakType

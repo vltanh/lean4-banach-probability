@@ -1,7 +1,7 @@
 module
 
+public import BanachProbability.Defs
 public import Mathlib.Algebra.BigOperators.Expect
-public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 public import Mathlib.Logic.Equiv.Fin.Basic
 
 /-!
@@ -9,7 +9,7 @@ public import Mathlib.Logic.Equiv.Fin.Basic
 
 `N` independent fair signs are realised on the finite set `Fin N → Bool` (the *sign cube*) with
 the uniform probability. This file sets up the elementary objects on the cube that the rest of the
-library uses:
+library uses (`coin` and `avg` are defined in `BanachProbability.Defs`):
 
 * `SignCube.coin`: the sign `±1` of a coin, `coin true = 1`, `coin false = -1`;
 * `SignCube.avg`: the expectation `2^{-N} Σ_ε g (ε)` over the cube;
@@ -30,9 +30,6 @@ open scoped BigOperators
 
 namespace BanachProbability.SignCube
 
-/-- The sign `±1` of a fair coin: `coin true = 1` and `coin false = -1`. -/
-def coin (b : Bool) : ℝ := if b then 1 else -1
-
 @[simp] theorem coin_true : coin true = 1 := rfl
 
 @[simp] theorem coin_false : coin false = -1 := rfl
@@ -50,11 +47,6 @@ theorem abs_coin (b : Bool) : |coin b| = 1 := by
   cases b <;> simp
 
 variable {N : ℕ}
-
-/-- The expectation over `N` independent fair signs:
-`avg g = 2^{-N} Σ_{ε ∈ {±1}^N} g ε`. -/
-noncomputable def avg (g : (Fin N → Bool) → ℝ) : ℝ :=
-  (∑ ε, g ε) / 2 ^ N
 
 /-- The probability that `N` fair signs fall in `s`. -/
 noncomputable def prob (s : Set (Fin N → Bool)) : ℝ :=

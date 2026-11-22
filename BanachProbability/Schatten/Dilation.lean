@@ -101,6 +101,20 @@ theorem schattenNorm_dilation_rpow {q : ℝ} (hq : 0 < q) (A : Matrix m n ℝ) :
   rw [(dilation_isHermitian A).eq, dilation_mul_dilation]
   simp only [Matrix.conjTranspose_eq_transpose_of_trivial, Matrix.transpose_transpose]
 
+/-- The singular values of `D (A)` above a level `s ≥ 0` are those of `A`, each counted twice. -/
+theorem countAbove_dilation {s : ℝ} (hs : 0 ≤ s) (A : Matrix m n ℝ) :
+    countAbove s (dilation A) = 2 * countAbove s A := by
+  have h := sum_singularValue_eq_add_of_eq_fromBlocks (M := dilation A) (X := Aᵀ) (Y := A)
+    (by rw [(dilation_isHermitian A).eq, dilation_mul_dilation]
+        simp only [Matrix.conjTranspose_eq_transpose_of_trivial, Matrix.transpose_transpose])
+    fun t => if s < t then 1 else 0
+  rw [sum_comp_singularValue_transpose A (F := fun t => if s < t then 1 else 0)
+    (ite_eq_right (not_lt.2 hs))] at h
+  have h' : (countAbove s (dilation A) : ℝ) = countAbove s A + countAbove s A := by
+    simpa only [countAbove, Finset.natCast_card_filter] using h
+  rw [two_mul]
+  exact_mod_cast h'
+
 omit [DecidableEq m] [DecidableEq n] in
 /-- The square function of a family of dilations is block diagonal:
 `Σ_i D (x_i)² = diag (Σ_i x_i x_iᵀ, Σ_i x_iᵀ x_i)`. -/

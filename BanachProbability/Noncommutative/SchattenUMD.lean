@@ -38,7 +38,8 @@ transforms `T_c x = E_0 x + Σ_{k<N} c_k (E_{k+1} x − E_k x)` by predictable s
    "by interpolation" of the source, which it does not give.
 2. General real matrices through the Hermitian dilation `D (A) = [[0, A], [Aᵀ, 0]]`
    (`dilation`, `‖D (A)‖_{S_r}^r = 2 ‖A‖_{S_r}^r`): every entry of `D (x)` is an entry of `x` or
-   `0`, so `E_k (D x) = D (E_k x)` exactly, hence `T_c (D x) = D (T_c x)`.
+   `0`, so `E_k (D x) = D (E_k x)` exactly, hence `T_c (D x) = D (T_c x)`. The weak type `(1, 1)`
+   bound extends to all real matrices in the same way (`weakType_one_one_of_memLp`).
 3. **Corollary 4.5**, `UMD_q (S_q^{n×n}) ≤ K q*` (`isUMDBound_schattenSpace`), directly for
    martingales on an arbitrary filtered probability space, as in the source's proof: an
    `S_q^n`-valued martingale `(Y_k)` with `Y_0 = 0` is, entrywise, a martingale of `𝒩` for
@@ -315,6 +316,23 @@ private theorem sumd_ncTransform_dilation (x : Ω → Matrix n n ℝ) :
   change _ = dilationLinearMap _
   simp only [map_add, map_sum, map_smul, map_sub]
   rfl
+
+/-- **Weak type `(1, 1)` of martingale transforms** (Randrianantoanina 2002, Theorem 3.1), for all
+real matrices: `λ τ (1_{(λ, ∞)} (|T_c x|)) ≤ 52 ‖x‖_{L¹ (τ)}`, from the symmetric case
+(`weakType_one_one`) for the dilation `D x`, as `T_c (D x) = D (T_c x)` and every singular value of
+`A` occurs twice among those of `D (A)`. -/
+theorem weakType_one_one_of_memLp [IsProbabilityMeasure μ] {x : Ω → Matrix n n ℝ}
+    (hxi : MatrixMemLp x 1 μ) (hc : ∀ k, StronglyMeasurable[ℱ k] (c k))
+    (hc1 : ∀ k ω, |c k ω| ≤ 1) {l : ℝ} (hl : 0 < l) :
+    l * ncDistribution μ l (ncTransform ℱ μ c N x) ≤ 52 * ∫ ω, schattenNorm 1 (x ω) ∂μ := by
+  have h := weakType_one_one (N := N) (sumd_matrixMemLp_dilation hxi)
+    (fun ω => dilation_isHermitian (x ω)) hc hc1 hl
+  have h1 : ∀ A : Matrix n n ℝ, schattenNorm 1 (dilation A) = 2 * schattenNorm 1 A := fun A => by
+    simpa only [ENNReal.ofReal_one, Real.rpow_one] using schattenNorm_dilation_rpow one_pos A
+  simp only [sumd_ncTransform_dilation, ncDistribution, countAbove_dilation hl.le, Nat.cast_mul,
+    Nat.cast_ofNat, h1, integral_const_mul] at h
+  simp only [ncDistribution]
+  linarith
 
 /-- `‖D (A)‖_{S_r} = 2^{1/r} ‖A‖_{S_r}`, in `L^r`. -/
 private theorem sumd_eLpNorm_dilation {r : ℝ} (hr : 0 < r) (y : Ω → Matrix n n ℝ) :

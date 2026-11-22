@@ -10,7 +10,8 @@ Funct. Anal. 194 (2002), Theorem 3.1) for the von Neumann algebra `L^∞ (Ω, μ
 probability space with a filtration `ℱ` and predictable scalar multipliers `|c_k| ≤ 1` (the
 multipliers commuting with `N_{k+1}`, see `ncTransform`):
 `λ τ (1_{(λ, ∞)} (|T_c x|)) ≤ C ‖x‖_{L¹ (τ)}` for every symmetric `x ∈ L¹`, every `λ > 0` and
-every `N` (`weakType_one_one`); `x` need not be `ℱ_N`-measurable, since `T_c x` involves only
+every `N` (`weakType_one_one`; for all real matrices, `weakType_one_one_of_memLp` in
+`Noncommutative/SchattenUMD.lean`); `x` need not be `ℱ_N`-measurable, since `T_c x` involves only
 `E_0 x, …, E_N x`.
 
 The proof follows the source:

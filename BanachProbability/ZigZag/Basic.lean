@@ -56,20 +56,6 @@ namespace BanachProbability
 
 open SignCube
 
-/-- `U : X × X → ℝ` is zig-zag concave for the obstacle `‖y‖^p − β^p ‖x‖^p` (real scalars):
-`z ↦ U (x + z, y + ε z)` is concave for every `ε ∈ [−1, 1]`, `U (0, 0) = 0`, and
-`U (x, y) ≥ ‖y‖^p − β^p ‖x‖^p`. -/
-def IsZigZagConcave {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] (p β : ℝ)
-    (U : X → X → ℝ) : Prop :=
-  (∀ (x y : X) (ε : ℝ), |ε| ≤ 1 → ConcaveOn ℝ Set.univ fun z : X => U (x + z) (y + ε • z)) ∧
-    U 0 0 = 0 ∧ ∀ x y : X, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ U x y
-
-/-- The complex version: `ε` ranges over the closed unit disc. -/
-def IsComplexZigZagConcave {X : Type*} [NormedAddCommGroup X] [NormedSpace ℂ X] (p β : ℝ)
-    (U : X → X → ℝ) : Prop :=
-  (∀ (x y : X) (ε : ℂ), ‖ε‖ ≤ 1 → ConcaveOn ℝ Set.univ fun z : X => U (x + z) (y + ε • z)) ∧
-    U 0 0 = 0 ∧ ∀ x y : X, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ U x y
-
 /-- A zig-zag concave function is zig-zag concave for the signs `±1` (HNVW I, Definition 4.5.3). -/
 theorem IsZigZagConcave.isSignZigZagConcave {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
     {p β : ℝ} {U : X → X → ℝ} (hU : IsZigZagConcave p β U) : IsSignZigZagConcave ℝ U :=
@@ -225,6 +211,19 @@ theorem umdConst_lt_top_iff_exists_isZigZagConcave {p : ℝ} (hp : 1 < p) :
   · rintro ⟨β, hβ, U, hU⟩
     exact (umdConst_le_of_isZigZagConcave hp hβ hU).trans_lt ENNReal.ofReal_lt_top
 
+/-- **HNVW I, Theorem 4.5.6, (1)⇔(3)** (p. 332), real scalars, for a fixed `p`: `UMD_p (X) < ∞` if
+and only if there are `β ≥ 1` and a function `u`, zig-zag concave for the signs `±1`, with
+`u (x, y) ≥ ‖y‖^p − β^p ‖x‖^p`, (4.30). -/
+theorem umdConst_lt_top_iff_exists_isSignZigZagConcave {p : ℝ} (hp : 1 < p) :
+    umdConst X p < ⊤ ↔ ∃ β : ℝ, 1 ≤ β ∧ ∃ u : X → X → ℝ, IsSignZigZagConcave ℝ u ∧
+      ∀ x y, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ u x y := by
+  refine ⟨fun h => ?_, fun ⟨β, hβ, u, hu, hF⟩ => (umdConst_le_of_isSignZigZagConcave hp.le
+    (by linarith) hu hF).trans_lt ENNReal.ofReal_lt_top⟩
+  obtain ⟨β, hβ, U, hU⟩ := (umdConst_lt_top_iff_exists_isZigZagConcave hp).1 h
+  refine ⟨max 1 β, le_max_left _ _, U, hU.isSignZigZagConcave, fun x y => ?_⟩
+  exact (sub_le_sub_left (mul_le_mul_of_nonneg_right (Real.rpow_le_rpow hβ.le (le_max_right _ _)
+    (by linarith)) (Real.rpow_nonneg (norm_nonneg x) p)) _).trans (hU.2.2 x y)
+
 /-- The final clause of **HNVW I, Theorem 4.5.6** (p. 332), for the zig-zag concave functions of
 `IsZigZagConcave`: the infimum of the `β ≥ 0` for which a zig-zag concave function exists is
 `UMD_p (X)`, and it is attained, by Burkholder's function with `β = UMD_p^Δ (X) = UMD_p (X)`. (HNVW
@@ -363,6 +362,19 @@ theorem complexUMDConst_lt_top_iff_exists_isComplexZigZagConcave {p : ℝ} (hp :
   · rintro ⟨β, hβ, U, hU⟩
     exact (complexUMDConst_le_of_isComplexZigZagConcave hp hβ hU).trans_lt ENNReal.ofReal_lt_top
 
+/-- **HNVW I, Theorem 4.5.6, (1)⇔(3)** (p. 332), complex scalars, for a fixed `p`:
+`UMD_{ℂ,p} (X) < ∞` if and only if there are `β ≥ 1` and a function `u`, zig-zag concave for the
+complex signs, with `u (x, y) ≥ ‖y‖^p − β^p ‖x‖^p`, (4.30). -/
+theorem complexUMDConst_lt_top_iff_exists_isSignZigZagConcave {p : ℝ} (hp : 1 < p) :
+    complexUMDConst X p < ⊤ ↔ ∃ β : ℝ, 1 ≤ β ∧ ∃ u : X → X → ℝ, IsSignZigZagConcave ℂ u ∧
+      ∀ x y, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ u x y := by
+  refine ⟨fun h => ?_, fun ⟨β, hβ, u, hu, hF⟩ => (complexUMDConst_le_of_isSignZigZagConcave hp.le
+    (by linarith) hu hF).trans_lt ENNReal.ofReal_lt_top⟩
+  obtain ⟨β, hβ, U, hU⟩ := (complexUMDConst_lt_top_iff_exists_isComplexZigZagConcave hp).1 h
+  refine ⟨max 1 β, le_max_left _ _, U, hU.isSignZigZagConcave, fun x y => ?_⟩
+  exact (sub_le_sub_left (mul_le_mul_of_nonneg_right (Real.rpow_le_rpow hβ.le (le_max_right _ _)
+    (by linarith)) (Real.rpow_nonneg (norm_nonneg x) p)) _).trans (hU.2.2 x y)
+
 /-- The final clause of **HNVW I, Theorem 4.5.6** (p. 332), complex scalars: the least `β ≥ 0` for
 which a complex zig-zag concave function exists is `UMD_{ℂ,p} (X)`. -/
 theorem isLeast_complexUMDConst_isComplexZigZagConcave {p : ℝ} (hp : 1 < p)
@@ -376,6 +388,21 @@ theorem isLeast_complexUMDConst_isComplexZigZagConcave {p : ℝ} (hp : 1 < p)
   · rintro β ⟨hβ, U, hU⟩
     exact ENNReal.toReal_le_of_le_ofReal hβ
       (complexUMDConst_le_of_isSignZigZagConcave hp.le hβ hU.isSignZigZagConcave hU.2.2)
+
+/-- The final clause of **HNVW I, Theorem 4.5.6** (p. 332), in HNVW's form, complex scalars: for
+`X ≠ 0`, the infimum of the `β ∈ [1, ∞)` for which there is a function `u`, zig-zag concave for the
+complex signs, with `u (x, y) ≥ ‖y‖^p − β^p ‖x‖^p`, (4.30), is `UMD_{ℂ,p} (X)`, and it is
+attained. -/
+theorem isLeast_complexUMDConst_isSignZigZagConcave [Nontrivial X] {p : ℝ} (hp : 1 < p)
+    (h : complexUMDConst X p < ⊤) :
+    IsLeast {β : ℝ | 1 ≤ β ∧ ∃ u : X → X → ℝ, IsSignZigZagConcave ℂ u ∧
+      ∀ x y, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ u x y} (complexUMDConst X p).toReal := by
+  obtain ⟨-, U, hU⟩ := (isLeast_complexUMDConst_isComplexZigZagConcave hp h).1
+  refine ⟨⟨?_, U, hU.isSignZigZagConcave, hU.2.2⟩, ?_⟩
+  · simpa using ENNReal.toReal_mono h.ne (one_le_complexUMDConst hp)
+  · rintro β ⟨hβ, u, hu, hF⟩
+    exact ENNReal.toReal_le_of_le_ofReal (by linarith)
+      (complexUMDConst_le_of_isSignZigZagConcave hp.le (by linarith) hu hF)
 
 end Complex
 

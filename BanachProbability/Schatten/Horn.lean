@@ -1,7 +1,6 @@
 module
 
 public import BanachProbability.Schatten.Spectral
-public import Mathlib.Analysis.InnerProductSpace.SingularValues
 import Mathlib.Order.Monotone.Extension
 
 /-!
@@ -111,12 +110,9 @@ omit [DecidableEq m] in
 Euclidean spaces. -/
 theorem singularValues_toEuclideanLin (A : Matrix m n ℝ) (k : ℕ) :
     (Matrix.toEuclideanLin A).singularValues k = sortedSingularValue A k := by
-  classical
   rcases lt_or_ge k (Fintype.card n) with hk | hk
-  · rw [LinearMap.singularValues_of_lt _ finrank_euclideanSpace hk, sortedSingularValue,
-      dite_eq_left hk, Matrix.IsHermitian.eigenvalues₀]
-    congr
-    rw [← Matrix.toEuclideanLin_conjTranspose_eq_adjoint, ← Matrix.toLpLin_mul_same]
+  · rw [sortedSingularValue, dite_eq_left hk]
+    exact singularValues_toEuclideanLin_fin A ⟨k, hk⟩
   · rw [LinearMap.singularValues_of_finrank_le _ (by rwa [finrank_euclideanSpace]),
       sortedSingularValue_eq_zero A hk]
 

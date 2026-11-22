@@ -35,12 +35,6 @@ namespace BanachProbability
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} {ℱ : MeasureTheory.Filtration ℕ mΩ}
   {n : Type*}
 
-/-- The martingale transform `T_c x = E_0 x + Σ_{k<N} c_k (E_{k+1} x − E_k x)`. -/
-noncomputable def ncTransform (ℱ : MeasureTheory.Filtration ℕ mΩ) (μ : Measure Ω)
-    (c : ℕ → Ω → ℝ) (N : ℕ) (x : Ω → Matrix n n ℝ) : Ω → Matrix n n ℝ :=
-  fun ω => matrixCondExp (ℱ 0) μ x ω +
-    ∑ k ∈ Finset.range N, c k ω • (matrixCondExp (ℱ (k + 1)) μ x ω - matrixCondExp (ℱ k) μ x ω)
-
 variable {c : ℕ → Ω → ℝ} {N : ℕ}
 
 /-! ### Entrywise description, measurability, `L^p` and linearity -/

@@ -111,18 +111,6 @@ theorem twoPoint_seminorm (S : Seminorm ℝ E) {p q : ℝ} (hp : 1 < p) (hpq : p
 
 /-! ### Borell's operator `K̄` and its tensor powers -/
 
-/-- **Borell's operator** on functions of one sign, with the kernel `K (x, y) = 1 + ρ x y`:
-`K̄ g (x) = E_y [K (x, y) g (y)] = ((1 + ρ x) g (1) + (1 − ρ x) g (−1)) / 2`. -/
-noncomputable def kBar (ρ : ℝ) (g : Bool → E) (x : Bool) : E :=
-  (1 / 2 : ℝ) • ((1 + ρ * coin x) • g true + (1 - ρ * coin x) • g false)
-
-/-- **The tensor power `⊗ⁿ K̄`**, the operator with the kernel `Π_i (1 + ρ x_i y_i)` on functions
-of `n` signs: `(⊗ⁿ⁺¹ K̄) f (x₀, x) = K̄ [y₀ ↦ (⊗ⁿ K̄) (f (y₀, ·)) (x)] (x₀)`. -/
-noncomputable def kBarTensor (ρ : ℝ) : (n : ℕ) → ((Fin n → Bool) → E) → (Fin n → Bool) → E
-  | 0, f => f
-  | n + 1, f => fun ε =>
-      kBar ρ (fun η => kBarTensor ρ n (fun ε' => f (Fin.cons η ε')) (Fin.tail ε)) (ε 0)
-
 theorem kBarTensor_zero (ρ : ℝ) (f : (Fin 0 → Bool) → E) : kBarTensor ρ 0 f = f := rfl
 
 theorem kBarTensor_succ (ρ : ℝ) {n : ℕ} (f : (Fin (n + 1) → Bool) → E) (ε : Fin (n + 1) → Bool) :

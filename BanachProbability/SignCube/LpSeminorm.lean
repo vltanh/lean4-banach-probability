@@ -10,12 +10,12 @@ public import Mathlib.Analysis.MeanInequalitiesPow
 
 For a function `nrm : E → ℝ` (a norm or seminorm of the values) and `p > 0`,
 `SignCube.lpNorm nrm p X = (E nrm (X ε)^p)^{1/p}` is the `L^p` norm of a random variable `X` on
-the sign cube. For a seminorm `N` on a real vector space and `p ≥ 1` it is a seminorm on
-`(Fin n → Bool) → E` (Minkowski's inequality), `lpSeminorm N p`; it is nondecreasing in `p`
-(the power-mean inequality, `lpNorm_mono_exponent`). Also: `‖X‖_p^p = E nrm (X ε)^p`
-(`lpNorm_rpow`), the norm of a constant (`lpNorm_const`), the splitting along the first sign
-(`lpNorm_succ`), and Jensen's inequality `E X ≤ (E X^p)^{1/p}` for `X ≥ 0`, `p ≥ 1`
-(`avg_le_rpow_avg_rpow`).
+the sign cube (defined in `BanachProbability.Defs`). For a seminorm `N` on a real vector space and
+`p ≥ 1` it is a seminorm on `(Fin n → Bool) → E` (Minkowski's inequality), `lpSeminorm N p`; it is
+nondecreasing in `p` (the power-mean inequality, `lpNorm_mono_exponent`). Also:
+`‖X‖_p^p = E nrm (X ε)^p` (`lpNorm_rpow`), the norm of a constant (`lpNorm_const`), the splitting
+along the first sign (`lpNorm_succ`), and Jensen's inequality `E X ≤ (E X^p)^{1/p}` for `X ≥ 0`,
+`p ≥ 1` (`avg_le_rpow_avg_rpow`).
 -/
 
 @[expose] public section
@@ -23,11 +23,6 @@ the sign cube. For a seminorm `N` on a real vector space and `p ≥ 1` it is a s
 namespace BanachProbability.SignCube
 
 variable {N : ℕ} {E : Type*}
-
-/-- The `L^p` norm `(E nrm (X ε)^p)^{1/p}` of a random variable `X` on the sign cube, the values
-measured with `nrm`. -/
-protected noncomputable def lpNorm (nrm : E → ℝ) (p : ℝ) (X : (Fin N → Bool) → E) : ℝ :=
-  avg (fun ε => nrm (X ε) ^ p) ^ (1 / p)
 
 theorem lpNorm_nonneg {nrm : E → ℝ} (hnrm : ∀ x, 0 ≤ nrm x) (p : ℝ) (X : (Fin N → Bool) → E) :
     0 ≤ SignCube.lpNorm nrm p X :=
