@@ -25,11 +25,12 @@ dominating martingale and `y` that of the subordinate one. It is the function `b
 * `burkholderFun_of_two_le`: for `p ≥ 2`, `p* = p` and
   `u_p (x, y) = p (1 − 1/p)^{p−1} (|y| − (p − 1) |x|) (|x| + |y|)^{p−1}`.
 
-These are the two properties of `u_p` on which Burkholder's proof of Theorem 1.1 rests; both are
-`burkholderU_ge` and `burkholderU_concaveOn_line` with the arguments exchanged, proved there by the
-argument of the paper: (1.10) through (1.11) and the function `F`, and Remark 1.2, which the paper
-states without proof, from its proof of (1.12) (the lines on which neither coordinate vanishes)
-and the shift by an orthogonal vector of its proof of (1.8).
+Both are `burkholderU_ge` and `burkholderU_concaveOn_line` with the arguments exchanged. The first
+is (1.10), on which Burkholder's proof of Theorem 1.1 rests, proved there by the paper's argument
+through (1.11) and the function `F`. The second is Remark 1.2, which the paper states without
+proof and its proof of Theorem 1.1 does not use (that proof uses (1.12), on lines along which
+neither coordinate vanishes); it is completed there from the paper's (1.12)–(1.14) and the shift
+by an orthogonal vector of its proof of (1.8).
 -/
 
 @[expose] public section

@@ -20,8 +20,11 @@ public import Mathlib.Analysis.InnerProductSpace.Calculus
 # Burkholder's inequality and square function inequality for Hilbert-space-valued martingales
 
 D. L. Burkholder, *Sharp inequalities for martingales and stochastic integrals*, Colloque Paul
-Lévy sur les processus stochastiques, Astérisque 157–158 (1988), 75–94: Theorem 1.1, Remark 1.2
-and Theorem 3.1, each proved here by the argument of the paper (§1 and §3). The same statements
+Lévy sur les processus stochastiques, Astérisque 157–158 (1988), 75–94: the inequality (1.2) of
+Theorem 1.1, for real Hilbert spaces, and the inequality (3.1) of Theorem 3.1, by the arguments of
+the paper (§1 and §3); the concavity (1.17) of Remark 1.2, which the paper states without proof,
+completed from the paper's own (1.12)–(1.14) and the shift of its proof of (1.8) (step 4 below).
+The equality cases and the sharpness of the constants are not formalized. The same inequalities
 are Theorems 3.5 and 8.6 of A. Osękowski, *Sharp martingale and semimartingale inequalities*
 (2012), and the case `H = ℝ` of Theorem 1.1 is in D. L. Burkholder, *Boundary value problems and
 sharp inequalities for martingale transforms*, Ann. Probab. 12 (1984); neither was obtained.
@@ -52,14 +55,17 @@ sharp inequalities for martingale transforms*, Ann. Probab. 12 (1984); neither w
    (`phi_le_one`, `one_le_phi`): `log φ` vanishes at `1` and `2`, is convex on `[1, 2]` and concave
    on `[2, ∞)` (its second derivative is `(2 − p) / (p² (p − 1))`), and tends to `∞` (it is at
    least `log p − 1`).
-2. (1.10) `V ≤ U` (`burkholderU_ge`): by homogeneity, on `|x| + |y| = 1` and with `t` the position
-   of the dominating martingale, `U − V = F (t) = α_p (1 − p* t) − (1 − t)^p + (p* − 1)^p t^p`
-   (`bF`). If `p = 2`, `F ≡ 0`. If `p > 2`, `F` is concave on `[0, s₀]` and convex on `[s₀, 1]`
-   for some `s₀ < 1/p*`, `F (1/p*) = F' (1/p*) = 0`, and `F (0) = α_p − 1 ≥ 0` by (1.11). If
-   `p < 2`, `F` is convex on `[0, s₀]` for some `s₀ > 1/p*` and concave on `[s₀, 1]`, and
-   `F (1) ≥ 0` by (1.11) (`bF_nonneg`).
-3. (1.12)–(1.14): if `x + t h` and `y + t k` never vanish, `G (t) = U (x + t h, y + t k)` is smooth.
-   For `p ≥ 2`, `U = α_p ψ (|x|, |y|)` with `ψ (s, r) = (s − (p − 1) r)(s + r)^{p−1}`, and the
+2. (1.10) `V ≤ U` (`burkholderU_ge`): by homogeneity, on `|x| + |y| = 1` and with `t` the norm
+   of the dominating martingale's position, `U − V = F (t) = α_p (1 − p* t) − (1 − t)^p +
+   (p* − 1)^p t^p` (`bF`). If `p = 2`, `F ≡ 0`. If `p > 2`, `F` is concave on `[0, s₀]` and convex
+   on `[s₀, 1]` for some `s₀ ≤ 1/p*`, `F (1/p*) = F' (1/p*) = 0`, and `F (0) = α_p − 1 ≥ 0` by
+   (1.11). If `p < 2`, `F` is convex on `[0, s₀]` for some `s₀ ≥ 1/p*` and concave on `[s₀, 1]`,
+   and `F (1) ≥ 0` by (1.11) (`bF_nonneg`). Burkholder asserts that `s₀` exists; here it is
+   `1/(1 + (p* − 1)^{p/(p−2)})`, read off from `F''`.
+3. (1.12)–(1.14): if `x + t h` and `y + t k` never vanish, `G (t) = U (x + t h, y + t k)` is twice
+   differentiable.
+   For `p ≥ 2`, `U = α_p ψ (|x|, |y|)` with `ψ (s, r) = (s − (p − 1) r)(s + r)^{p−1}` (`psi`, not
+   to be confused with Burkholder's gradient `ψ`), and the
    second derivative of `t ↦ ψ (S, R)`, `S = |x + t h|`, `R = |y + t k|`, is
    `p (S + R)^{p−3} (−(p − 1)(p − 2) R (S' + R')² − (p − 2)(S + R)² S''
    − (p − 1)(S + R)(|k|² − |h|²))` (`psi_hasDerivAt_two`): its three terms are Burkholder's
@@ -88,9 +94,12 @@ sharp inequalities for martingale transforms*, Ann. Probab. 12 (1984); neither w
    is differentially subordinate to the other, `|F_n| = |X_n|` and `|G_n| = 𝒮_n X`; Theorem 1.1
    applies to `(G, F)` and to `(F, G)`.
 
-Representation: the martingales start at `0` (`d_0 = e_0 = 0`) and the inequality is stated at a
-fixed time `n` rather than for `sup_n ‖·‖_p`; `n` being fixed, `ℓ²_H` in step 7 is replaced by
-`H^{n+1}` (`PiLp 2`), with `X` in the last coordinate and its increments in the first `n`.
+The statements are the ones cited (Cassese, Theorem 2.3): the martingales start at `0`
+(`d_0 = e_0 = 0`), so (1.9) is `U (0, 0) = 0` and (1.16) is not needed, and the inequality is at
+a fixed time `n` rather than for `sup_n ‖·‖_p`. In step 7, up to time `n` the values of
+Burkholder's `F` and `G` lie in the first `n + 1` coordinates of `ℓ²_H`; the proof works in that
+subspace, `H^{n+1}` (`PiLp 2`), with `X` in the last coordinate and its increments in the first
+`n`, and with both martingales stopped at `n`, which does not change them up to time `n`.
 -/
 
 @[expose] public section
@@ -155,8 +164,9 @@ theorem bkh_concaveOn_glue {s : Set ℝ} {f : ℝ → ℝ} {a dl dr : ℝ} (hs :
 
 /-! ### The function `ψ (s, r) = (s − (p − 1) r) (s + r)^{p−1}` and its derivatives -/
 
-/-- `ψ (s, r) = (s − (p − 1) r) (s + r)^{p−1}`; Burkholder's function is `α ψ (|x|, |y|)` for
-`p ≥ 2` and `−α (p − 1)⁻¹ ψ (|y|, |x|)` for `p ≤ 2`. -/
+/-- `ψ (s, r) = (s − (p − 1) r) (s + r)^{p−1}`; Burkholder's function in the argument order of
+`burkholderU` (subordinate first) is `α ψ (|x|, |y|)` for `p ≥ 2` and `−α (p − 1)⁻¹ ψ (|y|, |x|)`
+for `p ≤ 2`. Not Burkholder's `ψ`, which is a gradient (`gradX`). -/
 private noncomputable def psi (p s r : ℝ) : ℝ := (s - (p - 1) * r) * (s + r) ^ (p - 1)
 
 /-- `∂ψ/∂s = p (s + r)^{p−2} (s − (p − 2) r)`. -/
@@ -516,8 +526,8 @@ private theorem one_le_phi {p : ℝ} (hp : 2 ≤ p) : 1 ≤ (p - 1) ^ (p - 1) / 
 /-! ### The majorization `v ≤ u` (1.10) -/
 
 /-- Burkholder's `F (t) = α_p (1 − P t) − (1 − t)^p + (P − 1)^p t^p`, `α_p = p (1 − 1/P)^{p−1}`:
-for `P = p*`, `U − V` on `|x| + |y| = 1`, as a function of the position `t` of the dominating
-martingale. -/
+for `P = p*`, `U − V` on `|x| + |y| = 1`, as a function of the norm `t` of the dominating
+martingale's position. -/
 private noncomputable def bF (p P t : ℝ) : ℝ :=
   p * (1 - 1 / P) ^ (p - 1) * (1 - P * t) - (1 - t) ^ p + (P - 1) ^ p * t ^ p
 
@@ -637,9 +647,10 @@ private theorem alpha_eq_phi {p : ℝ} (hp : 1 < p) :
   field_simp
 
 /-- **`F ≥ 0` on `[0, 1]`** (Burkholder 1988, proof of (1.10)). If `p = 2`, `F ≡ 0`. With
-`d = (p* − 1)^{p/(p−2)}` and `s₀ = 1/(1 + d)`: if `p > 2`, `F` is concave on `[0, s₀]` and convex on
-`[s₀, 1]`, `s₀ < 1/p*`; `F (1/p*) = F' (1/p*) = 0` gives `F ≥ 0` on `[s₀, 1]`, and `F (0) ≥ 0` by
-(1.11) gives it on `[0, s₀]`. If `p < 2`, `F` is convex on `[0, s₀]`, `s₀ > 1/p*`, and concave on
+`d = (p* − 1)^{p/(p−2)}` and `s₀ = 1/(1 + d)` (Burkholder asserts that such an `s₀` exists; this
+value is read off from `F''`, `bF2_eq`): if `p > 2`, `F` is concave on `[0, s₀]` and convex on
+`[s₀, 1]`, `s₀ ≤ 1/p*`; `F (1/p*) = F' (1/p*) = 0` gives `F ≥ 0` on `[s₀, 1]`, and `F (0) ≥ 0` by
+(1.11) gives it on `[0, s₀]`. If `p < 2`, `F` is convex on `[0, s₀]`, `s₀ ≥ 1/p*`, and concave on
 `[s₀, 1]`, and `F (1) ≥ 0` by (1.11). -/
 private theorem bF_nonneg {p : ℝ} (hp : 1 < p) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) :
     0 ≤ bF p (max p (p / (p - 1))) t := by
@@ -778,6 +789,11 @@ theorem burkholderU_ge {p s r : ℝ} (hp : 1 < p) (hs : 0 ≤ s) (hr : 0 ≤ r) 
 
 /-! ### The concavity of `U` along lines: (1.12)–(1.14) and Remark 1.2 -/
 
+/-- `α_p = p (1 − 1/p)^{p−1} ≥ 0`. -/
+private theorem alpha_nonneg {p : ℝ} (hp : 1 < p) : 0 ≤ p * (1 - 1 / p) ^ (p - 1) := by
+  have h : 0 ≤ 1 - 1 / p := by rw [sub_nonneg, div_le_one (by linarith)]; linarith
+  exact mul_nonneg (by linarith) (Real.rpow_nonneg h _)
+
 /-- Burkholder's `ψ`, the gradient of `U` in the subordinate variable, as a multiple of `x`:
 `∇_x U (x, y) = gradX (|x|, |y|) x`,
 `gradX (s, r) = α_p (p s + (p + p* − p p*) r) (s + r)^{p−2} / s`. -/
@@ -810,8 +826,7 @@ private theorem burkholderU_zigzag_of_ne {H : Type*} [NormedAddCommGroup H]
   rcases le_total 2 p with h2 | h2
   · have hz := (psi_zigzag_of_ne hp x y h k hx hy).1 ⟨h2, hhk⟩
     rw [hD] at hz
-    have hα : 0 ≤ p * (1 - 1 / p) ^ (p - 1) := by
-      have := alpha_eq_phi hp; have := one_le_phi h2; linarith
+    have hα : 0 ≤ p * (1 - 1 / p) ^ (p - 1) := alpha_nonneg hp
     rw [U_eq_A h2, U_eq_A h2]
     have e : p * (1 - 1 / p) ^ (p - 1) * (psiS p ‖x‖ ‖y‖ * (⟪x, h⟫ / ‖x‖) +
         psiR p ‖x‖ ‖y‖ * (⟪y, k⟫ / ‖y‖)) = gradX p ‖x‖ ‖y‖ * ⟪x, h⟫ + gradY p ‖x‖ ‖y‖ * ⟪y, k⟫ := by
@@ -847,7 +862,7 @@ private theorem burkholderU_concaveOn_line_of_ne {H : Type*} [NormedAddCommGroup
       funext t; rw [U_eq_A h2, psiLine, smul_eq_mul]
     rw [e]
     exact ((psi_line_of_ne hp x y h k hx hy).1 ⟨h2, hhk⟩).smul
-      (by have := alpha_eq_phi hp; have := one_le_phi h2; linarith)
+      (alpha_nonneg hp)
   · have e : (fun t : ℝ => burkholderU p ‖x + t • h‖ ‖y + t • k‖) =
         fun t => (p * (1 / p) ^ (p - 1) / (p - 1)) • (-psiLine p y x k h) t := by
       funext t; rw [U_eq_B hp h2, Pi.neg_apply, psiLine, smul_eq_mul]; ring
@@ -900,9 +915,11 @@ private theorem tendsto_burkholderU_shift {p a b : ℝ} (hp : 1 < p) (ha : 0 ≤
 /-- **Concavity of Burkholder's function along lines** (Burkholder 1988, Remark 1.2, (1.17)):
 for `x, y, h, k` in a real inner product space with `|h| ≤ |k|`,
 `t ↦ U (x + t h, y + t k)` is concave on `ℝ` (`x` the position of the subordinate martingale,
-`y` that of the dominating one). The paper states this without proof; its proof of (1.12) covers
-the lines on which `x + t h` and `y + t k` never vanish (`burkholderU_concaveOn_line_of_ne`), and
-the other lines are reached by the device of its proof of (1.8): in `H ⊕ ℝ` (`WithLp 2 (H × ℝ)`),
+`y` that of the dominating one). Gap of the source: the paper states this without proof. It is
+completed here from two steps of the paper, an assembly of the formalization: the proof of (1.12)
+covers the lines on which `x + t h` and `y + t k` never vanish
+(`burkholderU_concaveOn_line_of_ne`), and the other lines are reached by the device of the proof of
+(1.8): in `H ⊕ ℝ` (`WithLp 2 (H × ℝ)`),
 the lines through `(x, δ)` and `(y, δ)` with directions `(h, 0)` and `(k, 0)` never vanish for
 `δ ≠ 0`, so `t ↦ U (√(|x + t h|² + δ²), √(|y + t k|² + δ²))` is concave, and these functions tend
 to `t ↦ U (|x + t h|, |y + t k|)` as `δ → 0` (`concaveOn_univ_of_tendsto`). -/
@@ -1373,6 +1390,8 @@ theorem inequality_of_subordinate {Ω H : Type*} {mΩ : MeasurableSpace Ω} {μ 
 semimartingale inequalities* (2012), Theorem 3.5): for martingales `X`, `Y` with values in a
 separable real Hilbert space, started at `0`, with `‖X_{n+1} − X_n‖ ≤ ‖Y_{n+1} − Y_n‖` almost
 surely, and `p > 1`, `‖X_n‖_{L^p} ≤ (p* − 1) ‖Y_n‖_{L^p}`, `p* = max (p, p / (p − 1))`.
+(Burkholder's Theorem 1.1 covers real and complex `H`, with no separability, and martingales from
+any start; the statement here is the one cited.)
 
 The argument of Burkholder 1988, proof of Theorem 1.1: Burkholder's function
 `U (x, y) = p (1 − 1/p*)^{p−1} (|x| − (p* − 1)|y|)(|x| + |y|)^{p−1}` (`burkholderU`, (1.6))
@@ -1541,9 +1560,10 @@ The argument of Burkholder 1988, proof of Theorem 3.1: in the Hilbert space `H^{
 `A_m = X_{n ∧ m} e_n` (Burkholder's `F`); each of the two martingales is differentially subordinate
 to the other, and Theorem 1.1 (`inequality_of_subordinate`) applies to both pairs.
 
-Representation: Burkholder's `ℓ²_H` is replaced by its truncation `H^{n+1}` (`PiLp 2`), since `n`
-is fixed, and `X` sits in the last coordinate rather than the first; the argument is the same. The
-separability of `H` is not used. -/
+Up to time `n`, Burkholder's `F` and `G` take values in the first `n + 1` coordinates of `ℓ²_H`;
+the proof works in that subspace, `H^{n+1}` (`PiLp 2`), with `X` in the last coordinate rather
+than the first and both martingales stopped at `n`, which leaves them unchanged up to time `n`.
+The separability of `H` is not used. -/
 theorem squareFunction {X : ℕ → Ω → H} [TopologicalSpace.SeparableSpace H] {p : ℝ} (hp : 1 < p)
     (hX : Martingale X ℱ μ) (hX0 : ∀ ω, X 0 ω = 0) (n : ℕ) :
     eLpNorm (fun ω => √(∑ k ∈ Finset.range n, ‖X (k + 1) ω - X k ω‖ ^ 2)) (ENNReal.ofReal p) μ ≤

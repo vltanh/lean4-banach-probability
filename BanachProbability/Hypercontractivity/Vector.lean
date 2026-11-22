@@ -8,9 +8,11 @@ public import Mathlib.Analysis.Normed.Module.Seminorm.Norm
 # Hypercontractivity of Rademacher sums in seminormed spaces
 
 C. Borell, *On the integrability of Banach space valued Walsh polynomials*, Séminaire de
-Probabilités XIII, Lecture Notes in Math. 721 (1979), 1–3: Theorem 1.1, by the argument of its
-§2. For a seminorm `S` on a real vector space `E` (no completeness, no quotient), `1 < p ≤ q` and
-`ρ = √((p − 1) / (q − 1))` (Borell's `λ`):
+Probabilités XIII, Lecture Notes in Math. 721 (1979), 1–3: the inequality (1.1) of Theorem 1.1,
+by the argument of its §2, for Walsh polynomials of degree at most `1` (the closure `W̄_d (E)`,
+the degrees `d ≥ 2`, exponents `p ≤ 1` and the exponential integrability are not formalized).
+For a seminorm `S` on a real vector space `E` (no completeness, no quotient), `1 < p ≤ q` and
+`ρ = √((p − 1) / (q − 1))`, the largest admissible value of Borell's `λ` (`|λ| ≤ ρ`):
 
 * Borell's operator on functions of one sign, with the kernel
   `K (x, y) = e₀ (x) e₀ (y) + ρ e₁ (x) e₁ (y) = 1 + ρ x y`: `K̄ g (x) = E_y [K (x, y) g (y)]`
@@ -19,17 +21,19 @@ Probabilités XIII, Lecture Notes in Math. 721 (1979), 1–3: Theorem 1.1, by th
 * the elementary inequality `‖K̄ g‖_{L^q} ≤ ‖g‖_{L^p}` for real `g` (`kBar_twoPoint`): with
   `c₀ = (g (1) + g (−1)) / 2`, `c₁ = (g (1) − g (−1)) / 2`, it is
   `[(|c₀ + ρ c₁|^q + |c₀ − ρ c₁|^q) / 2]^{1/q} ≤ [(|c₀ + c₁|^p + |c₀ − c₁|^p) / 2]^{1/p}`;
-* the Segal lemma `‖(⊗ⁿ K̄) f‖_{L^q} ≤ ‖f‖_{L^p}` for real `f` (`kBarTensor_lpNorm_le_real`),
-  by induction on `n`: the elementary inequality in the first sign, Minkowski's inequality in
-  `L^{q/p}` to exchange the `L^p` norm over the first sign with the `L^q` norm over the others
-  (`avg_twoPoint_le`), and the induction hypothesis;
+* `‖(⊗ⁿ K̄) f‖_{L^q} ≤ ‖f‖_{L^p}` for real `f` (`kBarTensor_lpNorm_le_real`), which Borell
+  obtains from the elementary inequality by the Segal lemma; here by induction on `n`: the
+  elementary inequality in the first sign, Minkowski's inequality in `L^{q/p}` to exchange the
+  `L^p` norm over the first sign with the `L^q` norm over the others (`avg_twoPoint_le`), and the
+  induction hypothesis;
 * `K ≥ 0`: `S ((⊗ⁿ K̄) f (ε)) ≤ (⊗ⁿ K̄) (S ∘ f) (ε)` (`seminorm_kBarTensor_le`), so the Segal
   lemma applied to `S ∘ f` gives `‖(⊗ⁿ K̄) f‖_{L^q (S)} ≤ ‖f‖_{L^p (S)}` for `E`-valued `f`
   (`kBarTensor_lpNorm_le`);
-* `⊗ⁿ K̄` multiplies the Walsh functions of degree `d` by `ρ^d`; on the affine sums,
+* Borell's eigenvalue relation `(⊗ⁿ K̄) e_α = ρ^{|α|} e_α` for `|α| ≤ 1`:
   `(⊗ⁿ K̄) (c + Σ_i ε_i x_i) = c + ρ Σ_i ε_i x_i` (`kBarTensor_affine`), so
   `‖c + ρ Σ_i ε_i x_i‖_{L^q (S)} ≤ ‖c + Σ_i ε_i x_i‖_{L^p (S)}` (`hypercontractive_affine`),
-  Borell's (1.1) in degree at most `1`.
+  Borell's (2.1) for `E`-valued coefficients supported on `|α| ≤ 1`; its case `c = 0` is (1.1) for
+  `d = 1` (`kahaneKhintchine_hypercontractive`).
 
 The vector two-point inequality `‖a + ρ b ε‖_{L^q (S)} ≤ ‖a + b ε‖_{L^p (S)}`
 (`twoPoint_seminorm`) is the case of one sign: `K ≥ 0`, that is, the triangle inequality applied
@@ -41,11 +45,13 @@ to `a ± ρ b = ((1 ± ρ)/2)(a + b) + ((1 ∓ ρ)/2)(a − b)`, and the scalar 
 Borell cites the elementary inequality as well known (L. Gross, *Logarithmic Sobolev
 inequalities*, Amer. J. Math. 97 (1975), Theorem 3; W. Beckner, *Inequalities in Fourier
 analysis*, Ann. of Math. 102 (1975), p. 180) and the Segal lemma from Beckner (Lemma 2); neither
-was consulted. The elementary inequality is proved from its case of nonnegative functions
-(`twoPoint`: A. Bonami (1970), in the proof of R. O'Donnell, *Analysis of Boolean Functions*
-(2014), §10.1) by `K ≥ 0`, the reduction of O'Donnell's Exercise 9.7; the Segal lemma by the
-standard induction, with Minkowski's inequality in the form of O'Donnell's Exercise 10.1,
-`‖ ‖f (X, Y)‖_{p, Y} ‖_{q, X} ≤ ‖ ‖f (X, Y)‖_{q, X} ‖_{p, Y}` for `p ≤ q`.
+was obtained. The elementary inequality is proved from its case of nonnegative functions
+(`twoPoint`: A. Bonami (1970), in R. O'Donnell's proof, *Analysis of Boolean Functions* (2014),
+§10.1, after S. Janson) by `K ≥ 0`, the reduction of O'Donnell's Exercise 9.7; the tensorisation
+by the induction of O'Donnell's Exercise 10.3 (the one-variable inequality, then Minkowski's
+inequality in the form of his Exercise 10.1,
+`‖ ‖f (X, Y)‖_{p, Y} ‖_{q, X} ≤ ‖ ‖f (X, Y)‖_{q, X} ‖_{p, Y}` for `p ≤ q`, then the induction
+hypothesis).
 -/
 
 @[expose] public section
@@ -122,7 +128,7 @@ theorem kBarTensor_succ (ρ : ℝ) {n : ℕ} (f : (Fin (n + 1) → Bool) → E) 
     kBarTensor ρ (n + 1) f ε =
       kBar ρ (fun η => kBarTensor ρ n (fun ε' => f (Fin.cons η ε')) (Fin.tail ε)) (ε 0) := rfl
 
-/-- `⊗ⁿ K̄` multiplies the Walsh functions of degree `d` by `ρ^d`; on the affine sums,
+/-- Borell's `(⊗ⁿ K̄) e_α = ρ^{|α|} e_α` for the Walsh functions of degree at most `1`:
 `(⊗ⁿ K̄) (c + Σ_i ε_i x_i) = c + ρ Σ_i ε_i x_i`. -/
 theorem kBarTensor_affine (ρ : ℝ) {n : ℕ} (c : E) (x : Fin n → E) :
     kBarTensor ρ n (fun ε => c + ∑ i, coin (ε i) • x i) =
@@ -223,9 +229,10 @@ theorem avg_twoPoint_le {n : ℕ} {p q : ℝ} (hp : 0 < p) (hpq : p ≤ q)
   rw [eL]
   exact Real.rpow_le_rpow (lpNorm_nonneg (fun t => by simp [hN]) _ _) hM (by positivity)
 
-/-- **The Segal lemma** for `⊗ⁿ K̄` (W. Beckner (1975), Lemma 2, cited by Borell): for
-`1 < p ≤ q`, `ρ = √((p − 1) / (q − 1))` and real `f` on `n` signs,
-`‖(⊗ⁿ K̄) f‖_{L^q} ≤ ‖f‖_{L^p}`. By induction on `n`: with `h (y₀, x) = (⊗ⁿ K̄) (f (y₀, ·)) (x)`,
+/-- **`⊗ⁿ K̄` from `L^p` to `L^q`**, which Borell derives from the elementary inequality by the
+Segal lemma (W. Beckner (1975), Lemma 2, not obtained): for `1 < p ≤ q`,
+`ρ = √((p − 1) / (q − 1))` and real `f` on `n` signs, `‖(⊗ⁿ K̄) f‖_{L^q} ≤ ‖f‖_{L^p}`. By
+induction on `n`, as in O'Donnell's Exercise 10.3: with `h (y₀, x) = (⊗ⁿ K̄) (f (y₀, ·)) (x)`,
 `‖(⊗ⁿ⁺¹ K̄) f‖_q = ‖ ‖K̄ h (·, x)‖_{q, x₀} ‖_{q, x} ≤ ‖ ‖h (·, x)‖_{p, x₀} ‖_{q, x}` (the elementary
 inequality, `kBar_twoPoint`) `≤ ‖ ‖h (x₀, ·)‖_{q, x} ‖_{p, x₀}` (Minkowski, `avg_twoPoint_le`)
 `≤ ‖ ‖f (x₀, ·)‖_{p, x} ‖_{p, x₀} = ‖f‖_p` (the induction hypothesis). -/
@@ -320,8 +327,9 @@ theorem seminorm_kBarTensor_le (S : Seminorm ℝ E) {ρ : ℝ} (hρ0 : 0 ≤ ρ)
           · exact ih _ _
       _ = _ := by simp only [kBar, smul_eq_mul]
 
-/-- **Borell's theorem** for the operator `⊗ⁿ K̄` in a seminormed space (Borell 1979, (2.1) for
-`E`-valued coefficients): for a seminorm `S`, `1 < p ≤ q`, `ρ = √((p − 1) / (q − 1))` and
+/-- **Borell's inequality** for the operator `⊗ⁿ K̄` in a seminormed space (Borell 1979, the
+operator form of (2.1), for `E`-valued functions): for a seminorm `S`, `1 < p ≤ q`,
+`ρ = √((p − 1) / (q − 1))` and
 `f : {±1}ⁿ → E`, `‖(⊗ⁿ K̄) f‖_{L^q (S)} ≤ ‖f‖_{L^p (S)}`. Since `K ≥ 0`,
 `S ((⊗ⁿ K̄) f) ≤ (⊗ⁿ K̄) (S ∘ f)` (`seminorm_kBarTensor_le`), and the Segal lemma
 (`kBarTensor_lpNorm_le_real`) applies to the real function `S ∘ f`. -/
@@ -347,8 +355,8 @@ theorem kBarTensor_lpNorm_le (S : Seminorm ℝ E) {p q : ℝ} (hp : 1 < p) (hpq 
         unfold SignCube.lpNorm
         simp only [coe_normSeminorm, Real.norm_eq_abs, abs_of_nonneg (hS _)]
 
-/-- **Affine hypercontractivity** of Rademacher sums in a seminormed space (Borell 1979,
-Theorem 1.1 in degree at most `1`):
+/-- **Affine hypercontractivity** of Rademacher sums in a seminormed space (Borell 1979, (2.1)
+for coefficients supported on `|α| ≤ 1`):
 `‖c + ρ Σ_i ε_i x_i‖_{L^q} ≤ ‖c + Σ_i ε_i x_i‖_{L^p}`, `ρ = √((p − 1) / (q − 1))`: the case
 `f = c + Σ_i ε_i x_i` of `kBarTensor_lpNorm_le`, with `(⊗ⁿ K̄) f = c + ρ Σ_i ε_i x_i`
 (`kBarTensor_affine`). -/
