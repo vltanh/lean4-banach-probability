@@ -1,6 +1,6 @@
 # BanachProbability
 
-<placeholder: CI badge, once the repository is published>
+[![Lean Action CI](https://github.com/vltanh/lean4-banach-probability/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/vltanh/lean4-banach-probability/actions/workflows/lean_action_ci.yml)
 
 A Lean 4 library of probability in Banach spaces: Rademacher sums and the Kahane–Khintchine
 inequality, martingales and the UMD property, and their Schatten-class (noncommutative) versions.
@@ -150,8 +150,8 @@ Lean `v4.36.0-rc2`, Mathlib `v4.36.0-rc2`, the module system. In a `lakefile.tom
 ```toml
 [[require]]
 name = "BanachProbability"
-git = "<placeholder: repository URL, not published yet>"
-rev = "<placeholder: full commit hash>"
+git = "https://github.com/vltanh/lean4-banach-probability"
+rev = "<commit>"
 ```
 
 Build with `lake build`; audit the axioms with `lake env lean scripts/Audit.lean` (it fails if a
@@ -160,10 +160,9 @@ and `Quot.sound`).
 
 ## Credits
 
-Maintainers: <placeholder: names to be settled>.
-
-Written with the AI system Claude (Anthropic), used through Claude Code; the AI system is not an
-author or maintainer.
+- Maintained by The-Anh Vu-Le.
+- Written by Claude (Opus 5.5, model `claude-opus-5-5`) in Claude Code.
+- No person has reviewed the proofs; Lean has checked them.
 
 ## Licence
 
