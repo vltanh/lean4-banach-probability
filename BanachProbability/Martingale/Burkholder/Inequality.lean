@@ -94,7 +94,7 @@ sharp inequalities for martingale transforms*, Ann. Probab. 12 (1984); neither w
    is differentially subordinate to the other, `|F_n| = |X_n|` and `|G_n| = 𝒮_n X`; Theorem 1.1
    applies to `(G, F)` and to `(F, G)`.
 
-The statements are the ones cited (Cassese, Theorem 2.3): the martingales start at `0`
+The statements are for martingales that start at `0`
 (`d_0 = e_0 = 0`), so (1.9) is `U (0, 0) = 0` and (1.16) is not needed, and the inequality is at
 a fixed time `n` rather than for `sup_n ‖·‖_p`. In step 7, up to time `n` the values of
 Burkholder's `F` and `G` lie in the first `n + 1` coordinates of `ℓ²_H`; the proof works in that
