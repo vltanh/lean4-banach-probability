@@ -10,9 +10,8 @@ For a seminorm `S` on a real vector space (in particular for every normed space)
 
 * the hypercontractive form: for `1 < p ≤ q < ∞`,
   `‖Σ ε_i x_i‖_{L^q} ≤ √((q − 1) / (p − 1)) ‖Σ ε_i x_i‖_{L^p}`
-  (`kahaneKhintchine_hypercontractive`; C. Borell (1979), with the scalar two-point inequality of
-  R. O'Donnell, *Analysis of Boolean Functions* (2014), §10.1), the case `c = 0` of
-  `hypercontractive_affine`;
+  (`kahaneKhintchine_hypercontractive`; C. Borell (1979), Theorem 1.1 for `d = 1`), the case
+  `c = 0` of `hypercontractive_affine`;
 * the Kahane–Khintchine inequality: for all `p, q ∈ (1, ∞)`,
   `‖Σ ε_i x_i‖_{L^p} ≤ κ_{p,q} ‖Σ ε_i x_i‖_{L^q}` with
   `κ_{p,q} = max (1, √((p − 1) / (q − 1)))` (`kahaneKhintchine`; J.-P. Kahane, *Sur les sommes
@@ -21,9 +20,10 @@ For a seminorm `S` on a real vector space (in particular for every normed space)
   `p > q` and from the monotonicity of `L^p` norms (`SignCube.lpNorm_mono_exponent`) when
   `p ≤ q`.
 
-The proof is hypercontractivity (Bonami's two-point inequality, carried to seminormed spaces by
-the triangle inequality and tensorised, the standard argument), not Kahane's original argument
-through Lévy's inequality, which gives no growth rate of the constants.
+The proof is Borell's (§2 of his paper; `Hypercontractivity/Vector.lean`): the elementary
+two-point inequality, tensorised by the Segal lemma and carried to seminormed spaces by the
+positivity of the kernel, applied to the Walsh polynomials of degree `1`; not Kahane's original
+argument through Lévy's inequality, which gives no growth rate of the constants.
 -/
 
 @[expose] public section

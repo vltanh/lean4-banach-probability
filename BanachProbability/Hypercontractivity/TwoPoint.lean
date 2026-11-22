@@ -8,11 +8,12 @@ public import BanachProbability.Hypercontractivity.Binomial
 For `1 < p ≤ q < ∞`, `ρ = √((p − 1) / (q − 1))` and `a ≥ |b|`,
 `‖a + ρ b ε‖_{L^q} ≤ ‖a + b ε‖_{L^p}` for one fair sign `ε`, that is
 `(((a + ρb)^q + (a − ρb)^q) / 2)^{1/q} ≤ (((a + b)^p + (a − b)^p) / 2)^{1/p}` (`twoPoint`): the
-case `a ≥ |b|` (nonnegative two-point functions, all that the vector-valued extension needs) of
-the two-point inequality of A. Bonami, *Étude des coefficients de Fourier des fonctions de
-`L^p (G)`*, Ann. Inst. Fourier 20 (1970), and R. O'Donnell, *Analysis of Boolean Functions*
-(2014), §10.1, "Two-Point Inequality", after S. Janson, which holds for all real `a`, `b`. The
-proof follows O'Donnell:
+case `a ≥ |b|` (nonnegative two-point functions) of the two-point inequality of A. Bonami,
+*Étude des coefficients de Fourier des fonctions de `L^p (G)`*, Ann. Inst. Fourier 20 (1970), and
+R. O'Donnell, *Analysis of Boolean Functions* (2014), §10.1, "Two-Point Inequality", after
+S. Janson, which holds for all real `a`, `b`; the general case, the elementary inequality of
+Borell's proof, follows from this one by the positivity of the kernel (O'Donnell's Exercise 9.7;
+`twoPoint_seminorm` for the absolute value, `kBar_twoPoint`). The proof follows O'Donnell:
 
 * `1 < p ≤ q ≤ 2` (`twoPoint_of_le_two`): normalise to `a = 1`, `|b| < 1`, expand both sides in
   the even binomial series (`hasSum_two_point_binomial`), apply `(1 + t)^θ ≤ 1 + θ t` with
