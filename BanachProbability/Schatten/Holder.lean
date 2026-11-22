@@ -24,9 +24,12 @@ public import Mathlib.Basic.Real.Sign
   matrices (`schattenNorm_sum_le_of_posSemidef`, Jensen's inequality for the `S_r` norm) without
   the general Schatten triangle inequality.
 
-Spectral facts used on the way (private helpers): `tr (f (A)) = Σ_i f (λ_i)`, the eigenvalues of
-`f (A)` are the `f (λ_i)` up to order (from the characteristic polynomial), `f (A) ⪰ 0` when
-`f ≥ 0` on the eigenvalues, and `‖A‖_{S_q} = (Σ_i |λ_i|^q)^{1/q}` for symmetric `A`.
+Spectral facts used on the way, from `BanachProbability.Schatten.Spectral`:
+`tr (f (A)) = Σ_i f (λ_i)` (`trace_cfc_eq_sum`), the eigenvalues of `f (A)` are the `f (λ_i)` up to
+order (`sum_comp_eigenvalues_cfc`, from the characteristic polynomial), `f (A) ⪰ 0` when `f ≥ 0`
+on the spectrum (`posSemidef_cfc`), `‖A‖_{S_q} = (Σ_i |λ_i|^q)^{1/q}` for symmetric `A`
+(`schattenNorm_eq_of_isHermitian`) and `‖W‖_{S_1} = tr W` for `W ⪰ 0`
+(`schattenNorm_one_of_posSemidef`).
 -/
 
 @[expose] public section
@@ -36,56 +39,6 @@ open scoped Matrix
 namespace BanachProbability
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
-
-/-! ### Spectral facts on `cfc` and Schatten norms -/
-
-/-- The trace of a function of a symmetric matrix: `tr (f (A)) = Σ_i f (λ_i)`. -/
-private theorem trace_cfc_eq_sum {A : Matrix n n ℝ} (hA : A.IsHermitian) (f : ℝ → ℝ) :
-    (cfc f A).trace = ∑ i, f (hA.eigenvalues i) := by
-  have h := trace_cfc_mul_cfc hA hA f (fun _ => 1)
-  rw [cfc_const_one ℝ A (show IsSelfAdjoint A from hA), mul_one] at h
-  rw [h]
-  refine Finset.sum_congr rfl fun j _ => ?_
-  simp only [mul_one]
-  rw [← Finset.sum_mul, sum_overlap_right, one_mul]
-
-/-- The eigenvalues of `f (A)` are those of `A` mapped by `f`, counted with multiplicity: the
-multisets `{λ_i (f (A))}` and `{f (λ_i (A))}` agree. -/
-private theorem map_eigenvalues_cfc {A : Matrix n n ℝ} (hA : A.IsHermitian) (f : ℝ → ℝ)
-    (hf : (cfc f A).IsHermitian) :
-    Multiset.map hf.eigenvalues Finset.univ.val =
-      Multiset.map (f ∘ hA.eigenvalues) Finset.univ.val := by
-  have h := hf.roots_charpoly_eq_eigenvalues
-  rw [hA.charpoly_cfc_eq f, Polynomial.roots_prod _ _
-    (Finset.prod_ne_zero_iff.mpr fun i _ => Polynomial.X_sub_C_ne_zero _)] at h
-  simp only [Polynomial.roots_X_sub_C, Multiset.bind_singleton, RCLike.ofReal_real_eq_id,
-    Function.id_comp] at h
-  exact h.symm
-
-/-- Sums over the eigenvalues of `f (A)` are sums over `f` of the eigenvalues of `A`. -/
-private theorem sum_comp_eigenvalues_cfc {A : Matrix n n ℝ} (hA : A.IsHermitian) (f : ℝ → ℝ)
-    (hf : (cfc f A).IsHermitian) (F : ℝ → ℝ) :
-    ∑ i, F (hf.eigenvalues i) = ∑ i, F (f (hA.eigenvalues i)) := by
-  have h := congrArg (Multiset.map F) (map_eigenvalues_cfc hA f hf)
-  rw [Multiset.map_map, Multiset.map_map] at h
-  exact congrArg Multiset.sum h
-
-/-- A function of a symmetric matrix that is nonnegative on its eigenvalues is positive
-semidefinite. -/
-private theorem posSemidef_cfc {A : Matrix n n ℝ} (hA : A.IsHermitian) {f : ℝ → ℝ}
-    (hf : ∀ i, 0 ≤ f (hA.eigenvalues i)) : (cfc f A).PosSemidef := by
-  rw [hA.cfc_eq, Matrix.IsHermitian.cfc, Unitary.conjStarAlgAut_apply,
-    Matrix.star_eq_conjTranspose]
-  refine Matrix.PosSemidef.mul_mul_conjTranspose_same ?_ _
-  exact Matrix.posSemidef_diagonal_iff.mpr fun i => by simpa using hf i
-
-/-- The Schatten `q`-norm of a symmetric matrix from its eigenvalues:
-`‖A‖_{S_q} = (Σ_i |λ_i|^q)^{1/q}`, `q > 0`. -/
-private theorem schattenNorm_eq_of_isHermitian {A : Matrix n n ℝ} (hA : A.IsHermitian) {q : ℝ}
-    (hq : 0 < q) :
-    schattenNorm (ENNReal.ofReal q) A = (∑ i, |hA.eigenvalues i| ^ q) ^ (1 / q) := by
-  rw [← schattenNorm_rpow_of_isHermitian hA hq, ← Real.rpow_mul (schattenNorm_nonneg _ _),
-    mul_one_div_cancel hq.ne', Real.rpow_one]
 
 /-! ### The trace Hölder inequality -/
 
@@ -197,11 +150,9 @@ noncomputable def normingElement (r : ℝ) (A : Matrix n n ℝ) : Matrix n n ℝ
 /-- `tr (A · normingElement r A) = Σ_i λ_i sgn (λ_i) |λ_i|^{r−1} = Σ_i |λ_i|^r = ‖A‖_{S_r}^r`. -/
 theorem trace_mul_normingElement {A : Matrix n n ℝ} (hA : A.IsHermitian) {r : ℝ} (hr : 1 < r) :
     (A * normingElement r A).trace = schattenNorm (ENNReal.ofReal r) A ^ r := by
-  have hc : ∀ f : ℝ → ℝ, ContinuousOn f (spectrum ℝ A) := fun f =>
-    Matrix.finite_real_spectrum.continuousOn f
   have h : cfc (fun t : ℝ => t * (Real.sign t * |t| ^ (r - 1))) A =
       cfc (fun t : ℝ => t) A * cfc (fun t : ℝ => Real.sign t * |t| ^ (r - 1)) A :=
-    cfc_mul _ _ A (hc _) (hc _)
+    cfc_mul _ _ A (continuousOn_spectrum _ _) (continuousOn_spectrum _ _)
   rw [cfc_id' ℝ A (show IsSelfAdjoint A from hA)] at h
   rw [normingElement, ← h, trace_cfc_eq_sum hA, schattenNorm_rpow_of_isHermitian hA (by linarith)]
   exact Finset.sum_congr rfl fun i _ => mul_sign_mul_abs_rpow _ hr
@@ -215,8 +166,7 @@ theorem schattenNorm_normingElement {A : Matrix n n ℝ} (hA : A.IsHermitian) {r
   have hr0 : 0 < r := by linarith
   have hr1 : 0 < r - 1 := by linarith
   have hr' : 0 < r / (r - 1) := div_pos hr0 hr1
-  have hN : (cfc (fun t : ℝ => Real.sign t * |t| ^ (r - 1)) A).IsHermitian :=
-    (cfc_predicate _ A : IsSelfAdjoint _).isHermitian
+  have hN : (cfc (fun t : ℝ => Real.sign t * |t| ^ (r - 1)) A).IsHermitian := isHermitian_cfc _ A
   rw [normingElement, schattenNorm_eq_of_isHermitian hN hr',
     sum_comp_eigenvalues_cfc hA _ hN fun t => |t| ^ (r / (r - 1))]
   have e : ∀ i, |Real.sign (hA.eigenvalues i) * |hA.eigenvalues i| ^ (r - 1)| ^ (r / (r - 1)) =
@@ -231,7 +181,7 @@ theorem schattenNorm_normingElement {A : Matrix n n ℝ} (hA : A.IsHermitian) {r
 /-- The norming element is symmetric, for every `A` (for a non-symmetric `A` it is `0`). -/
 theorem isHermitian_normingElement (r : ℝ) (A : Matrix n n ℝ) :
     (normingElement r A).IsHermitian :=
-  (cfc_predicate _ A : IsSelfAdjoint (normingElement r A)).isHermitian
+  isHermitian_cfc _ A
 
 /-- Duality for positive semidefinite matrices: `‖W‖_{S_r} = tr (W Z)` for some positive
 semidefinite `Z` with `‖Z‖_{S_{r'}} ≤ 1`. -/
@@ -249,8 +199,8 @@ theorem exists_posSemidef_trace_mul_eq {W : Matrix n n ℝ} (hW : W.PosSemidef) 
     exact hs
   · -- otherwise the normalized norming element `Z = normingElement r W / ‖W‖_{S_r}^{r−1}`
     have hN : (normingElement r W).PosSemidef :=
-      posSemidef_cfc hW.isHermitian fun i =>
-        mul_nonneg (sign_nonneg_of_nonneg (hW.eigenvalues_nonneg i))
+      posSemidef_cfc fun t ht =>
+        mul_nonneg (sign_nonneg_of_nonneg (spectrum_nonneg_of_posSemidef hW ht))
           (Real.rpow_nonneg (abs_nonneg _) _)
     have hsr : 0 < s ^ (r - 1) := Real.rpow_pos_of_pos hs _
     refine ⟨(s ^ (r - 1))⁻¹ • normingElement r W, hN.smul (inv_nonneg.mpr hsr.le), ?_, ?_⟩
@@ -258,17 +208,6 @@ theorem exists_posSemidef_trace_mul_eq {W : Matrix n n ℝ} (hW : W.PosSemidef) 
         abs_of_pos (inv_pos.mpr hsr), inv_mul_cancel₀ hsr.ne']
     · rw [Matrix.mul_smul, Matrix.trace_smul, trace_mul_normingElement hW.isHermitian hr,
         smul_eq_mul, ← div_eq_inv_mul, ← Real.rpow_sub hs, sub_sub_cancel, Real.rpow_one]
-
-/-- The `S_1` norm of a positive semidefinite matrix is its trace. -/
-private theorem schattenNorm_one_of_posSemidef {W : Matrix n n ℝ} (hW : W.PosSemidef) :
-    schattenNorm (ENNReal.ofReal 1) W = W.trace := by
-  have h := schattenNorm_rpow_of_isHermitian hW.isHermitian one_pos
-  have h2 := trace_cfc_eq_sum hW.isHermitian id
-  rw [cfc_id ℝ W (show IsSelfAdjoint W from hW.isHermitian)] at h2
-  rw [Real.rpow_one] at h
-  rw [h, h2]
-  exact Finset.sum_congr rfl fun i _ => by
-    rw [Real.rpow_one, abs_of_nonneg (hW.eigenvalues_nonneg i), id]
 
 /-- The triangle inequality (Jensen's inequality) for the `S_r` norm on positive semidefinite
 matrices, from duality: `‖Σ_i W_i‖_{S_r} ≤ Σ_i ‖W_i‖_{S_r}`, `r ≥ 1`. -/

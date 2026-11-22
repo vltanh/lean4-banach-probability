@@ -182,18 +182,18 @@ noncomputable def truncBelow (s : ℝ) (A : Matrix n n ℝ) : Matrix n n ℝ :=
 
 theorem truncAbove_add_truncBelow {A : Matrix n n ℝ} (hA : A.IsHermitian) (s : ℝ) :
     truncAbove s A + truncBelow s A = A := by
-  rw [truncAbove, truncBelow, ← cfc_add (R := ℝ) A _ _ (Matrix.finite_real_spectrum.continuousOn _)
-    (Matrix.finite_real_spectrum.continuousOn _)]
+  rw [truncAbove, truncBelow, ← cfc_add (R := ℝ) A _ _ (continuousOn_spectrum _ _)
+    (continuousOn_spectrum _ _)]
   conv_rhs => rw [← cfc_id' ℝ A hA.isSelfAdjoint]
   congr 1
   funext t
   split_ifs <;> simp
 
-theorem isHermitian_truncAbove (s : ℝ) (A : Matrix n n ℝ) : (truncAbove s A).IsHermitian := by
-  exact cfc_predicate _ A
+theorem isHermitian_truncAbove (s : ℝ) (A : Matrix n n ℝ) : (truncAbove s A).IsHermitian :=
+  isHermitian_cfc _ A
 
-theorem isHermitian_truncBelow (s : ℝ) (A : Matrix n n ℝ) : (truncBelow s A).IsHermitian := by
-  exact cfc_predicate _ A
+theorem isHermitian_truncBelow (s : ℝ) (A : Matrix n n ℝ) : (truncBelow s A).IsHermitian :=
+  isHermitian_cfc _ A
 
 /-- `t 1_{(s, ∞)} (|t|)` is the pointwise limit of the continuous functions
 `t min (1, max (0, k (|t| − s)))`. -/
@@ -226,21 +226,12 @@ theorem measurable_truncBelow (s : ℝ) : Measurable fun A : Matrix n n ℝ => t
   convert tendsto_const_nhds.sub (dist_tendsto_truncAbove s t) using 2
   split_ifs <;> simp
 
-/-- `‖f (A)‖_{S_r}^r = Σ_i |f (λ_i (A))|^r` for a symmetric `A` and `r > 0`. -/
-theorem mcd_schattenNorm_cfc_rpow {A : Matrix n n ℝ} (hA : A.IsHermitian) (f : ℝ → ℝ) {r : ℝ}
-    (hr : 0 < r) :
-    schattenNorm (ENNReal.ofReal r) (cfc f A) ^ r = ∑ i, |f (hA.eigenvalues i)| ^ r := by
-  have hB : (cfc f A).IsHermitian := cfc_predicate f A
-  obtain ⟨e, he⟩ := exists_equiv_eigenvalues_cfc_eq hA f hB
-  rw [schattenNorm_rpow_of_isHermitian hB hr, ← e.sum_comp]
-  simp [he]
-
 open scoped Classical in
 theorem schattenNorm_truncAbove_rpow {A : Matrix n n ℝ} (hA : A.IsHermitian) (s : ℝ) {r : ℝ}
     (hr : 0 < r) :
     schattenNorm (ENNReal.ofReal r) (truncAbove s A) ^ r =
       ∑ i ∈ Finset.univ.filter (fun i => s < |hA.eigenvalues i|), |hA.eigenvalues i| ^ r := by
-  rw [truncAbove, mcd_schattenNorm_cfc_rpow hA _ hr, Finset.sum_filter]
+  rw [truncAbove, schattenNorm_cfc_rpow hA _ hr, Finset.sum_filter]
   refine Finset.sum_congr rfl fun i _ => ?_
   split_ifs <;> simp [Real.zero_rpow hr.ne']
 
@@ -249,7 +240,7 @@ theorem schattenNorm_truncBelow_rpow {A : Matrix n n ℝ} (hA : A.IsHermitian) (
     (hr : 0 < r) :
     schattenNorm (ENNReal.ofReal r) (truncBelow s A) ^ r =
       ∑ i ∈ Finset.univ.filter (fun i => |hA.eigenvalues i| ≤ s), |hA.eigenvalues i| ^ r := by
-  rw [truncBelow, mcd_schattenNorm_cfc_rpow hA _ hr, Finset.sum_filter]
+  rw [truncBelow, schattenNorm_cfc_rpow hA _ hr, Finset.sum_filter]
   refine Finset.sum_congr rfl fun i _ => ?_
   by_cases h : s < |hA.eigenvalues i|
   · simp [h, not_le.mpr h, Real.zero_rpow hr.ne']

@@ -71,28 +71,6 @@ private theorem cuc_posSemidef_conj {q X : Matrix n n ℝ} (hqt : qᵀ = q) (hX 
   have h := hX.conjTranspose_mul_mul_same q
   rwa [Matrix.conjTranspose_eq_transpose_of_trivial, hqt] at h
 
-private theorem cuc_cont (f : ℝ → ℝ) (A : Matrix n n ℝ) : ContinuousOn f (spectrum ℝ A) :=
-  Matrix.finite_real_spectrum.continuousOn _
-
-/-- A function of a matrix that is nonnegative on its spectrum is positive semidefinite:
-`g (B) = h (B)ᵀ h (B)` with `h = √g`. -/
-private theorem cuc_posSemidef_cfc {B : Matrix n n ℝ} {g : ℝ → ℝ}
-    (hg : ∀ t ∈ spectrum ℝ B, 0 ≤ g t) : (cfc g B).PosSemidef := by
-  have hC : (cfc (fun t => Real.sqrt (g t)) B).IsHermitian := cfc_predicate _ B
-  have hCC : cfc (fun t => Real.sqrt (g t)) B * cfc (fun t => Real.sqrt (g t)) B = cfc g B := by
-    rw [← cfc_mul _ _ B (cuc_cont _ _) (cuc_cont _ _)]
-    exact cfc_congr fun t ht => Real.mul_self_sqrt (hg t ht)
-  have h := Matrix.posSemidef_conjTranspose_mul_self (cfc (fun t => Real.sqrt (g t)) B)
-  rwa [hC.eq, hCC] at h
-
-/-- The spectrum of a positive semidefinite matrix is nonnegative. -/
-private theorem cuc_spectrum_nonneg {B : Matrix n n ℝ} (hB : B.PosSemidef) {t : ℝ}
-    (ht : t ∈ spectrum ℝ B) : 0 ≤ t := by
-  rw [hB.isHermitian.spectrum_real_eq_range_eigenvalues] at ht
-  obtain ⟨i, rfl⟩ := ht
-  rw [hB.isHermitian.eigenvalues_eq]
-  exact hB.dotProduct_mulVec_nonneg _
-
 private theorem cuc_posSemidef_one_sub {q : Matrix n n ℝ} (hq : q * q = q) (hqt : qᵀ = q) :
     (1 - q).PosSemidef := by
   have h := Matrix.posSemidef_conjTranspose_mul_self (1 - q)
@@ -156,15 +134,6 @@ private theorem cuc_conj_sub' {q B P : Matrix n n ℝ} (l : ℝ) (hq : q * q = q
     hq, smul_sub]
   abel
 
-/-- A matrix commutes with its spectral projections: for a symmetric matrix by the functional
-calculus, and otherwise the spectral projection is `0` (the junk value of `cfc`). -/
-private theorem cuc_commute_spectralProj (A : Matrix n n ℝ) (S : Set ℝ) :
-    Commute A (spectralProj A S) := by
-  by_cases hA : A.IsHermitian
-  · exact commute_spectralProj hA S
-  · rw [spectralProj, cfc_apply_of_not_predicate A (show ¬ IsSelfAdjoint A from hA)]
-    exact Commute.zero_right A
-
 /-! ### One step of the construction
 
 For a projection `q` and a matrix `X`, with `B = q X q` and `P = 1_S (B)`. -/
@@ -203,7 +172,7 @@ private theorem cuc_step_transpose (hq : q * q = q) (hqt : qᵀ = q) (S : Set �
 
 private theorem cuc_step_commute (hq : q * q = q) (S : Set ℝ) :
     Commute (q * spectralProj (q * X * q) S) (q * X * q) := by
-  have hBP := (cuc_commute_spectralProj (q * X * q) S).eq
+  have hBP := (commute_spectralProj (q * X * q) S).eq
   change q * spectralProj (q * X * q) S * (q * X * q) =
     q * X * q * (q * spectralProj (q * X * q) S)
   rw [mul_assoc, ← hBP, ← mul_assoc, cuc_mul_conj hq, ← mul_assoc, cuc_conj_mul hq]
@@ -213,7 +182,7 @@ private theorem cuc_step_conj_eq (hq : q * q = q) (S : Set ℝ) :
     q * spectralProj (q * X * q) S * X * (q * spectralProj (q * X * q) S) =
       q * X * q * spectralProj (q * X * q) S := by
   have hPq := (cuc_commute_q hq (X := X) S).eq
-  have hBP := (cuc_commute_spectralProj (q * X * q) S).eq
+  have hBP := (commute_spectralProj (q * X * q) S).eq
   have hPP := spectralProj_mul_self (q * X * q) S
   calc q * spectralProj (q * X * q) S * X * (q * spectralProj (q * X * q) S)
       = spectralProj (q * X * q) S * q * X * (q * spectralProj (q * X * q) S) := by rw [hPq]
@@ -235,10 +204,11 @@ private theorem cuc_step_le (hq : q * q = q) (hqt : qᵀ = q) (l : ℝ) :
         (q * X * q) = l • spectralProj (q * X * q) (Set.Icc 0 l) -
           q * X * q * spectralProj (q * X * q) (Set.Icc 0 l) := by
       rw [cfc_sub (fun t => l * (Set.Icc 0 l).indicator 1 t)
-          (fun t => t * (Set.Icc 0 l).indicator 1 t) (q * X * q) (cuc_cont _ _) (cuc_cont _ _),
-        cfc_const_mul l ((Set.Icc 0 l).indicator 1) (q * X * q) (cuc_cont _ _),
-        cfc_mul (fun t => t) ((Set.Icc 0 l).indicator 1) (q * X * q) (cuc_cont _ _)
-          (cuc_cont _ _),
+          (fun t => t * (Set.Icc 0 l).indicator 1 t) (q * X * q) (continuousOn_spectrum _ _)
+          (continuousOn_spectrum _ _),
+        cfc_const_mul l ((Set.Icc 0 l).indicator 1) (q * X * q) (continuousOn_spectrum _ _),
+        cfc_mul (fun t => t) ((Set.Icc 0 l).indicator 1) (q * X * q) (continuousOn_spectrum _ _)
+          (continuousOn_spectrum _ _),
         cfc_id' ℝ (q * X * q) hB.isSelfAdjoint]
       rfl
     have hg : ∀ t ∈ spectrum ℝ (q * X * q),
@@ -250,7 +220,7 @@ private theorem cuc_step_le (hq : q * q = q) (hqt : qᵀ = q) (l : ℝ) :
         linarith [ht.2]
       · rw [Set.indicator_of_notMem ht]
         simp
-    have hC := cuc_posSemidef_conj hqt (cuc_posSemidef_cfc hg)
+    have hC := cuc_posSemidef_conj hqt (posSemidef_cfc hg)
     rw [hcfc, cuc_conj_sub l hq (cuc_mul_conj hq) (cuc_conj_mul hq) hPq] at hC
     rwa [cuc_step_conj_eq hq]
   · have h0 : spectralProj (q * X * q) (Set.Icc 0 l) = 0 := by
@@ -268,23 +238,26 @@ private theorem cuc_step_trace (hq : q * q = q) (hqt : qᵀ = q) (hX : X.PosSemi
   have hPq := (cuc_commute_q hq (X := X) (Set.Icc 0 l)).eq
   have h1 : cfc (fun t => 1 - (Set.Icc 0 l).indicator 1 t) (q * X * q) =
       1 - spectralProj (q * X * q) (Set.Icc 0 l) := by
-    rw [cfc_sub (fun _ => (1 : ℝ)) ((Set.Icc 0 l).indicator 1) (q * X * q) (cuc_cont _ _)
-        (cuc_cont _ _), cfc_const (1 : ℝ) (q * X * q) hB.isHermitian.isSelfAdjoint, map_one]
+    rw [cfc_sub (fun _ => (1 : ℝ)) ((Set.Icc 0 l).indicator 1) (q * X * q)
+        (continuousOn_spectrum _ _) (continuousOn_spectrum _ _),
+      cfc_const (1 : ℝ) (q * X * q) hB.isHermitian.isSelfAdjoint, map_one]
     rfl
   have hcfc : cfc (fun t => t * (1 - (Set.Icc 0 l).indicator 1 t) -
       l * (1 - (Set.Icc 0 l).indicator 1 t)) (q * X * q) =
         q * X * q * (1 - spectralProj (q * X * q) (Set.Icc 0 l)) -
           l • (1 - spectralProj (q * X * q) (Set.Icc 0 l)) := by
     rw [cfc_sub (fun t => t * (1 - (Set.Icc 0 l).indicator 1 t))
-        (fun t => l * (1 - (Set.Icc 0 l).indicator 1 t)) (q * X * q) (cuc_cont _ _) (cuc_cont _ _),
-      cfc_mul (fun t => t) (fun t => 1 - (Set.Icc 0 l).indicator 1 t) (q * X * q) (cuc_cont _ _)
-        (cuc_cont _ _),
-      cfc_const_mul l (fun t => 1 - (Set.Icc 0 l).indicator 1 t) (q * X * q) (cuc_cont _ _),
+        (fun t => l * (1 - (Set.Icc 0 l).indicator 1 t)) (q * X * q) (continuousOn_spectrum _ _)
+        (continuousOn_spectrum _ _),
+      cfc_mul (fun t => t) (fun t => 1 - (Set.Icc 0 l).indicator 1 t) (q * X * q)
+        (continuousOn_spectrum _ _) (continuousOn_spectrum _ _),
+      cfc_const_mul l (fun t => 1 - (Set.Icc 0 l).indicator 1 t) (q * X * q)
+        (continuousOn_spectrum _ _),
       cfc_id' ℝ (q * X * q) hB.isHermitian.isSelfAdjoint, h1]
   have hg : ∀ t ∈ spectrum ℝ (q * X * q),
       0 ≤ t * (1 - (Set.Icc 0 l).indicator 1 t) - l * (1 - (Set.Icc 0 l).indicator 1 t) := by
     intro t ht
-    have ht0 := cuc_spectrum_nonneg hB ht
+    have ht0 := spectrum_nonneg_of_posSemidef hB ht
     by_cases hS : t ∈ Set.Icc 0 l
     · rw [Set.indicator_of_mem hS]
       simp
@@ -294,7 +267,7 @@ private theorem cuc_step_trace (hq : q * q = q) (hqt : qᵀ = q) (hX : X.PosSemi
         exact hS ht0
       simp only [sub_zero, mul_one]
       linarith
-  have hC := cuc_posSemidef_conj hqt (cuc_posSemidef_cfc hg)
+  have hC := cuc_posSemidef_conj hqt (posSemidef_cfc hg)
   rw [hcfc, cuc_conj_sub' l hq (cuc_mul_conj hq) (cuc_conj_mul hq) hPq] at hC
   have htr := hC.trace_nonneg
   rw [Matrix.trace_sub, Matrix.trace_sub, Matrix.trace_smul, smul_eq_mul] at htr

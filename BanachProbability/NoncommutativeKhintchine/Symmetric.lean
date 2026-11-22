@@ -4,7 +4,6 @@ public import BanachProbability.Schatten.Holder
 public import BanachProbability.SignCube.LpSeminorm
 public import Mathlib.Algebra.Order.Star.Real
 public import Mathlib.Analysis.Matrix.PosDef
-public import Mathlib.Analysis.MeanInequalitiesPow
 
 /-!
 # The noncommutative Khintchine inequality for symmetric matrices
@@ -45,8 +44,11 @@ The proof thus gives the source's constants: `1` for `q = 2`, `√(q − 1)` for
 inequality that Remark 7.2 requires; it is proved in `BanachProbability.Schatten.Trace`
 (`trace_mean_value`).
 
-The elementary facts about the average over the sign cube that the proof uses (linearity over
-finite sums, flip invariance, Jensen's inequality) are proved here as private lemmas.
+The elementary facts about the average over the sign cube that the proof uses are those of
+`BanachProbability.SignCube.Basic` (linearity over finite sums, `avg_sum`; flip invariance,
+`avg_flip`) and `BanachProbability.SignCube.LpSeminorm` (Jensen's inequality,
+`avg_le_rpow_avg_rpow`); the spectral facts (`posSemidef_cfc`, `schattenNorm_cfc_rpow`,
+`schattenNorm_one_of_posSemidef`) are those of `BanachProbability.Schatten.Spectral`.
 -/
 
 @[expose] public section
@@ -59,80 +61,7 @@ open SignCube
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
-/-! ### Elementary facts about the average over the sign cube -/
-
-section Cube
-
-variable {N : ℕ}
-
-private theorem avg_finset_sum {ι : Type*} (s : Finset ι) (g : ι → (Fin N → Bool) → ℝ) :
-    avg (fun ε => ∑ i ∈ s, g i ε) = ∑ i ∈ s, avg (g i) := by
-  simp only [avg, Finset.sum_div]
-  exact Finset.sum_comm
-
-private theorem avg_const' (c : ℝ) : avg (fun _ : Fin N → Bool => c) = c := by
-  simp only [avg, Finset.sum_const, Finset.card_univ, Fintype.card_fun, Fintype.card_bool,
-    Fintype.card_fin, nsmul_eq_mul]
-  push_cast
-  field_simp
-
-/-- Flip invariance of the uniform measure on the cube. -/
-private theorem avg_comp_flip (k : Fin N) (g : (Fin N → Bool) → ℝ) :
-    avg (fun ε => g (SignCube.flip k ε)) = avg g := by
-  unfold avg
-  congr 1
-  exact Equiv.sum_comp ((flip_involutive k).toPerm _) g
-
-/-- Jensen's inequality for the average: `avg X ≤ (avg X^p)^{1/p}` for `X ≥ 0`, `p ≥ 1`. -/
-private theorem avg_le_avg_rpow_rpow {X : (Fin N → Bool) → ℝ} (hX : ∀ ε, 0 ≤ X ε) {p : ℝ}
-    (hp : 1 ≤ p) : avg X ≤ avg (fun ε => X ε ^ p) ^ (1 / p) := by
-  have h := Real.arith_mean_le_rpow_mean Finset.univ (fun _ => ((2 : ℝ) ^ N)⁻¹) X
-    (fun _ _ => by positivity) (by
-      simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fun, Fintype.card_bool,
-        Fintype.card_fin, nsmul_eq_mul]
-      push_cast
-      field_simp) (fun ε _ => hX ε) hp
-  simpa only [avg, div_eq_inv_mul, Finset.mul_sum] using h
-
-end Cube
-
 /-! ### Spectral facts -/
-
-/-- The eigenvalues of `f (A)` are the `f (λ_i (A))`, as multisets. -/
-private theorem map_eigenvalues_cfc {A : Matrix n n ℝ} (hA : A.IsHermitian) (f : ℝ → ℝ)
-    (hf : (cfc f A).IsHermitian) :
-    Multiset.map hf.eigenvalues Finset.univ.val =
-      Multiset.map (fun i => f (hA.eigenvalues i)) Finset.univ.val := by
-  have h1 := hf.roots_charpoly_eq_eigenvalues
-  rw [hA.charpoly_cfc_eq f, Polynomial.roots_prod] at h1
-  · simp only [Polynomial.roots_X_sub_C, Multiset.bind_singleton, RCLike.ofReal_real_eq_id,
-      Function.id_comp] at h1
-    exact h1.symm
-  · simp [Finset.prod_ne_zero_iff, Polynomial.X_sub_C_ne_zero]
-
-private theorem sum_eigenvalues_cfc {A : Matrix n n ℝ} (hA : A.IsHermitian) (f : ℝ → ℝ)
-    (hf : (cfc f A).IsHermitian) (φ : ℝ → ℝ) :
-    ∑ i, φ (hf.eigenvalues i) = ∑ i, φ (f (hA.eigenvalues i)) := by
-  rw [Finset.sum_eq_multiset_sum, Finset.sum_eq_multiset_sum]
-  calc (Multiset.map (fun i => φ (hf.eigenvalues i)) Finset.univ.val).sum
-      = ((Multiset.map hf.eigenvalues Finset.univ.val).map φ).sum := by
-        rw [Multiset.map_map]; rfl
-    _ = _ := by rw [map_eigenvalues_cfc hA f hf, Multiset.map_map]; rfl
-
-private theorem isHermitian_cfc (f : ℝ → ℝ) (A : Matrix n n ℝ) : (cfc f A).IsHermitian :=
-  cfc_predicate f A
-
-private theorem posSemidef_cfc {A : Matrix n n ℝ} (hA : A.IsHermitian) {f : ℝ → ℝ}
-    (hf : ∀ t, 0 ≤ f t) : (cfc f A).PosSemidef := by
-  have hG := isHermitian_cfc f A
-  rw [hG.posSemidef_iff_eigenvalues_nonneg]
-  intro i
-  have hmem : hG.eigenvalues i ∈ Multiset.map hG.eigenvalues Finset.univ.val :=
-    Multiset.mem_map_of_mem _ (Finset.mem_univ i)
-  rw [map_eigenvalues_cfc hA f hG, Multiset.mem_map] at hmem
-  obtain ⟨j, -, hj⟩ := hmem
-  rw [Pi.zero_apply, ← hj]
-  exact hf _
 
 /-- `‖|Y|^{q−2}‖_{S_{q/(q−2)}} = ‖Y‖_{S_q}^{q−2}` for a symmetric `Y` and `q > 2`, written with
 `r = q / 2` and `r / (r − 1) = q / (q − 2)`: the eigenvalues of `|Y|^{q−2}` are the
@@ -141,7 +70,6 @@ private theorem schattenNorm_cfc_abs_rpow {Y : Matrix n n ℝ} (hY : Y.IsHermiti
     (hq : 2 < q) :
     schattenNorm (ENNReal.ofReal (q / 2 / (q / 2 - 1))) (cfc (fun t : ℝ => |t| ^ (q - 2)) Y) =
       schattenNorm (ENNReal.ofReal q) Y ^ (q - 2) := by
-  have hG := isHermitian_cfc (fun t : ℝ => |t| ^ (q - 2)) Y
   have hq2 : q - 2 ≠ 0 := by linarith
   have hs : q / 2 / (q / 2 - 1) = q / (q - 2) := by
     field_simp
@@ -149,8 +77,8 @@ private theorem schattenNorm_cfc_abs_rpow {Y : Matrix n n ℝ} (hY : Y.IsHermiti
   have hsq : (q - 2) * (q / (q - 2)) = q := by field_simp
   have hYn := schattenNorm_nonneg (ENNReal.ofReal q) Y
   rw [hs, ← Real.rpow_left_inj (schattenNorm_nonneg _ _) (Real.rpow_nonneg hYn _) hs0.ne',
-    schattenNorm_rpow_of_isHermitian hG hs0, sum_eigenvalues_cfc hY _ hG (fun x => |x| ^ _),
-    ← Real.rpow_mul hYn, hsq, schattenNorm_rpow_of_isHermitian hY (by linarith)]
+    schattenNorm_cfc_rpow hY _ hs0, ← Real.rpow_mul hYn, hsq,
+    schattenNorm_rpow_of_isHermitian hY (by linarith)]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [abs_of_nonneg (Real.rpow_nonneg (abs_nonneg _) _), ← Real.rpow_mul (abs_nonneg _), hsq]
 
@@ -189,7 +117,7 @@ private theorem avg_trace_mul_eq {k : ℕ} (A : Fin k → Matrix n n ℝ)
     exact sum_coin_smul_sub_flip A ε i
   have hflip : ∀ i, avg (fun ε => coin (ε i) * (A i * F (Y (SignCube.flip i ε))).trace) =
       -avg (fun ε => coin (ε i) * (A i * F (Y ε)).trace) := fun i => by
-    rw [← avg_comp_flip i]
+    rw [← avg_flip i]
     simp only [flip_apply_self, coin_not, flip_involutive i _]
     rw [← neg_one_mul, ← avg_const_mul]
     congr 1
@@ -215,7 +143,7 @@ private theorem avg_trace_mul_eq {k : ℕ} (A : Fin k → Matrix n n ℝ)
           _ = _ := by
             simp only [Finset.sum_mul, Matrix.trace_sum, smul_mul_assoc, Matrix.trace_smul,
               smul_eq_mul]
-    _ = ∑ i, avg (fun ε => coin (ε i) * (A i * F (Y ε)).trace) := avg_finset_sum _ _
+    _ = ∑ i, avg (fun ε => coin (ε i) * (A i * F (Y ε)).trace) := avg_sum _ _
     _ = _ := by
       rw [Finset.mul_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
@@ -269,7 +197,7 @@ private theorem avg_schattenNorm_rpow_le_of_meanValue {q c : ℝ} (hq : 0 < q) {
           simp only [hsq, smul_mul_assoc, Matrix.trace_smul, smul_eq_mul]
       _ = _ := by
           rw [avg_const_mul, avg_add, avg_const_mul, avg_const_mul,
-            avg_comp_flip i (fun ε => (A i * A i * cfc g (Y ε)).trace)]
+            avg_flip i (fun ε => (A i * A i * cfc g (Y ε)).trace)]
           ring
   calc avg (fun ε => schattenNorm (ENNReal.ofReal q) (Y ε) ^ q)
       = avg (fun ε => (Y ε * cfc h (Y ε)).trace) := by
@@ -286,7 +214,7 @@ private theorem avg_schattenNorm_rpow_le_of_meanValue {q c : ℝ} (hq : 0 < q) {
         rw [← Finset.mul_sum]
         ring
     _ = 2 * c * avg (fun ε => ((∑ i, A i * A i) * cfc g (Y ε)).trace) := by
-        rw [← avg_finset_sum]
+        rw [← avg_sum]
         congr 2
         funext ε
         rw [Finset.sum_mul, Matrix.trace_sum]
@@ -339,7 +267,7 @@ private theorem avg_schattenNorm_two_rpow {k : ℕ} (A : Fin k → Matrix n n �
   simp only [id, hdiff, smul_mul_smul_comm, Matrix.trace_smul, smul_eq_mul]
   have hc : ∀ (ε : Fin k → Bool) (i : Fin k), 2 * coin (ε i) * (2 * coin (ε i)) = 4 :=
     fun ε i => by linear_combination 4 * coin_mul_self (ε i)
-  simp only [hc, avg_const', Matrix.trace_sum, ← Finset.mul_sum]
+  simp only [hc, avg_const, Matrix.trace_sum, ← Finset.mul_sum]
   ring
 
 /-- Solving the moment inequality, for `q > 2`: if `E ‖Y‖_q^q ≤ c E tr (V |Y|^{q−2})`, then the
@@ -370,7 +298,7 @@ private theorem rpow_le_of_avg_le {q c : ℝ} (hq2 : 2 < q) (hc : 0 ≤ c) {k : 
   have hG : ∀ ε, (V * cfc (fun t : ℝ => |t| ^ (q - 2)) (Y ε)).trace ≤
       W * schattenNorm (ENNReal.ofReal q) (Y ε) ^ (q - 2) := fun ε => by
     have := trace_mul_le_of_posSemidef hV
-      (posSemidef_cfc (f := fun t : ℝ => |t| ^ (q - 2)) (hYh ε) fun t =>
+      (posSemidef_cfc (A := Y ε) (f := fun t : ℝ => |t| ^ (q - 2)) fun t _ =>
         Real.rpow_nonneg (abs_nonneg t) _) hr
     rwa [schattenNorm_cfc_abs_rpow (hYh ε) hq2] at this
   -- Hölder's inequality for the expectation: `E ‖Y‖^{q−2} ≤ (E ‖Y‖^q)^{(q−2)/q}`
@@ -379,7 +307,7 @@ private theorem rpow_le_of_avg_le {q c : ℝ} (hq2 : 2 < q) (hc : 0 ≤ c) {k : 
     have hp : 1 ≤ q / (q - 2) := by
       rw [le_div_iff₀ (by linarith)]
       linarith
-    have := avg_le_avg_rpow_rpow
+    have := avg_le_rpow_avg_rpow
       (X := fun ε => schattenNorm (ENNReal.ofReal q) (Y ε) ^ (q - 2))
       (fun ε => Real.rpow_nonneg (schattenNorm_nonneg _ _) _) hp
     have hq2' : q - 2 ≠ 0 := by linarith
@@ -443,12 +371,8 @@ theorem ncKhintchine_symmetric_upper {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (A : Fin
       have := Matrix.posSemidef_conjTranspose_mul_self (A i)
       rwa [(hA i).eq] at this
     have hV1 : schattenNorm (ENNReal.ofReal (2 / 2)) V = V.trace := by
-      have := schattenNorm_rpow_of_isHermitian hV.1 one_pos
-      rw [Real.rpow_one] at this
-      rw [div_self two_ne_zero, this, hV.1.trace_eq_sum_eigenvalues]
-      refine Finset.sum_congr rfl fun i _ => ?_
-      rw [Real.rpow_one, abs_of_nonneg (hV.eigenvalues_nonneg i)]
-      rfl
+      rw [div_self two_ne_zero]
+      exact schattenNorm_one_of_posSemidef hV
     rw [avg_schattenNorm_two_rpow A hA Y (fun _ => rfl), hV1, ← Real.sqrt_eq_rpow]
     refine le_mul_of_one_le_left (Real.sqrt_nonneg _) ?_
     rw [show (2 : ℝ) * (2 - 1) = 2 by norm_num, ← Real.sqrt_one]
