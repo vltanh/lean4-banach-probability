@@ -49,7 +49,7 @@ Full references are in [REFERENCES.md](REFERENCES.md); HNVW is Hytönen–van Ne
 
 | # | Result | Shorter proof | Status |
 | --- | --- | --- | --- |
-| 1 | the noncommutative Khintchine inequality in `S_q`, `q ≥ 2`, real matrices (Lust-Piquard 1986; Lust-Piquard–Pisier 1991; Pisier–Xu 2003, Theorem 6.1) | exchangeable pairs (Mackey–Jordan–Chen–Farrell–Tropp 2014): Lemma 2.4, the mean-value trace inequality of Lemma 3.4, trace Hölder; non-symmetric matrices by the Hermitian dilation. Remark 7.2 needs a variant of Lemma 3.4 for `2 < q < 3` which the source does not prove; it is `trace_mean_value` | in the library; the original route is in preparation in [lean4-harmonic-analysis](https://github.com/vltanh/lean4-harmonic-analysis) |
+| 1 | the noncommutative Khintchine inequality in `S_q`, `q ≥ 2`, real matrices (Lust-Piquard 1986; Lust-Piquard–Pisier 1991; Pisier–Xu 2003, Theorem 6.1) | exchangeable pairs (Mackey–Jordan–Chen–Farrell–Tropp 2014): Lemma 2.4, the mean-value trace inequality of Lemma 3.4, trace Hölder; non-symmetric matrices by the Hermitian dilation. Remark 7.2 needs a variant of Lemma 3.4 for `2 < q < 3` which the source does not prove; it is `trace_mean_value` | in the library; the original route is in [lean4-harmonic-analysis](https://github.com/vltanh/lean4-harmonic-analysis) |
 
 ## Schatten classes, type 2, K-convexity (HNVW I, Appendix D; HNVW II, §6.2.a and Chapter 7; Tomczak-Jaegermann 1974; Pisier 1998)
 
@@ -63,7 +63,7 @@ Full references are in [REFERENCES.md](REFERENCES.md); HNVW is Hytönen–van Ne
 | 4 | HNVW I, Proposition D.2.5 | `\|tr A\| = \|Σ ⟨e_k, A e_k⟩\| ≤ Σ ‖A e_k‖ = Σ s_k` in the eigenbasis of `Aᵀ A` | a few lines | on paper |
 | 5 | `\|tr (A B)\| ≤ ‖A‖_{S_q} ‖B‖_{S_{q'}}` for rectangular matrices | the symmetric case (`abs_trace_mul_le_of_isHermitian`) applied to the dilations of `A` and `Bᵀ`; no Horn's inequality | a few lines | on paper |
 | 6 | HNVW II, Propositions 7.4.21, 7.4.22, the covariance domination | for `P` an orthogonal projection, `T (P g) = ½ (T (g) + T (R g))` with the reflection `R = 2P − 1`, which preserves the Gaussian measure, so `‖T ∘ P‖_{L²} ≤ ‖T‖_{L²}`; no Walsh functions, no contraction principle for Gaussian sums | 466 against 672 (with `SignCube/Walsh`) | history at `8962532` |
-| 7 | `ncKhintchine_lower_col` | from `complexSchattenNorm_blockCol_sq_le_avg`, `complexSchattenNorm_map_ofReal` and `L² ≤ L^q` | 44 against 64 | Lean, in preparation in [lean4-harmonic-analysis](https://github.com/vltanh/lean4-harmonic-analysis) |
+| 7 | `ncKhintchine_lower_col` | from `complexSchattenNorm_blockCol_sq_le_avg`, `complexSchattenNorm_map_ofReal` and `L² ≤ L^q` | 44 against 64 | Lean, in [lean4-harmonic-analysis](https://github.com/vltanh/lean4-harmonic-analysis) |
 | 8 | the Walsh expansion (HNVW II, p. 18) | `Σ_α w_α (ε) w_α (η) = Π_i (1 + ε_i η_i) = 2^N δ_{εη}`, put in `Σ_α w_α (ε) E (w_α f)`; no induction, no orthonormality | 17 against 47 | Lean |
 | 9 | the general Horn inequality (Tomczak-Jaegermann 1974, Lemma 1.1), at least one factor | the multiplicative inequality `Π_{k<N} s_k (A_1 ⋯ A_r) ≤ Π_{k<N} s_k (A_1) ⋯ s_k (A_r)` by induction, then `sum_rpow_le_sum_rpow_of_weak_log_majorization` with `p = 1`; no Abel transform, no additive Horn inequality | 32 against 43 | Lean |
 | 10 | `M_{2k} ≤ √(2k − 1)` (`evenKhintchineConst_le`) | `M_{2k} ≤ √k`, which is sharper, from `(2k)! ≤ (2k)^k k!` (Mathlib's `Nat.factorial_two_mul_le`) | 13 against 29 | Lean |
