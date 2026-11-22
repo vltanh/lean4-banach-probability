@@ -52,7 +52,7 @@ sources:
     note: >-
       An origin of decoupling for tangent sequences in UMD spaces, of which the decoupling of
       Paley-Walsh martingales is a case. For independent copies the notes of HNVW I (p. 364) credit
-      Burkholder (1983) and Garling (1986).
+      Burkholder (1983) and Garling (1986), and for tangent sequences also Hitczenko (1988).
     author_endorsement: "not-contacted"
 
 related_formalizations:
@@ -93,9 +93,10 @@ automation:
         Lean v4.36.0-rc2, Mathlib v4.36.0-rc2.
       cost:
         wall_time: >-
-          about 13 hours between the library's first commit and the commit on which this entry is
-          based (21-22 November 2026, git log), not continuous and with other work in parallel, and
-          about 2 hours for the eight entries of the package together; agent time not tracked
+          about 13 hours between the library's first commit and its last one before the entries
+          (21-22 November 2026, git log), not continuous and with other work in parallel, and about
+          1.5 hours for the eight entries of the package together, with the additions to the library
+          that they needed and the review; agent time not tracked
         spend_usd: "not tracked"
         hardware: "local machine (20 cores, 62 GB RAM) and API"
       prompting_notes: >-
@@ -135,9 +136,9 @@ review:
     - "Claude Opus 5.5 (independent agents)"
   notes: >-
     No human review. Independent AI agents compared the proofs of the library with the cited
-    sources. Another one compared the statements of this entry and this file with them; it found no
-    wrong and no vacuous statement, and its remarks on generality, citations and wording were
-    followed and then checked again.
+    sources. Another one compared the statements of this entry, and this file, with them and found
+    no wrong and no vacuous statement; its remarks on generality, citations and wording were
+    followed, and it checked the corrected entry again, with no further remark.
 
 alignment:
   namespace: "DecouplingChallenge"

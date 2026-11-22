@@ -55,8 +55,9 @@ sources:
       inequalities of Theorems 1.1 and 3.1 are those of Osękowski's Theorems 3.5 (ii) and 8.6, and
       are proved by the latter's arguments. Not formalized: the cases of equality in Theorems 1.1
       and 3.1, the sharpness clauses of Theorem 3.1, the maximal inequality (3.4), the other
-      assertions of Remark 1.2 (the least majorant), Remark 1.1, and Section 2 (stochastic
-      integrals).
+      assertions of Remark 1.2 (the least majorant), Remark 1.1, Section 2 (exponential and
+      weak-type inequalities), Sections 4 and 5 (continuous time, stochastic integrals), and Section
+      6.
     author_endorsement: "not-contacted"
   - title: "Boundary value problems and sharp inequalities for martingale transforms"
     authors:
@@ -101,7 +102,8 @@ status:
 
     Not formalized: the cases of equality; the sharpness of the square function inequalities (which
     Osękowski's Theorem 8.6 asserts in two of the four cases); the least majorant of Burkholder's
-    Remark 1.2; maximal inequalities; continuous time and stochastic integrals; p <= 1.
+    Remark 1.2; maximal, exponential and weak-type inequalities; continuous time and stochastic
+    integrals; p <= 1.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: []
@@ -119,9 +121,10 @@ automation:
         Lean v4.36.0-rc2, Mathlib v4.36.0-rc2.
       cost:
         wall_time: >-
-          about 13 hours between the library's first commit and the commit on which this entry is
-          based (21-22 November 2026, git log), not continuous and with other work in parallel, and
-          about 2 hours for the eight entries of the package together; agent time not tracked
+          about 13 hours between the library's first commit and its last one before the entries
+          (21-22 November 2026, git log), not continuous and with other work in parallel, and about
+          1.5 hours for the eight entries of the package together, with the additions to the library
+          that they needed and the review; agent time not tracked
         spend_usd: "not tracked"
         hardware: "local machine (20 cores, 62 GB RAM) and API"
       prompting_notes: >-
@@ -166,9 +169,10 @@ review:
     - "Claude Opus 5.5 (independent agents)"
   notes: >-
     No human review. Independent AI agents compared the proofs of the library with the cited
-    sources. Another one compared the statements of this entry and this file with them; it found no
-    wrong and no vacuous statement, and its remarks on generality, citations and wording were
-    followed and then checked again.
+    sources. Another one compared the statements of this entry, and this file, with them and found
+    no wrong and no vacuous statement; its remarks on generality, citations and wording were
+    followed, and it checked the corrected entry again, with a few further remarks on citations and
+    wording, none on a theorem statement, which were followed.
 
 alignment:
   namespace: "BurkholderChallenge"

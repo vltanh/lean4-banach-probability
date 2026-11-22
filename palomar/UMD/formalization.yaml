@@ -45,9 +45,11 @@ sources:
       and Lemmas 3.5.13 to 3.5.15 for Paley-Walsh martingales), Proposition 4.2.10 (p. 286, with
       Proposition 3.2.14), Proposition 4.2.15 (2) (p. 291; by its proof), Theorem 4.2.25 (pp.
       300-301, with Lemmas 3.6.17 and 3.6.18). The definition of the constants is Definition 4.2.1.
-      Corollary 4.5.15 (p. 346), for real Hilbert spaces, and Theorem 4.5.7 (the real line) are
-      contained in the theorem on Hilbert spaces, which is proved by the arguments of Osękowski's
-      book.
+      The last assertion of Corollary 4.5.15 (p. 346, the UMD constants of a Hilbert space), for
+      real Hilbert spaces and real signs, and Theorem 4.5.7 (the real line) are contained in the
+      theorem on Hilbert spaces, which is proved by the arguments of Osękowski's book; the first
+      assertion of the corollary, on transforms by operator-valued predictable sequences, is not
+      formalized.
     author_endorsement: "not-contacted"
   - title: "Sharp Martingale and Semimartingale Inequalities"
     authors:
@@ -109,8 +111,8 @@ status:
 
 
     Not formalized: sigma-finite measure spaces and filtrations; extrapolation for complex scalars;
-    complex multipliers for Hilbert spaces; the Hilbert transform; duality and the other permanence
-    properties of UMD spaces.
+    complex and operator-valued multipliers for Hilbert spaces; the Hilbert transform; duality and
+    the other permanence properties of UMD spaces.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: []
@@ -128,9 +130,10 @@ automation:
         Lean v4.36.0-rc2, Mathlib v4.36.0-rc2.
       cost:
         wall_time: >-
-          about 13 hours between the library's first commit and the commit on which this entry is
-          based (21-22 November 2026, git log), not continuous and with other work in parallel, and
-          about 2 hours for the eight entries of the package together; agent time not tracked
+          about 13 hours between the library's first commit and its last one before the entries
+          (21-22 November 2026, git log), not continuous and with other work in parallel, and about
+          1.5 hours for the eight entries of the package together, with the additions to the library
+          that they needed and the review; agent time not tracked
         spend_usd: "not tracked"
         hardware: "local machine (20 cores, 62 GB RAM) and API"
       prompting_notes: >-
@@ -175,9 +178,10 @@ review:
     - "Claude Opus 5.5 (independent agents)"
   notes: >-
     No human review. Independent AI agents compared the proofs of the library with the cited
-    sources. Another one compared the statements of this entry and this file with them; it found no
-    wrong and no vacuous statement, and its remarks on generality, citations and wording were
-    followed and then checked again.
+    sources. Another one compared the statements of this entry, and this file, with them and found
+    no wrong and no vacuous statement; its remarks on generality, citations and wording were
+    followed, and it checked the corrected entry again, with a few further remarks on citations and
+    wording, none on a theorem statement, which were followed.
 
 alignment:
   namespace: "UMDChallenge"
@@ -222,7 +226,7 @@ alignment:
       note: >-
         UMD_p(H) = p* - 1, and the same for dyadic martingales and deterministic signs, for every
         real Hilbert space H other than 0; complex multipliers (the complex case of Corollary
-        4.5.15) are not formalized.
+        4.5.15) and operator-valued ones are not formalized.
     - source: "HNVW I, Theorem 4.2.25"
       lean: "UMDChallenge.deterministic_transform_le"
       module: "UMD.Challenge"

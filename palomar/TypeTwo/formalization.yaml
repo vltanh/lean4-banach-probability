@@ -142,9 +142,10 @@ automation:
         Lean v4.36.0-rc2, Mathlib v4.36.0-rc2.
       cost:
         wall_time: >-
-          about 13 hours between the library's first commit and the commit on which this entry is
-          based (21-22 November 2026, git log), not continuous and with other work in parallel, and
-          about 2 hours for the eight entries of the package together; agent time not tracked
+          about 13 hours between the library's first commit and its last one before the entries
+          (21-22 November 2026, git log), not continuous and with other work in parallel, and about
+          1.5 hours for the eight entries of the package together, with the additions to the library
+          that they needed and the review; agent time not tracked
         spend_usd: "not tracked"
         hardware: "local machine (20 cores, 62 GB RAM) and API"
       prompting_notes: >-
@@ -170,7 +171,9 @@ fidelity:
     is a misprint for type 2.) Theorem 3.1 (ii) of Tomczak-Jaegermann: square matrices of a finite
     size; the norm of L^q(S_q) is on the left, where her definition of type has that of L^1, with
     the constant of her proof; the constant (q + 1)^(1/2) is an upper bound for it. Pisier's p. 106:
-    real square matrices, with the explicit constants; the dual statement is implicit there.
+    real square matrices, with the explicit constants; the dual statement is implicit there. Example
+    7.1.2: real inner product spaces, the upper bound only, no cotype. The averaging of p. 106:
+    l_p(X) with the counting measure, on finite cubes.
 
 
     Proofs. Those of the sources. In the even case of Theorem 3.1 (ii) the complex matrices are
@@ -186,9 +189,10 @@ review:
     - "Claude Opus 5.5 (independent agents)"
   notes: >-
     No human review. Independent AI agents compared the proofs of the library with the cited
-    sources. Another one compared the statements of this entry and this file with them; it found no
-    wrong and no vacuous statement, and its remarks on generality, citations and wording were
-    followed and then checked again.
+    sources. Another one compared the statements of this entry, and this file, with them and found
+    no wrong and no vacuous statement; its remarks on generality, citations and wording were
+    followed, and it checked the corrected entry again, with a few further remarks on citations and
+    wording, none on a theorem statement, which were followed.
 
 alignment:
   namespace: "TypeTwoChallenge"

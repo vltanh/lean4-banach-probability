@@ -138,9 +138,10 @@ automation:
         Lean v4.36.0-rc2, Mathlib v4.36.0-rc2.
       cost:
         wall_time: >-
-          about 13 hours between the library's first commit and the commit on which this entry is
-          based (21-22 November 2026, git log), not continuous and with other work in parallel, and
-          about 2 hours for the eight entries of the package together; agent time not tracked
+          about 13 hours between the library's first commit and its last one before the entries
+          (21-22 November 2026, git log), not continuous and with other work in parallel, and about
+          1.5 hours for the eight entries of the package together, with the additions to the library
+          that they needed and the review; agent time not tracked
         spend_usd: "not tracked"
         hardware: "local machine (20 cores, 62 GB RAM) and API"
       prompting_notes: >-
@@ -174,7 +175,7 @@ fidelity:
     matrices with n in Type; Remark 4.6 (1) has the order O(p) for the constant in L^2 as p tends to
     infinity, here C (q* - 1) for all 1 < q < infinity. HNVW: Proposition D.2.3 and Theorem D.2.6
     for finite real matrices (compact operators there); Corollary D.2.4 for all positive exponents
-    (there at least 1), real and complex. (Its display has a misprint: the second norm is that of
+    (there at least 1), real and complex. (Its inequality has a misprint: the second norm is that of
     C^r.) Tomczak-Jaegermann's Lemma 1.1 for real square matrices. The triangle inequality:
     Proposition 3.13 of Bourin-Zhang is about complex square matrices; here for real and complex
     rectangular ones.
@@ -196,9 +197,10 @@ review:
     - "Claude Opus 5.5 (independent agents)"
   notes: >-
     No human review. Independent AI agents compared the proofs of the library with the cited
-    sources. Another one compared the statements of this entry and this file with them; it found no
-    wrong and no vacuous statement, and its remarks on generality, citations and wording were
-    followed and then checked again.
+    sources. Another one compared the statements of this entry, and this file, with them and found
+    no wrong and no vacuous statement; its remarks on generality, citations and wording were
+    followed, and it checked the corrected entry again, with a few further remarks on citations and
+    wording, none on a theorem statement, which were followed.
 
 alignment:
   namespace: "SchattenClassesChallenge"
@@ -246,7 +248,7 @@ alignment:
       module: "SchattenClasses.Challenge"
       status: "partial"
       note: >-
-        One inequality of the duality, for finite real matrices.
+        One inequality of the duality, for finite real matrices and 1 < q < infinity.
     - source: "Randrianantoanina 2002, Theorem 3.1 (the positive case in its proof)"
       lean: "SchattenClassesChallenge.weakType_posSemidef"
       module: "SchattenClasses.Challenge"

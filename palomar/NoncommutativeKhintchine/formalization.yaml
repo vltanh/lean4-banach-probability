@@ -110,8 +110,9 @@ status:
 
     Not formalized: complex and rectangular matrices; exponents below 2 (Theorem 6.1 (ii)); infinite
     families; infinite-dimensional Schatten classes and general von Neumann algebras; the optimal
-    constants, and the optimality of the order; sums of other independent matrices (Theorem 7.1 and
-    the first inequality of Corollary 7.3 of Mackey et al.).
+    constants, and the optimality of the order; the matrix Burkholder-Davis-Gundy inequality for
+    matrix Stein pairs (Theorem 7.1 of Mackey et al.) and sums of other independent matrices (the
+    first inequality of their Corollary 7.3).
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: []
@@ -129,9 +130,10 @@ automation:
         Lean v4.36.0-rc2, Mathlib v4.36.0-rc2.
       cost:
         wall_time: >-
-          about 13 hours between the library's first commit and the commit on which this entry is
-          based (21-22 November 2026, git log), not continuous and with other work in parallel, and
-          about 2 hours for the eight entries of the package together; agent time not tracked
+          about 13 hours between the library's first commit and its last one before the entries
+          (21-22 November 2026, git log), not continuous and with other work in parallel, and about
+          1.5 hours for the eight entries of the package together, with the additions to the library
+          that they needed and the review; agent time not tracked
         spend_usd: "not tracked"
         hardware: "local machine (20 cores, 62 GB RAM) and API"
       prompting_notes: >-
@@ -148,14 +150,14 @@ fidelity:
     Statements. Theorem 6.1 (i) of Pisier and Xu is for semifinite von Neumann algebras and has a
     constant that depends only on p; here for the algebra of real n x n matrices with the trace
     (Schatten norms), finite families, real signs, and the constant (2 (q - 1))^(1/2), of the order
-    of the best one by the remarks after Theorem 6.1; the factor 2^(1/2) is needed only for 2 < q <
-    3: the bound with (q - 1)^(1/2) for the other q is a separate theorem. The S_q norms of the
-    square functions are written as the square roots of the S_{q/2} norms of the sums of squares,
-    and the maximum of the two is the norm of the source's intersection space. The signs are the
-    coordinates of the finite sign cube. Corollary 7.3 of Mackey et al.: only (7.2), the Rademacher
-    sums, for real symmetric matrices instead of complex Hermitian ones, q = 2p, in the source's
-    range q = 2 or q >= 3; its extension to all real square matrices is the dilation of their
-    Section 8.
+    of the best one by the remarks after Theorem 6.1; the factor 2^(1/2) comes from Remark 7.2 of
+    Mackey et al. and is used only for 2 < q < 3: the bound with (q - 1)^(1/2) for the other q is a
+    separate theorem. The S_q norms of the square functions are written as the square roots of the
+    S_{q/2} norms of the sums of squares, and the maximum of the two is the norm of the source's
+    intersection space. The signs are the coordinates of the finite sign cube. Corollary 7.3 of
+    Mackey et al.: only (7.2), the Rademacher sums, for real symmetric matrices instead of complex
+    Hermitian ones, q = 2p, in the source's range q = 2 or q >= 3; its extension to all real square
+    matrices is the dilation of their Section 8.
 
 
     Proofs. The upper bound by the method of exchangeable pairs (Mackey et al.), not by the
@@ -172,9 +174,10 @@ review:
     - "Claude Opus 5.5 (independent agents)"
   notes: >-
     No human review. Independent AI agents compared the proofs of the library with the cited
-    sources. Another one compared the statements of this entry and this file with them; it found no
-    wrong and no vacuous statement, and its remarks on generality, citations and wording were
-    followed and then checked again.
+    sources. Another one compared the statements of this entry, and this file, with them and found
+    no wrong and no vacuous statement; its remarks on generality, citations and wording were
+    followed, and it checked the corrected entry again, with a few further remarks on citations and
+    wording, none on a theorem statement, which were followed.
 
 alignment:
   namespace: "NoncommutativeKhintchineChallenge"
