@@ -61,7 +61,7 @@ noncomputable def prob (s : Set (Fin N → Bool)) : ℝ :=
   avg (s.indicator 1)
 
 theorem avg_eq_expect (g : (Fin N → Bool) → ℝ) : avg g = 𝔼 ε, g ε := by
-  sorry
+  simp [avg, Fintype.expect_eq_sum_div_card]
 
 theorem avg_add (f g : (Fin N → Bool) → ℝ) : avg (fun ε => f ε + g ε) = avg f + avg g := by
   simp only [avg, Finset.sum_add_distrib, add_div]
@@ -74,10 +74,11 @@ theorem avg_const_mul (c : ℝ) (g : (Fin N → Bool) → ℝ) : avg (fun ε => 
 
 theorem avg_sum {ι : Type*} (s : Finset ι) (g : ι → (Fin N → Bool) → ℝ) :
     avg (fun ε => ∑ i ∈ s, g i ε) = ∑ i ∈ s, avg (g i) := by
-  sorry
+  simp only [avg, div_eq_mul_inv]
+  rw [Finset.sum_comm, Finset.sum_mul]
 
 @[simp] theorem avg_const (c : ℝ) : avg (fun _ : Fin N → Bool => c) = c := by
-  sorry
+  simp [avg]
 
 theorem avg_mono {f g : (Fin N → Bool) → ℝ} (h : ∀ ε, f ε ≤ g ε) : avg f ≤ avg g :=
   div_le_div_of_nonneg_right (Finset.sum_le_sum fun ε _ => h ε) (by positivity)
@@ -88,13 +89,14 @@ theorem avg_nonneg {g : (Fin N → Bool) → ℝ} (h : ∀ ε, 0 ≤ g ε) : 0 �
 /-- Each sign vector has probability `2^{-N}`: `g ε ≤ 2^N avg g` for `g ≥ 0`. -/
 theorem le_two_pow_mul_avg {g : (Fin N → Bool) → ℝ} (h : ∀ ε, 0 ≤ g ε) (ε : Fin N → Bool) :
     g ε ≤ 2 ^ N * avg g := by
-  sorry
+  rw [avg, mul_div_cancel₀ _ (by positivity)]
+  exact Finset.single_le_sum (fun i _ => h i) (Finset.mem_univ ε)
 
 /-- Averages are invariant under every bijection of the cube (the uniform measure is invariant
 under every permutation). -/
 theorem avg_comp_equiv (e : (Fin N → Bool) ≃ (Fin N → Bool)) (g : (Fin N → Bool) → ℝ) :
     avg (fun ε => g (e ε)) = avg g := by
-  sorry
+  simp only [avg, e.sum_comp g]
 
 /-- The flip of the `k`-th sign. -/
 protected def flip (k : Fin N) (ε : Fin N → Bool) : Fin N → Bool :=
@@ -116,8 +118,8 @@ theorem flip_apply_of_ne {k j : Fin N} (h : j ≠ k) (ε : Fin N → Bool) :
   simp [SignCube.flip, h]
 
 theorem avg_flip (k : Fin N) (g : (Fin N → Bool) → ℝ) :
-    avg (fun ε => g (SignCube.flip k ε)) = avg g := by
-  sorry
+    avg (fun ε => g (SignCube.flip k ε)) = avg g :=
+  avg_comp_equiv ((flip_involutive k).toPerm _) g
 
 /-- The pointwise product of two sign vectors: `coin (mul ε η k) = coin (ε k) * coin (η k)`. -/
 def mul (ε η : Fin N → Bool) : Fin N → Bool :=
@@ -125,30 +127,57 @@ def mul (ε η : Fin N → Bool) : Fin N → Bool :=
 
 theorem coin_mul_apply (ε η : Fin N → Bool) (k : Fin N) :
     coin (mul ε η k) = coin (ε k) * coin (η k) := by
-  sorry
+  simp only [mul]
+  cases ε k <;> cases η k <;> simp [coin]
+
+theorem scb_mul_involutive (ε : Fin N → Bool) : Function.Involutive (mul ε) := by
+  intro η
+  funext k
+  simp only [mul]
+  cases ε k <;> cases η k <;> rfl
 
 /-- Translation invariance of the uniform measure on the group `{±1}^N`. -/
 theorem avg_mul_left (ε : Fin N → Bool) (g : (Fin N → Bool) → ℝ) :
-    avg (fun η => g (mul ε η)) = avg g := by
-  sorry
+    avg (fun η => g (mul ε η)) = avg g :=
+  avg_comp_equiv ((scb_mul_involutive ε).toPerm _) g
 
-theorem avg_coin (i : Fin N) : avg (fun ε => coin (ε i)) = 0 := by
-  sorry
+/-- An average vanishes when flipping one sign changes the sign of the function (pairing `ε`
+with `flip k ε`). -/
+theorem scb_avg_eq_zero_of_flip (k : Fin N) {g : (Fin N → Bool) → ℝ}
+    (hg : ∀ ε, g (SignCube.flip k ε) = -g ε) : avg g = 0 := by
+  have h := avg_flip k g
+  simp only [hg] at h
+  have h2 : avg (fun ε => -g ε) = -avg g := by
+    simpa using avg_const_mul (-1) g
+  linarith
+
+theorem avg_coin (i : Fin N) : avg (fun ε => coin (ε i)) = 0 :=
+  scb_avg_eq_zero_of_flip i fun ε => by simp [coin_not]
 
 /-- Orthonormality of the signs: `E ε_i ε_j = δ_{ij}`. -/
 theorem avg_coin_mul_coin (i j : Fin N) :
     avg (fun ε => coin (ε i) * coin (ε j)) = if i = j then 1 else 0 := by
-  sorry
+  split_ifs with h
+  · subst h
+    simp [coin_mul_self]
+  · exact scb_avg_eq_zero_of_flip i fun ε => by
+      simp [coin_not, flip_apply_of_ne (Ne.symm h)]
 
 /-- Splitting off the first sign: `E g = (E g (1, ·) + E g (−1, ·)) / 2`. -/
 theorem avg_succ (g : (Fin (N + 1) → Bool) → ℝ) :
     avg g = (avg (fun ε => g (Fin.cons true ε)) + avg (fun ε => g (Fin.cons false ε))) / 2 := by
-  sorry
+  simp only [avg]
+  rw [← (Fin.consEquiv fun _ => Bool).sum_comp, Fintype.sum_prod_type, Fintype.sum_bool]
+  simp only [Fin.consEquiv_apply, pow_succ]
+  ring
 
 /-- Splitting off the last sign. -/
 theorem avg_succ_last (g : (Fin (N + 1) → Bool) → ℝ) :
     avg g = (avg (fun ε => g (Fin.snoc ε true)) + avg (fun ε => g (Fin.snoc ε false))) / 2 := by
-  sorry
+  simp only [avg]
+  rw [← (Fin.snocEquiv fun _ => Bool).sum_comp, Fintype.sum_prod_type, Fintype.sum_bool]
+  simp only [Fin.snocEquiv_apply, pow_succ]
+  ring
 
 /-- The interleaving `(ε, η) ↦ (η₀, ε₀, η₁, ε₁, …)` of two sign vectors: the coordinate `2k` of
 the result is `η k` and the coordinate `2k + 1` is `ε k` (through `finProdFinEquiv`,
@@ -158,23 +187,27 @@ def interleave : (Fin N → Bool) × (Fin N → Bool) ≃ (Fin (N * 2) → Bool)
     else x.1 (finProdFinEquiv.symm i).1
   invFun ω := (fun k => ω (finProdFinEquiv (k, 1)), fun k => ω (finProdFinEquiv (k, 0)))
   left_inv x := by
-    sorry
+    ext k <;> simp
   right_inv ω := by
-    sorry
+    funext i
+    obtain ⟨⟨k, j⟩, rfl⟩ := finProdFinEquiv.surjective i
+    fin_cases j <;> simp
 
 theorem interleave_apply_even (x : (Fin N → Bool) × (Fin N → Bool)) (k : Fin N) :
     interleave x (finProdFinEquiv (k, 0)) = x.2 k := by
-  sorry
+  simp [interleave, -finProdFinEquiv_symm_apply]
 
 theorem interleave_apply_odd (x : (Fin N → Bool) × (Fin N → Bool)) (k : Fin N) :
     interleave x (finProdFinEquiv (k, 1)) = x.1 k := by
-  sorry
+  simp [interleave, -finProdFinEquiv_symm_apply]
 
 /-- The interleaving carries the uniform measure on pairs to the uniform measure on the doubled
 cube: a double average is a single average over `Fin (N * 2) → Bool`. -/
 theorem avg_interleave (G : (Fin N → Bool) → (Fin N → Bool) → ℝ) :
     avg (fun ω => G (interleave.symm ω).1 (interleave.symm ω).2) =
       avg (fun ε => avg fun η => G ε η) := by
-  sorry
+  simp only [avg]
+  rw [interleave.symm.sum_comp (fun x => G x.1 x.2), Fintype.sum_prod_type]
+  simp only [div_eq_mul_inv, ← Finset.sum_mul, mul_assoc, ← mul_inv, ← pow_add, mul_two]
 
 end BanachProbability.SignCube

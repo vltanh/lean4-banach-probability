@@ -52,9 +52,68 @@ def splice (k : ℕ) (ε ε' : Fin N → Bool) : Fin N → Bool :=
 def trunc (k : ℕ) (ε : Fin N → Bool) : Fin N → Bool :=
   splice k ε fun _ => false
 
+private theorem splice_zero (ε ε' : Fin N → Bool) : splice 0 ε ε' = ε' := by
+  funext j
+  simp [splice]
+
+/-- Splicing at `k` then at `l ≥ k` is splicing at `k` a spliced vector. -/
+private theorem splice_splice_of_le {k l : ℕ} (h : k ≤ l) (ε ε' ε'' : Fin N → Bool) :
+    splice l (splice k ε ε') ε'' = splice k ε (splice l ε' ε'') := by
+  funext j
+  simp only [splice]
+  split_ifs <;> first | rfl | omega
+
+private theorem splice_splice_self (l : ℕ) (a b : Fin N → Bool) :
+    splice l (splice l a b) (splice l b a) = a := by
+  funext j
+  simp only [splice]
+  split_ifs <;> rfl
+
+/-- The reindexing lemma for `splice`: `(ε', ε'') ↦ (splice l ε' ε'', splice l ε'' ε')` is a
+bijection of pairs of sign vectors, so
+`Σ_{ε'} Σ_{ε''} g (splice l ε' ε'') = Σ_{ε'} Σ_{ε''} g ε'`. -/
+private theorem sum_sum_splice {M : Type*} [AddCommMonoid M] (l : ℕ) (g : (Fin N → Bool) → M) :
+    ∑ ε' : Fin N → Bool, ∑ ε'' : Fin N → Bool, g (splice l ε' ε'') =
+      ∑ ε' : Fin N → Bool, ∑ _ε'' : Fin N → Bool, g ε' := by
+  let e : (Fin N → Bool) × (Fin N → Bool) ≃ (Fin N → Bool) × (Fin N → Bool) :=
+    { toFun := fun x => (splice l x.1 x.2, splice l x.2 x.1)
+      invFun := fun x => (splice l x.1 x.2, splice l x.2 x.1)
+      left_inv := fun x => Prod.ext (splice_splice_self l x.1 x.2) (splice_splice_self l x.2 x.1)
+      right_inv := fun x =>
+        Prod.ext (splice_splice_self l x.1 x.2) (splice_splice_self l x.2 x.1) }
+  rw [← Fintype.sum_prod_type', ← Fintype.sum_prod_type']
+  exact Equiv.sum_comp e (fun x => g x.1)
+
+/-- Two sign vectors agreeing on the coordinates `j < k` and on `k` agree on `j < k + 1`. -/
+private theorem agree_succ {k : Fin N} {a b : Fin N → Bool}
+    (hlt : ∀ j : Fin N, j.val < k.val → a j = b j) (hk : a k = b k) :
+    ∀ j : Fin N, j.val < k.val + 1 → a j = b j := by
+  intro j hj
+  rcases Nat.lt_succ_iff_lt_or_eq.mp hj with hj | hj
+  · exact hlt j hj
+  · rw [show j = k from Fin.ext hj]
+    exact hk
+
 section Module
 
 variable [AddCommGroup E] [Module ℝ E]
+
+private theorem sum_const_cube (c : E) : ∑ _ε : Fin N → Bool, c = (2 : ℝ) ^ N • c := by
+  rw [Finset.sum_const, Finset.card_univ, ← Nat.cast_smul_eq_nsmul ℝ]
+  simp
+
+/-- A sum that changes sign under the flip of one coordinate vanishes. -/
+private theorem sum_eq_zero_of_flip (k : Fin N) {g : (Fin N → Bool) → E}
+    (hg : ∀ ε, g (SignCube.flip k ε) = -g ε) : ∑ ε, g ε = 0 := by
+  have h : ∑ ε, g ε = -∑ ε, g ε := by
+    conv_lhs => rw [← Equiv.sum_comp (flip_involutive k).toPerm g]
+    rw [← Finset.sum_neg_distrib]
+    exact Finset.sum_congr rfl fun ε _ => hg ε
+  have h2 : (2 : ℝ) • ∑ ε, g ε = 0 := by
+    rw [two_smul]
+    nth_rewrite 2 [h]
+    exact add_neg_cancel _
+  rw [← inv_smul_smul₀ (two_ne_zero : (2 : ℝ) ≠ 0) (∑ ε, g ε), h2, smul_zero]
 
 /-- The Paley–Walsh martingale `n ↦ Σ_{k < n} ε_k ξ_k` of a family `ξ` (predictable in the
 applications), started at `0`, at time `n`. -/
@@ -105,37 +164,43 @@ theorem paleyWalsh_of_le (ξ : Fin N → (Fin N → Bool) → E) {n : ℕ} (hn :
 
 theorem paleyWalsh_add (ξ ζ : Fin N → (Fin N → Bool) → E) (n : ℕ) (ε : Fin N → Bool) :
     paleyWalsh (fun k ε => ξ k ε + ζ k ε) n ε = paleyWalsh ξ n ε + paleyWalsh ζ n ε := by
-  sorry
+  simp only [paleyWalsh, smul_add, Finset.sum_add_distrib]
 
 theorem paleyWalsh_smul (c : ℝ) (ξ : Fin N → (Fin N → Bool) → E) (n : ℕ) (ε : Fin N → Bool) :
     paleyWalsh (fun k ε => c • ξ k ε) n ε = c • paleyWalsh ξ n ε := by
-  sorry
+  simp only [paleyWalsh, Finset.smul_sum]
+  exact Finset.sum_congr rfl fun k _ => smul_comm _ _ _
 
 /-- The image of a Paley–Walsh martingale under a linear map. -/
 theorem map_paleyWalsh {F : Type*} [AddCommGroup F] [Module ℝ F] (T : E →ₗ[ℝ] F)
     (ξ : Fin N → (Fin N → Bool) → E) (n : ℕ) (ε : Fin N → Bool) :
     T (paleyWalsh ξ n ε) = paleyWalsh (fun k ε => T (ξ k ε)) n ε := by
-  sorry
+  simp only [paleyWalsh, map_sum, map_smul]
 
 /-- A linear map commutes with the cube conditional expectations. -/
 theorem map_condAvg {F : Type*} [AddCommGroup F] [Module ℝ F] (T : E →ₗ[ℝ] F) (k : ℕ)
     (f : (Fin N → Bool) → E) (ε : Fin N → Bool) :
     T (condAvg k f ε) = condAvg k (fun ε => T (f ε)) ε := by
-  sorry
+  simp only [condAvg, map_smul, map_sum]
 
 /-- A linear map commutes with martingale transforms by scalar multipliers. -/
 theorem map_transform {F : Type*} [AddCommGroup F] [Module ℝ F] (T : E →ₗ[ℝ] F)
     (σ : Fin N → (Fin N → Bool) → ℝ) (f : (Fin N → Bool) → E) (ε : Fin N → Bool) :
     T (transform σ f ε) = transform σ (fun ε => T (f ε)) ε := by
-  sorry
+  simp only [transform, map_add, map_sum, map_smul, map_sub, map_condAvg]
 
+set_option linter.unusedSectionVars false in
 theorem IsPredictable.add {ξ ζ : Fin N → (Fin N → Bool) → E} (hξ : IsPredictable ξ)
     (hζ : IsPredictable ζ) : IsPredictable fun k ε => ξ k ε + ζ k ε := by
-  sorry
+  intro k ε ε' h
+  dsimp only
+  rw [hξ k ε ε' h, hζ k ε ε' h]
 
 theorem IsPredictable.smul {σ : Fin N → (Fin N → Bool) → ℝ} {ξ : Fin N → (Fin N → Bool) → E}
     (hσ : IsPredictable σ) (hξ : IsPredictable ξ) : IsPredictable fun k ε => σ k ε • ξ k ε := by
-  sorry
+  intro k ε ε' h
+  dsimp only
+  rw [hσ k ε ε' h, hξ k ε ε' h]
 
 /-- The `n`-th value of a Paley–Walsh martingale of a predictable family depends only on the signs
 `ε_j`, `j < n`. -/
@@ -147,38 +212,137 @@ theorem IsPredictable.isAdapted_paleyWalsh {ξ : Fin N → (Fin N → Bool) → 
   have hj' : j.val < k := (Finset.mem_filter.mp hj).2
   rw [h j hj', hξ j ε ε' fun i hi => h i (lt_trans (Fin.lt_def.mp hi) hj')]
 
+private theorem condAvg_sum {ι : Type*} (s : Finset ι) (k : ℕ) (f : ι → (Fin N → Bool) → E)
+    (ε : Fin N → Bool) :
+    condAvg k (fun ε => ∑ i ∈ s, f i ε) ε = ∑ i ∈ s, condAvg k (f i) ε := by
+  simp only [condAvg, ← Finset.smul_sum]
+  rw [Finset.sum_comm]
+
+/-- The average over the signs `ε_j`, `j ≥ n`, of `ε_k h`, `k ≥ n`, with `h` depending only on
+the signs `ε_j`, `j < k`, vanishes: pair `ε` with its flip at `k`. -/
+private theorem condAvg_coin_smul_eq_zero {n : ℕ} {k : Fin N} (hk : n ≤ k.val)
+    {h : (Fin N → Bool) → E}
+    (hh : ∀ ε ε' : Fin N → Bool, (∀ j, j < k → ε j = ε' j) → h ε = h ε') (ε : Fin N → Bool) :
+    condAvg n (fun ε => coin (ε k) • h ε) ε = 0 := by
+  simp only [condAvg]
+  refine smul_eq_zero_of_right _ (sum_eq_zero_of_flip k fun ε' => ?_)
+  have hk' : ¬ k.val < n := by omega
+  have h1 : splice n ε (SignCube.flip k ε') k = !(splice n ε ε' k) := by simp [splice, hk']
+  have h2 : h (splice n ε (SignCube.flip k ε')) = h (splice n ε ε') := hh _ _ fun j hj => by
+    simp only [splice]
+    split_ifs
+    · rfl
+    · exact flip_apply_of_ne (Fin.ne_of_lt hj) ε'
+  rw [h1, h2, coin_not, neg_smul]
+
+/-- For `g` depending only on the signs `ε_j`, `j ≤ k`, the average over the signs `ε_j`, `j ≥ k`,
+is the average of `g` over the two values of `ε_k`: `2 E [g | ℱ_k] (ε) = g ε + g (flip k ε)`. -/
+private theorem two_smul_condAvg_of_succ {k : Fin N} {g : (Fin N → Bool) → E}
+    (hg : ∀ ε ε' : Fin N → Bool, (∀ j : Fin N, j.val < k.val + 1 → ε j = ε' j) → g ε = g ε')
+    (ε : Fin N → Bool) :
+    (2 : ℝ) • condAvg k g ε = g ε + g (SignCube.flip k ε) := by
+  have s1 : ∀ η : Fin N → Bool, ∀ j : Fin N, j.val < k.val → splice k ε η j = ε j :=
+    fun η j hj => by simp [splice, hj]
+  have s2 : ∀ η : Fin N → Bool, splice k ε η k = η k := fun η => by simp [splice]
+  have f1 : ∀ j : Fin N, j.val < k.val → splice k ε (SignCube.flip k ε) j = SignCube.flip k ε j :=
+    fun j hj => by rw [s1 _ j hj, flip_apply_of_ne (Fin.ne_of_lt hj)]
+  have hpair : ∀ ε', g (splice k ε ε') + g (splice k ε (SignCube.flip k ε')) =
+      g ε + g (SignCube.flip k ε) := by
+    intro ε'
+    have f1' : ∀ η : Fin N → Bool, ∀ j : Fin N, j.val < k.val →
+        splice k ε η j = SignCube.flip k ε j := fun η j hj => by
+      rw [s1 η j hj, flip_apply_of_ne (Fin.ne_of_lt hj)]
+    rcases Bool.eq_or_eq_not (ε' k) (ε k) with h | h
+    · rw [hg _ _ (agree_succ (s1 ε') ((s2 ε').trans h)),
+        hg _ (SignCube.flip k ε) (agree_succ (f1' _) (by rw [s2, flip_apply_self,
+          flip_apply_self, h]))]
+    · rw [hg _ (SignCube.flip k ε) (agree_succ (f1' ε') (by rw [s2, h, flip_apply_self])),
+        hg _ ε (agree_succ (s1 _) (by rw [s2, flip_apply_self, h, Bool.not_not])), add_comm]
+  have hsum : (2 : ℝ) • ∑ ε', g (splice k ε ε') = (2 : ℝ) ^ N • (g ε + g (SignCube.flip k ε)) := by
+    calc (2 : ℝ) • ∑ ε', g (splice k ε ε')
+        = ∑ ε', g (splice k ε ε') + ∑ ε', g (splice k ε (SignCube.flip k ε')) := by
+          rw [two_smul]
+          congr 1
+          exact (Equiv.sum_comp (flip_involutive k).toPerm (fun ε' => g (splice k ε ε'))).symm
+      _ = ∑ _ε' : Fin N → Bool, (g ε + g (SignCube.flip k ε)) := by
+          rw [← Finset.sum_add_distrib]
+          exact Finset.sum_congr rfl fun ε' _ => hpair ε'
+      _ = _ := sum_const_cube _
+  simp only [condAvg]
+  rw [smul_comm, hsum, inv_smul_smul₀ (by positivity)]
+
 /-- The tower property for the cube conditional expectation. -/
 theorem condAvg_condAvg {k l : ℕ} (h : k ≤ l) (f : (Fin N → Bool) → E) :
     condAvg k (condAvg l f) = condAvg k f := by
-  sorry
+  funext ε
+  have h1 : ∀ ε', condAvg l f (splice k ε ε') =
+      ((2 : ℝ) ^ N)⁻¹ • ∑ ε'', (fun η => f (splice k ε η)) (splice l ε' ε'') := by
+    intro ε'
+    simp only [condAvg, splice_splice_of_le h]
+  change ((2 : ℝ) ^ N)⁻¹ • ∑ ε', condAvg l f (splice k ε ε') =
+    ((2 : ℝ) ^ N)⁻¹ • ∑ ε', f (splice k ε ε')
+  simp_rw [h1]
+  rw [← Finset.smul_sum, sum_sum_splice l (fun η => f (splice k ε η))]
+  simp_rw [sum_const_cube]
+  rw [← Finset.smul_sum, inv_smul_smul₀ (by positivity)]
 
 /-- An `ℱ_k`-measurable function is its own conditional expectation. -/
 theorem condAvg_of_isAdapted {k : ℕ} {f : (Fin N → Bool) → E}
     (hf : ∀ ε ε' : Fin N → Bool, (∀ j : Fin N, j.val < k → ε j = ε' j) → f ε = f ε') :
     condAvg k f = f := by
-  sorry
+  funext ε
+  simp only [condAvg]
+  rw [Finset.sum_congr rfl fun ε' _ => hf (splice k ε ε') ε fun j hj => by simp [splice, hj],
+    sum_const_cube, inv_smul_smul₀ (by positivity)]
 
 /-- The conditional expectation `E [· | ℱ_0]` is the plain average. -/
 theorem condAvg_zero_real (f : (Fin N → Bool) → ℝ) (ε : Fin N → Bool) :
     condAvg 0 f ε = avg f := by
-  sorry
+  simp only [condAvg, avg, splice_zero, smul_eq_mul]
+  rw [inv_mul_eq_div]
 
 /-- A Paley–Walsh martingale of a predictable family is a martingale:
 `E [M_m | ℱ_n] = M_{min n m}`. -/
 theorem condAvg_paleyWalsh {ξ : Fin N → (Fin N → Bool) → E} (hξ : IsPredictable ξ) (n m : ℕ) :
     condAvg n (paleyWalsh ξ m) = paleyWalsh ξ (min n m) := by
-  sorry
+  funext ε
+  have hF : Finset.univ.filter (fun k : Fin N => k.val < min n m) =
+      (Finset.univ.filter (fun k : Fin N => k.val < m)).filter (fun k : Fin N => k.val < n) := by
+    ext k
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, lt_min_iff]
+    exact and_comm
+  unfold paleyWalsh
+  rw [condAvg_sum, hF, Finset.sum_filter (s := Finset.univ.filter fun k : Fin N => k.val < m)]
+  refine Finset.sum_congr rfl fun k _ => ?_
+  split_ifs with hk
+  · -- `j < n`: the term is `ℱ_n`-measurable
+    refine congrFun (condAvg_of_isAdapted fun ε ε' h => ?_) ε
+    rw [h k hk, hξ k ε ε' fun j hj => h j (lt_trans (Fin.lt_def.mp hj) hk)]
+  · -- `j ≥ n`: the term averages to `0` over the sign `ε_j`
+    exact condAvg_coin_smul_eq_zero (not_lt.mp hk) (hξ k) ε
 
 theorem IsPredictable.isCubeMartingale_paleyWalsh {ξ : Fin N → (Fin N → Bool) → E}
     (hξ : IsPredictable ξ) : IsCubeMartingale (paleyWalsh ξ) := by
-  sorry
+  refine ⟨hξ.isAdapted_paleyWalsh, fun n => ?_⟩
+  rw [condAvg_paleyWalsh hξ, min_eq_left (Nat.le_succ n)]
 
+set_option linter.unusedVariables false in
 /-- The transform of the final value of a Paley–Walsh martingale is the Paley–Walsh martingale
 of the transformed family: `T_σ (Σ_k ε_k ξ_k) = Σ_k σ_k ε_k ξ_k`. -/
 theorem transform_paleyWalsh {ξ : Fin N → (Fin N → Bool) → E} (hξ : IsPredictable ξ)
     {σ : Fin N → (Fin N → Bool) → ℝ} (hσ : IsPredictable σ) :
     transform σ (paleyWalsh ξ N) = paleyWalsh (fun k ε => σ k ε • ξ k ε) N := by
-  sorry
+  -- the identity holds for every family `σ`; its predictability is not used
+  funext ε
+  have h1 : ∀ k : Fin N, condAvg (k.val + 1) (paleyWalsh ξ N) ε -
+      condAvg k.val (paleyWalsh ξ N) ε = coin (ε k) • ξ k ε := by
+    intro k
+    rw [condAvg_paleyWalsh hξ, condAvg_paleyWalsh hξ, min_eq_left (Nat.succ_le_of_lt k.isLt),
+      min_eq_left k.isLt.le, paleyWalsh_succ, dite_eq_left k.isLt, add_sub_cancel_left]
+  simp only [transform, h1]
+  simp only [condAvg_paleyWalsh hξ, Nat.zero_min, paleyWalsh_zero, zero_add,
+    paleyWalsh_of_le _ le_rfl]
+  exact Finset.sum_congr rfl fun k _ => smul_comm _ _ _
 
 /-- Every martingale on the sign cube is a Paley–Walsh martingale started at its (constant)
 initial value: `M n = M 0 + Σ_{k<n} ε_k ξ_k` with `ξ_k = ε_k (M (k + 1) − M k)` predictable. -/
@@ -186,28 +350,73 @@ theorem exists_paleyWalsh_of_isCubeMartingale {M : ℕ → (Fin N → Bool) → 
     (hM : IsCubeMartingale M) :
     ∃ ξ : Fin N → (Fin N → Bool) → E, IsPredictable ξ ∧
       ∀ n ε, M n ε = M 0 ε + paleyWalsh ξ n ε := by
-  sorry
+  obtain ⟨hA, hC⟩ := hM
+  refine ⟨fun k ε => coin (ε k) • (M (k.val + 1) ε - M k.val ε), ?_, ?_⟩
+  · -- `ξ` is predictable: `M (k + 1) − M k` is `ε_k` times a function of `ε_j`, `j < k`
+    intro k ε ε' h
+    dsimp only
+    have hMk : M k.val ε' = M k.val ε := hA k.val ε' ε fun j hj => (h j hj).symm
+    rcases Bool.eq_or_eq_not (ε' k) (ε k) with hk | hk
+    · rw [hk, hMk, hA (k.val + 1) ε' ε (agree_succ (fun j hj => (h j hj).symm) hk)]
+    · have h2 := two_smul_condAvg_of_succ (g := M (k.val + 1)) (hA (k.val + 1)) ε
+      rw [hC k.val, two_smul] at h2
+      have hflip : M (k.val + 1) ε' = M (k.val + 1) (SignCube.flip k ε) :=
+        hA _ _ _ (agree_succ (fun j hj => by
+          rw [flip_apply_of_ne (Fin.ne_of_lt hj)]
+          exact (h j hj).symm) (by rw [hk, flip_apply_self]))
+      have hd : M (k.val + 1) (SignCube.flip k ε) - M k.val ε =
+          -(M (k.val + 1) ε - M k.val ε) := by
+        rw [neg_sub, sub_eq_sub_iff_add_eq_add, h2, add_comm]
+      rw [hk, coin_not, hMk, hflip, hd, neg_smul, smul_neg, neg_neg]
+  · intro n ε
+    induction n with
+    | zero => simp
+    | succ n ih =>
+      rw [paleyWalsh_succ]
+      split_ifs with hn
+      · simp only [smul_smul, coin_mul_self, one_smul]
+        rw [← add_assoc, ← ih, add_sub_cancel]
+      · -- for `n ≥ N`, `E [· | ℱ_n]` is the identity, so `M (n + 1) = M n`
+        have hid : condAvg n (M (n + 1)) = M (n + 1) := condAvg_of_isAdapted fun ε ε' h => by
+          rw [show ε = ε' from funext fun j => h j (lt_of_lt_of_le j.isLt (not_lt.mp hn))]
+        rw [add_zero, ← ih, ← hC n, hid]
 
+set_option linter.unusedSectionVars false in
 /-- The family `ξ` cut off where a predictable event fails: if the event `A k` depends only on the
 signs `ε_j`, `j < k`, then `k ↦ 1_{A k} ξ_k` is predictable. -/
 theorem IsPredictable.indicator {ξ : Fin N → (Fin N → Bool) → E} (hξ : IsPredictable ξ)
     {A : Fin N → Set (Fin N → Bool)}
     (hA : ∀ (k : Fin N) (ε ε' : Fin N → Bool), (∀ j, j < k → ε j = ε' j) → (ε ∈ A k ↔ ε' ∈ A k)) :
     IsPredictable fun k ε => (A k).indicator (ξ k) ε := by
-  sorry
+  intro k ε ε' h
+  dsimp only
+  by_cases hε : ε ∈ A k
+  · rw [Set.indicator_of_mem hε, Set.indicator_of_mem ((hA k ε ε' h).mp hε), hξ k ε ε' h]
+  · rw [Set.indicator_of_notMem hε, Set.indicator_of_notMem fun h' => hε ((hA k ε ε' h).mpr h')]
 
+set_option linter.unusedSectionVars false in
 /-- A Paley–Walsh martingale stopped at a stopping time is the Paley–Walsh martingale of the
 predictable family `k ↦ 1_{k < τ} ξ_k`. -/
 theorem IsPredictable.stopped {ξ : Fin N → (Fin N → Bool) → E} (hξ : IsPredictable ξ)
     {τ : (Fin N → Bool) → ℕ} (hτ : SignCube.IsStoppingTime τ) :
     IsPredictable fun k ε => if k.val < τ ε then ξ k ε else 0 := by
-  sorry
+  intro k ε ε' h
+  dsimp only
+  have hτk : k.val < τ ε ↔ k.val < τ ε' := by
+    rw [← not_le, ← not_le, hτ k.val ε ε' fun j hj => h j (Fin.lt_def.mpr hj)]
+  by_cases hk : k.val < τ ε
+  · rw [ite_eq_left hk, ite_eq_left (hτk.mp hk), hξ k ε ε' h]
+  · rw [ite_eq_right hk, ite_eq_right fun h' => hk (hτk.mpr h')]
 
 theorem paleyWalsh_stopped (ξ : Fin N → (Fin N → Bool) → E) (τ : (Fin N → Bool) → ℕ) (n : ℕ)
     (ε : Fin N → Bool) :
     paleyWalsh ξ (min n (τ ε)) ε =
       paleyWalsh (fun k ε => if k.val < τ ε then ξ k ε else 0) n ε := by
-  sorry
+  simp only [paleyWalsh, smul_ite, smul_zero]
+  rw [← Finset.sum_filter, Finset.filter_filter]
+  refine Finset.sum_congr ?_ fun _ _ => rfl
+  ext k
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and, lt_min_iff]
 
 end Module
 
@@ -219,13 +428,16 @@ variable [SeminormedAddCommGroup E] [NormedSpace ℝ E]
 theorem norm_paleyWalsh_succ_sub (ξ : Fin N → (Fin N → Bool) → E) (k : Fin N)
     (ε : Fin N → Bool) :
     ‖paleyWalsh ξ (k.val + 1) ε - paleyWalsh ξ k.val ε‖ = ‖ξ k ε‖ := by
-  sorry
+  rw [paleyWalsh_succ, dite_eq_left k.isLt, add_sub_cancel_left, norm_smul, Real.norm_eq_abs,
+    abs_coin, one_mul]
 
 /-- The norm of a conditional expectation is at most the conditional expectation of the norm
 (the triangle inequality for the average). -/
 theorem norm_condAvg_le (k : ℕ) (f : (Fin N → Bool) → E) (ε : Fin N → Bool) :
     ‖condAvg k f ε‖ ≤ condAvg k (fun ε => ‖f ε‖) ε := by
-  sorry
+  simp only [condAvg, smul_eq_mul]
+  rw [norm_smul, Real.norm_of_nonneg (by positivity)]
+  exact mul_le_mul_of_nonneg_left (norm_sum_le _ _) (by positivity)
 
 end Normed
 

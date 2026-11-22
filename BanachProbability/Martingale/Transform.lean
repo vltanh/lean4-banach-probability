@@ -39,7 +39,38 @@ theorem martingale_martingaleTransform {𝕜 : Type*} [RCLike 𝕜] [NormedSpace
     {φ : ℕ → Ω → 𝕜} (hφ : ∀ k, StronglyMeasurable[ℱ k] (φ (k + 1)))
     (hb : ∀ k, ∃ C : ℝ, ∀ ω, ‖φ (k + 1) ω‖ ≤ C) :
     Martingale (martingaleTransform φ Y) ℱ μ := by
-  sorry
+  -- the `k`-th term `φ_{k+1} (Y_{k+1} − Y_k)` is `ℱ_{k+1}`-measurable and integrable
+  have hterm_meas : ∀ k, StronglyMeasurable[ℱ (k + 1)]
+      fun ω => φ (k + 1) ω • (Y (k + 1) ω - Y k ω) := fun k =>
+    ((hφ k).mono (ℱ.mono k.le_succ)).smul
+      ((hY.stronglyAdapted (k + 1)).sub ((hY.stronglyAdapted k).mono (ℱ.mono k.le_succ)))
+  have hdY_int : ∀ k, Integrable (fun ω => Y (k + 1) ω - Y k ω) μ := fun k =>
+    (hY.integrable (k + 1)).sub (hY.integrable k)
+  have hterm_int : ∀ k, Integrable (fun ω => φ (k + 1) ω • (Y (k + 1) ω - Y k ω)) μ := by
+    intro k
+    obtain ⟨C, hC⟩ := hb k
+    exact (hdY_int k).bdd_smul C ((hφ k).mono (ℱ.le k)).aestronglyMeasurable (ae_of_all _ hC)
+  have hsucc : ∀ i, martingaleTransform φ Y (i + 1) - martingaleTransform φ Y i =
+      fun ω => φ (i + 1) ω • (Y (i + 1) ω - Y i ω) := by
+    intro i
+    funext ω
+    simp [martingaleTransform, Finset.sum_range_succ]
+  refine martingale_of_condExp_sub_eq_zero_nat (fun n => ?_) (fun n => ?_) (fun i => ?_)
+  · change StronglyMeasurable[ℱ n]
+      (fun ω => ∑ k ∈ Finset.range n, φ (k + 1) ω • (Y (k + 1) ω - Y k ω))
+    exact Finset.stronglyMeasurable_fun_sum _ fun k hk =>
+      (hterm_meas k).mono (ℱ.mono (Finset.mem_range.1 hk))
+  · exact integrable_finsetSum _ fun k _ => hterm_int k
+  · -- the pull-out property for the `ℝ`-bilinear map `(c, v) ↦ c • v` on `𝕜 × E`
+    rw [hsucc]
+    have hdY : μ[fun ω => Y (i + 1) ω - Y i ω | ℱ i] =ᵐ[μ] 0 := by
+      filter_upwards [condExp_sub (hY.integrable (i + 1)) (hY.integrable i) (ℱ i),
+        hY.condExp_ae_eq i.le_succ, hY.condExp_ae_eq (le_refl i)] with ω h1 h2 h3
+      change μ[Y (i + 1) - Y i | ℱ i] ω = 0
+      rw [h1, Pi.sub_apply, h2, h3, sub_self]
+    filter_upwards [condExp_bilin_of_stronglyMeasurable_left (ContinuousLinearMap.lsmul ℝ 𝕜)
+      (hφ i) (hterm_int i) (hdY_int i), hdY] with ω h1 h2
+    simpa [h2] using h1
 
 /-- The image of a martingale under a continuous linear map is a martingale. -/
 theorem martingale_map_continuousLinearMap {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -57,6 +88,13 @@ theorem martingale_map_continuousLinearMap {F : Type*} [NormedAddCommGroup F] [N
 theorem eLpNorm_sub_le_two_mul [IsFiniteMeasure μ] {Y : ℕ → Ω → E} (hY : Martingale Y ℱ μ)
     {p : ℝ≥0∞} (hp : 1 ≤ p) {k n : ℕ} (hkn : k < n) :
     eLpNorm (fun ω => Y (k + 1) ω - Y k ω) p μ ≤ 2 * eLpNorm (Y n) p μ := by
-  sorry
+  -- `Y_j = E[Y_n | ℱ_j]` for `j ≤ n`, and conditional expectations are `L^p` contractions
+  have hle : ∀ j, j ≤ n → eLpNorm (Y j) p μ ≤ eLpNorm (Y n) p μ := fun j hj => by
+    rw [← eLpNorm_congr_ae (hY.condExp_ae_eq hj)]
+    exact eLpNorm_condExp_le_eLpNorm _ hp
+  calc eLpNorm (fun ω => Y (k + 1) ω - Y k ω) p μ
+      ≤ eLpNorm (Y (k + 1)) p μ + eLpNorm (Y k) p μ := eLpNorm_sub_le (f := Y (k + 1)) hp
+    _ ≤ eLpNorm (Y n) p μ + eLpNorm (Y n) p μ := add_le_add (hle _ hkn) (hle _ hkn.le)
+    _ = 2 * eLpNorm (Y n) p μ := (two_mul _).symm
 
 end BanachProbability
