@@ -13,27 +13,32 @@ space, `β⁻¹ ‖Y_n‖_p ≤ ‖Σ_{k<n} ε_k (Y_{k+1} − Y_k)‖_p ≤ β �
 two such inequalities with constants `β⁻`, `β⁺` give the UMD constant `β⁻ β⁺`
 (`isUMDBound_of_randomised`): `max (β⁻, β⁺) ≤ β ≤ β⁻ β⁺`.
 
-The proof is the book's, p. 279–280 (Proposition 4.1.16, (1)⇒(2) and (2)⇒(1), of which Proposition
-4.2.3 is an "immediate corollary"). (1)⇒(2): for *fixed* values of the signs `ε_k` the sum
+The proof is the book's, p. 279–280: Proposition 4.1.16, (1)⇒(2) and (2)⇒(1), from which the book
+deduces Proposition 4.2.3 ("As an immediate consequence we therefore obtain the following corollary
+to Proposition 4.1.16", p. 282). (1)⇒(2): for *fixed* values of the signs `ε_k` the sum
 `Σ ε_k dY_k` is the transform of `Y` by constant signs, so its norm is at most `β ‖Y_n‖_p`; the
 reverse inequality is the same one for the martingale `Σ ε_k dY_k` and the same signs; raise both
 to the power `p` and integrate over the signs. (2)⇒(1): for signs `σ_k` the families `(σ_k ε_k)`
 and `(ε_k)` have the same law, so
 `‖Σ σ_k dY_k‖ ≤ β⁻ ‖Σ ε_k σ_k dY_k‖ = β⁻ ‖Σ ε_k dY_k‖ ≤ β⁻ β⁺ ‖Y_n‖`.
 
-Differences from the source: the signs `σ_k` of the UMD inequality are predictable here, which
-changes nothing (in (2)⇒(1), for each `ω` the families `(σ_k (ω) ε_k)` and `(ε_k)` have the same
-law), and the spaces are probability spaces.
+Differences from the source: the scalars, hence the signs and the Rademacher variables, are real;
+the signs `σ_k` of the UMD inequality are predictable here, which changes nothing (in (2)⇒(1), for
+each `ω` the families `(σ_k (ω) ε_k)` and `(ε_k)` have the same law); the spaces are probability
+spaces. Of the dyadic version of the proposition, for Paley–Walsh martingales, only the two
+inequalities are proved (`decoupling_dyadic`), not the converse.
 
 **Decoupling** of Paley–Walsh martingales. For a Paley–Walsh martingale
 `Y_n = Σ_{k<n} ε_k ξ_k (ε)` with predictable `ξ` and an independent copy `ε̃` of the signs, the
 decoupled sum `Ỹ_n = Σ_{k<n} ε̃_k ξ_k (ε)` satisfies
 `UMD_p⁻¹ ‖Ỹ_n‖_{L^p} ≤ ‖Y_n‖_{L^p} ≤ UMD_p ‖Ỹ_n‖_{L^p}` (`decoupling_dyadic`, `decoupling`). This is
 the randomised UMD property for Paley–Walsh martingales, as `dY_k = ε_k ξ_k` and, for each `ε`, the
-families `(ε̃_k ε_k)` and `(ε̃_k)` have the same law (`SignCube.avg_mul_left`). S. Cox, M. Veraar
-(*Some remarks on tangent martingale difference sequences in `L¹`-spaces*, Electron. Commun.
-Probab. 12 (2007)) credit the result for tangent sequences to T. R. McConnell (1989) and,
-independently, P. Hitczenko, and a proof from the definition of UMD to S. Montgomery-Smith.
+families `(ε̃_k ε_k)` and `(ε̃_k)` have the same law (`SignCube.avg_mul_left`). The book also has
+it as a case of the tangent martingale inequality of Hitczenko and McConnell (HNVW, Theorem 4.4.11
+with Example 4.4.13, p. 326), with the same constant. S. Cox, M. Veraar (*Some remarks on tangent
+martingale difference sequences in `L¹`-spaces*, Electron. Commun. Probab. 12 (2007)) credit the
+result for tangent sequences to T. R. McConnell (1989) and, independently, P. Hitczenko, and a proof
+from the definition of UMD to S. Montgomery-Smith.
 
 Since the dyadic constant is that of the space in which the `ξ_k` take values, the statement for a
 subspace `V` (with the constant `UMD_p^Δ (V)`) is the statement for the normed space `V`.
@@ -369,7 +374,7 @@ theorem decoupling_dyadic {p : ℝ} (hp : 1 < p) {N : ℕ} (ξ : Fin N → (Fin 
     exact ENNReal.rpow_le_rpow (dec_fixed_dyadic hu hξ η n).2 hp0.le
 
 /-- **Decoupling** (Hytönen–van Neerven–Veraar–Weis I, Proposition 4.2.3; Cox–Veraar 2007) for
-Paley–Walsh martingales in a Banach space, with the constant `UMD_p (X)`:
+Paley–Walsh martingales in a real Banach space, with the constant `UMD_p (X)`:
 `UMD_p⁻¹ ‖Ỹ_n‖_{L^p} ≤ ‖Y_n‖_{L^p} ≤ UMD_p ‖Ỹ_n‖_{L^p}`. -/
 theorem decoupling [CompleteSpace X] {p : ℝ} (hp : 1 < p) {N : ℕ}
     (ξ : Fin N → (Fin N → Bool) → X) (hξ : IsPredictable ξ) (n : ℕ) :

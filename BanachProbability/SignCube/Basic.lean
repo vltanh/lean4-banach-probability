@@ -193,14 +193,6 @@ def interleave : (Fin N → Bool) × (Fin N → Bool) ≃ (Fin (N * 2) → Bool)
     obtain ⟨⟨k, j⟩, rfl⟩ := finProdFinEquiv.surjective i
     fin_cases j <;> simp
 
-theorem interleave_apply_even (x : (Fin N → Bool) × (Fin N → Bool)) (k : Fin N) :
-    interleave x (finProdFinEquiv (k, 0)) = x.2 k := by
-  simp [interleave, -finProdFinEquiv_symm_apply]
-
-theorem interleave_apply_odd (x : (Fin N → Bool) × (Fin N → Bool)) (k : Fin N) :
-    interleave x (finProdFinEquiv (k, 1)) = x.1 k := by
-  simp [interleave, -finProdFinEquiv_symm_apply]
-
 /-- The interleaving carries the uniform measure on pairs to the uniform measure on the doubled
 cube: a double average is a single average over `Fin (N * 2) → Bool`. -/
 theorem avg_interleave (G : (Fin N → Bool) → (Fin N → Bool) → ℝ) :

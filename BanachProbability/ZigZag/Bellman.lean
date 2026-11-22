@@ -1,8 +1,7 @@
 module
 
+public import BanachProbability.UMD.ConvexHull
 public import BanachProbability.ZigZag.Concave
-public import Mathlib.Analysis.Convex.Combination
-public import Mathlib.Analysis.Normed.Module.Convex
 
 /-!
 # Burkholder's zig-zag concave function
@@ -99,18 +98,16 @@ private theorem zzg_paleyWalsh_smul {N : ℕ} (c : 𝕜) (ξ : Fin N → (Fin N 
   exact Finset.sum_congr rfl fun k _ => smul_comm _ _ _
 
 /-- The dyadic UMD property for deterministic multipliers in the closed unit ball: the vector of
-the multipliers is in `(B_𝕜)^N = conv (S_𝕜^N)` (HNVW I, Lemma 3.2.13 and Proposition 3.2.14,
-p. 183–184) and the `L^p` norm of the transform is a convex function of it. -/
+the multipliers is in `(B_𝕜)^N = conv (S_𝕜^N)` (HNVW I, Proposition 3.2.14, p. 184,
+`convexHull_pi_sphere`) and the `L^p` norm of the transform is a convex function of it. -/
 theorem IsSignDyadicUMDBound.lpNorm_le {p β : ℝ} (hp : 1 ≤ p) (hD : IsSignDyadicUMDBound 𝕜 X p β)
     {N : ℕ} {ξ : Fin N → (Fin N → Bool) → X} (hξ : IsPredictable ξ) {l : Fin N → 𝕜}
     (hl : ∀ k, ‖l k‖ ≤ 1) :
     SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh (fun k ε => l k • ξ k ε) N) ≤
       β * SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh ξ N) := by
   have hmem : l ∈ convexHull ℝ (Set.univ.pi fun _ : Fin N => Metric.sphere (0 : 𝕜) 1) := by
-    rw [convexHull_pi]
-    intro k _
-    rw [convexHull_sphere_eq_closedBall _ zero_le_one]
-    simpa using hl k
+    rw [convexHull_pi_sphere]
+    simpa [Set.mem_univ_pi] using hl
   refine convexHull_min (t := {l : Fin N → 𝕜 | SignCube.lpNorm (fun x => ‖x‖) p
       (paleyWalsh (fun k ε => l k • ξ k ε) N) ≤
         β * SignCube.lpNorm (fun x => ‖x‖) p (paleyWalsh ξ N)}) (fun l hl => ?_) ?_ hmem

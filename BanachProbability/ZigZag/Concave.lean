@@ -17,9 +17,7 @@ Neerven–Veraar–Weis, *Analysis in Banach spaces I* (2016) (HNVW), §4.5.a an
 * Lemma 4.5.4 (`isSignZigZagConcave_iff`, `IsSignZigZagConcave.sum_le`): Jensen's inequality
   `E u (x + ξ, y + ε ξ) ≤ u (x, y)` for simple random variables `ξ` with `E ξ = 0`.
 * Lemma 4.5.5 (`IsSignZigZagConcave.integral_le`): `E u (f_{n+1}, g_{n+1}) ≤ E u (f_n, g_n)` for a
-  martingale `f` on a finite probability space and its transform `g` by predictable signs; the
-  same on the sign cube for Paley–Walsh martingales
-  (`IsSignZigZagConcave.avg_paleyWalsh_le`).
+  martingale `f` on a finite probability space and its transform `g` by predictable signs.
 * The homogenisation (4.31) (`zigZagHomogenize`): `ũ = inf_{α ≠ 0} |α|^{−p} u (α x, α y)`, which
   has the same properties as `u`, is `p`-homogeneous, and vanishes at `(0, 0)`.
 -/
@@ -353,67 +351,6 @@ theorem IsSignZigZagConcave.integral_transform_le [IsScalarTower ℝ 𝕜 X]
     simp only [martingaleTransform, Finset.sum_range_succ]
 
 end Jensen
-
-section Cube
-
-variable {𝕜 X : Type*} [RCLike 𝕜] [NormedAddCommGroup X] [NormedSpace 𝕜 X] [NormedSpace ℝ X]
-  [IsScalarTower ℝ 𝕜 X] {u : X → X → ℝ}
-
-/-- Lemma 4.5.5 and its iteration for Paley–Walsh martingales on the sign cube: for a zig-zag
-concave `u`, `E u (f_n, g_n) ≤ u (0, 0)`, where `f = Σ ε_k ξ_k` and `g = Σ c_k ε_k ξ_k` for
-predictable `ξ` and predictable signs `c`. The atoms of `ℱ_n` are the sets of sign vectors with
-given first `n` signs. -/
-theorem IsSignZigZagConcave.avg_paleyWalsh_le (hu : IsSignZigZagConcave 𝕜 u) {N : ℕ}
-    {ξ : Fin N → (Fin N → Bool) → X} {c : Fin N → (Fin N → Bool) → 𝕜} (hξ : IsPredictable ξ)
-    (hc : IsPredictable c) (hc1 : ∀ k ε, ‖c k ε‖ = 1) (n : ℕ) :
-    avg (fun ε => u (paleyWalsh ξ n ε) (paleyWalsh (fun k ε => c k ε • ξ k ε) n ε)) ≤ u 0 0 := by
-  have hcξ : IsPredictable fun k ε => c k ε • ξ k ε := fun k ε ε' h => by
-    simp only [hc k ε ε' h, hξ k ε ε' h]
-  induction n with
-  | zero => simp
-  | succ n ih =>
-    refine le_trans ?_ ih
-    by_cases hn : n < N
-    swap
-    · simp only [paleyWalsh_succ, dite_eq_right hn, add_zero, le_refl]
-    generalize hK : (⟨n, hn⟩ : Fin N) = K
-    have hKn : K.val = n := by rw [← hK]
-    -- two sign vectors are in the same class if they agree on the first `n` signs
-    have hcl : ∀ ε ε' : Fin N → Bool, trunc n ε = trunc n ε' →
-        ∀ j : Fin N, j.val < n → ε j = ε' j := fun ε ε' h j hj => by
-      simpa [trunc, splice, hj] using congrFun h j
-    have hclK : ∀ ε ε' : Fin N → Bool, trunc n ε = trunc n ε' →
-        ∀ j : Fin N, j < K → ε j = ε' j := fun ε ε' h j hj =>
-      hcl ε ε' h j (by rw [← hKn]; exact hj)
-    have hflip : ∀ ε, trunc n (SignCube.flip K ε) = trunc n ε := by
-      intro ε
-      funext j
-      simp only [trunc, splice]
-      split_ifs with hj
-      · exact flip_apply_of_ne (fun h => by subst h; omega) ε
-      · rfl
-    have hstep := zzg_sum_step hu (w := fun _ : Fin N → Bool => (2 ^ N : ℝ)⁻¹)
-      (fun _ => by positivity) (trunc n) (f := paleyWalsh ξ n) (f' := paleyWalsh ξ (n + 1))
-      (g := paleyWalsh (fun k ε => c k ε • ξ k ε) n)
-      (g' := paleyWalsh (fun k ε => c k ε • ξ k ε) (n + 1)) (φ := c K) (hc1 K)
-      (fun ε ε' h => hξ.isAdapted_paleyWalsh n ε ε' (hcl ε ε' h))
-      (fun ε ε' h => hcξ.isAdapted_paleyWalsh n ε ε' (hcl ε ε' h))
-      (fun ε ε' h => hc K ε ε' (hclK ε ε' h)) (fun ε₀ => ?_) (fun ε => ?_)
-    · simpa only [avg, div_eq_inv_mul, Finset.mul_sum] using hstep
-    · -- the increment `ε_n ξ_n` changes sign under the flip of `ε_n`, which preserves the class
-      refine Finset.sum_involution (fun ε _ => SignCube.flip K ε) (fun ε _ => ?_)
-        (fun ε _ _ h => ?_) (fun ε hε => ?_) (fun ε _ => flip_involutive K ε)
-      · simp only [paleyWalsh_succ, dite_eq_left hn, hK, add_sub_cancel_left, flip_apply_self,
-          coin_not]
-        rw [hξ K (SignCube.flip K ε) ε (hclK _ _ (hflip ε)), neg_smul, smul_neg,
-          add_neg_cancel]
-      · have := congrFun h K
-        simp at this
-      · simpa only [Finset.mem_filter, Finset.mem_univ, true_and, hflip ε] using hε
-    · simp only [paleyWalsh_succ, dite_eq_left hn, hK, add_sub_cancel_left]
-      rw [smul_comm]
-
-end Cube
 
 section Homogenize
 

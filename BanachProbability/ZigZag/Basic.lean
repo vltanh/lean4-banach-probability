@@ -9,18 +9,20 @@ public import BanachProbability.ZigZag.Bellman
 A Banach space `X` is `UMD_p`, `p ∈ (1, ∞)`, if and only if there are `β > 0` and a function
 `U : X × X → ℝ` with `U (0, 0) = 0`, `U (x, y) ≥ ‖y‖^p − β^p ‖x‖^p`, and zig-zag concave:
 `z ↦ U (x + z, y + ε z)` is concave for every `ε ∈ [−1, 1]` (`IsZigZagConcave`); then
-`UMD_p (X) ≤ β`, and the least such `β` is `UMD_p (X)` (D. L. Burkholder, *A geometrical
+`UMD_p (X) ≤ β`, and `UMD_p (X)` is the infimum of these `β`, attained if `X ≠ 0` (for `X = 0` every
+`β > 0` is possible, and `UMD_p (X) = 0`). The theorem is D. L. Burkholder's (*A geometrical
 characterization of Banach spaces in which martingale difference sequences are unconditional*, Ann.
 Probab. 9 (1981), *Boundary value problems and sharp inequalities for martingale transforms*, Ann.
 Probab. 12 (1984), and, with biconcave functions, *Martingales and Fourier analysis in Banach
-spaces*, Lecture Notes in Math. 1206 (1986); Hytönen–van Neerven–Veraar–Weis, *Analysis in Banach
-spaces I* (2016) (HNVW), Theorem 4.5.6, p. 332). For a complex space and `ε` in the closed unit disc
-of `ℂ` (`IsComplexZigZagConcave`), the same holds with the complex constant `UMD_{ℂ,p} (X)`
-(I. Yaroslavtsev, *Even Fourier multipliers and martingale transforms in infinite dimensions*,
-Indag. Math. 29 (2018), Proposition 3.7). HNVW ask concavity only for the signs `‖ε‖ = 1`
-(`IsSignZigZagConcave`, Definition 4.5.3) and do not ask `U (0, 0) = 0`; the functions above satisfy
-more, and the bound for `UMD_p (X)` is proved from HNVW's hypotheses
-(`umdConst_le_of_isSignZigZagConcave`).
+spaces*, Lecture Notes in Math. 1206 (1986)); it is Theorem 4.5.6, p. 332, of Hytönen–van
+Neerven–Veraar–Weis, *Analysis in Banach spaces I* (2016) (HNVW).
+
+For a complex space and `ε` in the closed unit disc of `ℂ` (`IsComplexZigZagConcave`), the same
+holds with the complex constant `UMD_{ℂ,p} (X)` (I. Yaroslavtsev, *Even Fourier multipliers and
+martingale transforms in infinite dimensions*, Indag. Math. 29 (2018), Proposition 3.7). HNVW ask
+concavity only for the signs `‖ε‖ = 1` (`IsSignZigZagConcave`, Definition 4.5.3) and do not ask
+`U (0, 0) = 0`; the functions above satisfy more, and the bound for `UMD_p (X)` is proved from
+HNVW's hypotheses (`umdConst_le_of_isSignZigZagConcave`).
 
 The proof is HNVW's, p. 330–337, for `𝕜 = ℝ` and `ℂ` at once:
 
@@ -84,25 +86,6 @@ section Scalars
 
 variable {𝕜 X : Type*} [RCLike 𝕜] [NormedAddCommGroup X] [NormedSpace 𝕜 X] [NormedSpace ℝ X]
   [IsScalarTower ℝ 𝕜 X] {p β : ℝ} {u : X → X → ℝ}
-
-/-- The majorization step on the cube: if `‖y‖^p − β^p ‖x‖^p ≤ u (x, y)` and `E u (f, g) ≤ 0`, then
-`‖g‖_p ≤ β ‖f‖_p`. -/
-private theorem zzg_ofReal_lpNorm_le {F : Type*} [SeminormedAddCommGroup F] {N : ℕ}
-    (hp : 0 < p) (hβ : 0 ≤ β) {u : F → F → ℝ} (hF : ∀ x y, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ u x y)
-    {f g : (Fin N → Bool) → F} (h : avg (fun ε => u (f ε) (g ε)) ≤ 0) :
-    ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p g) ≤
-      ENNReal.ofReal β * ENNReal.ofReal (SignCube.lpNorm (fun x => ‖x‖) p f) := by
-  have h1 := avg_mono fun ε => hF (f ε) (g ε)
-  rw [avg_sub, avg_const_mul, ← lpNorm_rpow (fun x : F => norm_nonneg x) hp,
-    ← lpNorm_rpow (fun x : F => norm_nonneg x) hp] at h1
-  have hf0 := lpNorm_nonneg (fun x : F => norm_nonneg x) p f
-  have hg0 := lpNorm_nonneg (fun x : F => norm_nonneg x) p g
-  have h2 : SignCube.lpNorm (fun x => ‖x‖) p g ^ p ≤
-      (β * SignCube.lpNorm (fun x => ‖x‖) p f) ^ p := by
-    rw [Real.mul_rpow hβ hf0]
-    linarith
-  rw [← ENNReal.ofReal_mul hβ]
-  exact ENNReal.ofReal_le_ofReal ((Real.rpow_le_rpow_iff hg0 (by positivity) hp).mp h2)
 
 omit [NormedSpace ℝ X] in
 /-- The `L^p` norm on a finite probability space is `(E ‖h‖^p)^{1/p}`. -/
@@ -178,19 +161,6 @@ theorem umdConst_le_of_isSignZigZagConcave [CompleteSpace X] (hp : 1 ≤ p) (hβ
     {u : X → X → ℝ} (hu : IsSignZigZagConcave ℝ u)
     (hF : ∀ x y, ‖y‖ ^ p - β ^ p * ‖x‖ ^ p ≤ u x y) : umdConst X p ≤ ENNReal.ofReal β :=
   umdConst_le_of_isUMDBound (isUMDBound_of_isSignZigZagConcave hp hβ hu hF)
-
-/-- A zig-zag concave function bounds the dyadic UMD constant: `UMD_p^Δ (X) ≤ β`. This is HNVW I,
-Theorem 4.5.6, (3)⇒(1) (p. 333–334), restricted to Paley–Walsh martingales, and needs no
-completeness: `E U (f_n, g_n) ≤ … ≤ U (0, 0) = 0` for a Paley–Walsh martingale `f` and its
-transform `g` by predictable signs (Lemma 4.5.5, `IsSignZigZagConcave.avg_paleyWalsh_le`), and
-`U (x, y) ≥ ‖y‖^p − β^p ‖x‖^p` gives `‖g_n‖_p ≤ β ‖f_n‖_p`. -/
-theorem dyadicUMDConst_le_of_isZigZagConcave {p β : ℝ} (hp : 1 < p) (hβ : 0 < β)
-    {U : X → X → ℝ} (hU : IsZigZagConcave p β U) : dyadicUMDConst X p ≤ ENNReal.ofReal β := by
-  refine dyadicUMDConst_le_of_isDyadicUMDBound fun N ξ σ hξ hσ hσ1 n => ?_
-  refine zzg_ofReal_lpNorm_le (by linarith) hβ.le hU.2.2 ?_
-  have h := hU.isSignZigZagConcave.avg_paleyWalsh_le hξ hσ
-    (fun k ε => by rcases hσ1 k ε with h | h <;> simp [h]) n
-  rwa [hU.2.1] at h
 
 /-- A zig-zag concave function bounds the UMD constant: `UMD_p (X) ≤ β` (Burkholder; HNVW I,
 Theorem 4.5.6, (3)⇒(1), p. 333–334). -/

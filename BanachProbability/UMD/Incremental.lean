@@ -13,7 +13,7 @@ constant `β_{p,X}` with *deterministic* multipliers: for all scalars `|ε_n| = 
 constant bounds the transforms by all *predictable* multipliers of modulus at most one. This file
 follows its proof:
 
-* Lemma 3.6.18 (p. 257–258, `exists_incremental_filtration`): on a finite probability space, a
+* Lemma 3.6.18 (p. 258, `exists_incremental_filtration`): on a finite probability space, a
   martingale `f` and predictable multipliers `v` with respect to a filtration `ℱ` are samples of a
   martingale `g` and of *constant* multipliers `λ_j` with respect to a filtration `𝒢` that is
   *incremental*, `#𝒢_{j+1}^* = #𝒢_j^* + 1`, where `𝒢_j^*` is the set of the atoms of `𝒢_j`
@@ -123,7 +123,7 @@ private theorem inc_ncard_atoms_le [Finite Ω] {m m' : MeasurableSpace Ω} (h : 
 /-- If `m ≤ m'` and `m'` has one atom more than `m`, then `m` and `m'` share the same atoms,
 except that one atom `B` of `m` is the union of two atoms of `m'` (HNVW I, proof of Lemma 3.6.18,
 p. 258). -/
-theorem inc_exists_split [Finite Ω] {m m' : MeasurableSpace Ω} (h : m ≤ m')
+private theorem inc_exists_split [Finite Ω] {m m' : MeasurableSpace Ω} (h : m ≤ m')
     (hcard : (atoms m').ncard = (atoms m).ncard + 1) :
     ∃ B ∈ atoms m, (∀ ω, ω ∉ B → atom m' ω = atom m ω) ∧
       ∃ A₀ ∈ atoms m', ∃ A₁ ∈ atoms m', A₀ ≠ A₁ ∧ B = A₀ ∪ A₁ := by
@@ -370,7 +370,7 @@ private theorem inc_sub_eq_zero {D : Ω → X} (hD : StronglyMeasurable[m'] D)
     · rw [Set.indicator_of_notMem hx, Set.indicator_of_notMem hx, zero_smul]
   rwa [hconst, smul_smul, inv_mul_cancel₀ hpos.ne', one_smul] at h0
 
-/-- **HNVW I, Lemma 3.6.18** (p. 257–258). On a finite probability space, let `Y` be a martingale
+/-- **HNVW I, Lemma 3.6.18** (p. 258). On a finite probability space, let `Y` be a martingale
 and `φ` predictable multipliers (`φ_{k+1}` is `ℱ_k`-measurable), and let `n ≥ 0`. There are a
 filtration `𝒢` that is incremental up to time `N`, `#𝒢_{j+1}^* = #𝒢_j^* + 1` for `j < N`, a
 `𝒢`-martingale `g` with `g_0 = Y_0`, constants `λ_j` among the values of `φ` (here `c j`), and
@@ -750,15 +750,17 @@ theorem isComplexUMDBound_iff_isDeterministicUMDBound {X : Type*} [NormedAddComm
     rwa [eLpNorm_norm _ (stp_aestronglyMeasurable_transform hY hcm n),
       eLpNorm_norm _ ((hY.stronglyAdapted n).mono (ℱ.le n)).aestronglyMeasurable] at key
 
-/-- The constant `umdConst`, defined with predictable signs, is the best constant `β_{p,X}` for
-deterministic signs (HNVW I, Definition 4.2.1 and Theorem 4.2.25). -/
+/-- The constant `umdConst`, defined with predictable signs, is the best constant for deterministic
+signs on probability spaces (HNVW I, Theorem 4.2.25; the `β_{p,X}` of their Definition 4.2.1 is over
+all σ-finite measure spaces). -/
 theorem umdConst_eq_sInf_isDeterministicUMDBound (X : Type*) [NormedAddCommGroup X]
     [NormedSpace ℝ X] [CompleteSpace X] {p : ℝ} (hp : 1 ≤ p) :
     umdConst X p = sInf {β | IsDeterministicUMDBound ℝ X p β} := by
   simp only [umdConst, isUMDBound_iff_isDeterministicUMDBound hp]
 
 /-- The constant `complexUMDConst`, defined with predictable unimodular multipliers, is the best
-constant `β_{p,X}` for deterministic ones (HNVW I, Definition 4.2.1 and Theorem 4.2.25). -/
+constant for deterministic ones on probability spaces (HNVW I, Theorem 4.2.25; the `β_{p,X}` of
+their Definition 4.2.1 is over all σ-finite measure spaces). -/
 theorem complexUMDConst_eq_sInf_isDeterministicUMDBound (X : Type*) [NormedAddCommGroup X]
     [NormedSpace ℂ X] [CompleteSpace X] {p : ℝ} (hp : 1 ≤ p) :
     complexUMDConst X p = sInf {β | IsDeterministicUMDBound ℂ X p β} := by

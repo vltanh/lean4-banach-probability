@@ -7,13 +7,14 @@ public import Mathlib.Analysis.Complex.ExponentialBounds
 /-!
 # Extrapolation of the UMD property
 
-A Banach space that is `UMD_q` for one `q ∈ (1, ∞)` is `UMD_p` for every `p ∈ (1, ∞)`, with
+A real Banach space that is `UMD_q` for one `q ∈ (1, ∞)` is `UMD_p` for every `p ∈ (1, ∞)`, with
 `UMD_p (X) ≤ 100 (p / q + p' / q') UMD_q (X)`, and in particular
 `UMD₂ (X) / 200 ≤ UMD_p (X) ≤ 50 (p + p') UMD₂ (X)`: T. Hytönen, J. van Neerven, M. Veraar and
 L. Weis (HNVW), *Analysis in Banach Spaces I* (2016), Theorem 4.2.7 (p. 283). The proof is theirs:
 (3.49) of Theorem 3.5.4 (p. 223), the extrapolation of the bounds of one transform `T` of
 Paley–Walsh martingales, then the supremum over the transforms, in the form of Lemma 4.2.8, and the
-equality of the dyadic and the general constants, Theorem 4.2.5 (`dyadicUMDConst_eq_umdConst`).
+equality of the dyadic and the general constants, Theorem 4.2.5 (`dyadicUMDConst_eq_umdConst`). The
+book's statement is for real and complex scalars; here the scalars, hence the signs, are real.
 
 * Lemma 3.5.15 with the constant of (3.59) (p. 232), `IsWeakTransformBound.lpNorm_cubeMax_le`: a
   bound `K ≥ 1` of `T` from `H^q` to `L^{q,∞}` gives
@@ -544,7 +545,7 @@ end Dyadic
 
 variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
 
-/-- **Extrapolation of the UMD property** (HNVW, Theorem 4.2.7, p. 283):
+/-- **Extrapolation of the UMD property** (HNVW, Theorem 4.2.7, p. 283, for real scalars):
 `UMD_p (X) ≤ 100 (p/q + p'/q') UMD_q (X)` for all `p, q ∈ (1, ∞)`, with `p' = p / (p − 1)` and
 `q' = q / (q − 1)`. -/
 theorem umdConst_le_mul_umdConst {p q : ℝ} (hp : 1 < p) (hq : 1 < q) :
@@ -553,7 +554,7 @@ theorem umdConst_le_mul_umdConst {p q : ℝ} (hp : 1 < p) (hq : 1 < q) :
   rw [← dyadicUMDConst_eq_umdConst hp, ← dyadicUMDConst_eq_umdConst hq]
   exact dyadicUMDConst_le_mul_dyadicUMDConst hp hq
 
-/-- **Extrapolation of the UMD property** (HNVW, Theorem 4.2.7, p. 283): a Banach space that is
+/-- **Extrapolation of the UMD property** (HNVW, Theorem 4.2.7, p. 283): a real Banach space that is
 `UMD_{p₀}` for some `p₀ ∈ (1, ∞)` is `UMD_p` for every `p ∈ (1, ∞)`. -/
 theorem umdConst_lt_top_of_lt_top {p₀ p : ℝ} (hp₀ : 1 < p₀) (h : umdConst X p₀ < ⊤)
     (hp : 1 < p) : umdConst X p < ⊤ :=

@@ -33,7 +33,8 @@ For a seminorm `S` on a real vector space `E` (no completeness, no quotient), `1
   `(⊗ⁿ K̄) (c + Σ_i ε_i x_i) = c + ρ Σ_i ε_i x_i` (`kBarTensor_affine`), so
   `‖c + ρ Σ_i ε_i x_i‖_{L^q (S)} ≤ ‖c + Σ_i ε_i x_i‖_{L^p (S)}` (`hypercontractive_affine`),
   Borell's (2.1) for `E`-valued coefficients supported on `|α| ≤ 1`; its case `c = 0` is (1.1) for
-  `d = 1` (`kahaneKhintchine_hypercontractive`).
+  `d = 1`, the statement of `kahaneKhintchine_hypercontractive`, which is proved in
+  `KahaneKhintchine/Basic.lean` by another tensorisation (`Hypercontractivity/HeatSemigroup.lean`).
 
 The vector two-point inequality `‖a + ρ b ε‖_{L^q (S)} ≤ ‖a + b ε‖_{L^p (S)}`
 (`twoPoint_seminorm`) is the case of one sign: `K ≥ 0`, that is, the triangle inequality applied

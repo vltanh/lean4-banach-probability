@@ -197,7 +197,7 @@ a given `t`, the signs `ε_j` of `cos (2π (t_j + t))`,
 `Σ_j |x_j| |cos (2π (t_j + t))| = Σ_j ε_j |x_j| cos (2π (t_j + t)) = ℜ (e^{2πit} Σ_j ε_j x_j)
 ≤ ‖T x‖_∞`. In the book these are equalities after taking suprema over the signs and over `t`; only
 this inequality is used. -/
-theorem cvh_sum_norm_mul_abs_cos_le {n : ℕ} (x : PiLp 1 (fun _ : Fin n => ℂ)) (t : ℝ) :
+private theorem cvh_sum_norm_mul_abs_cos_le {n : ℕ} (x : PiLp 1 (fun _ : Fin n => ℂ)) (t : ℝ) :
     ∑ j, ‖x j‖ * |Real.cos (2 * π * (Complex.arg (x j) / (2 * π) + t))| ≤ ‖signSum n x‖ := by
   set c : Fin n → ℝ := fun j => Real.cos (2 * π * (Complex.arg (x j) / (2 * π) + t)) with hc
   set ε : Fin n → Bool := fun j => decide (0 ≤ c j) with hε
@@ -251,7 +251,7 @@ theorem two_div_pi_mul_norm_le_norm_signSum {n : ℕ} (x : PiLp 1 (fun _ : Fin n
 
 /-- A functional on `ℓ^∞` of a finite set is given by an `ℓ¹` vector:
 `Σ_i |y* (e_i)| ≤ ‖y*‖` (evaluate `y*` at a vector of unimodular entries). -/
-theorem cvh_sum_norm_apply_single_le {ι : Type*} [Fintype ι] [DecidableEq ι]
+private theorem cvh_sum_norm_apply_single_le {ι : Type*} [Fintype ι] [DecidableEq ι]
     (y' : StrongDual ℂ (ι → ℂ)) : ∑ i, ‖y' (Pi.single i 1)‖ ≤ ‖y'‖ := by
   set u : ι → ℂ := fun i =>
     Complex.exp (-(Complex.arg (y' (Pi.single i 1)) : ℂ) * Complex.I) with hu

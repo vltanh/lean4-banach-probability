@@ -254,33 +254,33 @@ section Stopping
 open Classical in
 /-- The first time `n ≤ N` at which the event `P n` happens; the value `N + 1` stands for `∞`
 (the event never happens). -/
-noncomputable def gdlTime (P : ℕ → Set (Fin N → Bool)) (ε : Fin N → Bool) : ℕ :=
+private noncomputable def gdlTime (P : ℕ → Set (Fin N → Bool)) (ε : Fin N → Bool) : ℕ :=
   Nat.find (p := fun n => N < n ∨ ε ∈ P n) ⟨N + 1, Or.inl (Nat.lt_succ_self N)⟩
 
-theorem gdl_notMem_of_lt_time {P : ℕ → Set (Fin N → Bool)} {ε : Fin N → Bool} {n : ℕ}
+private theorem gdl_notMem_of_lt_time {P : ℕ → Set (Fin N → Bool)} {ε : Fin N → Bool} {n : ℕ}
     (h : n < gdlTime P ε) : ε ∉ P n := fun hn => by
   classical
   exact Nat.find_min _ h (Or.inr hn)
 
-theorem gdl_time_le_of_mem {P : ℕ → Set (Fin N → Bool)} {ε : Fin N → Bool} {n : ℕ}
+private theorem gdl_time_le_of_mem {P : ℕ → Set (Fin N → Bool)} {ε : Fin N → Bool} {n : ℕ}
     (h : ε ∈ P n) : gdlTime P ε ≤ n := by
   classical
   exact Nat.find_min' _ (Or.inr h)
 
-theorem gdl_mem_time {P : ℕ → Set (Fin N → Bool)} {ε : Fin N → Bool} (h : gdlTime P ε ≤ N) :
+private theorem gdl_mem_time {P : ℕ → Set (Fin N → Bool)} {ε : Fin N → Bool} (h : gdlTime P ε ≤ N) :
     ε ∈ P (gdlTime P ε) := by
   classical
   exact (Nat.find_spec (p := fun n => N < n ∨ ε ∈ P n) ⟨N + 1, Or.inl (Nat.lt_succ_self N)⟩
     ).resolve_left (not_lt.mpr h)
 
-theorem gdl_lt_time_iff {P : ℕ → Set (Fin N → Bool)} {ε : Fin N → Bool} {n : ℕ} (hn : n ≤ N) :
-    n < gdlTime P ε ↔ ∀ j ≤ n, ε ∉ P j := by
+private theorem gdl_lt_time_iff {P : ℕ → Set (Fin N → Bool)} {ε : Fin N → Bool} {n : ℕ}
+    (hn : n ≤ N) : n < gdlTime P ε ↔ ∀ j ≤ n, ε ∉ P j := by
   refine ⟨fun h j hj => gdl_notMem_of_lt_time (hj.trans_lt h), fun h => ?_⟩
   by_contra hlt
   have hle := not_lt.mp hlt
   exact h _ hle (gdl_mem_time (hle.trans hn))
 
-theorem gdl_time_le_iff {P : ℕ → Set (Fin N → Bool)} {ε : Fin N → Bool} :
+private theorem gdl_time_le_iff {P : ℕ → Set (Fin N → Bool)} {ε : Fin N → Bool} :
     gdlTime P ε ≤ N ↔ ∃ n ≤ N, ε ∈ P n := by
   constructor
   · exact fun h => ⟨_, h, gdl_mem_time h⟩
@@ -289,7 +289,7 @@ theorem gdl_time_le_iff {P : ℕ → Set (Fin N → Bool)} {ε : Fin N → Bool}
 
 /-- The first time of an adapted sequence of events is a stopping time: whether it is later than
 `n` is determined by the first `n` signs. -/
-theorem gdl_lt_time_congr {P : ℕ → Set (Fin N → Bool)}
+private theorem gdl_lt_time_congr {P : ℕ → Set (Fin N → Bool)}
     (hP : ∀ (n : ℕ) (ε ε' : Fin N → Bool), (∀ j : Fin N, j.val < n → ε j = ε' j) →
       (ε ∈ P n ↔ ε' ∈ P n)) {n : ℕ} (hn : n ≤ N) {ε ε' : Fin N → Bool}
     (h : ∀ j : Fin N, j.val < n → ε j = ε' j) : n < gdlTime P ε ↔ n < gdlTime P ε' := by
@@ -299,7 +299,7 @@ theorem gdl_lt_time_congr {P : ℕ → Set (Fin N → Bool)}
 
 /-- The first time of an adapted sequence of events is a stopping time: whether it equals `k` is
 determined by the first `k` signs. -/
-theorem gdl_time_eq_congr {P : ℕ → Set (Fin N → Bool)}
+private theorem gdl_time_eq_congr {P : ℕ → Set (Fin N → Bool)}
     (hP : ∀ (n : ℕ) (ε ε' : Fin N → Bool), (∀ j : Fin N, j.val < n → ε j = ε' j) →
       (ε ∈ P n ↔ ε' ∈ P n)) {k : ℕ} (hk : k ≤ N) {ε ε' : Fin N → Bool}
     (h : ∀ j : Fin N, j.val < k → ε j = ε' j) : gdlTime P ε = k ↔ gdlTime P ε' = k := by
@@ -326,7 +326,7 @@ noncomputable def cubeStop (τ : (Fin N → Bool) → ℕ) (f : (Fin N → Bool)
   cubeTransform (fun k ε => if k.val < τ ε then 1 else 0) f
 
 /-- The multipliers `1_{k < τ}` of a stopping time are predictable. -/
-theorem gdl_isPredictable_stop {τ : (Fin N → Bool) → ℕ}
+private theorem gdl_isPredictable_stop {τ : (Fin N → Bool) → ℕ}
     (hτ : IsCubeStopping τ) :
     IsPredictable fun (k : Fin N) ε => if k.val < τ ε then (1 : ℝ) else 0 := by
   intro k ε ε' h
@@ -389,7 +389,7 @@ section GoodLambda
 
 /-! ### Lemma 3.5.14: the good-λ inequality -/
 
-theorem gdl_runningMax_congr {u : ℕ → (Fin N → Bool) → ℝ} (hu : IsAdapted u) {n : ℕ}
+private theorem gdl_runningMax_congr {u : ℕ → (Fin N → Bool) → ℝ} (hu : IsAdapted u) {n : ℕ}
     {ε ε' : Fin N → Bool} (h : ∀ j : Fin N, j.val < n → ε j = ε' j) :
     runningMax u n ε = runningMax u n ε' :=
   Finset.sup'_congr _ rfl fun k hk => hu k ε ε' fun j hj =>

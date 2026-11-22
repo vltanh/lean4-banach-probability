@@ -55,11 +55,6 @@ theorem measurableSet_atom {Ω : Type*} [Finite Ω] (m : MeasurableSpace Ω) (ω
   · exact hs
   · exact hs.compl
 
-/-- Membership in an atom is symmetric. -/
-theorem fpa_mem_atom_comm {Ω : Type*} {m : MeasurableSpace Ω} {x y : Ω} :
-    y ∈ atom m x ↔ x ∈ atom m y :=
-  ⟨fun h s hs => (h s hs).symm, fun h s hs => (h s hs).symm⟩
-
 /-- The atoms partition the space: a point of the atom of `x` has the same atom as `x`. -/
 theorem fpa_atom_eq_of_mem {Ω : Type*} {m : MeasurableSpace Ω} {x y : Ω} (h : y ∈ atom m x) :
     atom m y = atom m x := by
@@ -70,13 +65,6 @@ theorem fpa_atom_eq_of_mem {Ω : Type*} {m : MeasurableSpace Ω} {x y : Ω} (h :
 theorem fpa_mem_atom_of_le {Ω : Type*} {m₁ m₂ : MeasurableSpace Ω} (h : m₁ ≤ m₂) {x y : Ω}
     (hy : y ∈ atom m₂ x) : y ∈ atom m₁ x :=
   fun s hs => hy s (h s hs)
-
-/-- The trivial σ-algebra has the whole space as its only atom. -/
-theorem fpa_atom_bot {Ω : Type*} (x : Ω) : atom ⊥ x = Set.univ := by
-  ext y
-  simp only [Set.mem_univ, iff_true]
-  intro s hs
-  rcases MeasurableSpace.measurableSet_bot_iff.1 hs with rfl | rfl <;> simp
 
 /-- A strongly `m`-measurable function with values in a Hausdorff space is constant on the atoms
 of `m`: so are its approximating simple functions, whose fibres are `m`-measurable. -/
@@ -132,7 +120,7 @@ variable (X : Type*) [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X
 
 /-- The UMD inequality restricted to martingales on finite probability spaces. -/
 def IsFiniteUMDBound (p : ℝ) (β : ℝ≥0∞) : Prop :=
-  ∀ (Ω : Type) [Fintype Ω] (mΩ : MeasurableSpace Ω) [DiscreteMeasurableSpace Ω] (μ : Measure Ω)
+  ∀ (Ω : Type) [Finite Ω] (mΩ : MeasurableSpace Ω) [DiscreteMeasurableSpace Ω] (μ : Measure Ω)
     [IsProbabilityMeasure μ] (ℱ : Filtration ℕ mΩ) (Y : ℕ → Ω → X) (σ : ℕ → Ω → ℝ),
     Martingale Y ℱ μ → (∀ ω, Y 0 ω = 0) → (∀ n ω, σ n ω = 1 ∨ σ n ω = -1) →
       (∀ k, StronglyMeasurable[ℱ k] (σ (k + 1))) →
