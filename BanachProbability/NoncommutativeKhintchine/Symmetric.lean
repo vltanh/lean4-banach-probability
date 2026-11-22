@@ -16,26 +16,37 @@ constant independent of the dimension.
 
 The proof is the method of exchangeable pairs of L. Mackey, M. I. Jordan, R. Y. Chen, B. Farrell
 and J. A. Tropp, *Matrix concentration inequalities via the method of exchangeable pairs*, Ann.
-Probab. 42 (2014), §7 (matrix Burkholder–Davis–Gundy and Khintchine inequalities, Corollary 7.3):
+Probab. 42 (2014), §7 (the matrix Burkholder–Davis–Gundy inequality, Theorem 7.1, and its
+Khintchine case, Corollary 7.3 (7.2)), for the Stein pair of their §2.4: `Y = Y (ε)` and
+`Y' = Y (ε')`, where `ε'` resamples a uniformly chosen sign. For Rademacher sums `Y' = Y` unless the
+fresh sign differs, and then `Y' = Y^{(i)} = Y (flip_i ε)`, `Y − Y^{(i)} = 2 ε_i A_i`, and the
+conditional variance is `Δ_X = V = Σ_i A_i²`. With `h (t) = t |t|^{q−2}` and `g (t) = |t|^{q−2}`:
 
-* `E ‖Y‖_q^q = E tr (Y h (Y)) = Σ_i E [ε_i tr (A_i h (Y))]` with `h (t) = t |t|^{q−2}`; pairing
-  `ε` with its flip in the `i`-th sign, `Y − Y^{(i)} = 2 ε_i A_i`, and the mean-value trace
-  inequality (`trace_mean_value`) with flip invariance give
-  `E ‖Y‖_q^q ≤ 2 (q − 1) E tr (V g (Y))`, `V = Σ_i A_i²`, `g (t) = |t|^{q−2}`
-  (`avg_schattenNorm_rpow_le`);
-* for `q > 2`, the trace Hölder inequality with `r = q / 2` (`trace_mul_le_of_posSemidef`), the
-  identity `‖|Y|^{q−2}‖_{S_{q/(q−2)}} = ‖Y‖_{S_q}^{q−2}` (the eigenvalues of `|Y|^{q−2}` are the
-  `|λ_i (Y)|^{q−2}`, from `Matrix.IsHermitian.charpoly_cfc_eq`) and Jensen's inequality for
-  `t ↦ t^{1−2/q}` give `E ‖Y‖_q^q ≤ 2 (q − 1) ‖V‖_{q/2} (E ‖Y‖_q^q)^{1−2/q}`, which is solved for
-  `E ‖Y‖_q^q`;
-* for `q = 2`, `|Y|^0 = 1` and the estimate reads `E ‖Y‖_2^2 ≤ 2 tr V = 2 ‖V‖_{S_1}`.
+* Lemma 2.4 for this pair (`avg_trace_mul_eq`):
+  `E tr (Y F (Y)) = ¼ Σ_i E tr ((Y − Y^{(i)})(F (Y) − F (Y^{(i)})))`;
+* `q = 2`: with `F = id` this is the source's identity (2.5), `E ‖Y‖_{S_2}² = E tr Y² = tr V
+  = ‖V‖_{S_1}`;
+* `q > 2`: `E ‖Y‖_q^q = E tr (Y h (Y))`, Lemma 2.4 with `F = h`, a mean-value trace inequality
+  with constant `c`, `(Y − Y^{(i)})² = 4 A_i²` and flip invariance (exchangeability) give
+  `E ‖Y‖_q^q ≤ 2 c E tr (V g (Y))`. For `q ≥ 3` the source's Lemma 3.4
+  (`trace_mean_value_of_three_le`, `c = (q − 1) / 2`) gives the source's bound
+  `E ‖Y‖_q^q ≤ (q − 1) E tr (V g (Y))`; for `2 < q < 3` the variant named in Remark 7.2
+  (`trace_mean_value`, `c = q − 1`) gives `E ‖Y‖_q^q ≤ 2 (q − 1) E tr (V g (Y))`
+  (`avg_schattenNorm_rpow_le`, stated for every `q ≥ 2`);
+* then the trace Hölder inequality with `r = q / 2` (`trace_mul_le_of_posSemidef`), the identity
+  `‖|Y|^{q−2}‖_{S_{q/(q−2)}} = ‖Y‖_{S_q}^{q−2}` (the eigenvalues of `|Y|^{q−2}` are the
+  `|λ_i (Y)|^{q−2}`, from `Matrix.IsHermitian.charpoly_cfc_eq`) and Hölder's inequality for the
+  expectation give `E ‖Y‖_q^q ≤ 2 c ‖V‖_{q/2} (E ‖Y‖_q^q)^{1−2/q}`, which is solved for
+  `E ‖Y‖_q^q`.
+
+The proof thus gives the source's constants: `1` for `q = 2`, `√(q − 1)` for `q ≥ 3` (Corollary
+7.3) and `√(2 (q − 1))` for `2 < q < 3` (Remark 7.2); the statement records the largest of them,
+`√(2 (q − 1))`, for every `q ≥ 2`. The source does not prove the variant of the mean value trace
+inequality that Remark 7.2 requires; it is proved in `BanachProbability.Schatten.Trace`
+(`trace_mean_value`).
 
 The elementary facts about the average over the sign cube that the proof uses (linearity over
 finite sums, flip invariance, Jensen's inequality) are proved here as private lemmas.
-
-The constant `√(2 (q − 1))` is that of the cruder mean-value inequality valid for every `q ≥ 2`;
-Mackey et al. obtain `√(q − 1)` for `q = 2` and `q ≥ 3` (Corollary 7.3), and `√(2 (q − 1))` for
-`2 < q < 3` (Remark 7.2).
 -/
 
 @[expose] public section
@@ -211,11 +222,22 @@ private theorem avg_trace_mul_eq {k : ℕ} (A : Fin k → Matrix n n ℝ)
       rw [hi]
       ring
 
-private theorem avg_schattenNorm_rpow_le_aux {q : ℝ} (hq : 2 ≤ q) {k : ℕ}
+/-- The exchangeable-pair estimate from a mean-value trace inequality with constant `c`
+(`trace_mean_value`, `c = q − 1`, or the source's Lemma 3.4, `c = (q − 1) / 2` for `q ≥ 3`):
+`E ‖Y‖_q^q ≤ 2 c E tr (V g (Y))`. This is the source's proof of Theorem 7.1 up to the
+identification of the conditional variance `Δ_X = Σ_i A_i² = V`: Lemma 2.4 with
+`F = h`, the mean-value inequality, `(Y − Y^{(i)})² = 4 A_i²`, and exchangeability
+(flip invariance) to replace `g (Y^{(i)})` by `g (Y)`. -/
+private theorem avg_schattenNorm_rpow_le_of_meanValue {q c : ℝ} (hq : 0 < q) {k : ℕ}
     (A : Fin k → Matrix n n ℝ) (hA : ∀ i, (A i).IsHermitian)
-    (Y : (Fin k → Bool) → Matrix n n ℝ) (hY : ∀ ε, Y ε = ∑ i, coin (ε i) • A i) :
+    (Y : (Fin k → Bool) → Matrix n n ℝ) (hY : ∀ ε, Y ε = ∑ i, coin (ε i) • A i)
+    (hmv : ∀ P Q : Matrix n n ℝ, P.IsHermitian → Q.IsHermitian →
+      ((P - Q) * (cfc (fun t : ℝ => t * |t| ^ (q - 2)) P -
+        cfc (fun t : ℝ => t * |t| ^ (q - 2)) Q)).trace ≤
+      c * (((P - Q) * (P - Q) * cfc (fun t : ℝ => |t| ^ (q - 2)) P).trace +
+        ((P - Q) * (P - Q) * cfc (fun t : ℝ => |t| ^ (q - 2)) Q).trace)) :
     avg (fun ε => schattenNorm (ENNReal.ofReal q) (Y ε) ^ q) ≤
-      2 * (q - 1) * avg (fun ε =>
+      2 * c * avg (fun ε =>
         ((∑ i, A i * A i) * cfc (fun t : ℝ => |t| ^ (q - 2)) (Y ε)).trace) := by
   set g : ℝ → ℝ := fun t => |t| ^ (q - 2)
   set h : ℝ → ℝ := fun t => t * |t| ^ (q - 2)
@@ -234,13 +256,13 @@ private theorem avg_schattenNorm_rpow_le_aux {q : ℝ} (hq : 2 ≤ q) {k : ℕ}
   -- the mean-value trace inequality and exchangeability, for each `i`
   have hstep : ∀ i, avg (fun ε =>
       ((Y ε - Y (SignCube.flip i ε)) * (cfc h (Y ε) - cfc h (Y (SignCube.flip i ε)))).trace) ≤
-      8 * (q - 1) * avg (fun ε => (A i * A i * cfc g (Y ε)).trace) := fun i => by
-    calc _ ≤ avg (fun ε => (q - 1) *
+      8 * c * avg (fun ε => (A i * A i * cfc g (Y ε)).trace) := fun i => by
+    calc _ ≤ avg (fun ε => c *
           (((Y ε - Y (SignCube.flip i ε)) * (Y ε - Y (SignCube.flip i ε)) * cfc g (Y ε)).trace +
           ((Y ε - Y (SignCube.flip i ε)) * (Y ε - Y (SignCube.flip i ε)) *
             cfc g (Y (SignCube.flip i ε))).trace)) :=
-          avg_mono fun ε => trace_mean_value (hYh ε) (hYh _) hq
-      _ = avg (fun ε => (q - 1) * (4 * (A i * A i * cfc g (Y ε)).trace +
+          avg_mono fun ε => hmv _ _ (hYh ε) (hYh _)
+      _ = avg (fun ε => c * (4 * (A i * A i * cfc g (Y ε)).trace +
           4 * (A i * A i * cfc g (Y (SignCube.flip i ε))).trace)) := by
           congr 1
           funext ε
@@ -253,64 +275,173 @@ private theorem avg_schattenNorm_rpow_le_aux {q : ℝ} (hq : 2 ≤ q) {k : ℕ}
       = avg (fun ε => (Y ε * cfc h (Y ε)).trace) := by
         congr 1
         funext ε
-        exact schattenNorm_rpow_eq_trace (hYh ε) (by linarith)
+        exact schattenNorm_rpow_eq_trace (hYh ε) hq
     _ = 1 / 4 * ∑ i, avg (fun ε =>
         ((Y ε - Y (SignCube.flip i ε)) * (cfc h (Y ε) - cfc h (Y (SignCube.flip i ε)))).trace) :=
         avg_trace_mul_eq A Y hY (cfc h)
-    _ ≤ 1 / 4 * ∑ i, 8 * (q - 1) * avg (fun ε => (A i * A i * cfc g (Y ε)).trace) := by
+    _ ≤ 1 / 4 * ∑ i, 8 * c * avg (fun ε => (A i * A i * cfc g (Y ε)).trace) := by
         gcongr with i
         exact hstep i
-    _ = 2 * (q - 1) * ∑ i, avg (fun ε => (A i * A i * cfc g (Y ε)).trace) := by
+    _ = 2 * c * ∑ i, avg (fun ε => (A i * A i * cfc g (Y ε)).trace) := by
         rw [← Finset.mul_sum]
         ring
-    _ = 2 * (q - 1) * avg (fun ε => ((∑ i, A i * A i) * cfc g (Y ε)).trace) := by
+    _ = 2 * c * avg (fun ε => ((∑ i, A i * A i) * cfc g (Y ε)).trace) := by
         rw [← avg_finset_sum]
         congr 2
         funext ε
         rw [Finset.sum_mul, Matrix.trace_sum]
 
 /-- The exchangeable-pair estimate: `E ‖Y‖_{S_q}^q ≤ 2 (q − 1) E tr (V |Y|^{q−2})`,
-`Y = Σ_i ε_i A_i`, `V = Σ_i A_i²`. -/
+`Y = Σ_i ε_i A_i`, `V = Σ_i A_i²`, for every `q ≥ 2`, from the cruder mean-value trace inequality
+`trace_mean_value` (for `2 < q < 3`, the variant of Lemma 3.4 that Mackey et al., Remark 7.2,
+name without proof). -/
 theorem avg_schattenNorm_rpow_le {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (A : Fin k → Matrix n n ℝ)
     (hA : ∀ i, (A i).IsHermitian) :
     (avg fun ε => schattenNorm (ENNReal.ofReal q) (∑ i, coin (ε i) • A i) ^ q) ≤
       2 * (q - 1) * avg fun ε =>
         ((∑ i, A i * A i) * cfc (fun t : ℝ => |t| ^ (q - 2)) (∑ i, coin (ε i) • A i)).trace :=
-  avg_schattenNorm_rpow_le_aux hq A hA _ fun _ => rfl
+  avg_schattenNorm_rpow_le_of_meanValue (by linarith) A hA _ (fun _ => rfl)
+    fun _ _ hP hQ => trace_mean_value hP hQ hq
 
-/-- **Noncommutative Khintchine inequality, symmetric case, upper bound** (Mackey et al. 2014,
-§7): `(E ‖Σ_i ε_i A_i‖_{S_q}^q)^{1/q} ≤ √(2 (q − 1)) ‖Σ_i A_i²‖_{S_{q/2}}^{1/2}`, `q ≥ 2`.
+/-- The source's bound in the proof of Theorem 7.1, for `q ≥ 3` (their `p ≥ 1.5`), from Lemma 3.4
+(`trace_mean_value_of_three_le`): `E ‖Y‖_{S_q}^q ≤ (q − 1) E tr (V |Y|^{q−2})`. -/
+private theorem avg_schattenNorm_rpow_le_of_three_le {q : ℝ} (hq : 3 ≤ q) {k : ℕ}
+    (A : Fin k → Matrix n n ℝ) (hA : ∀ i, (A i).IsHermitian)
+    (Y : (Fin k → Bool) → Matrix n n ℝ) (hY : ∀ ε, Y ε = ∑ i, coin (ε i) • A i) :
+    avg (fun ε => schattenNorm (ENNReal.ofReal q) (Y ε) ^ q) ≤
+      (q - 1) * avg (fun ε =>
+        ((∑ i, A i * A i) * cfc (fun t : ℝ => |t| ^ (q - 2)) (Y ε)).trace) := by
+  have h := avg_schattenNorm_rpow_le_of_meanValue (c := (q - 1) / 2) (by linarith) A hA Y hY
+    fun _ _ hP hQ => trace_mean_value_of_three_le hP hQ hq
+  rwa [show 2 * ((q - 1) / 2) = q - 1 by ring] at h
 
-Departure from the source: for `q = 2` (their `p = 1`) Mackey et al. use the identity
-`E [Δ_X] = E X²` (2.5), which gives the constant `1`; here the exchangeable-pair estimate
-`avg_schattenNorm_rpow_le` is used for every `q ≥ 2`, and at `q = 2` it gives the constant `√2`
-of the statement. -/
-theorem ncKhintchine_symmetric_upper {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (A : Fin k → Matrix n n ℝ)
-    (hA : ∀ i, (A i).IsHermitian) :
-    SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
-        (fun ε : Fin k → Bool => ∑ i, coin (ε i) • A i) ≤
-      √(2 * (q - 1)) * √(schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, A i * A i)) := by
-  set Y : (Fin k → Bool) → Matrix n n ℝ := fun ε => ∑ i, coin (ε i) • A i
-  have hYh : ∀ ε, (Y ε).IsHermitian := fun ε =>
-    show (∑ i, coin (ε i) • A i).IsHermitian from
-      isSelfAdjoint_sum _ fun i _ => (hA i).smul (IsSelfAdjoint.all (coin (ε i)))
+/-- The case `q = 2` (their `p = 1`): the identity (2.5) `E [Δ_X] = E X²`, which the source
+derives from Lemma 2.4 with `F (X) = X`; here `Δ_X = V`, so `E ‖Y‖_{S_2}² = E tr Y² = tr V`. -/
+private theorem avg_schattenNorm_two_rpow {k : ℕ} (A : Fin k → Matrix n n ℝ)
+    (hA : ∀ i, (A i).IsHermitian)
+    (Y : (Fin k → Bool) → Matrix n n ℝ) (hY : ∀ ε, Y ε = ∑ i, coin (ε i) • A i) :
+    avg (fun ε => schattenNorm (ENNReal.ofReal 2) (Y ε) ^ (2 : ℝ)) = (∑ i, A i * A i).trace := by
+  have hYh : ∀ ε, (Y ε).IsHermitian := fun ε => by
+    rw [hY]
+    exact isSelfAdjoint_sum _ fun i _ => (hA i).smul (IsSelfAdjoint.all (coin (ε i)))
+  have hdiff : ∀ ε i, Y ε - Y (SignCube.flip i ε) = (2 * coin (ε i)) • A i := fun ε i => by
+    rw [hY, hY]
+    exact sum_coin_smul_sub_flip A ε i
+  -- `‖Y‖_{S_2}² = tr (Y h (Y))` with `h (t) = t |t|^0 = t`
+  have h2 : ∀ ε, schattenNorm (ENNReal.ofReal 2) (Y ε) ^ (2 : ℝ) = (Y ε * id (Y ε)).trace :=
+    fun ε => by
+      rw [schattenNorm_rpow_eq_trace (hYh ε) two_pos]
+      simp only [sub_self, Real.rpow_zero, mul_one, id]
+      rw [cfc_id' ℝ (Y ε) (show IsSelfAdjoint (Y ε) from hYh ε)]
+  simp only [h2]
+  -- Lemma 2.4 with `F = id`, and `(Y − Y^{(i)})² = 4 A_i²`
+  rw [avg_trace_mul_eq A Y hY id]
+  simp only [id, hdiff, smul_mul_smul_comm, Matrix.trace_smul, smul_eq_mul]
+  have hc : ∀ (ε : Fin k → Bool) (i : Fin k), 2 * coin (ε i) * (2 * coin (ε i)) = 4 :=
+    fun ε i => by linear_combination 4 * coin_mul_self (ε i)
+  simp only [hc, avg_const', Matrix.trace_sum, ← Finset.mul_sum]
+  ring
+
+/-- Solving the moment inequality, for `q > 2`: if `E ‖Y‖_q^q ≤ c E tr (V |Y|^{q−2})`, then the
+trace Hölder inequality with `r = q / 2` and Hölder's inequality for the expectation (Jensen)
+give `E ‖Y‖_q^q ≤ c ‖V‖_{q/2} (E ‖Y‖_q^q)^{1−2/q}`, whence
+`(E ‖Y‖_q^q)^{1/q} ≤ √c ‖V‖_{q/2}^{1/2}` (the end of the source's proof of Theorem 7.1). -/
+private theorem rpow_le_of_avg_le {q c : ℝ} (hq2 : 2 < q) (hc : 0 ≤ c) {k : ℕ}
+    (A : Fin k → Matrix n n ℝ) (hA : ∀ i, (A i).IsHermitian)
+    (Y : (Fin k → Bool) → Matrix n n ℝ) (hY : ∀ ε, Y ε = ∑ i, coin (ε i) • A i)
+    (hbound : avg (fun ε => schattenNorm (ENNReal.ofReal q) (Y ε) ^ q) ≤
+      c * avg (fun ε => ((∑ i, A i * A i) * cfc (fun t : ℝ => |t| ^ (q - 2)) (Y ε)).trace)) :
+    avg (fun ε => schattenNorm (ENNReal.ofReal q) (Y ε) ^ q) ^ (1 / q) ≤
+      √c * √(schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, A i * A i)) := by
+  have hYh : ∀ ε, (Y ε).IsHermitian := fun ε => by
+    rw [hY]
+    exact isSelfAdjoint_sum _ fun i _ => (hA i).smul (IsSelfAdjoint.all (coin (ε i)))
   set M := avg fun ε => schattenNorm (ENNReal.ofReal q) (Y ε) ^ q with hM
-  have hlp : SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q Y = M ^ (1 / q) := rfl
-  rw [hlp]
   have hq0 : 0 < q := by linarith
   have hM0 : 0 ≤ M := avg_nonneg fun ε => Real.rpow_nonneg (schattenNorm_nonneg _ _) _
   set V := ∑ i, A i * A i
   have hV : V.PosSemidef := Matrix.posSemidef_sum _ fun i _ => by
     have := Matrix.posSemidef_conjTranspose_mul_self (A i)
     rwa [(hA i).eq] at this
-  have hbound : M ≤ 2 * (q - 1) * avg (fun ε =>
-      (V * cfc (fun t : ℝ => |t| ^ (q - 2)) (Y ε)).trace) := avg_schattenNorm_rpow_le hq A hA
+  have hr : 1 < q / 2 := by linarith
+  set W := schattenNorm (ENNReal.ofReal (q / 2)) V
+  have hW : 0 ≤ W := schattenNorm_nonneg _ _
+  -- the trace Hölder inequality, `‖|Y|^{q−2}‖_{S_{q/(q−2)}} = ‖Y‖_{S_q}^{q−2}`
+  have hG : ∀ ε, (V * cfc (fun t : ℝ => |t| ^ (q - 2)) (Y ε)).trace ≤
+      W * schattenNorm (ENNReal.ofReal q) (Y ε) ^ (q - 2) := fun ε => by
+    have := trace_mul_le_of_posSemidef hV
+      (posSemidef_cfc (f := fun t : ℝ => |t| ^ (q - 2)) (hYh ε) fun t =>
+        Real.rpow_nonneg (abs_nonneg t) _) hr
+    rwa [schattenNorm_cfc_abs_rpow (hYh ε) hq2] at this
+  -- Hölder's inequality for the expectation: `E ‖Y‖^{q−2} ≤ (E ‖Y‖^q)^{(q−2)/q}`
+  have hJ : avg (fun ε => schattenNorm (ENNReal.ofReal q) (Y ε) ^ (q - 2)) ≤
+      M ^ ((q - 2) / q) := by
+    have hp : 1 ≤ q / (q - 2) := by
+      rw [le_div_iff₀ (by linarith)]
+      linarith
+    have := avg_le_avg_rpow_rpow
+      (X := fun ε => schattenNorm (ENNReal.ofReal q) (Y ε) ^ (q - 2))
+      (fun ε => Real.rpow_nonneg (schattenNorm_nonneg _ _) _) hp
+    have hq2' : q - 2 ≠ 0 := by linarith
+    convert this using 2
+    · rw [hM]
+      congr 1
+      funext ε
+      rw [← Real.rpow_mul (schattenNorm_nonneg _ _)]
+      congr 1
+      field_simp
+    · field_simp
+  have hMb : M ≤ c * W * M ^ ((q - 2) / q) := by
+    calc M ≤ c * avg (fun ε => (V * cfc (fun t : ℝ => |t| ^ (q - 2)) (Y ε)).trace) := hbound
+      _ ≤ c * avg (fun ε => W * schattenNorm (ENNReal.ofReal q) (Y ε) ^ (q - 2)) :=
+          mul_le_mul_of_nonneg_left (avg_mono hG) hc
+      _ = c * W * avg (fun ε => schattenNorm (ENNReal.ofReal q) (Y ε) ^ (q - 2)) := by
+          rw [avg_const_mul]
+          ring
+      _ ≤ c * W * M ^ ((q - 2) / q) := mul_le_mul_of_nonneg_left hJ (mul_nonneg hc hW)
+  -- solve for `M`
+  rcases hM0.eq_or_lt with hM' | hMpos
+  · rw [← hM', Real.zero_rpow (one_div_pos.mpr hq0).ne']
+    positivity
+  · have hsplit : M = M ^ (2 / q) * M ^ ((q - 2) / q) := by
+      rw [← Real.rpow_add hMpos, show 2 / q + (q - 2) / q = 1 by field_simp; ring,
+        Real.rpow_one]
+    have h2 : M ^ (2 / q) ≤ c * W := by
+      refine le_of_mul_le_mul_right ?_ (Real.rpow_pos_of_pos hMpos ((q - 2) / q))
+      rw [← hsplit]
+      exact hMb
+    have hroot : M ^ (1 / q) = √(M ^ (2 / q)) := by
+      rw [Real.sqrt_eq_rpow, ← Real.rpow_mul hM0]
+      congr 1
+      ring
+    rw [hroot, ← Real.sqrt_mul hc]
+    exact Real.sqrt_le_sqrt h2
+
+/-- **Noncommutative Khintchine inequality, symmetric case, upper bound** (Mackey et al. 2014,
+§7, Corollary 7.3 (7.2) and Remark 7.2):
+`(E ‖Σ_i ε_i A_i‖_{S_q}^q)^{1/q} ≤ √(2 (q − 1)) ‖Σ_i A_i²‖_{S_{q/2}}^{1/2}`, `q ≥ 2`.
+
+The proof follows the source in each range: for `q = 2`, the identity (2.5) gives the
+constant `1`; for `q ≥ 3`, Lemma 3.4 gives `√(q − 1)`; for `2 < q < 3`, the variant of the mean
+value trace inequality named in Remark 7.2 gives `√(2 (q − 1))`.
+
+Departure from the source: Remark 7.2 does not prove that variant; it is `trace_mean_value`,
+proved from the scalar inequality `mul_sub_le_sq_mul_add`. -/
+theorem ncKhintchine_symmetric_upper {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (A : Fin k → Matrix n n ℝ)
+    (hA : ∀ i, (A i).IsHermitian) :
+    SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q
+        (fun ε : Fin k → Bool => ∑ i, coin (ε i) • A i) ≤
+      √(2 * (q - 1)) * √(schattenNorm (ENNReal.ofReal (q / 2)) (∑ i, A i * A i)) := by
+  set Y : (Fin k → Bool) → Matrix n n ℝ := fun ε => ∑ i, coin (ε i) • A i
+  have hlp : SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q Y =
+      avg (fun ε => schattenNorm (ENNReal.ofReal q) (Y ε) ^ q) ^ (1 / q) := rfl
+  rw [hlp]
   rcases hq.eq_or_lt with rfl | hq2
-  · -- `q = 2`: `|t|^0 = 1`, and `‖V‖_{S_1} = tr V`
-    have hG : ∀ ε, cfc (fun t : ℝ => |t| ^ ((2 : ℝ) - 2)) (Y ε) = 1 := fun ε => by
-      simp only [sub_self, Real.rpow_zero]
-      exact cfc_const_one ℝ (Y ε)
-    simp only [hG, Matrix.mul_one, avg_const'] at hbound
+  · -- `q = 2`: `E ‖Y‖_{S_2}² = tr V = ‖V‖_{S_1}`, constant `1 ≤ √2`
+    set V := ∑ i, A i * A i
+    have hV : V.PosSemidef := Matrix.posSemidef_sum _ fun i _ => by
+      have := Matrix.posSemidef_conjTranspose_mul_self (A i)
+      rwa [(hA i).eq] at this
     have hV1 : schattenNorm (ENNReal.ofReal (2 / 2)) V = V.trace := by
       have := schattenNorm_rpow_of_isHermitian hV.1 one_pos
       rw [Real.rpow_one] at this
@@ -318,60 +449,17 @@ theorem ncKhintchine_symmetric_upper {q : ℝ} (hq : 2 ≤ q) {k : ℕ} (A : Fin
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [Real.rpow_one, abs_of_nonneg (hV.eigenvalues_nonneg i)]
       rfl
-    rw [hV1, ← Real.sqrt_mul (by norm_num), ← Real.sqrt_eq_rpow]
-    exact Real.sqrt_le_sqrt hbound
-  · -- `q > 2`: trace Hölder with `r = q / 2`, then Jensen
-    have hr : 1 < q / 2 := by linarith
-    set W := schattenNorm (ENNReal.ofReal (q / 2)) V
-    have hW : 0 ≤ W := schattenNorm_nonneg _ _
-    have hG : ∀ ε, (V * cfc (fun t : ℝ => |t| ^ (q - 2)) (Y ε)).trace ≤
-        W * schattenNorm (ENNReal.ofReal q) (Y ε) ^ (q - 2) := fun ε => by
-      have := trace_mul_le_of_posSemidef hV
-        (posSemidef_cfc (f := fun t : ℝ => |t| ^ (q - 2)) (hYh ε) fun t =>
-          Real.rpow_nonneg (abs_nonneg t) _) hr
-      rwa [schattenNorm_cfc_abs_rpow (hYh ε) hq2] at this
-    have hJ : avg (fun ε => schattenNorm (ENNReal.ofReal q) (Y ε) ^ (q - 2)) ≤
-        M ^ ((q - 2) / q) := by
-      have hp : 1 ≤ q / (q - 2) := by
-        rw [le_div_iff₀ (by linarith)]
-        linarith
-      have := avg_le_avg_rpow_rpow
-        (X := fun ε => schattenNorm (ENNReal.ofReal q) (Y ε) ^ (q - 2))
-        (fun ε => Real.rpow_nonneg (schattenNorm_nonneg _ _) _) hp
-      have hq2' : q - 2 ≠ 0 := by linarith
-      convert this using 2
-      · rw [hM]
-        congr 1
-        funext ε
-        rw [← Real.rpow_mul (schattenNorm_nonneg _ _)]
-        congr 1
-        field_simp
-      · field_simp
-    have hMb : M ≤ 2 * (q - 1) * W * M ^ ((q - 2) / q) := by
-      calc M ≤ 2 * (q - 1) * avg (fun ε =>
-            (V * cfc (fun t : ℝ => |t| ^ (q - 2)) (Y ε)).trace) := hbound
-        _ ≤ 2 * (q - 1) * avg (fun ε => W * schattenNorm (ENNReal.ofReal q) (Y ε) ^ (q - 2)) :=
-            mul_le_mul_of_nonneg_left (avg_mono hG) (by linarith)
-        _ = 2 * (q - 1) * W * avg (fun ε => schattenNorm (ENNReal.ofReal q) (Y ε) ^ (q - 2)) := by
-            rw [avg_const_mul]
-            ring
-        _ ≤ 2 * (q - 1) * W * M ^ ((q - 2) / q) :=
-            mul_le_mul_of_nonneg_left hJ (mul_nonneg (by linarith) hW)
-    rcases hM0.eq_or_lt with hM' | hMpos
-    · rw [← hM', Real.zero_rpow (one_div_pos.mpr hq0).ne']
-      positivity
-    · have hsplit : M = M ^ (2 / q) * M ^ ((q - 2) / q) := by
-        rw [← Real.rpow_add hMpos, show 2 / q + (q - 2) / q = 1 by field_simp; ring,
-          Real.rpow_one]
-      have h2 : M ^ (2 / q) ≤ 2 * (q - 1) * W := by
-        refine le_of_mul_le_mul_right ?_ (Real.rpow_pos_of_pos hMpos ((q - 2) / q))
-        rw [← hsplit]
-        exact hMb
-      have hroot : M ^ (1 / q) = √(M ^ (2 / q)) := by
-        rw [Real.sqrt_eq_rpow, ← Real.rpow_mul hM0]
-        congr 1
-        ring
-      rw [hroot, ← Real.sqrt_mul (by linarith)]
-      exact Real.sqrt_le_sqrt h2
+    rw [avg_schattenNorm_two_rpow A hA Y (fun _ => rfl), hV1, ← Real.sqrt_eq_rpow]
+    refine le_mul_of_one_le_left (Real.sqrt_nonneg _) ?_
+    rw [show (2 : ℝ) * (2 - 1) = 2 by norm_num, ← Real.sqrt_one]
+    exact Real.sqrt_le_sqrt (by norm_num)
+  rcases le_or_gt 3 q with hq3 | hq3
+  · -- `q ≥ 3`: Lemma 3.4, constant `√(q − 1) ≤ √(2 (q − 1))`
+    refine (rpow_le_of_avg_le hq2 (by linarith) A hA Y (fun _ => rfl)
+      (avg_schattenNorm_rpow_le_of_three_le hq3 A hA Y fun _ => rfl)).trans ?_
+    exact mul_le_mul_of_nonneg_right (Real.sqrt_le_sqrt (by linarith)) (Real.sqrt_nonneg _)
+  · -- `2 < q < 3`: the variant of Lemma 3.4 (Remark 7.2), constant `√(2 (q − 1))`
+    exact rpow_le_of_avg_le hq2 (by linarith) A hA Y (fun _ => rfl)
+      (avg_schattenNorm_rpow_le hq A hA)
 
 end BanachProbability
