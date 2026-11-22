@@ -5,9 +5,10 @@ public import BanachProbability.Noncommutative.Cuculescu
 /-!
 # Weak type `(1, 1)` of noncommutative martingale transforms
 
-Randrianantoanina's theorem (N. Randrianantoanina, *Non-commutative martingale transforms*,
-J. Funct. Anal. 194 (2002), Theorem 3.1) for the von Neumann algebra `L^∞ (Ω, μ) ⊗ M_n (ℝ)` of a
-probability space with a filtration `ℱ` and predictable scalar multipliers `|c_k| ≤ 1` (the multipliers commuting with `N_{k+1}`, see `ncTransform`):
+Randrianantoanina's theorem (N. Randrianantoanina, *Non-commutative martingale transforms*, J.
+Funct. Anal. 194 (2002), Theorem 3.1) for the von Neumann algebra `L^∞ (Ω, μ) ⊗ M_n (ℝ)` of a
+probability space with a filtration `ℱ` and predictable scalar multipliers `|c_k| ≤ 1` (the
+multipliers commuting with `N_{k+1}`, see `ncTransform`):
 `λ τ (1_{(λ, ∞)} (|T_c x|)) ≤ C ‖x‖_{L¹ (τ)}` for every symmetric `x ∈ L¹`, every `λ > 0` and
 every `N` (`weakType_one_one`); `x` need not be `ℱ_N`-measurable, since `T_c x` involves only
 `E_0 x, …, E_N x`.
