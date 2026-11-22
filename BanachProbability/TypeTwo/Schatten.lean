@@ -9,12 +9,12 @@ public import BanachProbability.KahaneKhintchine.Basic
 
 For `q ≥ 2` the Schatten class `S_q` of real matrices has type 2 with a constant of order `√q`,
 uniformly in the size. For an even integer `q = 2m` the constant is the scalar Khintchine constant,
-at most `√(2m − 1)` (`lpNorm_two_schattenNorm_le_of_even`; N. Tomczak-Jaegermann; Hytönen–van
+at most `√(2m − 1)` (`lpNorm_schattenNorm_le_of_even`; N. Tomczak-Jaegermann; Hytönen–van
 Neerven–Veraar–Weis (HNVW), *Analysis in Banach spaces II* (2017), Lemma 7.1.12, pp. 62–63: the
 trace is expanded, and Hölder's inequality compares each term with the scalar one). The other
-exponents follow by complex interpolation between `2m` and `2m + 2` (HNVW II, Proposition 7.1.11, p.
-63, with Proposition 7.1.3 and HNVW I, Proposition D.3.1, p. 574), by Hadamard's three lines theorem
-(`isTypeTwoBound_schattenSpace`, with the constant `√(q + 1)`).
+exponents follow by complex interpolation between `2m` and `2m + 2` (HNVW II, Proposition 7.1.11,
+pp. 63, with Proposition 7.1.3 and HNVW I, Proposition D.3.1, p. 574), by Hadamard's three lines
+theorem (`isTypeTwoBound_schattenSpace`, with the constant `√(q + 1)`).
 -/
 
 @[expose] public section

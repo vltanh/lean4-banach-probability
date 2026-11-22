@@ -11,9 +11,10 @@ Schatten norms are the row and column square functions:
 `‖blockCol a‖_{S_q} = ‖(Σ a_kᴴ a_k)^{1/2}‖_{S_q}` and
 `‖blockRow a‖_{S_q} = ‖(Σ a_k a_kᴴ)^{1/2}‖_{S_q}`, that is,
 `‖blockCol a‖_{S_q}² = ‖Σ a_kᴴ a_k‖_{S_{q/2}}` (Lust-Piquard–Pisier, *Non commutative Khintchine and
-Paley inequalities*, Ark. Mat. 29 (1991), (I.2), p. 245; their norms of `C_E (ℓ²_R)` and
-`C_E (ℓ²_L)`). Hölder's inequality for a block row times a block column is their (I.3), p. 246; and
-for `q ≥ 2` the square functions are dominated by the Rademacher sums, (I.5)–(I.7), pp. 246–247:
+Paley inequalities*, Ark. Mat. 29 (1991), (I.2), p. 245; `‖blockCol a‖_{S_q}` is their norm of
+`C_E (ℓ²_R)`, `‖blockRow a‖_{S_q}` that of `C_E (ℓ²_L)`, `E = ℓ^q`, p. 246). Hölder's inequality for
+a block row times a block column is their (I.3), p. 246; and for `q ≥ 2` the square functions are
+dominated by the Rademacher sums, (I.5)–(I.7), pp. 246–247:
 `‖blockCol a‖_{S_q}² ≤ E ‖Σ ε_k a_k‖_{S_q}²`.
 -/
 

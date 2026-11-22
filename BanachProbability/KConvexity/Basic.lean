@@ -7,17 +7,17 @@ public import Mathlib.Probability.Distributions.Gaussian.Multivariate
 # K-convexity and type 2
 
 The Rademacher projection of `f : {±1}^N → X` is `Σ_k ε_k E (ε_k f)` (`rademacherProj f`). A normed
-space
-`X` is K-convex with constant `K` in `L^p` when `‖Σ_k ε_k E (ε_k f)‖_{L^p} ≤ K ‖f‖_{L^p}` for all
-`N` and `f` (`IsKConvexBound X p K`; Hytönen–van Neerven–Veraar–Weis (HNVW), *Analysis in Banach
-spaces II* (2017), Section 7.4).
+space `X` is K-convex with constant `K` in `L^p` when `‖Σ_k ε_k E (ε_k f)‖_{L^p} ≤ K ‖f‖_{L^p}` for
+all `N` and `f` (`IsKConvexBound X p K`; Hytönen–van Neerven–Veraar–Weis (HNVW), *Analysis in Banach
+spaces II* (2017), Definition 7.4.4 and Proposition 7.4.5, p. 111).
 
 `IsTypeTwoBound.isKConvexBound`: a space of type 2 with constant `τ` is K-convex in `L²`, with
 constant `√(π/2) τ` (HNVW II, Proposition 7.4.22, p. 124; Maurey–Pisier (1976), Remark 2.10). The
 steps are HNVW's: type 2 gives Gaussian type 2 with the same constant (Proposition 7.1.18);
 Rademacher sums are dominated by Gaussian sums, with the factor `1 / E |g| = √(π/2)` (Proposition
-6.1.15); and Gaussian sums over an orthonormal system are compared by the rotation invariance of the
-Gaussian measure (Theorem 7.1.20).
+6.1.15); and the Gaussian sum over the signs is dominated by the one over a complete orthonormal
+system, which the rotation invariance of the Gaussian measure compares with `‖f‖_{L²}` (Theorem
+7.1.20; the covariance domination in the proof of Proposition 7.4.21, p. 123).
 -/
 
 @[expose] public section
@@ -58,8 +58,10 @@ theorem avg_norm_sq_le_integral_stdGaussian (x : Fin N → X) :
       Real.pi / 2 * ∫ g, ‖∑ k, g k • x k‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ (Fin N)) := by
   sorry
 
-/-- The extremality of Gaussian sums (HNVW II, Theorem 7.1.20), for the orthonormal system of the
-signs: with `x_k = E (ε_k f)`, `E ‖Σ_k g_k x_k‖² ≤ E ‖Σ_η g_η 2^{−N/2} f (η)‖²`. -/
+/-- The extremality of Gaussian sums (HNVW II, the covariance domination in the proof of Proposition
+7.4.21, p. 123; the contraction and the rotation in those of Proposition 7.4.22 and Theorem 7.1.20),
+for the orthonormal system of the signs: with `x_k = E (ε_k f)`,
+`E ‖Σ_k g_k x_k‖² ≤ E ‖Σ_η g_η 2^{−N/2} f (η)‖²`. -/
 theorem integral_stdGaussian_rademacherCoeff_le (f : (Fin N → Bool) → X) :
     ∫ g, ‖∑ k, g k • rademacherCoeff f k‖ ^ 2 ∂stdGaussian (EuclideanSpace ℝ (Fin N)) ≤
       ∫ g, ‖∑ η, g η • √((2 : ℝ) ^ N)⁻¹ • f η‖ ^ 2
