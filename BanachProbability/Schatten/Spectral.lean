@@ -128,9 +128,7 @@ theorem schattenNorm_rpow_eq_trace {A : Matrix n n ℝ} (hA : A.IsHermitian) {q 
 noncomputable def spectralProj (A : Matrix n n ℝ) (S : Set ℝ) : Matrix n n ℝ :=
   cfc (S.indicator (1 : ℝ → ℝ)) A
 
--- `hA` is not used: `cfc` is multiplicative for every matrix.
-set_option linter.unusedVariables false in
-theorem spectralProj_mul_self {A : Matrix n n ℝ} (hA : A.IsHermitian) (S : Set ℝ) :
+theorem spectralProj_mul_self (A : Matrix n n ℝ) (S : Set ℝ) :
     spectralProj A S * spectralProj A S = spectralProj A S := by
   rw [spectralProj, ← cfc_mul _ _ A (Matrix.finite_real_spectrum.continuousOn _)
     (Matrix.finite_real_spectrum.continuousOn _)]
@@ -138,9 +136,7 @@ theorem spectralProj_mul_self {A : Matrix n n ℝ} (hA : A.IsHermitian) (S : Set
   ext t
   by_cases ht : t ∈ S <;> simp [ht]
 
--- `hA` is not used: a real `cfc` is always self-adjoint.
-set_option linter.unusedVariables false in
-theorem spectralProj_transpose {A : Matrix n n ℝ} (hA : A.IsHermitian) (S : Set ℝ) :
+theorem spectralProj_transpose (A : Matrix n n ℝ) (S : Set ℝ) :
     (spectralProj A S)ᵀ = spectralProj A S := by
   have h : (spectralProj A S).IsHermitian := cfc_predicate _ A
   rw [← Matrix.conjTranspose_eq_transpose_of_trivial, h.eq]
@@ -195,10 +191,8 @@ theorem trace_mul_nonneg_of_posSemidef {A B : Matrix n n ℝ} (hA : A.PosSemidef
   rw [hC.eq] at this
   exact this.trace_nonneg
 
--- `hA` is not used: `tr ((c − A) B) ≥ 0` is all the proof needs.
-set_option linter.unusedVariables false in
-/-- `tr (A B) ≤ c tr B` for `0 ⪯ A ⪯ c` and `B ⪰ 0`. -/
-theorem trace_mul_le_of_le_smul_one {A B : Matrix n n ℝ} {c : ℝ} (hA : A.PosSemidef)
+/-- `tr (A B) ≤ c tr B` for `A ⪯ c` and `B ⪰ 0`. -/
+theorem trace_mul_le_of_le_smul_one {A B : Matrix n n ℝ} {c : ℝ}
     (hAc : (c • (1 : Matrix n n ℝ) - A).PosSemidef) (hB : B.PosSemidef) :
     (A * B).trace ≤ c * B.trace := by
   have h := trace_mul_nonneg_of_posSemidef hAc hB

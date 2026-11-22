@@ -170,12 +170,12 @@ private theorem cuc_step_mul_q (hq : q * q = q) (S : Set ℝ) :
 private theorem cuc_step_mul_self (hq : q * q = q) (hqt : qᵀ = q) (hX : X.PosSemidef) (S : Set ℝ) :
     q * spectralProj (q * X * q) S * (q * spectralProj (q * X * q) S) =
       q * spectralProj (q * X * q) S := by
-  have hP := spectralProj_mul_self (cuc_posSemidef_conj hqt hX).isHermitian S
+  have hP := spectralProj_mul_self (q * X * q) S
   rw [← mul_assoc, cuc_step_mul_q hq S, mul_assoc, hP]
 
 private theorem cuc_step_transpose (hq : q * q = q) (hqt : qᵀ = q) (hX : X.PosSemidef)
     (S : Set ℝ) : (q * spectralProj (q * X * q) S)ᵀ = q * spectralProj (q * X * q) S := by
-  rw [Matrix.transpose_mul, spectralProj_transpose (cuc_posSemidef_conj hqt hX).isHermitian, hqt,
+  rw [Matrix.transpose_mul, spectralProj_transpose (q * X * q), hqt,
     (cuc_commute_q hq S).eq]
 
 private theorem cuc_step_commute (hq : q * q = q) (hqt : qᵀ = q) (hX : X.PosSemidef) (S : Set ℝ) :
@@ -192,7 +192,7 @@ private theorem cuc_step_conj_eq (hq : q * q = q) (hqt : qᵀ = q) (hX : X.PosSe
   have hB := cuc_posSemidef_conj hqt hX
   have hPq := (cuc_commute_q hq (X := X) S).eq
   have hBP := (commute_spectralProj hB.isHermitian S).eq
-  have hPP := spectralProj_mul_self hB.isHermitian S
+  have hPP := spectralProj_mul_self (q * X * q) S
   calc q * spectralProj (q * X * q) S * X * (q * spectralProj (q * X * q) S)
       = spectralProj (q * X * q) S * q * X * (q * spectralProj (q * X * q) S) := by rw [hPq]
     _ = spectralProj (q * X * q) S * (q * X * q) * spectralProj (q * X * q) S := by
