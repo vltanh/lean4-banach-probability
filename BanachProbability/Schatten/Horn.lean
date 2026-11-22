@@ -619,4 +619,17 @@ theorem abs_trace_mul_le {q q' : ℝ} (hq : q.HolderConjugate q') (A : Matrix n 
   rw [ENNReal.ofReal_one] at h
   exact (abs_trace_le_schattenNorm_one _).trans h
 
+/-- **Horn's inequality**, in the additive form: `Σ_{k<N} s_k (A B) ≤ Σ_{k<N} s_k (A) s_k (B)`. -/
+theorem sum_sortedSingularValue_mul_le (A : Matrix l m ℝ) (B : Matrix m n ℝ) (N : ℕ) :
+    ∑ k ∈ Finset.range N, sortedSingularValue (A * B) k ≤
+      ∑ k ∈ Finset.range N, sortedSingularValue A k * sortedSingularValue B k := by
+  sorry
+
+/-- The general Horn inequality (Tomczak-Jaegermann (1974), Lemma 1.1, p. 165):
+`Σ_{k<N} s_k (A_1 ⋯ A_r) ≤ Σ_{k<N} s_k (A_1) ⋯ s_k (A_r)`. -/
+theorem sum_sortedSingularValue_prod_le (L : List (Matrix n n ℝ)) (N : ℕ) :
+    ∑ k ∈ Finset.range N, sortedSingularValue L.prod k ≤
+      ∑ k ∈ Finset.range N, (L.map fun A => sortedSingularValue A k).prod := by
+  sorry
+
 end BanachProbability

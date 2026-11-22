@@ -5,21 +5,21 @@ public import BanachProbability.Schatten.Horn
 public import BanachProbability.SignCube.LpSeminorm
 
 /-!
-# Duality of `L^r (Ω; S_q)` and `L^{r'} (Ω; S_{q'})` on the sign cube
+# Duality of `L^q (Ω; S_q)` and `L^{q'} (Ω; S_{q'})` on the sign cube
 
 For functions `X`, `Y` on the sign cube `Ω = {±1}^N` with values in real `n × n` matrices:
 Hölder's inequality `|E tr (X Y)| ≤ ‖X‖_{L^q (S_q)} ‖Y‖_{L^{q'} (S_{q'})}`
-(`abs_avg_trace_mul_le`), and, when the values of `X` are symmetric, the norm
-`‖X‖_{L^r (S_q)}`, `1 < q, r < ∞`, is attained: `E tr (X Y) = ‖X‖_{L^r (S_q)}` for some symmetric
-`Y` with `‖Y‖_{L^{r'} (S_{q'})} ≤ 1` (`exists_avg_trace_mul_eq_lpNorm_of_holderConjugate`; for
-`r = q`, `exists_avg_trace_mul_eq_lpNorm`).
+(`abs_avg_trace_mul_le`), and the norm `‖X‖_{L^q (S_q)}`, `1 < q < ∞`, is attained:
+`E tr (Yᵀ X) = ‖X‖_{L^q (S_q)}` for some `Y` with `‖Y‖_{L^{q'} (S_{q'})} ≤ 1`
+(`exists_avg_trace_transpose_mul_eq_lpNorm`).
 
 Source: Hytönen–van Neerven–Veraar–Weis (HNVW), *Analysis in Banach spaces I* (2016), the first
-paragraph of the proof of Theorem D.2.6, p. 573: the trace duality `⟨Λ v, u⟩ = tr (v u)` of `S_{q'}`
-and `S_q` is contractive, and it is isometric, by the test element `Σ_k τ_k^{q−1} e_k f_kᵀ` of
-`Σ_k τ_k f_k e_kᵀ`. The book treats a single operator. Here it is the duality of functions on the
-sign cube, by the same test element at every point (`normingElement`, defined for symmetric
-matrices, hence the symmetry of `X`), times a scalar function.
+paragraph of the proof of Theorem D.2.6, p. 573: the trace duality of `S_{q'}` and `S_q` is
+contractive, and it is isometric, by the test element `Σ_k τ_k^{q−1} f_k e_kᵀ` of `Σ_k τ_k f_k e_kᵀ`
+(`trNormingElement`). The book treats a single operator; here it is the duality of functions on the
+sign cube, by the same test element at every point, times a constant. (The duality
+`⟨A, B⟩ = tr A Bᴴ` of Lust-Piquard and Pisier, *Non commutative Khintchine and Paley inequalities*,
+Ark. Mat. 29 (1991), p. 245.)
 -/
 
 @[expose] public section
@@ -66,63 +66,32 @@ theorem abs_avg_trace_mul_le {q q' : ℝ} (hq : q.HolderConjugate q')
     _ ≤ _ := avg_mul_le_rpow_mul_rpow hq (fun ε => schattenNorm_nonneg _ _)
         fun ε => schattenNorm_nonneg _ _
 
-/-- The norm of `L^r (Ω; S_q)`, `1 < q, r < ∞`, is attained: for symmetric `X` there is a symmetric
-`Y` with `‖Y‖_{L^{r'} (S_{q'})} ≤ 1` and `E tr (X Y) = ‖X‖_{L^r (S_q)}`. It is
-`Y (ε) = ‖X‖^{1−r} ‖X (ε)‖_{S_q}^{r−q} N (X (ε))` with the norming element `N` (the test element of
-HNVW I, proof of Theorem D.2.6, p. 573). -/
-theorem exists_avg_trace_mul_eq_lpNorm_of_holderConjugate {q q' r r' : ℝ}
-    (hq : q.HolderConjugate q') (hr : r.HolderConjugate r')
-    (X : (Fin N → Bool) → Matrix n n ℝ) (hX : ∀ ε, (X ε).IsHermitian) :
-    ∃ Y : (Fin N → Bool) → Matrix n n ℝ, (∀ ε, (Y ε).IsHermitian) ∧
-      SignCube.lpNorm (schattenNorm (ENNReal.ofReal q')) r' Y ≤ 1 ∧
-      (avg fun ε => (X ε * Y ε).trace) =
-        SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) r X := by
-  have hq1 : 1 < q := hq.lt
-  have hr1 : 1 < r := hr.lt
-  have hq'ne : ENNReal.ofReal q' ≠ 0 := (ENNReal.ofReal_pos.2 hq.symm.pos).ne'
-  set s : (Fin N → Bool) → ℝ := fun ε => schattenNorm (ENNReal.ofReal q) (X ε)
-  have hs : ∀ ε, 0 ≤ s ε := fun ε => schattenNorm_nonneg _ _
-  set L := SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) r X
-  have hL : 0 ≤ L := lpNorm_nonneg (schattenNorm_nonneg _) r X
-  have hLr : (avg fun ε => s ε ^ r) = L ^ r := (lpNorm_rpow (schattenNorm_nonneg _) hr.pos X).symm
-  have hpow : 0 ≤ (L ^ (r - 1))⁻¹ := inv_nonneg.2 (Real.rpow_nonneg hL _)
-  refine ⟨fun ε => ((L ^ (r - 1))⁻¹ * s ε ^ (r - q)) • normingElement q (X ε), fun ε =>
-    (isHermitian_normingElement q (X ε)).smul (IsSelfAdjoint.all _), ?_, ?_⟩
-  · -- `‖Y (ε)‖_{S_{q'}}^{r'} = (‖X‖^{1−r} ‖X (ε)‖^{r−1})^{r'} = ‖X‖^{−r} ‖X (ε)‖^r`
-    have hY : ∀ ε, schattenNorm (ENNReal.ofReal q')
-        (((L ^ (r - 1))⁻¹ * s ε ^ (r - q)) • normingElement q (X ε)) ^ r' =
-          (L ^ r)⁻¹ * s ε ^ r := fun ε => by
-      have h := schattenNorm_normingElement (hX ε) hq1
-      rw [← hq.conjugate_eq] at h
-      rw [schattenNorm_smul hq'ne, h,
-        abs_of_nonneg (mul_nonneg hpow (Real.rpow_nonneg (hs ε) _)), mul_assoc,
-        ← Real.rpow_add' (hs ε) (by linarith), sub_add_sub_cancel,
-        Real.mul_rpow hpow (Real.rpow_nonneg (hs ε) _), Real.inv_rpow (Real.rpow_nonneg hL _),
-        ← Real.rpow_mul hL, ← Real.rpow_mul (hs ε), hr.sub_one_mul_conj]
-    unfold SignCube.lpNorm
-    simp only [hY]
-    rw [avg_const_mul, hLr]
-    exact Real.rpow_le_one (mul_nonneg (inv_nonneg.2 (Real.rpow_nonneg hL _))
-      (Real.rpow_nonneg hL _)) inv_mul_le_one (by have := hr.symm.pos; positivity)
-  · -- `E tr (X Y) = ‖X‖^{1−r} E ‖X (ε)‖^r = ‖X‖`
-    have ht : ∀ ε, (X ε * (((L ^ (r - 1))⁻¹ * s ε ^ (r - q)) • normingElement q (X ε))).trace =
-        (L ^ (r - 1))⁻¹ * s ε ^ r := fun ε => by
-      rw [Matrix.mul_smul, Matrix.trace_smul, trace_mul_normingElement (hX ε) hq1, smul_eq_mul,
-        mul_assoc, ← Real.rpow_add' (hs ε) (by linarith), sub_add_cancel]
-    simp only [ht]
-    rw [avg_const_mul, hLr]
-    rcases hL.eq_or_lt with h | h
-    · rw [← h, Real.zero_rpow hr.ne_zero, mul_zero]
-    · rw [← div_eq_inv_mul, ← Real.rpow_sub h, sub_sub_cancel, Real.rpow_one]
+/-- The norming element `A (Aᵀ A)^{(q−2)/2}` of a real matrix `A`, that is `Σ_k τ_k^{q−1} f_k e_kᵀ`
+when `A = Σ_k τ_k f_k e_kᵀ` is the singular value decomposition (HNVW I, proof of Theorem D.2.6, p.
+573). -/
+noncomputable def trNormingElement (q : ℝ) (A : Matrix n n ℝ) : Matrix n n ℝ :=
+  A * cfc (fun t : ℝ => t ^ ((q - 2) / 2)) (Aᵀ * A)
 
-/-- The norm of `L^q (Ω; S_q)` is attained: for symmetric `X` there is a symmetric `Y` with
-`‖Y‖_{L^{q'} (S_{q'})} ≤ 1` and `E tr (X Y) = ‖X‖_{L^q (S_q)}`. -/
-theorem exists_avg_trace_mul_eq_lpNorm {q q' : ℝ} (hq : q.HolderConjugate q')
-    (X : (Fin N → Bool) → Matrix n n ℝ) (hX : ∀ ε, (X ε).IsHermitian) :
-    ∃ Y : (Fin N → Bool) → Matrix n n ℝ, (∀ ε, (Y ε).IsHermitian) ∧
+/-- `tr (N (A)ᵀ A) = ‖A‖_{S_q}^q`. -/
+theorem trace_transpose_trNormingElement_mul {q : ℝ} (hq : 1 < q) (A : Matrix n n ℝ) :
+    ((trNormingElement q A)ᵀ * A).trace = schattenNorm (ENNReal.ofReal q) A ^ q := by
+  sorry
+
+/-- `‖N (A)‖_{S_{q'}} = ‖A‖_{S_q}^{q−1}`. -/
+theorem schattenNorm_trNormingElement {q q' : ℝ} (hq : q.HolderConjugate q') (A : Matrix n n ℝ) :
+    schattenNorm (ENNReal.ofReal q') (trNormingElement q A) =
+      schattenNorm (ENNReal.ofReal q) A ^ (q - 1) := by
+  sorry
+
+/-- The norm of `L^q (Ω; S_q)`, `1 < q < ∞`, is attained in the trace duality `⟨Y, X⟩ = E tr (Yᵀ X)`
+(the isometry of HNVW I, Theorem D.2.6, for functions on the sign cube): for some `Y` with
+`‖Y‖_{L^{q'} (S_{q'})} ≤ 1`, `E tr (Yᵀ X) = ‖X‖_{L^q (S_q)}`. -/
+theorem exists_avg_trace_transpose_mul_eq_lpNorm {q q' : ℝ} (hq : q.HolderConjugate q')
+    (X : (Fin N → Bool) → Matrix n n ℝ) :
+    ∃ Y : (Fin N → Bool) → Matrix n n ℝ,
       SignCube.lpNorm (schattenNorm (ENNReal.ofReal q')) q' Y ≤ 1 ∧
-      (avg fun ε => (X ε * Y ε).trace) =
-        SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q X :=
-  exists_avg_trace_mul_eq_lpNorm_of_holderConjugate hq hq X hX
+      (avg fun ε => ((Y ε)ᵀ * X ε).trace) =
+        SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q X := by
+  sorry
 
 end BanachProbability

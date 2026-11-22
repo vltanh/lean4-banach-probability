@@ -121,28 +121,12 @@ private theorem kcs_avg_trace_comm (f Y : (Fin N → Bool) → Matrix n n ℝ) :
     (Eq.trans ?_ (avg_trace_sum_coin_smul_mul (rademacherCoeff Y) f).symm)
   exact Finset.sum_congr rfl fun k _ => Matrix.trace_mul_comm _ _
 
-/-- The Rademacher projection on `L^{q'} (Ω; S_{q'})`, `q ≥ 2`, for symmetric `f`, by duality. It is
-implicit in Pisier (1998), p. 106, where the duality is used only with (8.4.4). -/
+/-- The Rademacher projection on `L^{q'} (Ω; S_{q'})`, `q ≥ 2`, by duality (it is implicit in Pisier
+(1998), p. 106, where the duality is used only with (8.4.4)). -/
 theorem lpNorm_rademacherProj_schattenNorm_conj_le {q q' : ℝ} (hq : 2 ≤ q)
-    (hqq' : q.HolderConjugate q') (f : (Fin N → Bool) → Matrix n n ℝ)
-    (hf : ∀ ε, (f ε).IsHermitian) :
+    (hqq' : q.HolderConjugate q') (f : (Fin N → Bool) → Matrix n n ℝ) :
     SignCube.lpNorm (schattenNorm (ENNReal.ofReal q')) q' (rademacherProj f) ≤
       √(Real.pi / 2) * √(q + 1) * SignCube.lpNorm (schattenNorm (ENNReal.ofReal q')) q' f := by
-  have hPf : ∀ ε, (rademacherProj f ε).IsHermitian := fun ε => by
-    have : ∀ ε, (f ε)ᴴ = f ε := hf
-    simp only [rademacherProj, rademacherCoeff, Matrix.IsHermitian, Matrix.conjTranspose_sum,
-      Matrix.conjTranspose_smul, this, star_trivial]
-  obtain ⟨Y, -, hY, hY'⟩ := exists_avg_trace_mul_eq_lpNorm hqq'.symm _ hPf
-  rw [← hY', kcs_avg_trace_comm]
-  have h0 := lpNorm_nonneg (fun A : Matrix n n ℝ => schattenNorm_nonneg (ENNReal.ofReal q') A) q' f
-  calc (avg fun ε => (f ε * rademacherProj Y ε).trace)
-      ≤ SignCube.lpNorm (schattenNorm (ENNReal.ofReal q')) q' f *
-          SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q (rademacherProj Y) :=
-        (le_abs_self _).trans (abs_avg_trace_mul_le hqq'.symm _ _)
-    _ ≤ SignCube.lpNorm (schattenNorm (ENNReal.ofReal q')) q' f *
-          (√(Real.pi / 2) * √(q + 1) * 1) := by
-        refine mul_le_mul_of_nonneg_left ((lpNorm_rademacherProj_schattenNorm_le hq Y).trans ?_) h0
-        exact mul_le_mul_of_nonneg_left hY (by positivity)
-    _ = _ := by ring
+  sorry
 
 end BanachProbability

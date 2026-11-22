@@ -43,6 +43,7 @@ import all BanachProbability.Schatten.Horn
 import all BanachProbability.Schatten.Measurable
 import all BanachProbability.Schatten.Space
 import all BanachProbability.Schatten.Spectral
+import all BanachProbability.Schatten.ThreeLines
 import all BanachProbability.Schatten.Trace
 import all BanachProbability.Schatten.Triangle
 import all BanachProbability.SignCube.Basic
@@ -50,6 +51,7 @@ import all BanachProbability.SignCube.Bridge
 import all BanachProbability.SignCube.LpSeminorm
 import all BanachProbability.SignCube.PaleyWalsh
 import all BanachProbability.TypeTwo.Basic
+import all BanachProbability.TypeTwo.Even
 import all BanachProbability.TypeTwo.Schatten
 import all BanachProbability.UMD.Complex
 import all BanachProbability.UMD.ConvexHull

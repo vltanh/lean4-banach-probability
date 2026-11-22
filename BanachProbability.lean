@@ -39,6 +39,7 @@ public import BanachProbability.Schatten.Horn
 public import BanachProbability.Schatten.Measurable
 public import BanachProbability.Schatten.Space
 public import BanachProbability.Schatten.Spectral
+public import BanachProbability.Schatten.ThreeLines
 public import BanachProbability.Schatten.Trace
 public import BanachProbability.Schatten.Triangle
 public import BanachProbability.SignCube.Basic
@@ -46,6 +47,7 @@ public import BanachProbability.SignCube.Bridge
 public import BanachProbability.SignCube.LpSeminorm
 public import BanachProbability.SignCube.PaleyWalsh
 public import BanachProbability.TypeTwo.Basic
+public import BanachProbability.TypeTwo.Even
 public import BanachProbability.TypeTwo.Schatten
 public import BanachProbability.UMD.Complex
 public import BanachProbability.UMD.ConvexHull
