@@ -94,6 +94,66 @@ theorem lpNorm_sum_coin_smul_le_pi_div_two_mul [NormedSpace ℂ E] {p : ℝ} (hp
     (mul_le_mul_of_nonneg_right hw1 (lpNorm_nonneg (fun _ => norm_nonneg _) _ _))
   simp only [hw k, Complex.real_smul, mul_comm]
 
+/-- The homogeneous form of a contraction principle: an inequality with the constant `C` for
+coefficients of modulus at most `1` gives one with `C M` for coefficients of modulus at most `M`. -/
+private theorem lpNorm_sum_coin_smul_le_mul {𝕜 : Type*} [NormedField 𝕜] [NormedAlgebra ℝ 𝕜]
+    [NormedSpace ℝ E] [NormedSpace 𝕜 E] [IsScalarTower ℝ 𝕜 E] {p C M : ℝ} (hp : 1 ≤ p)
+    (h : ∀ c : Fin N → 𝕜, (∀ k, ‖c k‖ ≤ 1) → ∀ x : Fin N → E,
+      SignCube.lpNorm (fun y => ‖y‖) p (fun ε : Fin N → Bool => ∑ k, coin (ε k) • c k • x k) ≤
+        C * SignCube.lpNorm (fun y => ‖y‖) p (fun ε : Fin N → Bool => ∑ k, coin (ε k) • x k))
+    {c : Fin N → 𝕜} (hc : ∀ k, ‖c k‖ ≤ M) (x : Fin N → E) :
+    SignCube.lpNorm (fun y => ‖y‖) p (fun ε : Fin N → Bool => ∑ k, coin (ε k) • c k • x k) ≤
+      C * M * SignCube.lpNorm (fun y => ‖y‖) p (fun ε : Fin N → Bool => ∑ k, coin (ε k) • x k) := by
+  have hp0 : 0 < p := by linarith
+  have hS : ∀ X : (Fin N → Bool) → E,
+      SignCube.lpNorm (fun y => ‖y‖) p X = lpSeminorm (normSeminorm ℝ E) p hp X := fun X => by
+    rw [lpSeminorm_apply, coe_normSeminorm]
+  have h0 : SignCube.lpNorm (fun y => ‖y‖) p (fun _ : Fin N → Bool => (0 : E)) = 0 := by
+    rw [hS]
+    exact map_zero _
+  rcases lt_or_ge 0 M with hM | hM
+  · -- the case `M = 1` for `c_k / M` and `M x_k`
+    have h1 := h (fun k => M⁻¹ • c k) (fun k => by
+      rw [norm_smul, norm_inv, Real.norm_of_nonneg hM.le, inv_mul_le_iff₀ hM, mul_one]
+      exact hc k) fun k => M • x k
+    have e1 : ∀ ε : Fin N → Bool, ∑ k, coin (ε k) • (M⁻¹ • c k) • M • x k =
+        ∑ k, coin (ε k) • c k • x k := fun ε => Finset.sum_congr rfl fun k _ => by
+      rw [smul_assoc, smul_comm (c k) M, inv_smul_smul₀ hM.ne']
+    have e2 : (fun ε : Fin N → Bool => ∑ k, coin (ε k) • M • x k) =
+        M • fun ε : Fin N → Bool => ∑ k, coin (ε k) • x k := by
+      funext ε
+      rw [Pi.smul_apply, Finset.smul_sum]
+      exact Finset.sum_congr rfl fun k _ => smul_comm _ _ _
+    simp only [e1] at h1
+    rw [e2, hS (M • _), map_smul_eq_mul, ← hS, Real.norm_of_nonneg hM.le, ← mul_assoc] at h1
+    exact h1
+  · -- all `c_k = 0`
+    have hc0 : ∀ k, c k = 0 := fun k => norm_le_zero_iff.1 ((hc k).trans hM)
+    simp only [hc0, zero_smul, smul_zero, Finset.sum_const_zero, h0]
+    rcases isEmpty_or_nonempty (Fin N) with hN | ⟨⟨k⟩⟩
+    · simp only [Finset.univ_eq_empty, Finset.sum_empty, h0, mul_zero, le_refl]
+    · rw [le_antisymm hM ((norm_nonneg _).trans (hc k)), mul_zero, zero_mul]
+
+/-- **Kahane's contraction principle**, real scalars, with `max |c_k|` (HNVW I, Proposition 3.2.10,
+p. 181). -/
+theorem lpNorm_sum_coin_smul_le_max_mul [NormedSpace ℝ E] {p M : ℝ} (hp : 1 ≤ p) {c : Fin N → ℝ}
+    (hc : ∀ k, |c k| ≤ M) (x : Fin N → E) :
+    SignCube.lpNorm (fun y => ‖y‖) p (fun ε : Fin N → Bool => ∑ k, coin (ε k) • c k • x k) ≤
+      M * SignCube.lpNorm (fun y => ‖y‖) p (fun ε : Fin N → Bool => ∑ k, coin (ε k) • x k) := by
+  have h := lpNorm_sum_coin_smul_le_mul (C := 1) hp (fun c hc x => by
+    rw [one_mul]
+    exact lpNorm_sum_coin_smul_le hp hc x) hc x
+  rwa [one_mul] at h
+
+/-- **Kahane's contraction principle**, complex scalars and real signs, with `(π/2) max |c_k|`
+(HNVW I, Proposition 3.2.10, (3.15), pp. 181–182). -/
+theorem lpNorm_sum_coin_smul_le_pi_div_two_mul_max_mul [NormedSpace ℂ E] {p M : ℝ} (hp : 1 ≤ p)
+    {c : Fin N → ℂ} (hc : ∀ k, ‖c k‖ ≤ M) (x : Fin N → E) :
+    SignCube.lpNorm (fun y => ‖y‖) p (fun ε : Fin N → Bool => ∑ k, coin (ε k) • c k • x k) ≤
+      Real.pi / 2 * M *
+        SignCube.lpNorm (fun y => ‖y‖) p (fun ε : Fin N → Bool => ∑ k, coin (ε k) • x k) :=
+  lpNorm_sum_coin_smul_le_mul hp (fun _ hc x => lpNorm_sum_coin_smul_le_pi_div_two_mul hp hc x) hc x
+
 /-- The contraction principle for complex scalars and real signs with the factor `2 ≥ π/2`. -/
 theorem lpNorm_sum_coin_smul_le_two_mul [NormedSpace ℂ E] {p : ℝ} (hp : 1 ≤ p) {c : Fin N → ℂ}
     (hc : ∀ k, ‖c k‖ ≤ 1) (x : Fin N → E) :

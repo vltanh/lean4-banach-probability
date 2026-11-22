@@ -31,8 +31,11 @@ in the modules named with each block.
 * `signs`: the sign cube `{−1, 1}^N`, averages and `L^p` norms on it (`SignCube/`);
 * `paleyWalsh`: predictable families and Paley–Walsh martingales (`SignCube/PaleyWalsh.lean`);
 * `burkholder`: Burkholder's function (`Martingale/Burkholder/Function.lean`);
-* `umd`: the UMD constants, over real and complex scalars (`UMD/Defs.lean`);
-* `umdForms`: the dyadic, deterministic and randomised forms of the UMD property (`UMD/`);
+* `umd`, `complexUMD`: the UMD constants, for real signs and for complex multipliers
+  (`UMD/Defs.lean`);
+* `dyadicUMD`: the dyadic and deterministic forms of the UMD property (`UMD/Maurey/Basic.lean`,
+  `UMD/Incremental.lean`);
+* `randomisedUMD`: the randomised UMD property (`UMD/Decoupling.lean`);
 * `zigZag`: zig-zag concave functions (`ZigZag/`);
 * `hypercontractivity`: the discrete heat semigroup (`Hypercontractivity/`);
 * `schatten`: Schatten norms of real and complex matrices (`Schatten/`);
@@ -139,6 +142,10 @@ noncomputable def umdConst [CompleteSpace X] (p : ℝ) : ℝ≥0∞ :=
 
 end
 
+-- END SHARED DEFINITIONS: umd
+
+-- BEGIN SHARED DEFINITIONS: complexUMD
+
 section
 
 variable (X : Type*) [NormedAddCommGroup X] [NormedSpace ℂ X]
@@ -160,11 +167,9 @@ noncomputable def complexUMDConst [CompleteSpace X] (p : ℝ) : ℝ≥0∞ :=
 
 end
 
--- END SHARED DEFINITIONS: umd
+-- END SHARED DEFINITIONS: complexUMD
 
--- BEGIN SHARED DEFINITIONS: umdForms
-
-/-! The same constants for Paley–Walsh martingales on the sign cubes. -/
+-- BEGIN SHARED DEFINITIONS: dyadicUMD
 
 section
 
@@ -221,6 +226,10 @@ def IsDeterministicUMDBound (𝕜 X : Type*) [RCLike 𝕜] [NormedAddCommGroup X
           (ENNReal.ofReal p) μ ≤
         β * eLpNorm (fun ω => ‖Y n ω‖) (ENNReal.ofReal p) μ
 
+-- END SHARED DEFINITIONS: dyadicUMD
+
+-- BEGIN SHARED DEFINITIONS: randomisedUMD
+
 section
 
 variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
@@ -258,7 +267,7 @@ noncomputable def decoupledLpNorm {N : ℕ} (p : ℝ) (ξ : Fin N → (Fin N →
 
 end
 
--- END SHARED DEFINITIONS: umdForms
+-- END SHARED DEFINITIONS: randomisedUMD
 
 -- BEGIN SHARED DEFINITIONS: zigZag
 

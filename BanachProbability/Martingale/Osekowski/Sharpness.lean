@@ -1,7 +1,7 @@
 module
 
 public import BanachProbability.UMD.Hilbert
-public import BanachProbability.ZigZag.Basic
+public import BanachProbability.UMD.Maurey.Basic
 
 /-!
 # The sharpness of `p* − 1`
@@ -31,7 +31,8 @@ formalized: only its function `W⁰`, with the properties 1°, 2°, 3°, and the
 * `dyadicUMDConst_real`, `umdConst_real`, `dyadicUMDConst_of_innerProductSpace`,
   `umdConst_of_innerProductSpace`: the constants are `p* − 1`.
 * `exists_lt_lpNorm_transform`: for `K < p* − 1` there are a real Paley–Walsh martingale `f` and a
-  transform `g` of `f` by predictable signs with `K ‖f‖_p < ‖g‖_p`.
+  transform `g` of `f` by predictable signs with `K ‖f‖_p < ‖g‖_p`;
+  `exists_lt_lpNorm_transform_const`: the same with deterministic signs.
 
 ## The proof
 
@@ -696,6 +697,31 @@ theorem exists_lt_lpNorm_transform {p K : ℝ} (hp : 1 < p) (hK : K < pStar p - 
     rw [pStar]
     linarith
   exact absurd hβ (not_le.mpr (max_lt hK h1))
+
+/-- **No constant below `p* − 1`** holds in the moment inequality for `±1`-transforms (transforms by
+*deterministic* signs), even of dyadic martingales (Theorem 3.5, Remark 3.8): for `K < p* − 1` there
+are a real Paley–Walsh martingale `f = Σ ε_k φ_k` and constants `l_k ∈ {±1}` such that
+`g = Σ l_k ε_k φ_k` satisfies `K ‖f‖_p < ‖g‖_p`. Deterministic and predictable signs give the same
+dyadic constants (`isUMDBound_of_isSignDyadicUMDBound`; Hytönen–van Neerven–Veraar–Weis, *Analysis
+in Banach Spaces I* (2016), Theorem 4.2.25). The dyadic martingales of the book are the partial sums
+of Haar series, whose deterministic signs are predictable signs of Paley–Walsh martingales. -/
+theorem exists_lt_lpNorm_transform_const {p K : ℝ} (hp : 1 < p) (hK : K < pStar p - 1) :
+    ∃ (N : ℕ) (φ : Fin N → (Fin N → Bool) → ℝ) (l : Fin N → ℝ), IsPredictable φ ∧
+      (∀ k, l k = 1 ∨ l k = -1) ∧
+        K * SignCube.lpNorm (fun x => |x|) p (paleyWalsh φ N) <
+          SignCube.lpNorm (fun x => |x|) p (paleyWalsh (fun k ε => l k * φ k ε) N) := by
+  by_contra! h
+  have hβ : IsSignDyadicUMDBound ℝ ℝ p (max K 0) := fun N φ l hφ hl =>
+    (h N φ l hφ fun k => eq_or_eq_neg_of_abs_eq (hl k)).trans (mul_le_mul_of_nonneg_right
+      (le_max_left K 0) (lpNorm_nonneg (fun x => abs_nonneg x) p _))
+  have h1 := umdConst_le_of_isUMDBound (isUMDBound_of_isSignDyadicUMDBound hp.le
+    (le_max_right K 0) hβ)
+  have h2 : 0 < pStar p - 1 := by
+    have := le_max_left p (p / (p - 1))
+    rw [pStar]
+    linarith
+  rw [umdConst_real hp, ENNReal.ofReal_le_ofReal_iff (le_max_right K 0)] at h1
+  exact absurd h1 (not_le.mpr (max_lt hK h2))
 
 end Constants
 

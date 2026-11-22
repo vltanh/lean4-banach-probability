@@ -267,6 +267,34 @@ private theorem dec_ofReal_lpNorm_rpow (hp : 0 < p) (f : (Fin N → Bool) → X)
   rw [ENNReal.ofReal_rpow_of_nonneg (lpNorm_nonneg (fun x => norm_nonneg x) p f) hp.le,
     lpNorm_rpow (fun x : X => norm_nonneg x) hp]
 
+/-- `decoupledLpNorm p ξ n` is the `L^p` norm of the decoupled sum `Σ_{k<n} ε̃_k ξ_k (ε)` on the
+product of two sign cubes, with the uniform probabilities. -/
+theorem eLpNorm_prod_uniformOn (hp : 0 < p) (ξ : Fin N → (Fin N → Bool) → X) (n : ℕ) :
+    eLpNorm (fun z : (Fin N → Bool) × (Fin N → Bool) => paleyWalsh (fun k _ => ξ k z.1) n z.2)
+        (ENNReal.ofReal p) ((ProbabilityTheory.uniformOn Set.univ).prod
+          (ProbabilityTheory.uniformOn Set.univ)) =
+      ENNReal.ofReal (decoupledLpNorm p ξ n) := by
+  have h0 : ∀ ε : Fin N → Bool,
+      0 ≤ avg fun ε' => ‖paleyWalsh (fun k _ => ξ k ε) n ε'‖ ^ p := fun ε =>
+    avg_nonneg fun ε' => Real.rpow_nonneg (norm_nonneg _) p
+  have h1 : 0 ≤ avg (fun ε => avg fun ε' => ‖paleyWalsh (fun k _ => ξ k ε) n ε'‖ ^ p) :=
+    avg_nonneg h0
+  have hm : AEStronglyMeasurable (fun z : (Fin N → Bool) × (Fin N → Bool) =>
+      paleyWalsh (fun k _ => ξ k z.1) n z.2) ((ProbabilityTheory.uniformOn Set.univ).prod
+        (ProbabilityTheory.uniformOn Set.univ)) :=
+    StronglyMeasurable.of_discrete.aestronglyMeasurable
+  refine ENNReal.rpow_left_injective hp.ne' ?_
+  simp only
+  rw [dec_eLpNorm_rpow hp hm, lintegral_prod _ (hm.enorm.pow_const p), decoupledLpNorm,
+    ENNReal.ofReal_rpow_of_nonneg (Real.rpow_nonneg h1 _) hp.le, ← Real.rpow_mul h1,
+    one_div_mul_cancel hp.ne', Real.rpow_one, dec_lintegral_uniformOn, dec_ofReal_avg h0]
+  congr 1
+  refine Finset.sum_congr rfl fun ε _ => ?_
+  rw [dec_lintegral_uniformOn, dec_ofReal_avg fun ε' => Real.rpow_nonneg (norm_nonneg _) p]
+  congr 1
+  refine Finset.sum_congr rfl fun ε' _ => ?_
+  rw [← ENNReal.ofReal_rpow_of_nonneg (norm_nonneg _) hp.le, ofReal_norm]
+
 /-- The inequalities for fixed signs `η` (HNVW I, proof of Proposition 4.1.16, (1)⇒(2), p. 279, for
 Paley–Walsh martingales): the dyadic UMD inequality for `Σ ε_k ξ_k` and the constant signs `η`, and
 for the Paley–Walsh martingale `Σ ε_k η_k ξ_k` and the same signs. -/

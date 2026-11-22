@@ -8,10 +8,13 @@ public import Mathlib.MeasureTheory.Function.LpSpace.Complete
 # `L^p` spaces of UMD spaces are UMD
 
 For any measure space `(S, μ)`, any Banach space `B` and `p ∈ (1, ∞)`,
-`UMD_p (L^p (μ; B)) ≤ UMD_p (B)`; in particular `UMD_p (L^p (μ; ℂ)) ≤ p* − 1` and the complex
-`L^p (μ)` is UMD (Pisier, *Martingales in Banach spaces* (2016), Corollary 5.22, "by Fubini").
+`UMD_p (L^p (μ; B)) ≤ UMD_p (B)` (Hytönen–van Neerven–Veraar–Weis (HNVW), *Analysis in Banach Spaces
+I* (2016), Proposition 4.2.15 (2)), with equality if there is a set of finite positive measure,
+since `B` embeds in `L^p (μ; B)`; in particular `UMD_p (L^p (μ; ℂ)) ≤ p* − 1` and the complex
+`L^p (μ)` is UMD (also G. Pisier, *Martingales in Banach spaces* (2016), Corollary 5.22, "by
+Fubini").
 
-The proof is the dyadic one, which needs neither σ-finiteness nor joint measurability. A
+The proof is the dyadic one, as in HNVW, which needs neither σ-finiteness nor joint measurability. A
 Paley–Walsh martingale with values in `L^p (μ; B)` takes finitely many values; for every `s` the
 evaluations `ε ↦ ξ_k (ε) (s)` of the representatives form a predictable `B`-valued family, and the
 finitely many linear relations defining the Paley–Walsh sums and their transform hold off one null
@@ -139,13 +142,48 @@ theorem dyadicUMDConst_Lp_le {B : Type*} [NormedAddCommGroup B] [NormedSpace ℝ
 private theorem ulp_one_lt_toReal {p : ℝ≥0∞} (hp : 1 < p) (hpt : p ≠ ⊤) : 1 < p.toReal := by
   simpa using (ENNReal.toReal_lt_toReal ENNReal.one_ne_top hpt).mpr hp
 
-/-- `UMD_p (L^p (μ; B)) ≤ UMD_p (B)`, for every measure `μ` and every Banach space `B`. -/
+/-- `UMD_p (L^p (μ; B)) ≤ UMD_p (B)`, for every measure `μ` and every Banach space `B` (HNVW I,
+Proposition 4.2.15 (2)). -/
 theorem umdConst_Lp_le {B : Type*} [NormedAddCommGroup B] [NormedSpace ℝ B] [CompleteSpace B]
     (p : ℝ≥0∞) [Fact (1 ≤ p)] (hp : 1 < p) (hpt : p ≠ ⊤) :
     umdConst (Lp B p μ) p.toReal ≤ umdConst B p.toReal := by
   have hr := ulp_one_lt_toReal hp hpt
   rw [← dyadicUMDConst_eq_umdConst hr, ← dyadicUMDConst_eq_umdConst hr]
   exact dyadicUMDConst_Lp_le μ p hp hpt
+
+/-- `B` embeds isometrically in `L^p (μ; B)`, by the multiples of an indicator function, if there is
+a set of finite positive measure. -/
+theorem exists_linearIsometry_Lp {B : Type*} [NormedAddCommGroup B] [NormedSpace ℝ B] (p : ℝ≥0∞)
+    [Fact (1 ≤ p)] (hpt : p ≠ ⊤) {A : Set S} (hA : MeasurableSet A) (h0 : μ A ≠ 0)
+    (ht : μ A ≠ ⊤) : Nonempty (B →ₗᵢ[ℝ] Lp B p μ) := by
+  have hp0 : p ≠ 0 := (zero_lt_one.trans_le (Fact.out : 1 ≤ p)).ne'
+  set c : ℝ := (μ.real A ^ (1 / p.toReal))⁻¹
+  have hA0 : 0 < μ.real A := ENNReal.toReal_pos h0 ht
+  have hc : 0 < c := inv_pos.2 (Real.rpow_pos_of_pos hA0 _)
+  refine ⟨⟨{ toFun := fun x => c • indicatorConstLp p hA ht x
+             map_add' := fun x y => ?_
+             map_smul' := fun a x => ?_ }, fun x => ?_⟩⟩
+  · rw [← indicatorConstLp_add, smul_add]
+  · rw [RingHom.id_apply, smul_comm a c]
+    congr 1
+    refine Lp.ext ?_
+    filter_upwards [indicatorConstLp_coeFn (p := p) (hs := hA) (hμs := ht) (c := a • x),
+      indicatorConstLp_coeFn (p := p) (hs := hA) (hμs := ht) (c := x),
+      Lp.coeFn_smul a (indicatorConstLp p hA ht x)] with s h1 h2 h3
+    rw [h1, h3, Pi.smul_apply, h2]
+    by_cases hs : s ∈ A <;> simp [hs]
+  · change ‖c • indicatorConstLp p hA ht x‖ = ‖x‖
+    rw [norm_smul, norm_indicatorConstLp hp0 hpt, Real.norm_of_nonneg hc.le, mul_left_comm,
+      inv_mul_cancel₀ (Real.rpow_pos_of_pos hA0 _).ne', mul_one]
+
+/-- **Fubini** (HNVW I, Proposition 4.2.15 (2)): `UMD_p (L^p (μ; B)) = UMD_p (B)`, if there is a set
+of finite positive measure. (The book does not say so, but for `L^p (μ) = 0` the constant on the
+left is that of the space `0`.) -/
+theorem umdConst_Lp_eq {B : Type*} [NormedAddCommGroup B] [NormedSpace ℝ B] [CompleteSpace B]
+    (p : ℝ≥0∞) [Fact (1 ≤ p)] (hp : 1 < p) (hpt : p ≠ ⊤) {A : Set S} (hA : MeasurableSet A)
+    (h0 : μ A ≠ 0) (ht : μ A ≠ ⊤) : umdConst (Lp B p μ) p.toReal = umdConst B p.toReal := by
+  obtain ⟨T⟩ := exists_linearIsometry_Lp (B := B) μ p hpt hA h0 ht
+  exact le_antisymm (umdConst_Lp_le μ p hp hpt) (umdConst_le_of_linearIsometry T _)
 
 /-- The complex `L^p (μ)` is UMD with `UMD_p (L^p (μ; ℂ)) ≤ p* − 1`, for every measure `μ`. -/
 theorem umdConst_Lp_complex_le (p : ℝ≥0∞) [Fact (1 ≤ p)] (hp : 1 < p) (hpt : p ≠ ⊤) :
