@@ -17,8 +17,9 @@ file defines:
   on arbitrary probability spaces (Hytönen–van Neerven–Veraar–Weis, *Analysis in Banach spaces I*
   (2016), Definition 4.2.1; Pisier, *Martingales in Banach spaces* (2016), Chapter 5). The
   definition here quantifies over predictable signs and martingales started at `0`; the sources
-  define the constant with deterministic signs, which are predictable, so the constant here is at
-  least theirs, and the results of this library are stated for it;
+  define the constant with deterministic signs, which gives the same constant
+  (`BanachProbability.umdConst_eq_sInf_isDeterministicUMDBound`; Hytönen–van Neerven–Veraar–Weis,
+  Theorem 4.2.25);
 * `IsDyadicUMDBound X p β` and `dyadicUMDConst X p`, the same for Paley–Walsh martingales on the
   sign cube, `UMD_p^Δ (X)`;
 * `IsComplexUMDBound X p β`, `complexUMDConst X p` and their dyadic versions, for a complex
@@ -28,8 +29,8 @@ file defines:
 Basic facts: the constants are attained (`isUMDBound_umdConst`), they do not increase under linear
 isometric embeddings (`umdConst_le_of_linearIsometry`), they are at least `1` on a nonzero space
 (`one_le_umdConst`), and the dyadic constant is at most the full one
-(`dyadicUMDConst_le_umdConst`). The converse, `dyadicUMDConst X p = umdConst X p`, is Maurey's
-theorem (`BanachProbability.dyadicUMDConst_eq_umdConst`).
+(`dyadicUMDConst_le_umdConst`). In fact `dyadicUMDConst X p = umdConst X p`, a theorem of Maurey
+(`BanachProbability.dyadicUMDConst_eq_umdConst`).
 -/
 
 @[expose] public section
