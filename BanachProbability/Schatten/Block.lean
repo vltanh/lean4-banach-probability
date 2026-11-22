@@ -10,15 +10,26 @@ For matrices `a_1, …, a_K`, `blockRow a = (a_1 … a_K)` and `blockCol a = (a_
 Schatten norms are the row and column square functions:
 `‖blockCol a‖_{S_q} = ‖(Σ a_kᴴ a_k)^{1/2}‖_{S_q}` and
 `‖blockRow a‖_{S_q} = ‖(Σ a_k a_kᴴ)^{1/2}‖_{S_q}`, that is,
-`‖blockCol a‖_{S_q}² = ‖Σ a_kᴴ a_k‖_{S_{q/2}}` (Lust-Piquard–Pisier, *Non commutative Khintchine and
-Paley inequalities*, Ark. Mat. 29 (1991), (I.2), p. 245; `‖blockCol a‖_{S_q}` is their norm of
-`C_E (ℓ²_R)`, `‖blockRow a‖_{S_q}` that of `C_E (ℓ²_L)`, `E = ℓ^q`, p. 246). Hölder's inequality for
-a block row times a block column is their (I.3), p. 246; and for `q ≥ 2` the square functions are
-dominated by the Rademacher sums, (I.5)–(I.7), pp. 246–247:
-`‖blockCol a‖_{S_q}² ≤ E ‖Σ ε_k a_k‖_{S_q}²`.
+`‖blockCol a‖_{S_q}² = ‖Σ a_kᴴ a_k‖_{S_{q/2}}` (F. Lust-Piquard, G. Pisier, *Non commutative
+Khintchine and Paley inequalities*, Ark. Mat. 29 (1991) 241–260, (I.2), p. 245; `‖blockCol a‖_{S_q}`
+is their norm of `C_E (ℓ²_R)`, `‖blockRow a‖_{S_q}` that of `C_E (ℓ²_L)`, `E = ℓ^q`, p. 246).
 
-For real block diagonal matrices, `‖diag (A_i)‖_{S_q}^q = Σ ‖A_i‖_{S_q}^q`
-(`schattenNorm_blockDiagonal_rpow`).
+From the same paper:
+
+* (I.3), p. 246, in trace form: Hölder's inequality for the trace of a block row times a block
+  column (`norm_sum_trace_mul_le`);
+* the bounds in the dualities of `C_q (ℓ²_R)` and `C_{q'} (ℓ²_R)` and of `C_q (ℓ²_L)` and
+  `C_{q'} (ℓ²_L)`, p. 246 (`norm_sum_trace_mul_conjTranspose_le_blockCol`,
+  `norm_sum_trace_mul_conjTranspose_le_blockRow`);
+* for `q ≥ 2` the square functions are dominated by the Rademacher sums, (I.7), p. 247, by (I.5) and
+  the triangle inequality, as (I.6), p. 246: `‖blockCol a‖_{S_q}² ≤ E ‖Σ ε_k a_k‖_{S_q}²`
+  (`complexSchattenNorm_blockCol_sq_le_avg`, `complexSchattenNorm_blockRow_sq_le_avg`).
+
+For block diagonal matrices, `‖diag (A_i)‖_{S_q} = (Σ ‖A_i‖_{S_q}^q)^{1/q}`
+(`complexSchattenNorm_blockDiagonal`, `schattenNorm_blockDiagonal_rpow`; N. Tomczak-Jaegermann, *The
+moduli of smoothness and convexity and the Rademacher averages of trace classes `S_p`
+(`1 ≤ p < ∞`)*, Studia Math. 50 (1974) 163–182, p. 166), so, for real matrices, `ℓ^q (S_q)` embeds
+isometrically in `S_q` (`schattenBlockDiagonal`).
 -/
 
 @[expose] public section
@@ -131,7 +142,7 @@ theorem complexSchattenNorm_blockCol_smul {q : ℝ≥0∞} (hq : q ≠ 0) (a : F
     complexSchattenNorm_blockCol_sq hq, complexSchattenNorm_blockCol_sq hq]
   simp only [h]
 
-/-- Lust-Piquard–Pisier (1991), (I.3), for the trace:
+/-- Lust-Piquard–Pisier (1991), (I.3), p. 246, in trace form:
 `|Σ tr (a_k b_k)| ≤ ‖(Σ a_k a_kᴴ)^{1/2}‖_{S_q} ‖(Σ b_kᴴ b_k)^{1/2}‖_{S_{q'}}`. -/
 theorem norm_sum_trace_mul_le [DecidableEq m] {q q' : ℝ} (hq : q.HolderConjugate q')
     (a : Fin K → Matrix n m ℂ) (b : Fin K → Matrix m n ℂ) :
@@ -141,54 +152,45 @@ theorem norm_sum_trace_mul_le [DecidableEq m] {q q' : ℝ} (hq : q.HolderConjuga
   rw [← Matrix.trace_sum, ← blockRow_mul_blockCol]
   exact norm_trace_mul_le hq _ _
 
-/-- The bound in the duality of `C_q (ℓ²_L)` and `C_{q'} (ℓ²_L)` (Lust-Piquard–Pisier (1991), p.
-246, who write it for `ℓ²_R`; by adjoints):
-`|Σ tr (a_k b_kᴴ)| ≤ ‖(Σ a_k a_kᴴ)^{1/2}‖_{S_q} ‖(Σ b_k b_kᴴ)^{1/2}‖_{S_{q'}}`. -/
+/-- The bound in the duality `⟨a, b⟩ = Σ tr (a_k b_kᴴ)` of `C_q (ℓ²_L)` and `C_{q'} (ℓ²_L)`
+(Lust-Piquard–Pisier (1991), p. 246, who write the duality for `ℓ²_R`), by (I.3) for the `a_k` and
+the `b_kᴴ`: `|Σ tr (a_k b_kᴴ)| ≤ ‖(Σ a_k a_kᴴ)^{1/2}‖_{S_q} ‖(Σ b_k b_kᴴ)^{1/2}‖_{S_{q'}}`. -/
 theorem norm_sum_trace_mul_conjTranspose_le_blockRow {q q' : ℝ} (hq : q.HolderConjugate q')
     (a b : Fin K → Matrix m n ℂ) :
     ‖∑ k, (a k * (b k)ᴴ).trace‖ ≤
       complexSchattenNorm (ENNReal.ofReal q) (blockRow a) *
         complexSchattenNorm (ENNReal.ofReal q') (blockRow b) := by
   classical
-  rw [← Matrix.trace_sum, ← blockRow_mul_conjTranspose_blockRow,
-    ← complexSchattenNorm_conjTranspose _ (blockRow b)]
-  exact norm_trace_mul_le hq _ _
+  rw [← complexSchattenNorm_conjTranspose _ (blockRow b)]
+  exact norm_sum_trace_mul_le hq a fun k => (b k)ᴴ
 
-/-- The bound in the duality of `C_q (ℓ²_R)` and `C_{q'} (ℓ²_R)` (Lust-Piquard–Pisier (1991), p.
-246): `|Σ tr (a_k b_kᴴ)| ≤ ‖(Σ a_kᴴ a_k)^{1/2}‖_{S_q} ‖(Σ b_kᴴ b_k)^{1/2}‖_{S_{q'}}`. -/
+/-- The bound in the duality `⟨a, b⟩ = Σ tr (a_k b_kᴴ)` of `C_q (ℓ²_R)` and `C_{q'} (ℓ²_R)`
+(Lust-Piquard–Pisier (1991), p. 246), by (I.3) for the `b_kᴴ` and the `a_k`:
+`|Σ tr (a_k b_kᴴ)| ≤ ‖(Σ a_kᴴ a_k)^{1/2}‖_{S_q} ‖(Σ b_kᴴ b_k)^{1/2}‖_{S_{q'}}`. -/
 theorem norm_sum_trace_mul_conjTranspose_le_blockCol {q q' : ℝ} (hq : q.HolderConjugate q')
     (a b : Fin K → Matrix m n ℂ) :
     ‖∑ k, (a k * (b k)ᴴ).trace‖ ≤
       complexSchattenNorm (ENNReal.ofReal q) (blockCol a) *
         complexSchattenNorm (ENNReal.ofReal q') (blockCol b) := by
   classical
-  -- `tr (a_k b_kᴴ) = tr (b_kᴴ a_k)`
   simp only [Matrix.trace_mul_comm (a _)]
-  rw [← Matrix.trace_sum, ← conjTranspose_blockCol_mul_blockCol, Matrix.trace_mul_comm,
-    ← complexSchattenNorm_conjTranspose _ (blockCol b)]
-  exact norm_trace_mul_le hq _ _
+  rw [mul_comm, ← complexSchattenNorm_blockRow_conjTranspose]
+  exact norm_sum_trace_mul_le hq.symm (fun k => (b k)ᴴ) a
 
 omit [Fintype n] [DecidableEq n] in
 /-- Orthonormality of the signs: `E [Yᴴ Y] = Σ a_kᴴ a_k` for `Y = Σ ε_k a_k`. -/
 private theorem sum_smul_conjTranspose_mul_self (a : Fin K → Matrix m n ℂ) :
     ∑ ε : Fin K → Bool, ((2 : ℝ) ^ K)⁻¹ •
         ((∑ k, coin (ε k) • a k)ᴴ * ∑ k, coin (ε k) • a k) = ∑ k, (a k)ᴴ * a k := by
-  have hexp : ∀ ε : Fin K → Bool, (∑ k, coin (ε k) • a k)ᴴ * ∑ k, coin (ε k) • a k =
-      ∑ i, ∑ j, (coin (ε i) * coin (ε j)) • ((a i)ᴴ * a j) := fun ε => by
-    rw [Matrix.conjTranspose_sum, Matrix.sum_mul]
-    refine Finset.sum_congr rfl fun i _ => ?_
-    rw [Matrix.mul_sum]
-    refine Finset.sum_congr rfl fun j _ => ?_
-    rw [Matrix.conjTranspose_smul, star_trivial, Matrix.smul_mul, Matrix.mul_smul, smul_smul]
   have hcoin : ∀ i j, ∑ ε : Fin K → Bool, ((2 : ℝ) ^ K)⁻¹ * (coin (ε i) * coin (ε j)) =
       if i = j then 1 else 0 := fun i j => by
     rw [← avg_coin_mul_coin i j, avg, ← Finset.mul_sum, div_eq_inv_mul]
-  simp only [hexp, Finset.smul_sum, smul_smul]
+  simp only [Matrix.conjTranspose_sum, Matrix.conjTranspose_smul, star_trivial, Matrix.sum_mul,
+    Matrix.mul_sum, Matrix.smul_mul, Matrix.mul_smul, smul_smul, Finset.smul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [Finset.sum_comm]
-  simp only [← Finset.sum_smul, hcoin, ite_smul, one_smul, zero_smul, Finset.sum_ite_eq,
-    Finset.mem_univ, ite_true]
+  simp [← Finset.sum_smul, hcoin, ite_smul]
 
 /-- Lust-Piquard–Pisier (1991), (I.7) with signs, column form: for `q ≥ 2`,
 `‖(Σ a_kᴴ a_k)^{1/2}‖_{S_q}² ≤ E ‖Σ ε_k a_k‖_{S_q}²`. -/
@@ -230,42 +232,68 @@ theorem complexSchattenNorm_blockRow_sq_le_avg {q : ℝ} (hq : 2 ≤ q) (a : Fin
 
 /-! ### Block diagonal matrices -/
 
-/-- Real block diagonal matrices: `‖diag (A_i)‖_{S_q}^q = Σ ‖A_i‖_{S_q}^q`; in other words,
-`ℓ^q (S_q)` embeds isometrically in `S_q`. -/
-theorem schattenNorm_blockDiagonal_rpow {ι : Type*} [Fintype ι] [DecidableEq ι] {q : ℝ}
-    (hq : 0 < q) (A : ι → Matrix n n ℝ) :
+section BlockDiagonal
+
+variable {ι : Type*} [Fintype ι] [DecidableEq ι]
+
+/-- Complex block diagonal matrices: `‖diag (A_i)‖_{S_p} = (Σ ‖A_i‖_{S_p}^p)^{1/p}`
+(Tomczak-Jaegermann (1974), p. 166), as the singular value decompositions of the blocks give one of
+the block diagonal matrix. -/
+theorem complexSchattenNorm_blockDiagonal {p : ℝ} (hp : 0 < p) (A : ι → Matrix n n ℂ) :
+    complexSchattenNorm (ENNReal.ofReal p) (Matrix.blockDiagonal A) =
+      (∑ i, complexSchattenNorm (ENNReal.ofReal p) (A i) ^ p) ^ (1 / p) := by
+  choose U hU V hV hA using fun i => exists_eq_unitary_mul_diagonal_mul (A i)
+  have hb : ∀ W : ι → Matrix n n ℂ, (∀ i, W i ∈ Matrix.unitaryGroup n ℂ) →
+      Matrix.blockDiagonal W ∈ Matrix.unitaryGroup (n × ι) ℂ := fun W hW => by
+    rw [Matrix.mem_unitaryGroup_iff', Matrix.star_eq_conjTranspose,
+      Matrix.blockDiagonal_conjTranspose, ← Matrix.blockDiagonal_mul]
+    simp only [← Matrix.star_eq_conjTranspose, Unitary.star_mul_self_of_mem (hW _)]
+    exact Matrix.blockDiagonal_one
+  have h : Matrix.blockDiagonal A = Matrix.blockDiagonal U *
+      Matrix.diagonal (fun x : n × ι => (complexSingularValue (A x.2) x.1 : ℂ)) *
+      (Matrix.blockDiagonal V)ᴴ := by
+    rw [← Matrix.blockDiagonal_diagonal fun i j => (complexSingularValue (A i) j : ℂ),
+      Matrix.blockDiagonal_conjTranspose, ← Matrix.blockDiagonal_mul, ← Matrix.blockDiagonal_mul]
+    exact congrArg Matrix.blockDiagonal (funext hA)
+  rw [h, complexSchattenNorm_unitary_mul_diagonal_mul hp (hb U hU) (hb V hV),
+    Fintype.sum_prod_type_right]
+  simp only [complexSchattenNorm_ofReal_rpow hp, Complex.norm_real,
+    Real.norm_of_nonneg (complexSingularValue_nonneg _ _)]
+
+/-- Real block diagonal matrices: `‖diag (A_i)‖_{S_q}^q = Σ ‖A_i‖_{S_q}^q`, from the complex case.
+-/
+theorem schattenNorm_blockDiagonal_rpow {q : ℝ} (hq : 0 < q) (A : ι → Matrix n n ℝ) :
     schattenNorm (ENNReal.ofReal q) (Matrix.blockDiagonal A) ^ q =
       ∑ i, schattenNorm (ENNReal.ofReal q) (A i) ^ q := by
-  have hA : ∀ i, ((A i)ᴴ * A i).IsHermitian := fun i =>
-    Matrix.isHermitian_conjTranspose_mul_self (A i)
-  -- diagonalise each block
-  set U : Matrix (n × ι) (n × ι) ℝ :=
-    Matrix.blockDiagonal fun i => ((hA i).eigenvectorUnitary : Matrix n n ℝ) with hU
-  have hUs : star U =
-      Matrix.blockDiagonal fun i => star ((hA i).eigenvectorUnitary : Matrix n n ℝ) := by
-    simp only [hU, Matrix.star_eq_conjTranspose, Matrix.blockDiagonal_conjTranspose]
-  have hUU : U ∈ Matrix.unitaryGroup (n × ι) ℝ := by
-    rw [Matrix.mem_unitaryGroup_iff, hUs, hU, ← Matrix.blockDiagonal_mul]
-    simp only [Unitary.mul_star_self_of_mem (hA _).eigenvectorUnitary.2]
-    exact Matrix.blockDiagonal_one
-  set μ : n × ι → ℝ := fun x => (hA x.2).eigenvalues x.1 with hμ
-  have hdiag : Matrix.diagonal μ =
-      Matrix.blockDiagonal fun i => Matrix.diagonal (hA i).eigenvalues := by
-    rw [Matrix.blockDiagonal_diagonal]
-  have h : (Matrix.blockDiagonal A)ᴴ * Matrix.blockDiagonal A =
-      (⟨U, hUU⟩ : Matrix.unitaryGroup (n × ι) ℝ) * Matrix.diagonal μ *
-        star ((⟨U, hUU⟩ : Matrix.unitaryGroup (n × ι) ℝ) : Matrix (n × ι) (n × ι) ℝ) := by
-    change _ = U * Matrix.diagonal μ * star U
-    rw [hUs, hdiag, hU, ← Matrix.blockDiagonal_mul, ← Matrix.blockDiagonal_mul,
-      Matrix.blockDiagonal_conjTranspose, ← Matrix.blockDiagonal_mul]
-    congr 1
-    funext i
-    exact eq_eigenvectorUnitary_mul_diagonal_mul_star (hA i)
-  have h1 := sum_comp_eq_of_map_eq (map_eigenvalues_eq_of_eq_mul_diagonal_mul_star
-    (Matrix.isHermitian_conjTranspose_mul_self (Matrix.blockDiagonal A)) ⟨U, hUU⟩ μ h)
-    fun x => √x ^ q
-  rw [schattenNorm_ofReal_rpow hq]
-  simp only [schattenNorm_ofReal_rpow hq, singularValue]
-  rw [h1, Fintype.sum_prod_type_right]
+  have hq0 := (ENNReal.ofReal_pos.2 hq).ne'
+  have h := complexSchattenNorm_blockDiagonal hq fun i => (A i).map Complex.ofReal
+  rw [← Matrix.blockDiagonal_map _ _ Complex.ofReal_zero] at h
+  simp only [complexSchattenNorm_map_ofReal hq0] at h
+  rw [h, one_div, Real.rpow_inv_rpow (Finset.sum_nonneg fun i _ =>
+    Real.rpow_nonneg (schattenNorm_nonneg _ _) _) hq.ne']
+
+/-- The isometric embedding of `ℓ^q (S_q)` in `S_q`, `1 ≤ q < ∞`, by block diagonal matrices. -/
+noncomputable def schattenBlockDiagonal (q : ℝ) [Fact (1 ≤ ENNReal.ofReal q)] :
+    PiLp (ENNReal.ofReal q) (fun _ : ι => SchattenSpace (ENNReal.ofReal q) n n) →ₗᵢ[ℝ]
+      SchattenSpace (ENNReal.ofReal q) (n × ι) (n × ι) where
+  toFun A := SchattenSpace.ofMatrix
+    (Matrix.blockDiagonal fun i => SchattenSpace.ofMatrix.symm (A i))
+  map_add' A B := by
+    rw [← map_add, ← Matrix.blockDiagonal_add]
+    rfl
+  map_smul' c A := by
+    rw [RingHom.id_apply, ← map_smul, ← Matrix.blockDiagonal_smul]
+    rfl
+  norm_map' A := by
+    have hq : 0 < q := zero_lt_one.trans_le (ENNReal.one_le_ofReal.1 Fact.out)
+    change schattenNorm (ENNReal.ofReal q)
+      (Matrix.blockDiagonal fun i => SchattenSpace.ofMatrix.symm (A i)) = ‖A‖
+    rw [PiLp.norm_eq_sum (by rwa [ENNReal.toReal_ofReal hq.le]), ENNReal.toReal_ofReal hq.le,
+      one_div, Real.eq_rpow_inv (schattenNorm_nonneg _ _)
+        (Finset.sum_nonneg fun i _ => Real.rpow_nonneg (norm_nonneg _) _) hq.ne',
+      schattenNorm_blockDiagonal_rpow hq]
+    rfl
+
+end BlockDiagonal
 
 end BanachProbability

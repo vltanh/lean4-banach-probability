@@ -21,10 +21,10 @@ The proofs, up to those of the last two results, are those of Hytönen–van Nee
 (HNVW), *Analysis in Banach spaces I* (2016), Appendix D: Lemma D.1.1 and (D.3) (p. 566), Lemma
 D.1.4 (pp. 567–568), Lemmas D.2.1–D.2.2 (pp. 570–571), Proposition D.2.3 (p. 571), Corollary D.2.4
 and Proposition D.2.5 (p. 572), and the first line of the proof of Theorem D.2.6 (p. 573). Two
-remarks on Corollary D.2.4. The proof in the book takes the logarithms of Horn's inequality; where
-some singular values vanish, this is completed here by the restriction to the positive singular
-values of `A B`. The book states it for exponents `p, q, r ≥ 1`; its proof, by Horn's inequality,
-gives it for all positive exponents, and it is stated for these.
+remarks on Corollary D.2.4. The proof in the book takes the logarithms of Horn's inequality; here
+this step is `sum_rpow_le_sum_rpow_of_weak_log_majorization`, in which the vanishing singular values
+are left out first. The book states the corollary for exponents `p, q, r ≥ 1`; its proof, by Horn's
+inequality, gives it for all positive exponents, and it is stated for these.
 
 The general Horn inequality, with its proof, is Lemma 1.1 of N. Tomczak-Jaegermann, *The moduli of
 smoothness and convexity and the Rademacher averages of trace classes `S_p` (`1 ≤ p < ∞`)*, Studia
@@ -424,7 +424,59 @@ theorem sum_le_sum_of_weak_majorization {f : ℝ → ℝ} (hf : ConvexOn ℝ Set
       exact hab k hk
   rwa [Finset.sum_congr rfl hmul, Finset.sum_sub_distrib, sub_nonneg] at h
 
+/-- Weak log-majorization (the first step of HNVW I, Corollary D.2.4, p. 572, for sequences): if
+`a, b ≥ 0` are nonincreasing with `Π_{j<k} a_j ≤ Π_{j<k} b_j` for all `k ≤ N`, then
+`Σ_{j<N} a_j^p ≤ Σ_{j<N} b_j^p` for every `p > 0`, by Lemma D.1.4 for the logarithms and for
+`f (t) = e^{p t}`. The last terms, as long as `a_j = 0`, are left out first; then all the `a_j`, and
+hence all the `b_j`, are positive. -/
+theorem sum_rpow_le_sum_rpow_of_weak_log_majorization {a b : ℕ → ℝ} (ha : Antitone a)
+    (hb : Antitone b) (ha0 : ∀ j, 0 ≤ a j) (hb0 : ∀ j, 0 ≤ b j) {p : ℝ} (hp : 0 < p) (N : ℕ)
+    (hab : ∀ k ≤ N, ∏ j ∈ Finset.range k, a j ≤ ∏ j ∈ Finset.range k, b j) :
+    ∑ j ∈ Finset.range N, a j ^ p ≤ ∑ j ∈ Finset.range N, b j ^ p := by
+  induction N with
+  | zero => simp
+  | succ N ih =>
+    rcases (ha0 N).eq_or_lt with h0 | h0
+    · rw [Finset.sum_range_succ, ← h0, Real.zero_rpow hp.ne', add_zero, Finset.sum_range_succ]
+      exact (ih fun k hk => hab k (hk.trans N.le_succ)).trans
+        (le_add_of_nonneg_right (Real.rpow_nonneg (hb0 N) p))
+    have hA : ∀ j < N + 1, 0 < a j := fun j hj => h0.trans_le (ha (Nat.lt_succ_iff.1 hj))
+    have hB : ∀ j < N + 1, 0 < b j := fun j hj => by
+      have h1 : 0 < ∏ i ∈ Finset.range (j + 1), a i := Finset.prod_pos fun i hi =>
+        hA i ((Finset.mem_range_succ_iff.1 hi).trans_lt hj)
+      exact (hb0 j).lt_of_ne' (Finset.prod_ne_zero_iff.1 (h1.trans_le (hab (j + 1) hj)).ne' j
+        (Finset.self_mem_range_succ j))
+    have hconv : ConvexOn ℝ Set.univ fun t : ℝ => Real.exp (p * t) := by
+      simpa only [Set.preimage_univ] using! convexOn_exp.comp_linearMap (LinearMap.mulLeft ℝ p)
+    have hmono : Monotone fun t : ℝ => Real.exp (p * t) := fun s t hst =>
+      Real.exp_le_exp.2 (mul_le_mul_of_nonneg_left hst hp.le)
+    have h := sum_le_sum_of_weak_majorization hconv hmono
+      (a := fun j => Real.log (a j)) (b := fun j => Real.log (b j)) (N + 1)
+      (fun i j hij hj => Real.log_le_log (hA j hj) (ha hij))
+      (fun i j hij hj => Real.log_le_log (hB j hj) (hb hij)) fun k hk => by
+        have hlt : ∀ j ∈ Finset.range k, j < N + 1 := fun j hj =>
+          (Finset.mem_range.1 hj).trans_le hk
+        rw [← Real.log_prod fun j hj => (hA j (hlt j hj)).ne',
+          ← Real.log_prod fun j hj => (hB j (hlt j hj)).ne']
+        exact Real.log_le_log (Finset.prod_pos fun j hj => hA j (hlt j hj)) (hab k hk)
+    refine (Finset.sum_congr rfl fun j hj => ?_).trans_le
+      (h.trans_eq (Finset.sum_congr rfl fun j hj => ?_))
+    · rw [Real.rpow_def_of_pos (hA j (Finset.mem_range.1 hj)), mul_comm]
+    · rw [Real.rpow_def_of_pos (hB j (Finset.mem_range.1 hj)), mul_comm]
+
 /-! ### Hölder's inequality -/
+
+/-- (HNVW I, Corollary D.2.4, first step) `Σ_{k < N} s_k (A B)^p ≤ Σ_{k < N} (s_k (A) s_k (B))^p`,
+from Horn's inequality. -/
+private theorem sum_sortedSingularValue_mul_rpow_le {p : ℝ} (hp : 0 < p) (A : Matrix l m ℝ)
+    (B : Matrix m n ℝ) (N : ℕ) :
+    ∑ k ∈ Finset.range N, sortedSingularValue (A * B) k ^ p ≤
+      ∑ k ∈ Finset.range N, (sortedSingularValue A k * sortedSingularValue B k) ^ p :=
+  sum_rpow_le_sum_rpow_of_weak_log_majorization (antitone_sortedSingularValue _)
+    (fun _ _ h => mul_le_mul (antitone_sortedSingularValue A h) (antitone_sortedSingularValue B h)
+      (sortedSingularValue_nonneg B _) (sortedSingularValue_nonneg A _))
+    (sortedSingularValue_nonneg _) (fun k => mul_nonneg (sortedSingularValue_nonneg A k)
+      (sortedSingularValue_nonneg B k)) hp N fun k _ => prod_sortedSingularValue_mul_le A B k
 
 omit [DecidableEq m] in
 /-- `(Σ_{k < K} s_k^q)^{1/q} ≤ ‖A‖_{S_q}` for every `K`. -/
@@ -443,46 +495,6 @@ private theorem rpow_sum_sortedSingularValue_le {q : ℝ} (hq : 0 < q) (A : Matr
         refine (Finset.sum_subset (Finset.range_mono (le_max_right _ _)) fun k _ hk => ?_).symm
         rw [sortedSingularValue_eq_zero A (by simpa using hk), Real.zero_rpow hq.ne']
 
-/-- (HNVW I, Corollary D.2.4, first step) `Σ_{k < K} s_k (A B)^p ≤ Σ_{k < K} (s_k (A) s_k (B))^p` if
-the first `K` singular values of `A B` are positive: the logarithms of Horn's inequality and
-Lemma D.1.4 with `f (t) = e^{p t}`. (The book takes the logarithms without a restriction on the
-singular values.) -/
-private theorem sum_sortedSingularValue_mul_rpow_le {p : ℝ} (hp : 0 < p) (A : Matrix l m ℝ)
-    (B : Matrix m n ℝ) {K : ℕ} (hK : ∀ k < K, 0 < sortedSingularValue (A * B) k) :
-    ∑ k ∈ Finset.range K, sortedSingularValue (A * B) k ^ p ≤
-      ∑ k ∈ Finset.range K, (sortedSingularValue A k * sortedSingularValue B k) ^ p := by
-  -- `s_k (A) s_k (B) > 0` for `k < K`, from Horn's inequality
-  have hAB : ∀ k < K, 0 < sortedSingularValue A k * sortedSingularValue B k := by
-    intro k hk
-    have h1 : 0 < ∏ j ∈ Finset.range (k + 1), sortedSingularValue (A * B) j :=
-      Finset.prod_pos fun j hj => hK j ((Finset.mem_range_succ_iff.1 hj).trans_lt hk)
-    have h2 := Finset.prod_ne_zero_iff.1
-      (h1.trans_le (prod_sortedSingularValue_mul_le A B (k + 1))).ne' k
-      (Finset.self_mem_range_succ k)
-    exact (mul_nonneg (sortedSingularValue_nonneg A k)
-      (sortedSingularValue_nonneg B k)).lt_of_ne' h2
-  have hconv : ConvexOn ℝ Set.univ fun t : ℝ => Real.exp (p * t) := by
-    simpa only [Set.preimage_univ] using! convexOn_exp.comp_linearMap (LinearMap.mulLeft ℝ p)
-  have hmono : Monotone fun t : ℝ => Real.exp (p * t) := fun s t hst =>
-    Real.exp_le_exp.2 (mul_le_mul_of_nonneg_left hst hp.le)
-  have h := sum_le_sum_of_weak_majorization hconv hmono
-    (a := fun k => Real.log (sortedSingularValue (A * B) k))
-    (b := fun k => Real.log (sortedSingularValue A k * sortedSingularValue B k)) K
-    (fun i j hij hj => Real.log_le_log (hK j hj) (antitone_sortedSingularValue _ hij))
-    (fun i j hij hj => Real.log_le_log (hAB j hj) (mul_le_mul (antitone_sortedSingularValue A hij)
-      (antitone_sortedSingularValue B hij) (sortedSingularValue_nonneg B j)
-      (sortedSingularValue_nonneg A i)))
-    fun k hk => by
-      have hlt : ∀ j ∈ Finset.range k, j < K := fun j hj => (Finset.mem_range.1 hj).trans_le hk
-      rw [← Real.log_prod fun j hj => (hK j (hlt j hj)).ne',
-        ← Real.log_prod fun j hj => (hAB j (hlt j hj)).ne']
-      exact Real.log_le_log (Finset.prod_pos fun j hj => hK j (hlt j hj))
-        (prod_sortedSingularValue_mul_le A B k)
-  refine (Finset.sum_congr rfl fun k hk => ?_).trans_le
-    (h.trans_eq (Finset.sum_congr rfl fun k hk => ?_))
-  · rw [Real.rpow_def_of_pos (hK k (Finset.mem_range.1 hk)), mul_comm]
-  · rw [Real.rpow_def_of_pos (hAB k (Finset.mem_range.1 hk)), mul_comm]
-
 /-- **Hölder's inequality** for Schatten norms (HNVW I, Corollary D.2.4, p. 572, there for exponents
 `p, q, r ≥ 1`): `‖A B‖_{S_p} ≤ ‖A‖_{S_q} ‖B‖_{S_r}`, `1/p = 1/q + 1/r`, for all `0 < q, r < ∞`. -/
 theorem schattenNorm_mul_le {p q r : ℝ} (hq : 0 < q) (hr : 0 < r) (hpqr : 1 / p = 1 / q + 1 / r)
@@ -491,30 +503,16 @@ theorem schattenNorm_mul_le {p q r : ℝ} (hq : 0 < q) (hr : 0 < r) (hpqr : 1 / 
       schattenNorm (ENNReal.ofReal q) A * schattenNorm (ENNReal.ofReal r) B := by
   have hp : 0 < p := one_div_pos.1 (hpqr ▸ by positivity)
   have hT : q.HolderTriple r p := ⟨by simpa only [one_div] using hpqr.symm, hq, hr⟩
-  -- the number `K` of nonzero singular values of `A B`
-  have hex : ∃ k, sortedSingularValue (A * B) k = 0 :=
-    ⟨Fintype.card n, sortedSingularValue_eq_zero _ le_rfl⟩
-  classical
-  set K := Nat.find hex with hKdef
-  have hK : ∀ k < K, 0 < sortedSingularValue (A * B) k := fun k hk =>
-    (sortedSingularValue_nonneg _ k).lt_of_ne' (Nat.find_min hex hk)
-  have hK0 : ∀ k, K ≤ k → sortedSingularValue (A * B) k = 0 := fun k hk =>
-    le_antisymm ((antitone_sortedSingularValue _ hk).trans (Nat.find_spec hex).le)
-      (sortedSingularValue_nonneg _ k)
-  have hKn : K ≤ Fintype.card n := Nat.find_min' hex (sortedSingularValue_eq_zero _ le_rfl)
-  have hsum : ∑ k ∈ Finset.range (Fintype.card n), sortedSingularValue (A * B) k ^ p =
-      ∑ k ∈ Finset.range K, sortedSingularValue (A * B) k ^ p := by
-    refine (Finset.sum_subset (Finset.range_mono hKn) fun k _ hk => ?_).symm
-    rw [hK0 k (by simpa using hk), Real.zero_rpow hp.ne']
+  set K := Fintype.card n
   have hA0 : 0 ≤ ∑ k ∈ Finset.range K, sortedSingularValue A k ^ q :=
     Finset.sum_nonneg fun k _ => Real.rpow_nonneg (sortedSingularValue_nonneg A k) q
   have hB0 : 0 ≤ ∑ k ∈ Finset.range K, sortedSingularValue B k ^ r :=
     Finset.sum_nonneg fun k _ => Real.rpow_nonneg (sortedSingularValue_nonneg B k) r
   -- Horn's inequality, then the scalar Hölder inequality
-  have h := (sum_sortedSingularValue_mul_rpow_le hp A B hK).trans
+  have h := (sum_sortedSingularValue_mul_rpow_le hp A B K).trans
     (Real.Lr_rpow_le_Lp_mul_Lq_of_nonneg (Finset.range K) hT
       (fun k _ => sortedSingularValue_nonneg A k) fun k _ => sortedSingularValue_nonneg B k)
-  rw [schattenNorm_eq_sum_sortedSingularValue hp, hsum]
+  rw [schattenNorm_eq_sum_sortedSingularValue hp]
   calc (∑ k ∈ Finset.range K, sortedSingularValue (A * B) k ^ p) ^ (1 / p)
       ≤ ((∑ k ∈ Finset.range K, sortedSingularValue A k ^ q) ^ (p / q) *
           (∑ k ∈ Finset.range K, sortedSingularValue B k ^ r) ^ (p / r)) ^ (1 / p) :=
@@ -632,33 +630,12 @@ theorem abs_trace_mul_le {q q' : ℝ} (hq : q.HolderConjugate q') (A : Matrix n 
 /-- **Horn's inequality**, in the additive form: `Σ_{k<N} s_k (A B) ≤ Σ_{k<N} s_k (A) s_k (B)`
 (Tomczak-Jaegermann (1974), p. 165, the case of two factors of Lemma 1.1, quoted there as the
 classical Horn inequality). It follows from the multiplicative form
-`prod_sortedSingularValue_mul_le` and the weak majorization lemma, by the first step of Corollary
-D.2.4 of HNVW I with the exponent `1`, after the restriction to the positive singular values of
-`A B`. -/
+`prod_sortedSingularValue_mul_le` by weak log-majorization, the first step of Corollary D.2.4 of
+HNVW I, with the exponent `1`. -/
 theorem sum_sortedSingularValue_mul_le (A : Matrix l m ℝ) (B : Matrix m n ℝ) (N : ℕ) :
     ∑ k ∈ Finset.range N, sortedSingularValue (A * B) k ≤
       ∑ k ∈ Finset.range N, sortedSingularValue A k * sortedSingularValue B k := by
-  classical
-  have hex : ∃ k, sortedSingularValue (A * B) k = 0 :=
-    ⟨Fintype.card n, sortedSingularValue_eq_zero _ le_rfl⟩
-  -- the first `K` of the first `N` singular values of `A B` are positive, the others are zero
-  set K := min N (Nat.find hex)
-  have hK : ∀ k < K, 0 < sortedSingularValue (A * B) k := fun k hk =>
-    (sortedSingularValue_nonneg _ k).lt_of_ne'
-      (Nat.find_min hex (hk.trans_le (min_le_right _ _)))
-  have hKN : Finset.range K ⊆ Finset.range N := Finset.range_mono (min_le_left _ _)
-  have hK0 : ∀ k ∈ Finset.range N, k ∉ Finset.range K → sortedSingularValue (A * B) k = 0 :=
-    fun k hkN hk => by
-      have hfind : Nat.find hex ≤ k := by
-        rw [Finset.mem_range, not_lt, min_le_iff] at hk
-        exact hk.resolve_left (not_le.2 (Finset.mem_range.1 hkN))
-      exact le_antisymm ((antitone_sortedSingularValue _ hfind).trans (Nat.find_spec hex).le)
-        (sortedSingularValue_nonneg _ k)
-  have h := sum_sortedSingularValue_mul_rpow_le one_pos A B hK
-  simp only [Real.rpow_one] at h
-  rw [← Finset.sum_subset hKN hK0]
-  exact h.trans (Finset.sum_le_sum_of_subset_of_nonneg hKN fun k _ _ =>
-    mul_nonneg (sortedSingularValue_nonneg A k) (sortedSingularValue_nonneg B k))
+  simpa only [Real.rpow_one] using sum_sortedSingularValue_mul_rpow_le one_pos A B N
 
 /-- The singular values of the identity are at most `1`. -/
 private theorem sortedSingularValue_one_le (k : ℕ) :

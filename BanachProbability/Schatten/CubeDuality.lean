@@ -17,8 +17,10 @@ paragraph of the proof of Theorem D.2.6, p. 573: the trace duality of `S_{q'}` a
 contractive, and it is isometric, by the test element `u = Σ_k τ_k^{q−1} e_k f_kᵀ` of
 `v = Σ_k τ_k f_k e_kᵀ` (`u = N (v)ᵀ`, `trNormingElement`). The book treats a single operator; here
 it is the duality of functions on the sign cube, by the same test element at every point, times a
-constant. (The duality `⟨A, B⟩ = tr A Bᴴ` of Lust-Piquard and Pisier, *Non commutative Khintchine
-and Paley inequalities*, Ark. Mat. 29 (1991), p. 245.)
+constant. The pairing `⟨Y, X⟩ = tr (Yᵀ X) = tr (X Yᵀ)` at a point is the real form of the duality
+`⟨A, B⟩ = tr A Bᴴ` of F. Lust-Piquard and G. Pisier, *Non commutative Khintchine and Paley
+inequalities*, Ark. Mat. 29 (1991) 241–260, p. 245, who cite B. Simon, *Trace ideals and their
+applications* (1979), Theorem 3.2, for the dual of `C_E`.
 -/
 
 @[expose] public section
@@ -104,13 +106,12 @@ private theorem transpose_mul_cfc_mul (A : Matrix n n ℝ) (f : ℝ → ℝ) :
     cfc_id' ℝ _ hA]
 
 /-- `tr (N (A)ᵀ A) = Σ_k τ_k^q = ‖A‖_{S_q}^q` (HNVW I, proof of Theorem D.2.6, p. 573). -/
-theorem trace_transpose_trNormingElement_mul {q : ℝ} (hq : 1 < q) (A : Matrix n n ℝ) :
+theorem trace_transpose_trNormingElement_mul {q : ℝ} (hq : 0 < q) (A : Matrix n n ℝ) :
     ((trNormingElement q A)ᵀ * A).trace = schattenNorm (ENNReal.ofReal q) A ^ q := by
   have hA : (Aᵀ * A).IsHermitian := Matrix.isHermitian_conjTranspose_mul_self A
   -- `tr (N (A)ᵀ A) = tr (f (Aᵀ A) Aᵀ A) = Σ s_i^{q−2} s_i²`
-  rw [trNormingElement, transpose_mul_cfc_mul, trace_cfc_eq_sum hA,
-    schattenNorm_ofReal_rpow (by linarith)]
-  exact Finset.sum_congr rfl fun i _ => rpow_mul_self_eq (by linarith)
+  rw [trNormingElement, transpose_mul_cfc_mul, trace_cfc_eq_sum hA, schattenNorm_ofReal_rpow hq]
+  exact Finset.sum_congr rfl fun i _ => rpow_mul_self_eq hq
     (Matrix.eigenvalues_conjTranspose_mul_self_nonneg A i)
 
 /-- `‖N (A)‖_{S_{q'}} = ‖A‖_{S_q}^{q−1}`, that is `‖N (A)‖_{S_{q'}}^{q'} = ‖A‖_{S_q}^q` (HNVW I,
@@ -176,7 +177,7 @@ theorem exists_avg_trace_transpose_mul_eq_lpNorm {q q' : ℝ} (hq : q.HolderConj
     have ht : ∀ ε, (((L ^ (q - 1))⁻¹ • trNormingElement q (X ε))ᵀ * X ε).trace =
         (L ^ (q - 1))⁻¹ * schattenNorm (ENNReal.ofReal q) (X ε) ^ q := fun ε => by
       rw [Matrix.transpose_smul, Matrix.smul_mul, Matrix.trace_smul,
-        trace_transpose_trNormingElement_mul hq.lt, smul_eq_mul]
+        trace_transpose_trNormingElement_mul hq.pos, smul_eq_mul]
     simp only [ht]
     rw [avg_const_mul, hLq]
     rcases hL.eq_or_lt with h | h

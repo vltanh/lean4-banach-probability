@@ -8,8 +8,7 @@ import Mathlib.LinearAlgebra.Multilinear.Basic
 /-!
 # Type 2 of the Schatten classes with even exponents
 
-For matrices `A_1, …, A_N` and `k ≥ 1`, with `M_{2k} = ((2k)! / (2^k k!))^{1/2k}` (the best constant
-in the scalar Khintchine inequality for the exponent `2k`),
+For matrices `A_1, …, A_N` and `k ≥ 1`, with `M_{2k} = ((2k)! / (2^k k!))^{1/2k}`,
 
 `(E ‖Σ ε_i A_i‖_{S_{2k}}^{2k})^{1/2k} ≤ M_{2k} (Σ ‖A_i‖_{S_{2k}}²)^{1/2}`
 
@@ -40,7 +39,8 @@ variable {N : ℕ} {n : Type*} [Fintype n] [DecidableEq n]
 noncomputable def evenKhintchineConst (k : ℕ) : ℝ :=
   (((2 * k).factorial : ℝ) / (2 ^ k * k.factorial)) ^ (1 / (2 * k : ℝ))
 
-private theorem evenKhintchineConst_nonneg (k : ℕ) : 0 ≤ evenKhintchineConst k :=
+/-- `M_{2k} ≥ 0`. -/
+theorem evenKhintchineConst_nonneg (k : ℕ) : 0 ≤ evenKhintchineConst k :=
   Real.rpow_nonneg (by positivity) _
 
 /-- `M_{2k}^{2k} = (2k)! / (2^k k!)`. -/
@@ -100,8 +100,8 @@ private theorem avg_prod_coin_pow (β : Fin N → ℕ) :
       neg_one_mul]
 
 /-- The comparison of the multinomial coefficients (Tomczak-Jaegermann (1974), p. 177):
-`(2k)! / Π (2β_i)! ≤ ((2k)! / (2^k k!)) (k! / Π β_i!)` if `Σ β_i = k`, since
-`(2β)! ≥ (2β)!! = 2^β β!`; here multiplied by `2^k k!`. (The source refers to the literature.) -/
+`(2k)! / Π (2β_i)! ≤ ((2k)! / (2^k k!)) (k! / Π β_i!)` if `Σ β_i = k`, since `(2β)! ≥ 2^β β!`; here
+multiplied by `2^k k!`. (The source refers to the literature.) -/
 private theorem multinomial_two_mul_le {k : ℕ} {β : Fin N → ℕ} (hβ : ∑ i, β i = k) :
     Nat.multinomial Finset.univ (fun i => 2 * β i) * (2 ^ k * k.factorial) ≤
       (2 * k).factorial * Nat.multinomial Finset.univ β := by
@@ -111,9 +111,7 @@ private theorem multinomial_two_mul_le {k : ℕ} {β : Fin N → ℕ} (hβ : ∑
   rw [hβ] at h2
   have h3 : 2 ^ k * ∏ i, (β i).factorial ≤ ∏ i, (2 * β i).factorial := by
     rw [← hβ, ← Finset.prod_pow_eq_pow_sum, ← Finset.prod_mul_distrib]
-    refine Finset.prod_le_prod fun i _ => ?_
-    rw [← Nat.doubleFactorial_two_mul]
-    exact Nat.doubleFactorial_le_factorial _
+    exact Finset.prod_le_prod fun i _ => Nat.two_pow_mul_factorial_le_factorial_two_mul _
   calc Nat.multinomial Finset.univ (fun i => 2 * β i) * (2 ^ k * k.factorial)
       = (2 ^ k * ∏ i, (β i).factorial) * Nat.multinomial Finset.univ (fun i => 2 * β i) *
           Nat.multinomial Finset.univ β := by rw [← h2]; ring
@@ -121,8 +119,9 @@ private theorem multinomial_two_mul_le {k : ℕ} {β : Fin N → ℕ} (hβ : ∑
           Nat.multinomial Finset.univ β := by gcongr
     _ = (2 * k).factorial * Nat.multinomial Finset.univ β := by rw [h1]
 
-/-- `E (Σ ε_i a_i)^{2k} = Σ_{β_1 + ⋯ + β_N = k} ((2k)! / Π (2β_i)!) Π a_i^{2β_i}`: in the expansion
-the terms with an odd exponent have expectation `0` (Tomczak-Jaegermann (1974), pp. 176–177). -/
+/-- The scalar part of the argument: in the expansion of the power, the terms with an odd exponent
+have expectation `0` (Tomczak-Jaegermann (1974), pp. 176–177), so
+`E (Σ ε_i a_i)^{2k} = Σ_{β_1 + ⋯ + β_N = k} ((2k)! / Π (2β_i)!) Π a_i^{2β_i}`. -/
 private theorem avg_sum_coin_mul_pow (k : ℕ) (a : Fin N → ℝ) :
     (avg fun ε : Fin N → Bool => (∑ i, coin (ε i) * a i) ^ (2 * k)) =
       ∑ β ∈ Finset.piAntidiag Finset.univ k,
@@ -146,8 +145,9 @@ private theorem avg_sum_coin_mul_pow (k : ℕ) (a : Fin N → ℝ) :
   rw [← Finset.sum_filter, heven, Finset.sum_map]
   rfl
 
-/-- The scalar Khintchine inequality for an even exponent, with the constant `M_{2k}`
-(Tomczak-Jaegermann (1974), p. 177): `E (Σ ε_i a_i)^{2k} ≤ M_{2k}^{2k} (Σ a_i²)^k`. -/
+/-- The scalar part of the argument (Tomczak-Jaegermann (1974), p. 177, for the numbers
+`a_i = s_j (A_i)`), which is the Khintchine inequality for an even exponent, with the constant
+`M_{2k}`: `E (Σ ε_i a_i)^{2k} ≤ M_{2k}^{2k} (Σ a_i²)^k`. -/
 theorem avg_sum_coin_mul_pow_le {k : ℕ} (hk : 1 ≤ k) (a : Fin N → ℝ) :
     (avg fun ε : Fin N → Bool => (∑ i, coin (ε i) * a i) ^ (2 * k)) ≤
       evenKhintchineConst k ^ (2 * k) * (∑ i, a i ^ 2) ^ k := by

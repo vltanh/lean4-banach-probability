@@ -12,8 +12,10 @@ For vectors `x_k` in a normed space, independent real signs `ε_k`, `1 ≤ p < �
 and the same with the factor `π/2` for complex `c_k` (`lpNorm_sum_coin_smul_le_pi_div_two_mul`).
 Source: Hytönen–van Neerven–Veraar–Weis (HNVW), *Analysis in Banach spaces I* (2016), Proposition
 3.2.10, pp. 181–182, with its proof from Lemma 3.2.11, pp. 182 and 185–186, and Proposition 3.2.14,
-pp. 184–185; and *II* (2017), Theorem 6.1.13, pp. 9–10. Of the latter, only the case `ξ_k = ε_k x_k`
-of real signs is proved, for `p < ∞`; complex signs and the sharpness of `π/2` are not treated.
+pp. 184–185; this is also the case `ξ_k = ε_k x_k` of Theorem 6.1.13 of *II* (2017), pp. 9–10, for
+independent symmetric random variables `ξ_k`. Here the signs are real and `p < ∞`; complex signs and
+the sharpness of `π/2` are not treated. Theorem 6.1.13 (i) for Gaussian sums, `ξ_k = g_k x_k`, with
+`p = 2` and real scalars, is `integral_stdGaussian_smul_le` in `BanachProbability.KConvexity.Basic`.
 
 The proof: the vector `(c_k)` is a combination `Σ_η w_η η` of sign vectors `η`, with `Σ |w_η| ≤ 1`
 for real and `Σ |w_η| ≤ π/2` for complex `c_k` (Proposition 3.2.14); then the triangle inequality,

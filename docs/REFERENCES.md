@@ -48,9 +48,11 @@ Works cited in the README, in [SHORTER_PROOFS.md](SHORTER_PROOFS.md) and in the 
   https://doi.org/10.4064/sm-70-3-231-283
 - P. Hitczenko, *On tangent sequences of UMD-space valued random vectors*, unpublished manuscript (as
   cited by Cox–Veraar (2007), without a year).
-- T. Hytönen, J. van Neerven, M. Veraar, L. Weis (HNVW), *Analysis in Banach Spaces I* (2016), *II*
-  (2017), *III* (2023), Springer. https://doi.org/10.1007/978-3-319-48520-1,
-  https://doi.org/10.1007/978-3-319-69808-3, https://doi.org/10.1007/978-3-031-46598-7
+- T. Hytönen, J. van Neerven, M. Veraar, L. Weis (HNVW), *Analysis in Banach Spaces*, Springer. *Volume
+  I: Martingales and Littlewood–Paley Theory* (2016), https://doi.org/10.1007/978-3-319-48520-1;
+  *Volume II: Probabilistic Methods and Operator Theory* (2017),
+  https://doi.org/10.1007/978-3-319-69808-3; *Volume III: Harmonic Analysis and Spectral Theory* (2023),
+  https://doi.org/10.1007/978-3-031-46598-7
 - S. Janson, *Gaussian Hilbert Spaces*, Cambridge University Press (1997).
   https://doi.org/10.1017/CBO9780511526169
 - J.-P. Kahane, *Sur les sommes vectorielles `Σ ±u_n`*, C. R. Acad. Sci. Paris 259 (1964) 2577–2580.
@@ -93,9 +95,11 @@ Works cited in the README, in [SHORTER_PROOFS.md](SHORTER_PROOFS.md) and in the 
   1459–1517. https://doi.org/10.1016/s1874-5849(03)80041-4
 - N. Randrianantoanina, *Non-commutative martingale transforms*, J. Funct. Anal. 194 (2002) 181–212.
   https://doi.org/10.1006/jfan.2002.3952, [arXiv:math/0111264](https://arxiv.org/abs/math/0111264)
+- B. Simon, *Trace ideals and their applications*, London Math. Soc. Lecture Note Series 35, Cambridge
+  University Press (1979); as cited by Lust-Piquard–Pisier (1991).
 - D. Sutter, M. Berta, M. Tomamichel, *Multivariate trace inequalities*, Comm. Math. Phys. 352 (2017)
   37–58. https://doi.org/10.1007/s00220-016-2778-5, [arXiv:1604.03023](https://arxiv.org/abs/1604.03023)
 - N. Tomczak-Jaegermann, *The moduli of smoothness and convexity and the Rademacher averages of trace
-  classes `S_p`*, Studia Math. 50 (1974) 163–182.
+  classes `S_p` (`1 ≤ p < ∞`)*, Studia Math. 50 (1974) 163–182.
 - I. Yaroslavtsev, *Even Fourier multipliers and martingale transforms in infinite dimensions*, Indag.
   Math. 29 (2018) 1290–1309. https://doi.org/10.1016/j.indag.2018.05.014

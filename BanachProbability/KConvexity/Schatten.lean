@@ -8,18 +8,27 @@ import BanachProbability.Schatten.Block
 /-!
 # The Rademacher projection on `L^q (Ω; S_q)`
 
-For `q ≥ 2` the Rademacher projection (real signs) is bounded on `L^q (Ω; S_q)`, real square
-matrices, with norm at most `√(π/2) √(q + 1)`, uniformly in the size
-(`lpNorm_rademacherProj_schattenNorm_le`), and, by duality, with the same bound on
-`L^{q'} (Ω; S_{q'})` (`lpNorm_rademacherProj_schattenNorm_conj_le`). The proof is G. Pisier's,
-*Non-commutative vector valued `L_p`-spaces and completely `p`-summing maps*, Astérisque 247 (1998),
-p. 106, for the projection `P_1 ⊗ I_X`, `X = S_q`: by averaging, its norm on `L_q (X)` is at most
-`K (L_q (X))`, the K-convexity constant of `L_q (X)`; this is `K (S_q)`, because `ℓ_q (S_q)` embeds
-isometrically in `S_q` (block diagonal matrices); and `K (S_q)` is dominated by the type 2 constant
-(here up to the factor `√(π/2)`). The second statement is implicit there: Pisier uses the duality
-only with (8.4.4), the noncommutative Khintchine inequality for `1 ≤ p ≤ 2`, to get the inequality
-for `p ≥ 2`. Here it follows from `E tr (Yᵀ π_N f) = E tr ((π_N Y)ᵀ f)` and the isometric duality of
-`L^q (Ω; S_q)` and `L^{q'} (Ω; S_{q'})`, `BanachProbability.Schatten.CubeDuality`.
+Let `Ω = {±1}^N` be the sign cube, with the uniform probability. For `q ≥ 2` the Rademacher
+projection (real signs) is bounded on `L^q (Ω; S_q)`, real square matrices, with norm at most
+`√(π/2) √(q + 1)`, uniformly in `N` and in the size (`lpNorm_rademacherProj_schattenNorm_le`), and,
+by duality, with the same bound on `L^{q'} (Ω; S_{q'})`
+(`lpNorm_rademacherProj_schattenNorm_conj_le`). The proof is G. Pisier's, *Non-commutative vector
+valued `L_p`-spaces and completely `p`-summing maps*, Astérisque 247 (1998), p. 106, for the
+projection `P_1 ⊗ I_X`, `X = S_q`:
+
+1. averaging: for every normed space `X`, its norm on `L_p (X)` is at most `K (L_p (X))`, the
+   K-convexity constant, in `L²`, of `L_p (X)` (`isKConvexBound_of_piLp`);
+2. `K (L_q (S_q)) = K (S_q)`, because `ℓ_q (S_q)` embeds isometrically in `S_q`, by block diagonal
+   matrices (`schattenBlockDiagonal`), and the K-convexity constant of a subspace is at most that of
+   the space (`IsKConvexBound.of_linearIsometry`); only `≤` is needed;
+3. `K (S_q)` is dominated by the type 2 constant of `S_q`, here up to the factor `√(π/2)`
+   (`IsTypeTwoBound.isKConvexBound`), and this is of order `√q`, by Tomczak-Jaegermann's theorem;
+   `√(q + 1)` is the bound for it in `isTypeTwoBound_schattenSpace`.
+
+The second statement is implicit there: Pisier uses the duality only with (8.4.4), the
+noncommutative Khintchine inequality for `1 ≤ p ≤ 2`, to get the inequality for `p ≥ 2`. Here it
+follows from `E tr (Yᵀ π_N f) = E tr ((π_N Y)ᵀ f)` and the isometric duality of `L^q (Ω; S_q)` and
+`L^{q'} (Ω; S_{q'})`, `BanachProbability.Schatten.CubeDuality`.
 -/
 
 @[expose] public section
@@ -30,24 +39,76 @@ namespace BanachProbability
 
 open SignCube
 
-variable {N : ℕ} {n : Type*} [Fintype n] [DecidableEq n]
+/-! ### Averaging, and subspaces -/
 
-/-- The product of sign vectors is commutative. -/
-private theorem kcs_mul_comm (ε η : Fin N → Bool) : mul ε η = mul η ε := by
-  funext k
-  simp only [mul]
-  cases ε k <;> cases η k <;> rfl
+section General
+
+variable {N : ℕ} {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {p K : ℝ}
 
 /-- `E_ω ω_k f (ω η) = η_k E_ω ω_k f (ω)`, by translation invariance (stated for the sums over the
 cube). -/
-private theorem kcs_sum_translate {V : Type*} [AddCommGroup V] [Module ℝ V]
-    (f : (Fin N → Bool) → V) (η : Fin N → Bool) (k : Fin N) :
+private theorem kcs_sum_translate (f : (Fin N → Bool) → X) (η : Fin N → Bool) (k : Fin N) :
     ∑ ω, coin (ω k) • f (mul ω η) = coin (η k) • ∑ ω, coin (ω k) • f ω := by
   rw [← Equiv.sum_comp ((scb_mul_involutive η).toPerm _) fun ω => coin (ω k) • f ω,
     Finset.smul_sum]
   refine Finset.sum_congr rfl fun ω _ => ?_
+  have hc : mul ω η = mul η ω := funext fun _ => Bool.beq_comm
   change _ = coin (η k) • coin (mul η ω k) • f (mul η ω)
-  rw [coin_mul_apply, smul_smul, ← mul_assoc, coin_mul_self, one_mul, kcs_mul_comm]
+  rw [coin_mul_apply, smul_smul, ← mul_assoc, coin_mul_self, one_mul, hc]
+
+/-- The first step of the source (Pisier (1998), p. 106, "by a standard averaging technique"): the
+norm of the Rademacher projection on `L_p (Ω; X)` is at most the K-convexity constant, in `L²`, of
+the spaces `L_p (Ω; X)`. These are taken with the counting measure on `Ω = {±1}^M`, as the constant
+does not depend on the normalisation. The projection is applied to the function `ω ↦ f (ω ·)` with
+values in `L_p (Ω; X)`, whose norm does not depend on `ω`. -/
+theorem isKConvexBound_of_piLp [Fact (1 ≤ ENNReal.ofReal p)]
+    (h : ∀ M : ℕ, IsKConvexBound (PiLp (ENNReal.ofReal p) fun _ : Fin M → Bool => X) 2 K) :
+    IsKConvexBound X p K := by
+  intro N f
+  have hp : 0 < p := zero_lt_one.trans_le (ENNReal.one_le_ofReal.1 Fact.out)
+  set F : ((Fin N → Bool) → X) → (Fin N → Bool) →
+      PiLp (ENNReal.ofReal p) fun _ : Fin N → Bool => X := fun g ω =>
+    WithLp.toLp _ fun η => g (mul ω η) with hFdef
+  -- `‖g (ω ·)‖ = 2^{N/p} ‖g‖_{L^p}`
+  have hF : ∀ g ω, ‖F g ω‖ = ((2 : ℝ) ^ N) ^ (1 / p) * SignCube.lpNorm (fun y => ‖y‖) p g :=
+    fun g ω => by
+      have h1 : ∑ η, ‖g (mul ω η)‖ ^ p = 2 ^ N * avg fun η => ‖g η‖ ^ p := by
+        rw [← avg_mul_left ω, avg, mul_div_cancel₀ _ (by positivity)]
+      rw [PiLp.norm_eq_sum (by rwa [ENNReal.toReal_ofReal hp.le]), ENNReal.toReal_ofReal hp.le, h1,
+        Real.mul_rpow (by positivity) (avg_nonneg fun _ => by positivity), SignCube.lpNorm]
+  have hL2 : ∀ g, SignCube.lpNorm (fun y => ‖y‖) 2 (F g) =
+      ((2 : ℝ) ^ N) ^ (1 / p) * SignCube.lpNorm (fun y => ‖y‖) p g := fun g => by
+    conv_lhs => rw [SignCube.lpNorm]
+    simp only [hF]
+    rw [avg_const, one_div 2, Real.rpow_rpow_inv (mul_nonneg (by positivity)
+      (lpNorm_nonneg (fun _ => norm_nonneg _) _ _)) two_ne_zero]
+  -- the projection of `ω ↦ f (ω ·)` is `ω ↦ (π_N f) (ω ·)`
+  have hP : rademacherProj (F f) = F (rademacherProj f) := by
+    funext ω
+    ext η
+    simp only [hFdef, rademacherProj, rademacherCoeff, WithLp.ofLp_sum, WithLp.ofLp_smul,
+      Finset.sum_apply, Pi.smul_apply]
+    refine Finset.sum_congr rfl fun k _ => ?_
+    rw [kcs_sum_translate, coin_mul_apply, smul_comm ((2 : ℝ) ^ N)⁻¹ (coin (η k)), smul_smul]
+  have hK := h N N (F f)
+  rw [hP, hL2, hL2, mul_left_comm] at hK
+  exact le_of_mul_le_mul_left hK (by positivity)
+
+/-- The K-convexity constant of a space that embeds isometrically in `Y` is at most that of `Y`
+(Pisier (1998), p. 106, for `ℓ_p (S_p)` and `S_p`). -/
+theorem IsKConvexBound.of_linearIsometry {Y : Type*} [NormedAddCommGroup Y] [NormedSpace ℝ Y]
+    (h : IsKConvexBound Y p K) (T : X →ₗᵢ[ℝ] Y) : IsKConvexBound X p K := by
+  intro N f
+  have hT : rademacherProj (fun ε => T (f ε)) = fun ε => T (rademacherProj f ε) := by
+    funext ε
+    simp only [rademacherProj, rademacherCoeff, map_sum, map_smul]
+  simpa only [hT, SignCube.lpNorm, T.norm_map] using h N fun ε => T (f ε)
+
+end General
+
+/-! ### The Schatten classes -/
+
+variable {N : ℕ} {n : Type*} [Fintype n] [DecidableEq n]
 
 /-- **The Rademacher projection on `L^q (Ω; S_q)`**, `q ≥ 2` (Pisier (1998), p. 106): its norm is at
 most `√(π/2) √(q + 1)`. -/
@@ -55,51 +116,12 @@ theorem lpNorm_rademacherProj_schattenNorm_le {q : ℝ} (hq : 2 ≤ q)
     (f : (Fin N → Bool) → Matrix n n ℝ) :
     SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q (rademacherProj f) ≤
       √(Real.pi / 2) * √(q + 1) * SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q f := by
-  have hq0 : 0 < q := by linarith
   have : Fact (1 ≤ ENNReal.ofReal q) := ⟨ENNReal.one_le_ofReal.2 (by linarith)⟩
-  have hs0 : ∀ A : Matrix n n ℝ, 0 ≤ schattenNorm (ENNReal.ofReal q) A :=
-    fun A => schattenNorm_nonneg _ A
-  -- `ℓ^q (Ω; S_q)` embeds isometrically in `S_q`
-  let B : ((Fin N → Bool) → Matrix n n ℝ) →ₗ[ℝ]
-      SchattenSpace (ENNReal.ofReal q) (n × (Fin N → Bool)) (n × (Fin N → Bool)) :=
-    { toFun := fun G => SchattenSpace.ofMatrix (Matrix.blockDiagonal G)
-      map_add' := fun G H => by rw [Matrix.blockDiagonal_add, map_add]
-      map_smul' := fun c G => by rw [Matrix.blockDiagonal_smul, map_smul, RingHom.id_apply] }
-  have hB : ∀ G : (Fin N → Bool) → Matrix n n ℝ,
-      ‖B G‖ ^ q = ∑ η, schattenNorm (ENNReal.ofReal q) (G η) ^ q := fun G =>
-    schattenNorm_blockDiagonal_rpow hq0 G
-  -- the norm of the block diagonal of the translates `g (ω ·)`
-  have hBg : ∀ (g : (Fin N → Bool) → Matrix n n ℝ) (ω : Fin N → Bool),
-      ‖B fun η => g (mul ω η)‖ = ((2 : ℝ) ^ N) ^ (1 / q) *
-        SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q g := fun g ω => by
-    have h1 : ‖B fun η => g (mul ω η)‖ ^ q =
-        2 ^ N * avg fun η => schattenNorm (ENNReal.ofReal q) (g η) ^ q := by
-      rw [hB, ← avg_mul_left ω, avg, mul_div_cancel₀ _ (by positivity)]
-    rw [SignCube.lpNorm, ← Real.mul_rpow (by positivity)
-      (avg_nonneg fun _ => Real.rpow_nonneg (hs0 _) _), ← h1, one_div,
-      Real.rpow_rpow_inv (norm_nonneg _) hq0.ne']
-  have hL2 : ∀ g : (Fin N → Bool) → Matrix n n ℝ,
-      SignCube.lpNorm (fun y => ‖y‖) 2 (fun ω => B fun η => g (mul ω η)) =
-        ((2 : ℝ) ^ N) ^ (1 / q) * SignCube.lpNorm (schattenNorm (ENNReal.ofReal q)) q g :=
-    fun g => by
-      conv_lhs => rw [SignCube.lpNorm]
-      simp only [hBg]
-      rw [avg_const, one_div 2, Real.rpow_rpow_inv (mul_nonneg (by positivity)
-        (lpNorm_nonneg hs0 _ _)) two_ne_zero]
-  -- the Rademacher projection of the block diagonal of the translates
-  have hP : rademacherProj (fun ω => B fun η => f (mul ω η)) =
-      fun ω => B fun η => rademacherProj f (mul ω η) := by
-    funext ω
-    simp only [rademacherProj, rademacherCoeff, ← map_smul, ← map_sum]
-    congr 1
-    funext η
-    simp only [Finset.sum_apply, Pi.smul_apply]
-    refine Finset.sum_congr rfl fun k _ => ?_
-    rw [kcs_sum_translate, coin_mul_apply, smul_comm ((2 : ℝ) ^ N)⁻¹ (coin (η k)), smul_smul]
-  have hK := (isTypeTwoBound_schattenSpace (n := n × (Fin N → Bool)) hq).isKConvexBound N
-    fun ω => B fun η => f (mul ω η)
-  rw [hP, hL2 f, hL2 (rademacherProj f), mul_left_comm] at hK
-  exact le_of_mul_le_mul_left hK (by positivity)
+  -- `K (S_q) ≤ √(π/2) √(q + 1)`, for matrices of every size, and `ℓ_q (S_q)` embeds in `S_q`
+  have h : IsKConvexBound (SchattenSpace (ENNReal.ofReal q) n n) q (√(Real.pi / 2) * √(q + 1)) :=
+    isKConvexBound_of_piLp fun M => (isTypeTwoBound_schattenSpace
+      (n := n × (Fin M → Bool)) hq).isKConvexBound.of_linearIsometry (schattenBlockDiagonal q)
+  exact h N f
 
 omit [DecidableEq n] in
 /-- `E tr ((Σ_k ε_k c_k) Y) = Σ_k tr (c_k E (ε_k Y))`. -/

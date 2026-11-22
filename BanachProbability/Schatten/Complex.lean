@@ -12,9 +12,11 @@ as in the real case (`schattenNorm`). With the *realification*
 `realify A = [[Re A, −Im A], [Im A, Re A]]`, a real `2m × 2n` matrix, every singular value of `A`
 occurs twice, so `‖A‖_{S_q} = 2^{−1/q} ‖realify A‖_{S_q}` (`complexSchattenNorm_eq_realify`), and
 the facts about real Schatten norms carry over: norm axioms, adjoints,
-`‖Aᴴ A‖_{S_{q/2}} = ‖A‖_{S_q}²`, Hölder's inequality. `ComplexSchattenSpace q m n` is the resulting
-complex normed space; as a real space it embeds isometrically in `SchattenSpace q (m ⊕ m) (n ⊕ n)`
-(see `BanachProbability.Noncommutative.ComplexSchattenUMD` for its UMD constants).
+`‖Aᴴ A‖_{S_{q/2}} = ‖A‖_{S_q}²`, Hölder's inequality. A square matrix has a singular value
+decomposition `A = U diag (s_i) Vᴴ` with unitary `U`, `V` (`exists_eq_unitary_mul_diagonal_mul`).
+`ComplexSchattenSpace q m n` is the complex normed space of the Schatten `q`-norm; as a real space
+it embeds isometrically in `SchattenSpace q (m ⊕ m) (n ⊕ n)` (see
+`BanachProbability.Noncommutative.ComplexSchattenUMD` for its UMD constants).
 -/
 
 @[expose] public section
@@ -93,9 +95,16 @@ noncomputable def complexSchattenNorm (q : ℝ≥0∞) (A : Matrix m n ℂ) : �
   if q = ⊤ then ⨆ i, complexSingularValue A i
   else (∑ i, complexSingularValue A i ^ q.toReal) ^ (1 / q.toReal)
 
-private theorem complexSingularValue_nonneg (A : Matrix m n ℂ) (i : n) :
-    0 ≤ complexSingularValue A i :=
+/-- The singular values are nonnegative. -/
+theorem complexSingularValue_nonneg (A : Matrix m n ℂ) (i : n) : 0 ≤ complexSingularValue A i :=
   Real.sqrt_nonneg _
+
+/-- `‖A‖_{S_q}^q = Σ_i s_i^q`. -/
+theorem complexSchattenNorm_ofReal_rpow {q : ℝ} (hq : 0 < q) (A : Matrix m n ℂ) :
+    complexSchattenNorm (ENNReal.ofReal q) A ^ q = ∑ i, complexSingularValue A i ^ q := by
+  rw [complexSchattenNorm, ite_eq_right ENNReal.ofReal_ne_top, ENNReal.toReal_ofReal hq.le, one_div,
+    Real.rpow_inv_rpow (Finset.sum_nonneg fun i _ =>
+      Real.rpow_nonneg (complexSingularValue_nonneg A i) _) hq.ne']
 
 /-- The spectral theorem for a complex Hermitian matrix: `A = U diag (λ) Uᴴ`, as
 `eq_eigenvectorUnitary_mul_diagonal_mul_star` for real symmetric matrices. -/
@@ -332,6 +341,20 @@ theorem norm_trace_mul_le [DecidableEq m] {q q' : ℝ} (hq : q.HolderConjugate q
     ENNReal.toReal_ofReal hq.nonneg, ENNReal.toReal_ofReal hq.symm.nonneg, mul_mul_mul_comm, h3]
   linarith
 
+/-- `(U diag (c) Vᴴ)ᴴ (U diag (d) Vᴴ) = V diag (c̄_i d_i) Vᴴ` for a unitary `U`. -/
+theorem conjTranspose_unitary_mul_diagonal_mul {U : Matrix n n ℂ}
+    (hU : U ∈ Matrix.unitaryGroup n ℂ) (V : Matrix n n ℂ) (c d : n → ℂ) :
+    (U * Matrix.diagonal c * Vᴴ)ᴴ * (U * Matrix.diagonal d * Vᴴ) =
+      V * Matrix.diagonal (fun i => star (c i) * d i) * Vᴴ := by
+  have hU' : Uᴴ * U = 1 := Matrix.mem_unitaryGroup_iff'.1 hU
+  have hd : Matrix.diagonal (fun i => star (c i) * d i) =
+      (Matrix.diagonal c)ᴴ * Matrix.diagonal d := by
+    rw [Matrix.diagonal_conjTranspose, Matrix.diagonal_mul_diagonal]
+    rfl
+  rw [hd, Matrix.conjTranspose_mul, Matrix.conjTranspose_mul, Matrix.conjTranspose_conjTranspose]
+  simp only [Matrix.mul_assoc]
+  rw [← Matrix.mul_assoc Uᴴ U, hU', Matrix.one_mul]
+
 /-- If `A = U diag (c) Vᴴ` with `U`, `V` unitary and `c_i ∈ ℂ`, then
 `‖A‖_{S_q} = (Σ_i |c_i|^q)^{1/q}`. -/
 theorem complexSchattenNorm_unitary_mul_diagonal_mul {q : ℝ} (hq : 0 < q)
@@ -339,25 +362,72 @@ theorem complexSchattenNorm_unitary_mul_diagonal_mul {q : ℝ} (hq : 0 < q)
     (c : n → ℂ) :
     complexSchattenNorm (ENNReal.ofReal q) (U * Matrix.diagonal c * Vᴴ) =
       (∑ i, ‖c i‖ ^ q) ^ (1 / q) := by
-  have hU' : Uᴴ * U = 1 := Matrix.mem_unitaryGroup_iff'.1 hU
-  have hV' : Vᴴ * V = 1 := Matrix.mem_unitaryGroup_iff'.1 hV
   -- `(U D Vᴴ)ᴴ (U D Vᴴ) = V |D|² Vᴴ`
   have h : (U * Matrix.diagonal c * Vᴴ)ᴴ * (U * Matrix.diagonal c * Vᴴ) =
       V * Matrix.diagonal (fun i => ((‖c i‖ ^ 2 : ℝ) : ℂ)) * Vᴴ := by
-    have hd : Matrix.diagonal (fun i => ((‖c i‖ ^ 2 : ℝ) : ℂ)) =
-        (Matrix.diagonal c)ᴴ * Matrix.diagonal c := by
-      rw [Matrix.diagonal_conjTranspose, Matrix.diagonal_mul_diagonal]
-      congr 1
-      funext i
-      rw [Complex.ofReal_pow, ← Complex.conj_mul', Pi.star_apply, starRingEnd_apply]
-    rw [hd, Matrix.conjTranspose_mul, Matrix.conjTranspose_mul, Matrix.conjTranspose_conjTranspose]
-    simp only [Matrix.mul_assoc]
-    rw [← Matrix.mul_assoc Uᴴ U, hU', Matrix.one_mul]
+    simp only [conjTranspose_unitary_mul_diagonal_mul hU, ← starRingEnd_apply, Complex.conj_mul',
+      Complex.ofReal_pow]
   rw [complexSchattenNorm_eq_of_filter_map_eq (ENNReal.ofReal_pos.2 hq).ne'
-    (fun i => Real.sqrt_nonneg _)
-    (congrArg (Multiset.filter (· ≠ 0)) (map_complexSingularValue hV' _ h)),
+    (fun i => Real.sqrt_nonneg _) (congrArg (Multiset.filter (· ≠ 0))
+      (map_complexSingularValue (Matrix.mem_unitaryGroup_iff'.1 hV) _ h)),
     ite_eq_right ENNReal.ofReal_ne_top, ENNReal.toReal_ofReal hq.le]
   simp only [Real.sqrt_sq (norm_nonneg _)]
+
+/-- The **singular value decomposition** `A = U diag (s_i) Vᴴ`, with unitary `U`, `V`, of a square
+matrix. The columns of `V` are the eigenvectors `e_i` of `Aᴴ A`; those of `U` are `s_i⁻¹ A e_i` for
+`s_i ≠ 0`, completed to an orthonormal basis. -/
+theorem exists_eq_unitary_mul_diagonal_mul (A : Matrix n n ℂ) :
+    ∃ U ∈ Matrix.unitaryGroup n ℂ, ∃ V ∈ Matrix.unitaryGroup n ℂ,
+      A = U * Matrix.diagonal (fun i => (complexSingularValue A i : ℂ)) * Vᴴ := by
+  set hA := Matrix.isHermitian_conjTranspose_mul_self A
+  set V : Matrix n n ℂ := (hA.eigenvectorUnitary : Matrix n n ℂ) with hVdef
+  have hV : Vᴴ * V = 1 := Unitary.coe_star_mul_self hA.eigenvectorUnitary
+  have hV' : V * Vᴴ = 1 := Unitary.coe_mul_star_self hA.eigenvectorUnitary
+  set s := complexSingularValue A
+  -- the vectors `f_i = A e_i` are orthogonal, with norm `s_i`
+  set f : n → EuclideanSpace ℂ n := fun i => WithLp.toLp 2 fun k => (A * V) k i
+  have hAV : (A * V)ᴴ * (A * V) = Matrix.diagonal fun i => ((s i ^ 2 : ℝ) : ℂ) := by
+    have hs : ∀ i, s i ^ 2 = hA.eigenvalues i := fun i =>
+      Real.sq_sqrt (Matrix.eigenvalues_conjTranspose_mul_self_nonneg A i)
+    rw [Matrix.conjTranspose_mul, Matrix.mul_assoc, ← Matrix.mul_assoc Aᴴ,
+      eq_eigenvectorUnitary_mul_diagonal_mul_conjTranspose hA]
+    simp only [← hVdef, Matrix.mul_assoc, hV, Matrix.mul_one, hs]
+    rw [← Matrix.mul_assoc, hV, Matrix.one_mul]
+  have hf : ∀ i j, inner ℂ (f i) (f j) = if i = j then ((s i ^ 2 : ℝ) : ℂ) else 0 := fun i j => by
+    rw [← Matrix.diagonal_apply (d := fun i => ((s i ^ 2 : ℝ) : ℂ)), ← hAV, PiLp.inner_apply,
+      Matrix.mul_apply]
+    exact Finset.sum_congr rfl fun k _ => mul_comm _ _
+  -- the `s_i⁻¹ f_i`, `s_i ≠ 0`, are orthonormal
+  obtain ⟨b, hb⟩ := Orthonormal.exists_orthonormalBasis_extension_of_card_eq
+    (finrank_euclideanSpace (𝕜 := ℂ) (ι := n)) (v := fun i => ((s i)⁻¹ : ℂ) • f i)
+    (s := {i | s i ≠ 0}) (by
+      rw [orthonormal_iff_ite]
+      rintro ⟨i, hi⟩ ⟨j, hj⟩
+      simp only [Set.domRestrict_apply, inner_smul_left, inner_smul_right, hf, Subtype.mk.injEq]
+      split_ifs with h
+      · subst h
+        have hi' : (s i : ℂ) ≠ 0 := Complex.ofReal_ne_zero.2 hi
+        rw [← Complex.ofReal_inv, Complex.conj_ofReal]
+        push_cast
+        field_simp
+      · rw [mul_zero, mul_zero])
+  refine ⟨(EuclideanSpace.basisFun n ℂ).toBasis.toMatrix b,
+    (EuclideanSpace.basisFun n ℂ).toMatrix_orthonormalBasis_mem_unitary b, V,
+    hA.eigenvectorUnitary.2, ?_⟩
+  -- `f_i = s_i b_i`
+  have h : A * V = (EuclideanSpace.basisFun n ℂ).toBasis.toMatrix b *
+      Matrix.diagonal fun i => (s i : ℂ) := by
+    ext k i
+    rw [Matrix.mul_diagonal]
+    change f i k = b i k * s i
+    rcases eq_or_ne (s i) 0 with h0 | h0
+    · have hfi : f i = 0 := by
+        rw [← inner_self_eq_zero (𝕜 := ℂ), hf, ite_eq_left rfl, h0, zero_pow two_ne_zero,
+          Complex.ofReal_zero]
+      rw [hfi, h0, Complex.ofReal_zero, mul_zero, PiLp.zero_apply]
+    · rw [hb i h0, PiLp.smul_apply, smul_eq_mul, mul_right_comm, inv_mul_cancel₀
+        (Complex.ofReal_ne_zero.2 h0), one_mul]
+  rw [← h, Matrix.mul_assoc, hV', Matrix.mul_one]
 
 /-- `‖A‖_{S_q}^q = Σ_i |λ_i|^q` for a Hermitian matrix. -/
 theorem complexSchattenNorm_rpow_of_isHermitian {A : Matrix n n ℂ} (hA : A.IsHermitian) {q : ℝ}
