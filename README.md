@@ -4,58 +4,104 @@
 
 A Lean 4 library of probability in Banach spaces:
 
-- Burkholder's inequality for Hilbert-space-valued martingales, its square function inequality, and
-  the sharpness of the constant `p* − 1`;
-- UMD constants: the reduction to Paley–Walsh martingales, extrapolation, the randomised UMD
-  property and decoupling, real against complex constants, and Burkholder's zig-zag concave
-  functions;
+- martingales in Hilbert spaces:
+  - Burkholder's inequality;
+  - its square function inequality;
+  - the sharpness of the constant `p* − 1`;
+- UMD constants:
+  - the reduction to Paley–Walsh martingales;
+  - extrapolation;
+  - the randomised UMD property and decoupling;
+  - real against complex constants;
+  - Burkholder's zig-zag concave functions;
 - hypercontractivity on the cube and the Kahane–Khintchine inequality in seminormed spaces;
-- Schatten classes: the Schatten norms, Hölder's inequality, the noncommutative Khintchine inequality,
-  martingale transforms with values in matrices, and the UMD property and type 2 of `S_q`, uniformly in
-  the dimension;
-- random sums: Kahane's contraction principle, type 2 and Gaussian type 2, K-convexity.
+- Schatten classes:
+  - the Schatten norms;
+  - Hölder's inequality;
+  - the noncommutative Khintchine inequality;
+  - martingale transforms with values in matrices;
+  - the UMD property and type 2 of `S_q`, uniformly in the dimension;
+- random sums:
+  - Kahane's contraction principle;
+  - type 2 and Gaussian type 2;
+  - K-convexity.
 
 **Status.** Every result below is proved, and no theorem takes an unproved result as a hypothesis.
 The library builds with no `sorry` and no axiom beyond Lean's standard [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext), [`Classical.choice`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Classical.choice)
 and [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound); [`scripts/Audit.lean`](scripts/Audit.lean) checks this for every declaration and fails otherwise.
 
-**Not formalized.** The equality cases of Burkholder's inequality and the sharpness clauses of the
-square function inequality; σ-finite measure spaces (the constants are defined with probability
-spaces in `Type` and martingales started at `0`); complex and operator-valued multipliers for
-Hilbert spaces; extrapolation and the randomised UMD property over complex scalars; the converse of
-the randomised UMD property for Paley–Walsh martingales; the necessity of the condition on the
-exponents in the hypercontractive inequality; Borell's theorem for Walsh polynomials of degree
-`≥ 2`; complex Rademacher variables; rectangular or complex matrices and exponents below `2` in the
-noncommutative Khintchine inequality; general semifinite von Neumann algebras, complex matrices in
-the weak type inequality and in the bound of the transforms, and complex or non-scalar multipliers,
-in the noncommutative martingale results.
+**Not formalized.**
 
-**Planned extensions.** Kahane–Khintchine for Rademacher sums on a probability space; the
-noncommutative Khintchine inequality for rectangular and complex matrices (a proof of it along the route
-of Lust-Piquard and Pisier is in [lean4-harmonic-analysis](https://github.com/vltanh/lean4-harmonic-analysis)); Randrianantoanina's Theorem 3.1 for general semifinite von Neumann algebras and non-scalar
-multipliers.
+- the equality cases of Burkholder's inequality and the sharpness clauses of the square function
+  inequality;
+- σ-finite measure spaces (the constants are defined with probability spaces in `Type` and
+  martingales started at `0`);
+- complex and operator-valued multipliers for Hilbert spaces;
+- extrapolation and the randomised UMD property over complex scalars;
+- the converse of the randomised UMD property for Paley–Walsh martingales;
+- the necessity of the condition on the exponents in the hypercontractive inequality;
+- Borell's theorem for Walsh polynomials of degree `≥ 2`;
+- complex Rademacher variables;
+- rectangular or complex matrices and exponents below `2` in the noncommutative Khintchine
+  inequality;
+- in the noncommutative martingale results:
+  - general semifinite von Neumann algebras;
+  - complex matrices in the weak type inequality and in the bound of the transforms;
+  - complex or non-scalar multipliers.
+
+**Planned extensions.**
+
+- Kahane–Khintchine for Rademacher sums on a probability space;
+- the noncommutative Khintchine inequality for rectangular and complex matrices (a proof of it along
+  the route of Lust-Piquard and Pisier is in
+  [lean4-harmonic-analysis](https://github.com/vltanh/lean4-harmonic-analysis));
+- Randrianantoanina's Theorem 3.1 for general semifinite von Neumann algebras and non-scalar
+  multipliers.
 
 ## Results
 
-`UMD_p (X)` is `umdConst X p`, the best `β ∈ [0, ∞]` in
-`‖Σ_{k<n} σ_{k+1} (Y_{k+1} − Y_k)‖_{L^p} ≤ β ‖Y_n‖_{L^p}` over all `X`-valued martingales `Y` (Mathlib's
-`MeasureTheory.Martingale`) with `Y_0 = 0` and all predictable signs `σ`; `UMD_{ℂ,p} (X)` is the same
-with predictable unimodular complex multipliers, and `UMD_p^Δ`, `UMD_{ℂ,p}^Δ` are the restrictions to
-Paley–Walsh martingales on sign cubes `Fin N → Bool`. Moreover `1 < p < ∞`, `p' = p/(p − 1)`,
-`p* = max (p, p')`, the `ε_i` are independent fair signs, and `‖·‖_p` is an `L^p` norm. All
-declarations are in the namespace [`BanachProbability`](BanachProbability); modules are relative to
-[`BanachProbability/`](BanachProbability). HNVW is Hytönen–van Neerven–Veraar–Weis, *Analysis in Banach Spaces*; the full
-references are in [docs/REFERENCES.md](docs/REFERENCES.md).
+Notation:
+
+- `UMD_p (X)` is `umdConst X p`, the best `β ∈ [0, ∞]` in
+  `‖Σ_{k<n} σ_{k+1} (Y_{k+1} − Y_k)‖_{L^p} ≤ β ‖Y_n‖_{L^p}` over all `X`-valued martingales `Y`
+  (Mathlib's `MeasureTheory.Martingale`) with `Y_0 = 0` and all predictable signs `σ`;
+- `UMD_{ℂ,p} (X)` is the same with predictable unimodular complex multipliers;
+- `UMD_p^Δ`, `UMD_{ℂ,p}^Δ` are the restrictions to Paley–Walsh martingales on sign cubes
+  `Fin N → Bool`.
+
+Moreover, throughout:
+
+- `1 < p < ∞`;
+- `p' = p/(p − 1)`;
+- `p* = max (p, p')`;
+- the `ε_i` are independent fair signs;
+- `‖·‖_p` is an `L^p` norm.
+
+All declarations are in the namespace [`BanachProbability`](BanachProbability); modules are relative
+to [`BanachProbability/`](BanachProbability). HNVW is Hytönen–van Neerven–Veraar–Weis, *Analysis in
+Banach Spaces*; the full references are in [docs/REFERENCES.md](docs/REFERENCES.md).
 
 ### Martingales in Hilbert spaces
 
 | Theorem | Lean | Source | Module |
 | --- | --- | --- | --- |
 | Burkholder's inequality: for martingales `f`, `g` in a real Hilbert space with `‖g_0‖ ≤ ‖f_0‖` and `‖g_{n+1} − g_n‖ ≤ ‖f_{n+1} − f_n‖` a.s., `‖g_n‖_p ≤ (p* − 1) ‖f_n‖_p` | [`Osekowski.eLpNorm_le_of_subordinate`](BanachProbability/Martingale/Osekowski/Moment.lean#L312); started at `0`: [`Burkholder.inequality_of_subordinate`](BanachProbability/Martingale/Burkholder/Inequality.lean#L65) | Osękowski (2012), Thm 3.5 (ii); Burkholder (1988), Thm 1.1 | [`Martingale/Osekowski/Moment`](BanachProbability/Martingale/Osekowski/Moment.lean), [`Martingale/Burkholder/Inequality`](BanachProbability/Martingale/Burkholder/Inequality.lean) |
-| Sharpness: for `K < p* − 1` there are a real Paley–Walsh martingale `f` and a transform `g` of it by deterministic signs with `K ‖f‖_p < ‖g‖_p`; for every real Hilbert space `H ≠ 0`, `UMD_p (H) = UMD_p^Δ (H) = p* − 1` | [`Osekowski.exists_lt_lpNorm_transform_const`](BanachProbability/Martingale/Osekowski/Sharpness.lean#L710) (predictable signs: [`Osekowski.exists_lt_lpNorm_transform`](BanachProbability/Martingale/Osekowski/Sharpness.lean#L686)), [`Osekowski.umdConst_of_innerProductSpace`](BanachProbability/Martingale/Osekowski/Sharpness.lean#L676), [`Osekowski.dyadicUMDConst_of_innerProductSpace`](BanachProbability/Martingale/Osekowski/Sharpness.lean#L669) | Osękowski (2012), Thm 3.5, Rem 3.8, Sec 3.11.2; HNVW I, Cor 4.5.15 | [`Martingale/Osekowski/Sharpness`](BanachProbability/Martingale/Osekowski/Sharpness.lean) |
+| Sharpness (below) | [`Osekowski.exists_lt_lpNorm_transform_const`](BanachProbability/Martingale/Osekowski/Sharpness.lean#L710) (predictable signs: [`Osekowski.exists_lt_lpNorm_transform`](BanachProbability/Martingale/Osekowski/Sharpness.lean#L686)), [`Osekowski.umdConst_of_innerProductSpace`](BanachProbability/Martingale/Osekowski/Sharpness.lean#L676), [`Osekowski.dyadicUMDConst_of_innerProductSpace`](BanachProbability/Martingale/Osekowski/Sharpness.lean#L669) | Osękowski (2012), Thm 3.5, Rem 3.8, Sec 3.11.2; HNVW I, Cor 4.5.15 | [`Martingale/Osekowski/Sharpness`](BanachProbability/Martingale/Osekowski/Sharpness.lean) |
 | Square function, `S_n X = (‖X_0‖² + Σ_{k<n} ‖X_{k+1} − X_k‖²)^{1/2}`: `‖S_n X‖_p ≤ (p* − 1) ‖X_n‖_p` and `‖X_n‖_p ≤ (p* − 1) ‖S_n X‖_p` for a martingale `X` in a real Hilbert space | [`Burkholder.squareFunction_with_start`](BanachProbability/Martingale/Burkholder/Inequality.lean#L114); `X_0 = 0`: [`Burkholder.squareFunction_of_martingale`](BanachProbability/Martingale/Burkholder/Inequality.lean#L228) | Osękowski (2012), Thm 8.6; Burkholder (1988), Thm 3.1 | [`Martingale/Burkholder/Inequality`](BanachProbability/Martingale/Burkholder/Inequality.lean) |
-| Burkholder's function `u_p (x, y) = p (1 − 1/p*)^{p−1} (‖y‖ − (p* − 1) ‖x‖) (‖x‖ + ‖y‖)^{p−1}`: `u_p (x, y) ≥ ‖y‖^p − (p* − 1)^p ‖x‖^p`, and `t ↦ u_p (x + t h, y + t k)` is concave for `‖k‖ ≤ ‖h‖` in a real inner product space | [`Burkholder.burkholderFun_ge`](BanachProbability/Martingale/Burkholder/Function.lean#L787), [`Burkholder.burkholderFun_concaveOn_line`](BanachProbability/Martingale/Burkholder/Function.lean#L795) | Burkholder (1988), (1.6), (1.10), Rem 1.2 | [`Martingale/Burkholder/Function`](BanachProbability/Martingale/Burkholder/Function.lean) |
+| Burkholder's function `u_p` (below) | [`Burkholder.burkholderFun_ge`](BanachProbability/Martingale/Burkholder/Function.lean#L787), [`Burkholder.burkholderFun_concaveOn_line`](BanachProbability/Martingale/Burkholder/Function.lean#L795) | Burkholder (1988), (1.6), (1.10), Rem 1.2 | [`Martingale/Burkholder/Function`](BanachProbability/Martingale/Burkholder/Function.lean) |
 | Doob, Banach-space-valued martingales: `‖max_{k≤n} ‖Y_k‖‖_p ≤ p' ‖Y_n‖_p` | [`eLpNorm_runningMax_norm_le`](BanachProbability/Martingale/Doob.lean#L188) | standard argument | [`Martingale/Doob`](BanachProbability/Martingale/Doob.lean) |
+
+Sharpness:
+
+- for `K < p* − 1` there are a real Paley–Walsh martingale `f` and a transform `g` of it by
+  deterministic signs with `K ‖f‖_p < ‖g‖_p`;
+- for every real Hilbert space `H ≠ 0`, `UMD_p (H) = UMD_p^Δ (H) = p* − 1`.
+
+Burkholder's function
+`u_p (x, y) = p (1 − 1/p*)^{p−1} (‖y‖ − (p* − 1) ‖x‖) (‖x‖ + ‖y‖)^{p−1}`:
+
+- `u_p (x, y) ≥ ‖y‖^p − (p* − 1)^p ‖x‖^p`;
+- `t ↦ u_p (x + t h, y + t k)` is concave for `‖k‖ ≤ ‖h‖` in a real inner product space.
 
 ### UMD constants
 
@@ -63,12 +109,42 @@ references are in [docs/REFERENCES.md](docs/REFERENCES.md).
 | --- | --- | --- | --- |
 | `UMD_p^Δ (X) = UMD_p (X)` and `UMD_{ℂ,p}^Δ (X) = UMD_{ℂ,p} (X)`, dyadic (Paley–Walsh) martingales with predictable multipliers; with deterministic ones the same constants | [`dyadicUMDConst_eq_umdConst`](BanachProbability/UMD/Maurey/Basic.lean#L89), [`complexDyadicUMDConst_eq_complexUMDConst`](BanachProbability/UMD/Maurey/Basic.lean#L189); deterministic: [`isUMDBound_iff_isDeterministicDyadicUMDBound`](BanachProbability/UMD/Maurey/Basic.lean#L145), [`isComplexUMDBound_iff_isDeterministicDyadicUMDBound`](BanachProbability/UMD/Maurey/Basic.lean#L166) | Maurey (1974–75); HNVW I, Thm 4.2.5 | [`UMD/Maurey/Basic`](BanachProbability/UMD/Maurey/Basic.lean) |
 | Deterministic and predictable multipliers give the same constants, real and complex | [`umdConst_eq_sInf_isDeterministicUMDBound`](BanachProbability/UMD/Incremental.lean#L741), [`complexUMDConst_eq_sInf_isDeterministicUMDBound`](BanachProbability/UMD/Incremental.lean#L749) | HNVW I, Thm 4.2.25 | [`UMD/Incremental`](BanachProbability/UMD/Incremental.lean) |
-| Extrapolation, `p, q ∈ (1, ∞)`: `UMD_p ≤ 100 (p/q + p'/q') UMD_q` (for the transforms the proof gives `80` in place of `100`: [`IsTransformBound.extrapolation`](BanachProbability/UMD/Extrapolation.lean#L424)); `UMD₂ ≤ 200 UMD_p`, `UMD_p ≤ 50 (p + p') UMD₂ ≤ 100 p* UMD₂`; finite for one `p` implies finite for all | [`umdConst_le_mul_umdConst`](BanachProbability/UMD/Extrapolation.lean#L551), [`umdConst_two_le_mul`](BanachProbability/UMD/Extrapolation.lean#L580), [`umdConst_le_fifty_mul_umdConst_two`](BanachProbability/UMD/Extrapolation.lean#L565), [`umdConst_le_mul_umdConst_two`](BanachProbability/UMD/Extrapolation.lean#L572), [`umdConst_lt_top_of_lt_top`](BanachProbability/UMD/Extrapolation.lean#L559) | HNVW I, Thm 4.2.7 | [`UMD/Extrapolation`](BanachProbability/UMD/Extrapolation.lean) |
-| Randomised UMD property: a `UMD_p` constant `β` satisfies `β⁻¹ ‖Y_n‖_p ≤ ‖Σ_{k<n} ε_k (Y_{k+1} − Y_k)‖_p ≤ β ‖Y_n‖_p`; two such inequalities with constants `β⁻`, `β⁺` give the `UMD_p` constant `β⁻ β⁺` | [`IsUMDBound.isLowerRandomisedUMDBound`](BanachProbability/UMD/Decoupling.lean#L188), [`IsUMDBound.isUpperRandomisedUMDBound`](BanachProbability/UMD/Decoupling.lean#L175), [`isUMDBound_of_randomised`](BanachProbability/UMD/Decoupling.lean#L241) | HNVW I, Prop 4.2.3 | [`UMD/Decoupling`](BanachProbability/UMD/Decoupling.lean) |
+| Extrapolation, `p, q ∈ (1, ∞)` (below) | [`umdConst_le_mul_umdConst`](BanachProbability/UMD/Extrapolation.lean#L551), [`umdConst_two_le_mul`](BanachProbability/UMD/Extrapolation.lean#L580), [`umdConst_le_fifty_mul_umdConst_two`](BanachProbability/UMD/Extrapolation.lean#L565), [`umdConst_le_mul_umdConst_two`](BanachProbability/UMD/Extrapolation.lean#L572), [`umdConst_lt_top_of_lt_top`](BanachProbability/UMD/Extrapolation.lean#L559) | HNVW I, Thm 4.2.7 | [`UMD/Extrapolation`](BanachProbability/UMD/Extrapolation.lean) |
+| Randomised UMD property (below) | [`IsUMDBound.isLowerRandomisedUMDBound`](BanachProbability/UMD/Decoupling.lean#L188), [`IsUMDBound.isUpperRandomisedUMDBound`](BanachProbability/UMD/Decoupling.lean#L175), [`isUMDBound_of_randomised`](BanachProbability/UMD/Decoupling.lean#L241) | HNVW I, Prop 4.2.3 | [`UMD/Decoupling`](BanachProbability/UMD/Decoupling.lean) |
 | Decoupling of a Paley–Walsh martingale `Y_n = Σ_{k<n} ε_k ξ_k`, with `Ỹ_n = Σ_{k<n} ε̃_k ξ_k` for an independent copy `ε̃` of the signs: `UMD_p⁻¹ ‖Ỹ_n‖_p ≤ ‖Y_n‖_p ≤ UMD_p ‖Ỹ_n‖_p`, also with `UMD_p^Δ` | [`decoupling`](BanachProbability/UMD/Decoupling.lean#L377), [`decoupling_dyadic`](BanachProbability/UMD/Decoupling.lean#L352) | HNVW I, Prop 4.2.3, Rem 4.4.2 (Thm 4.4.1 for signs; cf. McConnell (1989), Cox–Veraar (2007)) | [`UMD/Decoupling`](BanachProbability/UMD/Decoupling.lean) |
 | `UMD_p (X) ≤ UMD_{ℂ,p} (X) ≤ (π/2) UMD_p (X)`, `X` complex | [`umdConst_le_complexUMDConst_le`](BanachProbability/UMD/Complex.lean#L135) | HNVW I, Prop 4.2.10 | [`UMD/Complex`](BanachProbability/UMD/Complex.lean), [`UMD/ConvexHull`](BanachProbability/UMD/ConvexHull.lean) |
-| `UMD_p (L^p (μ; B)) ≤ UMD_p (B)` for every measure `μ`, with equality if there is a set of finite positive measure; the same for `UMD_{ℂ,p}`; `UMD_p (L^p (μ; ℂ)) ≤ p* − 1` | [`umdConst_Lp_le`](BanachProbability/UMD/Lp.lean#L178), [`umdConst_Lp_eq`](BanachProbability/UMD/Lp.lean#L213), [`complexUMDConst_Lp_le`](BanachProbability/UMD/Lp.lean#L221), [`complexUMDConst_Lp_eq`](BanachProbability/UMD/Lp.lean#L233), [`umdConst_Lp_complex_le`](BanachProbability/UMD/Lp.lean#L241) | HNVW I, Prop 4.2.15; Pisier (2011), Cor 8.19 | [`UMD/Lp`](BanachProbability/UMD/Lp.lean) |
-| `UMD_p (X) < ∞` if and only if, for some `β ≥ 1`, there is `u : X × X → ℝ` with `u (x, y) ≥ ‖y‖^p − β^p ‖x‖^p` and `z ↦ u (x + z, y + ε z)` concave for `\|ε\| = 1`; the least such `β` is `UMD_p (X)`, `X ≠ 0`. The same over `ℂ`, with `UMD_{ℂ,p}`; and, over `ℝ` and `ℂ`, with `\|ε\| ≤ 1` and `β > 0` (the least `β ≥ 0` is the constant), also for functions with `U (0, 0) = 0` | [`umdConst_lt_top_iff_exists_isSignZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L235), [`isLeast_umdConst_isSignZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L300), [`complexUMDConst_lt_top_iff_exists_isSignZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L423), [`isLeast_complexUMDConst_isSignZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L489); `\|ε\| ≤ 1`: [`umdConst_lt_top_iff_exists_isBallZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L261), [`isLeast_umdConst_isBallZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L288), [`complexUMDConst_lt_top_iff_exists_isBallZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L450), [`isLeast_complexUMDConst_isBallZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L475); `U (0, 0) = 0`: [`umdConst_lt_top_iff_exists_isZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L219), [`isLeast_umdConst_isZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L274), [`complexUMDConst_lt_top_iff_exists_isComplexZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L405), [`isLeast_complexUMDConst_isComplexZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L460) | Burkholder (1986); HNVW I, Thm 4.5.6; Yaroslavtsev (2018), Prop 3.7 | [`ZigZag/Basic`](BanachProbability/ZigZag/Basic.lean) |
+| UMD constants of `L^p (μ; B)` (below) | [`umdConst_Lp_le`](BanachProbability/UMD/Lp.lean#L178), [`umdConst_Lp_eq`](BanachProbability/UMD/Lp.lean#L213), [`complexUMDConst_Lp_le`](BanachProbability/UMD/Lp.lean#L221), [`complexUMDConst_Lp_eq`](BanachProbability/UMD/Lp.lean#L233), [`umdConst_Lp_complex_le`](BanachProbability/UMD/Lp.lean#L241) | HNVW I, Prop 4.2.15; Pisier (2011), Cor 8.19 | [`UMD/Lp`](BanachProbability/UMD/Lp.lean) |
+| Burkholder's characterization of UMD by zig-zag concave functions (below) | [`umdConst_lt_top_iff_exists_isSignZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L235), [`isLeast_umdConst_isSignZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L300), [`complexUMDConst_lt_top_iff_exists_isSignZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L423), [`isLeast_complexUMDConst_isSignZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L489); `\|ε\| ≤ 1`: [`umdConst_lt_top_iff_exists_isBallZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L261), [`isLeast_umdConst_isBallZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L288), [`complexUMDConst_lt_top_iff_exists_isBallZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L450), [`isLeast_complexUMDConst_isBallZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L475); `U (0, 0) = 0`: [`umdConst_lt_top_iff_exists_isZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L219), [`isLeast_umdConst_isZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L274), [`complexUMDConst_lt_top_iff_exists_isComplexZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L405), [`isLeast_complexUMDConst_isComplexZigZagConcave`](BanachProbability/ZigZag/Basic.lean#L460) | Burkholder (1986); HNVW I, Thm 4.5.6; Yaroslavtsev (2018), Prop 3.7 | [`ZigZag/Basic`](BanachProbability/ZigZag/Basic.lean) |
+
+Extrapolation, `p, q ∈ (1, ∞)`:
+
+- `UMD_p ≤ 100 (p/q + p'/q') UMD_q` (for the transforms the proof gives `80` in place of `100`:
+  [`IsTransformBound.extrapolation`](BanachProbability/UMD/Extrapolation.lean#L424));
+- `UMD₂ ≤ 200 UMD_p`, `UMD_p ≤ 50 (p + p') UMD₂ ≤ 100 p* UMD₂`;
+- finite for one `p` implies finite for all.
+
+Randomised UMD property:
+
+- a `UMD_p` constant `β` satisfies
+  `β⁻¹ ‖Y_n‖_p ≤ ‖Σ_{k<n} ε_k (Y_{k+1} − Y_k)‖_p ≤ β ‖Y_n‖_p`;
+- two such inequalities with constants `β⁻`, `β⁺` give the `UMD_p` constant `β⁻ β⁺`.
+
+UMD constants of `L^p (μ; B)`:
+
+- `UMD_p (L^p (μ; B)) ≤ UMD_p (B)` for every measure `μ`, with equality if there is a set of finite
+  positive measure;
+- the same for `UMD_{ℂ,p}`;
+- `UMD_p (L^p (μ; ℂ)) ≤ p* − 1`.
+
+Burkholder's characterization of UMD by zig-zag concave functions:
+
+- `UMD_p (X) < ∞` if and only if, for some `β ≥ 1`, there is `u : X × X → ℝ` with
+  `u (x, y) ≥ ‖y‖^p − β^p ‖x‖^p` and `z ↦ u (x + z, y + ε z)` concave for `|ε| = 1`;
+- the least such `β` is `UMD_p (X)`, `X ≠ 0`;
+- the same over `ℂ`, with `UMD_{ℂ,p}`;
+- the same, over `ℝ` and `ℂ`, with `|ε| ≤ 1` and `β > 0` (the least `β ≥ 0` is the constant), also
+  for functions with `U (0, 0) = 0`.
+
 
 ### Hypercontractivity and Kahane–Khintchine
 
@@ -78,7 +154,13 @@ The values are in a real vector space with a seminorm; completeness is not neede
 | --- | --- | --- | --- |
 | The discrete heat semigroup on functions of `n` signs, `T (t) (Σ_α w_α x_α) = Σ_α e^{−t #α} w_α x_α`: `‖T (t) f‖_q ≤ ‖f‖_p` for `1 < p ≤ q` and `e^{−t} ≤ √((p−1)/(q−1))` | [`heatSemigroup_sum_walsh`](BanachProbability/Hypercontractivity/HeatSemigroup.lean#L397), [`heatSemigroup_lpNorm_le`](BanachProbability/Hypercontractivity/HeatSemigroup.lean#L430); one sign: [`bonami_seminorm`](BanachProbability/Hypercontractivity/HeatSemigroup.lean#L277) | HNVW II, (6.6), Thm 6.2.2 and Lemma 6.2.3 ("if" parts) | [`Hypercontractivity/HeatSemigroup`](BanachProbability/Hypercontractivity/HeatSemigroup.lean) |
 | Borell's operator `⊗ⁿ K̄` (kernel `Π_i (1 + ρ x_i y_i)`, `ρ = √((p−1)/(q−1))`), `1 < p ≤ q`: `‖(⊗ⁿ K̄) f‖_q ≤ ‖f‖_p`, hence `‖c + ρ Σ ε_i x_i‖_q ≤ ‖c + Σ ε_i x_i‖_p` | [`kBarTensor_lpNorm_le`](BanachProbability/Hypercontractivity/Vector.lean#L325), [`hypercontractive_affine`](BanachProbability/Hypercontractivity/Vector.lean#L352) | Borell (1979), (2.1) | [`Hypercontractivity/Vector`](BanachProbability/Hypercontractivity/Vector.lean) |
-| Kahane–Khintchine: `‖Σ ε_i x_i‖_q ≤ √((q−1)/(p−1)) ‖Σ ε_i x_i‖_p` for `1 < p ≤ q`; `‖Σ ε_i x_i‖_p ≤ max (1, √((p−1)/(q−1))) ‖Σ ε_i x_i‖_q` for all `p, q > 1`; with some constant depending only on `p` and `q` for all `p, q ∈ (0, ∞)` | [`kahaneKhintchine_hypercontractive`](BanachProbability/KahaneKhintchine/Basic.lean#L50), [`kahaneKhintchine`](BanachProbability/KahaneKhintchine/Basic.lean#L84), [`exists_kahaneKhintchine`](BanachProbability/KahaneKhintchine/Basic.lean#L211) | Kahane (1964); HNVW II, Thm 6.2.4 | [`KahaneKhintchine/Basic`](BanachProbability/KahaneKhintchine/Basic.lean) |
+| Kahane–Khintchine (below) | [`kahaneKhintchine_hypercontractive`](BanachProbability/KahaneKhintchine/Basic.lean#L50), [`kahaneKhintchine`](BanachProbability/KahaneKhintchine/Basic.lean#L84), [`exists_kahaneKhintchine`](BanachProbability/KahaneKhintchine/Basic.lean#L211) | Kahane (1964); HNVW II, Thm 6.2.4 | [`KahaneKhintchine/Basic`](BanachProbability/KahaneKhintchine/Basic.lean) |
+
+Kahane–Khintchine:
+
+- `‖Σ ε_i x_i‖_q ≤ √((q−1)/(p−1)) ‖Σ ε_i x_i‖_p` for `1 < p ≤ q`;
+- `‖Σ ε_i x_i‖_p ≤ max (1, √((p−1)/(q−1))) ‖Σ ε_i x_i‖_q` for all `p, q > 1`;
+- with some constant depending only on `p` and `q` for all `p, q ∈ (0, ∞)`.
 
 ### Random sums, type 2, K-convexity
 
@@ -86,13 +168,42 @@ The values are in a real vector space with a seminorm; completeness is not neede
 
 | Theorem | Lean | Source | Module |
 | --- | --- | --- | --- |
-| Kahane's contraction principle, `1 ≤ p < ∞`: `‖Σ ε_k c_k x_k‖_p ≤ ‖Σ ε_k x_k‖_p` for real `\|c_k\| ≤ 1`; with the factor `π/2` for complex `\|c_k\| ≤ 1`; with `max \|c_k\|` in general | [`lpNorm_sum_coin_smul_le`](BanachProbability/RandomSums/Contraction.lean#L73), [`lpNorm_sum_coin_smul_le_pi_div_two_mul`](BanachProbability/RandomSums/Contraction.lean#L86), [`lpNorm_sum_coin_smul_le_max_mul`](BanachProbability/RandomSums/Contraction.lean#L139), [`lpNorm_sum_coin_smul_le_pi_div_two_mul_max_mul`](BanachProbability/RandomSums/Contraction.lean#L150) | HNVW I, Prop 3.2.10; HNVW II, Thm 6.1.13 | `RandomSums/Contraction` |
+| Kahane's contraction principle, `1 ≤ p < ∞` (below) | [`lpNorm_sum_coin_smul_le`](BanachProbability/RandomSums/Contraction.lean#L73), [`lpNorm_sum_coin_smul_le_pi_div_two_mul`](BanachProbability/RandomSums/Contraction.lean#L86), [`lpNorm_sum_coin_smul_le_max_mul`](BanachProbability/RandomSums/Contraction.lean#L139), [`lpNorm_sum_coin_smul_le_pi_div_two_mul_max_mul`](BanachProbability/RandomSums/Contraction.lean#L150) | HNVW I, Prop 3.2.10; HNVW II, Thm 6.1.13 | `RandomSums/Contraction` |
 | A real inner product space has type 2 with constant `1` | [`isTypeTwoBound_of_innerProductSpace`](BanachProbability/TypeTwo/Basic.lean#L27) | HNVW II, Ex 7.1.2 | `TypeTwo/Basic` |
-| Type 2 of the Schatten classes, `q ≥ 2`, real or complex square matrices of every size: `‖Σ ε_k x_k‖_{L^q (S_q)} ≤ √(q + 1) (Σ ‖x_k‖²_{S_q})^{1/2}`; for complex matrices and `2k ≤ q ≤ 2k + 2` with `M_{2k}^{1−θ} M_{2k+2}^θ`, `M_{2k} = ((2k)!/(2^k k!))^{1/2k}` | [`lpNorm_schattenNorm_le`](BanachProbability/TypeTwo/Schatten.lean#L205), [`lpNorm_complexSchattenNorm_le_interp`](BanachProbability/TypeTwo/Schatten.lean#L122), [`isTypeTwoBound_schattenSpace`](BanachProbability/TypeTwo/Schatten.lean#L222); even `q`: [`lpNorm_schattenNorm_le_of_even`](BanachProbability/TypeTwo/Even.lean#L326) | Tomczak-Jaegermann (1974), Thm 3.1 (ii) | `TypeTwo/Schatten`, `TypeTwo/Even` |
+| Type 2 of the Schatten classes (below) | [`lpNorm_schattenNorm_le`](BanachProbability/TypeTwo/Schatten.lean#L205), [`lpNorm_complexSchattenNorm_le_interp`](BanachProbability/TypeTwo/Schatten.lean#L122), [`isTypeTwoBound_schattenSpace`](BanachProbability/TypeTwo/Schatten.lean#L222); even `q`: [`lpNorm_schattenNorm_le_of_even`](BanachProbability/TypeTwo/Even.lean#L326) | Tomczak-Jaegermann (1974), Thm 3.1 (ii) | `TypeTwo/Schatten`, `TypeTwo/Even` |
 | The three lines theorem for Schatten norms, and for `L^p (Ω; S_p)` on the sign cube, finite exponents | [`complexSchattenNorm_le_of_verticalStrip`](BanachProbability/Schatten/ThreeLines.lean#L354), [`lpNorm_complexSchattenNorm_le_of_verticalStrip`](BanachProbability/Schatten/ThreeLines.lean#L421) | Gohberg–Krein (1965), §13, and Tomczak-Jaegermann (1974), Prop 1.2; proof of Sutter–Berta–Tomamichel (2017), Thm 3.1 | `Schatten/ThreeLines` |
 | A space of Gaussian type 2 with constant `τ`, and so a space of type 2 with constant `τ`, is K-convex in `L²` with constant `√(π/2) τ` | [`IsGaussianTypeTwoBound.isKConvexBound`](BanachProbability/KConvexity/Basic.lean#L472), [`IsTypeTwoBound.isKConvexBound`](BanachProbability/KConvexity/Basic.lean#L507) | HNVW II, Prop 7.4.22 | `KConvexity/Basic` |
-| Gaussian sums, `p = 2`, independent real standard Gaussian `g_i`: type 2 gives Gaussian type 2 with the same constant, and Gaussian type 2 with constant `τ` gives type 2 with `√(π/2) τ`; `E ‖Σ ε_k x_k‖² ≤ (π/2) E ‖Σ g_k x_k‖²`; `E ‖Σ c_i g_i y_i‖² ≤ E ‖Σ g_i y_i‖²` for real `\|c_i\| ≤ 1`; in a space of Gaussian type 2, `E ‖Σ g_i x_i‖² ≤ τ² ‖Σ f_i x_i‖²_{L²}` for an orthonormal system `(f_i)` on a finite set with weights | [`IsTypeTwoBound.isGaussianTypeTwoBound`](BanachProbability/KConvexity/Basic.lean#L255), [`IsGaussianTypeTwoBound.isTypeTwoBound`](BanachProbability/KConvexity/Basic.lean#L372), [`avg_norm_sq_le_integral_stdGaussian`](BanachProbability/KConvexity/Basic.lean#L348), [`integral_stdGaussian_smul_le`](BanachProbability/KConvexity/Basic.lean#L402), [`IsGaussianTypeTwoBound.integral_stdGaussian_le_of_orthonormal`](BanachProbability/KConvexity/Basic.lean#L417) | HNVW II, Props 7.1.18 (1), 6.1.15, Thms 6.1.13 (i), 7.1.20 (2) | `KConvexity/Basic` |
-| The Rademacher projection on `L^q (Ω; S_q)`, `q ≥ 2`, real square matrices: norm at most `√(π/2) √(q + 1)`; the same on `L^{q'} (Ω; S_{q'})`. The averaging for a normed space `X`: a K-convexity constant in `L²` of the spaces `L^p (Ω; X)` is one of `X` in `L^p` | [`lpNorm_rademacherProj_schattenNorm_le`](BanachProbability/KConvexity/Schatten.lean#L115), [`lpNorm_rademacherProj_schattenNorm_conj_le`](BanachProbability/KConvexity/Schatten.lean#L149); [`isKConvexBound_of_piLp`](BanachProbability/KConvexity/Schatten.lean#L64) | Pisier (1998), p. 106 | `KConvexity/Schatten` |
+| Gaussian sums, `p = 2` (below) | [`IsTypeTwoBound.isGaussianTypeTwoBound`](BanachProbability/KConvexity/Basic.lean#L255), [`IsGaussianTypeTwoBound.isTypeTwoBound`](BanachProbability/KConvexity/Basic.lean#L372), [`avg_norm_sq_le_integral_stdGaussian`](BanachProbability/KConvexity/Basic.lean#L348), [`integral_stdGaussian_smul_le`](BanachProbability/KConvexity/Basic.lean#L402), [`IsGaussianTypeTwoBound.integral_stdGaussian_le_of_orthonormal`](BanachProbability/KConvexity/Basic.lean#L417) | HNVW II, Props 7.1.18 (1), 6.1.15, Thms 6.1.13 (i), 7.1.20 (2) | `KConvexity/Basic` |
+| The Rademacher projection on `L^q (Ω; S_q)`; the averaging (below) | [`lpNorm_rademacherProj_schattenNorm_le`](BanachProbability/KConvexity/Schatten.lean#L115), [`lpNorm_rademacherProj_schattenNorm_conj_le`](BanachProbability/KConvexity/Schatten.lean#L149); [`isKConvexBound_of_piLp`](BanachProbability/KConvexity/Schatten.lean#L64) | Pisier (1998), p. 106 | `KConvexity/Schatten` |
+
+Kahane's contraction principle, `1 ≤ p < ∞`:
+
+- `‖Σ ε_k c_k x_k‖_p ≤ ‖Σ ε_k x_k‖_p` for real `|c_k| ≤ 1`;
+- with the factor `π/2` for complex `|c_k| ≤ 1`;
+- with `max |c_k|` in general.
+
+Type 2 of the Schatten classes, `q ≥ 2`, real or complex square matrices of every size:
+
+- `‖Σ ε_k x_k‖_{L^q (S_q)} ≤ √(q + 1) (Σ ‖x_k‖²_{S_q})^{1/2}`;
+- for complex matrices and `2k ≤ q ≤ 2k + 2` with `M_{2k}^{1−θ} M_{2k+2}^θ`,
+  `M_{2k} = ((2k)!/(2^k k!))^{1/2k}`.
+
+Gaussian sums, `p = 2`, independent real standard Gaussian `g_i`:
+
+- type 2 gives Gaussian type 2 with the same constant, and Gaussian type 2 with constant `τ` gives
+  type 2 with `√(π/2) τ`;
+- `E ‖Σ ε_k x_k‖² ≤ (π/2) E ‖Σ g_k x_k‖²`;
+- `E ‖Σ c_i g_i y_i‖² ≤ E ‖Σ g_i y_i‖²` for real `|c_i| ≤ 1`;
+- in a space of Gaussian type 2, `E ‖Σ g_i x_i‖² ≤ τ² ‖Σ f_i x_i‖²_{L²}` for an orthonormal system
+  `(f_i)` on a finite set with weights.
+
+The Rademacher projection and the averaging:
+
+- the Rademacher projection on `L^q (Ω; S_q)`, `q ≥ 2`, real square matrices: norm at most
+  `√(π/2) √(q + 1)`;
+- the same on `L^{q'} (Ω; S_{q'})`;
+- the averaging for a normed space `X`: a K-convexity constant in `L²` of the spaces `L^p (Ω; X)`
+  is one of `X` in `L^p`.
 
 ### Schatten classes
 
@@ -105,10 +216,10 @@ transform by predictable scalar multipliers `|c_k| ≤ 1`, for a general filtrat
 | --- | --- | --- | --- |
 | The Schatten norms, real and complex, from Mathlib's singular values | [`schattenNorm_eq_sum_singularValues`](BanachProbability/Schatten/Basic.lean#L96), [`schattenNorm_top_eq_singularValues`](BanachProbability/Schatten/Basic.lean#L103), [`complexSchattenNorm_eq_sum_singularValues`](BanachProbability/Schatten/Complex.lean#L93), [`complexSchattenNorm_top_eq_singularValues`](BanachProbability/Schatten/Complex.lean#L100) | — | `Schatten/Basic`, `Schatten/Complex` |
 | `‖A + B‖_{S_q} ≤ ‖A‖_{S_q} + ‖B‖_{S_q}`, `q ∈ [1, ∞]`, `m × n` matrices | [`schattenNorm_add_le`](BanachProbability/Schatten/Triangle.lean#L210) | Bourin–Zhang (2026), Prop 3.13, Rem 3.14 | `Schatten/Triangle` |
-| Horn's inequality `Π_{k<N} s_k (A B) ≤ Π_{k<N} s_k (A) s_k (B)`; Hölder's inequality `‖A B‖_{S_p} ≤ ‖A‖_{S_q} ‖B‖_{S_r}`, `1/p = 1/q + 1/r`, `0 < q, r < ∞`, real and complex rectangular matrices; `\|tr (A B)\| ≤ ‖A‖_{S_q} ‖B‖_{S_{q'}}` | [`prod_sortedSingularValue_mul_le`](BanachProbability/Schatten/Horn.lean#L333), [`schattenNorm_mul_le`](BanachProbability/Schatten/Horn.lean#L496), [`complexSchattenNorm_mul_le`](BanachProbability/Schatten/Complex.lean#L310), [`abs_trace_mul_le`](BanachProbability/Schatten/Horn.lean#L616) | HNVW I, Prop D.2.3, Cor D.2.4, Thm D.2.6 | `Schatten/Horn`, `Schatten/Complex` |
+| Horn's and Hölder's inequalities (below) | [`prod_sortedSingularValue_mul_le`](BanachProbability/Schatten/Horn.lean#L333), [`schattenNorm_mul_le`](BanachProbability/Schatten/Horn.lean#L496), [`complexSchattenNorm_mul_le`](BanachProbability/Schatten/Complex.lean#L310), [`abs_trace_mul_le`](BanachProbability/Schatten/Horn.lean#L616) | HNVW I, Prop D.2.3, Cor D.2.4, Thm D.2.6 | `Schatten/Horn`, `Schatten/Complex` |
 | The additive Horn inequality `Σ_{k<N} s_k (A B) ≤ Σ_{k<N} s_k (A) s_k (B)`, and the general one, for square matrices, `Σ_{k<N} s_k (A_1 ⋯ A_r) ≤ Σ_{k<N} s_k (A_1) ⋯ s_k (A_r)` | [`sum_sortedSingularValue_mul_le`](BanachProbability/Schatten/Horn.lean#L631), [`sum_sortedSingularValue_prod_le`](BanachProbability/Schatten/Horn.lean#L651) | Tomczak-Jaegermann (1974), Lemma 1.1 | `Schatten/Horn` |
 | Complex matrices: `‖A‖_{S_q} = 2^{−1/q} ‖realify A‖_{S_q}`, the norm axioms, `UMD₂ (S_q) ≤ C (q* − 1)` | [`complexSchattenNorm_eq_realify`](BanachProbability/Schatten/Complex.lean#L187), [`umdConst_two_complexSchattenSpace_le`](BanachProbability/Noncommutative/ComplexSchattenUMD.lean#L48) | — | `Schatten/Complex`, `Noncommutative/ComplexSchattenUMD` |
-| Row and column square functions as norms of block rows and columns; `‖(Σ a_kᴴ a_k)^{1/2}‖²_{S_q} ≤ E ‖Σ ε_k a_k‖²_{S_q}`, `q ≥ 2`, and for rows; Hölder's inequality for `Σ tr (a_k b_k)`, and the bounds in the duality `Σ tr (a_k b_kᴴ)` | [`complexSchattenNorm_blockCol_sq`](BanachProbability/Schatten/Block.lean#L99), [`complexSchattenNorm_blockCol_sq_le_avg`](BanachProbability/Schatten/Block.lean#L197), [`complexSchattenNorm_blockRow_sq_le_avg`](BanachProbability/Schatten/Block.lean#L219); [`norm_sum_trace_mul_le`](BanachProbability/Schatten/Block.lean#L147), [`norm_sum_trace_mul_conjTranspose_le_blockCol`](BanachProbability/Schatten/Block.lean#L170), [`norm_sum_trace_mul_conjTranspose_le_blockRow`](BanachProbability/Schatten/Block.lean#L158) | Lust-Piquard–Pisier (1991), (I.2), (I.3), (I.7), p. 246 | `Schatten/Block` |
+| Block rows and columns (below) | [`complexSchattenNorm_blockCol_sq`](BanachProbability/Schatten/Block.lean#L99), [`complexSchattenNorm_blockCol_sq_le_avg`](BanachProbability/Schatten/Block.lean#L197), [`complexSchattenNorm_blockRow_sq_le_avg`](BanachProbability/Schatten/Block.lean#L219); [`norm_sum_trace_mul_le`](BanachProbability/Schatten/Block.lean#L147), [`norm_sum_trace_mul_conjTranspose_le_blockCol`](BanachProbability/Schatten/Block.lean#L170), [`norm_sum_trace_mul_conjTranspose_le_blockRow`](BanachProbability/Schatten/Block.lean#L158) | Lust-Piquard–Pisier (1991), (I.2), (I.3), (I.7), p. 246 | `Schatten/Block` |
 | The singular value decomposition of a complex square matrix; `‖diag (A_i)‖_{S_q} = (Σ ‖A_i‖_{S_q}^q)^{1/q}` for block diagonal matrices, real and complex | [`exists_eq_unitary_mul_diagonal_mul`](BanachProbability/Schatten/Complex.lean#L382), [`complexSchattenNorm_blockDiagonal`](BanachProbability/Schatten/Block.lean#L242), [`schattenNorm_blockDiagonal_rpow`](BanachProbability/Schatten/Block.lean#L265) | the second: Tomczak-Jaegermann (1974), p. 166 | `Schatten/Complex`, `Schatten/Block` |
 | `\|tr (A B)\| ≤ ‖A‖_{S_r} ‖B‖_{S_{r'}}` for symmetric `A`, `B` and `r > 1` | [`abs_trace_mul_le_of_isHermitian`](BanachProbability/Schatten/Holder.lean#L108) | Mackey et al. (2014), Prop 7.5 | `Schatten/Holder` |
 | Noncommutative Khintchine, upper bound, `q ≥ 2`: `‖Σ ε_i x_i‖_{L^q (S_q)} ≤ √(2(q−1)) max (‖Σ x_i x_iᵀ‖_{S_{q/2}}, ‖Σ x_iᵀ x_i‖_{S_{q/2}})^{1/2}`; the constant is `√(q−1)` for `q = 2` and `q ≥ 3` | [`ncKhintchine_upper`](BanachProbability/NoncommutativeKhintchine/Basic.lean#L122), [`ncKhintchine_upper_of_eq_two_or_three_le`](BanachProbability/NoncommutativeKhintchine/Basic.lean#L134); symmetric `x_i`: [`ncKhintchine_symmetric_upper`](BanachProbability/NoncommutativeKhintchine/Symmetric.lean#L401), [`ncKhintchine_symmetric_upper_of_eq_two_or_three_le`](BanachProbability/NoncommutativeKhintchine/Symmetric.lean#L381) | Lust-Piquard (1986), Pisier–Xu (2003), Thm 6.1; proof of Mackey et al. (2014), Cor 7.3, Rem 7.2, §8 | `NoncommutativeKhintchine/Basic`, `NoncommutativeKhintchine/Symmetric` |
@@ -117,14 +228,30 @@ transform by predictable scalar multipliers `|c_k| ≤ 1`, for a general filtrat
 | `‖T_c x‖_{L^r (S_r)} ≤ K r* ‖x‖_{L^r (S_r)}`, `1 < r < ∞`, `K = 192 · 864³` | [`eLpNorm_ncTransform_le`](BanachProbability/Noncommutative/SchattenUMD.lean#L358) | Randrianantoanina (2002), Thm 4.3 | `Noncommutative/SchattenUMD` |
 | `UMD_q (S_q^{n×n}) ≤ K q*` and `UMD₂ (S_q^{n×n}) ≤ C (q* − 1)`, with `K` and `C` independent of `q ∈ (1, ∞)` and `n` | [`umdConst_schattenSpace_le`](BanachProbability/Noncommutative/SchattenUMD.lean#L457), [`isUMDBound_schattenSpace`](BanachProbability/Noncommutative/SchattenUMD.lean#L384) (`K = 192 · 864³`), [`umdConst_two_schattenSpace_le`](BanachProbability/Noncommutative/SchattenUMD.lean#L465); for matrix-valued martingales, real and complex: [`isMatrixUMDBound_schattenNorm`](BanachProbability/Noncommutative/MatrixUMD.lean#L103), [`isMatrixUMDBound_complexSchattenNorm`](BanachProbability/Noncommutative/MatrixUMD.lean#L115), [`isMatrixUMDBound_two`](BanachProbability/Noncommutative/MatrixUMD.lean#L124), [`isMatrixUMDBound_schattenNorm_iff`](BanachProbability/Noncommutative/MatrixUMD.lean#L52) | Randrianantoanina (2002), Cor 4.5, Rem 4.6 (1) | `Noncommutative/SchattenUMD`, `Noncommutative/MatrixUMD` |
 
+Horn's and Hölder's inequalities:
+
+- Horn's inequality `Π_{k<N} s_k (A B) ≤ Π_{k<N} s_k (A) s_k (B)`;
+- Hölder's inequality `‖A B‖_{S_p} ≤ ‖A‖_{S_q} ‖B‖_{S_r}`, `1/p = 1/q + 1/r`, `0 < q, r < ∞`, real
+  and complex rectangular matrices;
+- `|tr (A B)| ≤ ‖A‖_{S_q} ‖B‖_{S_{q'}}`.
+
+Block rows and columns:
+
+- row and column square functions as norms of block rows and columns;
+- `‖(Σ a_kᴴ a_k)^{1/2}‖²_{S_q} ≤ E ‖Σ ε_k a_k‖²_{S_q}`, `q ≥ 2`, and for rows;
+- Hölder's inequality for `Σ tr (a_k b_k)`, and the bounds in the duality `Σ tr (a_k b_kᴴ)`.
+
+
 ## Palomar
 
 The headline theorems are packaged for the [Palomar registry](https://palomar-registry.org) as eight
-entries, not submitted yet. An entry is a directory `palomar/<Entry>/`: `Challenge.lean` states the
-theorems, with `sorry` proofs and the definitions they need, importing only Mathlib; `Solution.lean`
-proves the same statements from the library; `comparator.json` configures Comparator, which checks
-that the Solution proves the Challenge; `formalization.yaml` is the metadata (sources, scope,
-differences from the sources).
+entries, not submitted yet. An entry is a directory `palomar/<Entry>/`:
+
+- `Challenge.lean` states the theorems, with `sorry` proofs and the definitions they need, importing
+  only Mathlib;
+- `Solution.lean` proves the same statements from the library;
+- `comparator.json` configures Comparator, which checks that the Solution proves the Challenge;
+- `formalization.yaml` is the metadata (sources, scope, differences from the sources).
 
 | Entry | Theorems | Sources | Files |
 | --- | --- | --- | --- |
@@ -188,12 +315,12 @@ says otherwise.
 
 | Source | Read | Used for | Departures and completions |
 | --- | --- | --- | --- |
-| Osękowski (2012) | the book | Burkholder's inequality, its sharpness, the square function | the two integral formulas, stated there without proof, are proved, one of them with a corrected constant; Theorem 3.34 itself is not formalized, only its function `W⁰` |
+| Osękowski (2012) | the book | Burkholder's inequality, its sharpness, the square function | the two integral formulas; Theorem 3.34 (below) |
 | Burkholder (1988) | [Numdam, `AST_1988__157-158__75_0`](http://www.numdam.org/item/AST_1988__157-158__75_0/) | Burkholder's function: (1.10), Remark 1.2 | Remark 1.2, stated there without proof, is completed from (1.14) |
-| HNVW I (2016) | the book | Props 4.2.3, 4.2.10, 4.2.15; Thms 4.2.5, 4.2.7, 4.2.25, 4.5.6; (4.26) for signs; Prop 3.2.10; Appendix D | in Theorem 4.5.6, Steps 2 and 3 are reordered, and the multipliers lie in the closed unit ball, as in Yaroslavtsev (2018); Corollary D.2.4 is completed for zero singular values and holds for all positive exponents |
-| HNVW II (2017) | the book | Thms 6.2.2, 6.2.4; Props 6.1.11, 6.1.15, Thm 6.1.13; Props 7.1.18 (1), 7.4.22, Thm 7.1.20 (2); the Walsh expansion, p. 18 | an edge case of Lemma 6.2.3 by continuity; the random sums with `p = 2` and real Gaussian variables; Theorem 7.1.20 (2) for orthonormal systems on finite sets with weights |
-| Tomczak-Jaegermann (1974) | Studia Math. 50 | Lemma 1.1, Prop 1.2, Thm 3.1 (ii) | finite matrices; in the even case of Theorem 3.1 (ii) the complex ones by realification; the additive Horn inequality, quoted there, from the multiplicative one (HNVW I, D.2.4); finite exponents, and the boundedness that Prop 1.2 needs; the theorem of Gohberg–Krein (§13, not obtained) is proved by the argument of Sutter–Berta–Tomamichel (2017) |
-| Sutter–Berta–Tomamichel (2017) | [arXiv:1604.03023](https://arxiv.org/abs/1604.03023) | Thm 3.1 with its proof in Appendix D, for the three lines theorem | finite matrices and finite exponents; Hadamard's three lines theorem in place of Hirschman's; the boundedness of `tr (X (z)ᴴ Ψ (z))` from the entries; any point of the closed strip |
+| HNVW I (2016) | the book | Props 4.2.3, 4.2.10, 4.2.15; Thms 4.2.5, 4.2.7, 4.2.25, 4.5.6; (4.26) for signs; Prop 3.2.10; Appendix D | Theorem 4.5.6; Corollary D.2.4 (below) |
+| HNVW II (2017) | the book | Thms 6.2.2, 6.2.4; Props 6.1.11, 6.1.15, Thm 6.1.13; Props 7.1.18 (1), 7.4.22, Thm 7.1.20 (2); the Walsh expansion, p. 18 | Lemma 6.2.3; the random sums; Theorem 7.1.20 (2), below |
+| Tomczak-Jaegermann (1974) | Studia Math. 50 | Lemma 1.1, Prop 1.2, Thm 3.1 (ii) | finite matrices and exponents; realification; the additive Horn inequality; Gohberg–Krein's theorem (below) |
+| Sutter–Berta–Tomamichel (2017) | [arXiv:1604.03023](https://arxiv.org/abs/1604.03023) | Thm 3.1 with its proof in Appendix D, for the three lines theorem | finite matrices and exponents; Hadamard's theorem (below) |
 | Maurey–Pisier (1976) | Studia Math. 58 | Remark 2.10, stated without proof | proved by HNVW II, Prop 7.4.22 |
 | Lust-Piquard–Pisier (1991) | Ark. Mat. 29 | (I.2), (I.3) in trace form, (I.5), (I.7), the dualities of p. 246 | finite matrices; (I.7) for signs; the bounds of the dualities only, not the isometry |
 | Pisier (1998) | [Numdam, `AST_1998__247__R1_0`](https://www.numdam.org/item/AST_1998__247__R1_0/) | p. 106 | `K (S_q) ≤ √(π/2) √(q + 1)`, with the constant of the type 2 of `S_q` proved here; the statement on `L^{q'} (Ω; S_{q'})` is implicit there |
@@ -201,14 +328,64 @@ says otherwise.
 | O'Donnell (2014) | the book | two-point inequality and tensorisation (§10.1, Exercises 9.7, 10.1, 10.3) | none |
 | Randrianantoanina (2002) | [arXiv:math/0111264](https://arxiv.org/abs/math/0111264) | Thms 3.1, 4.3, Cor 4.5, Rem 4.6 (1) | a rank count for Lemma 3.2; the interpolation is written out |
 | Mackey et al. (2014) | [arXiv:1201.6002](https://arxiv.org/abs/1201.6002) | noncommutative Khintchine, trace Hölder | the variant of Lemma 3.4 for `2 < q < 3` is proved |
-| Bourin–Zhang (2026) | [arXiv:2610.30538](https://arxiv.org/abs/2610.30538) | the triangle inequality | real `m × n` matrices, complex ones by realification; von Neumann's inequality, quoted there, is proved by Peierls's argument (its Jensen step is in the proof of Fehr (2021), Thm 7.1) |
+| Bourin–Zhang (2026) | [arXiv:2610.30538](https://arxiv.org/abs/2610.30538) | the triangle inequality | real and complex matrices; von Neumann's inequality (below) |
 | Burkholder (1973, 1981) | Ann. Probab. | origin of the good-λ method and of the characterization of UMD | not followed: the proofs are HNVW's |
 
-Cited for a statement or its origin, with another argument here: Maurey (1974–75); Burkholder
-(1984); Kahane (1964); Bonami (1970); Gohberg–Krein (1965); Lust-Piquard (1986); Lust-Piquard–Pisier (1991), for the Khintchine inequality; Pisier–Xu (2003), which states its Theorem 6.1 without proof; Pisier (2011, lecture notes), Cor 8.19, proved here on
-Paley–Walsh martingales. Burkholder (1986) is followed through HNVW I. Not used: Bhatia (1997) and
-Carlen (2010), the usual references for the triangle inequality, Weyl's inequalities and Peierls's
-inequality. Not obtained: Gross (1975) and Beckner (1975), which Borell cites.
+Osękowski (2012), departures and completions:
+
+- the two integral formulas, stated there without proof, are proved, one of them with a corrected
+  constant;
+- Theorem 3.34 itself is not formalized, only its function `W⁰`.
+
+HNVW I (2016), departures and completions:
+
+- in Theorem 4.5.6, Steps 2 and 3 are reordered, and the multipliers lie in the closed unit ball, as
+  in Yaroslavtsev (2018);
+- Corollary D.2.4 is completed for zero singular values and holds for all positive exponents.
+
+HNVW II (2017), departures and completions:
+
+- an edge case of Lemma 6.2.3 by continuity;
+- the random sums with `p = 2` and real Gaussian variables;
+- Theorem 7.1.20 (2) for orthonormal systems on finite sets with weights.
+
+Tomczak-Jaegermann (1974), departures and completions:
+
+- finite matrices;
+- in the even case of Theorem 3.1 (ii) the complex ones by realification;
+- the additive Horn inequality, quoted there, from the multiplicative one (HNVW I, D.2.4);
+- finite exponents, and the boundedness that Prop 1.2 needs;
+- the theorem of Gohberg–Krein (§13, not obtained) is proved by the argument of
+  Sutter–Berta–Tomamichel (2017).
+
+Sutter–Berta–Tomamichel (2017), departures and completions:
+
+- finite matrices and finite exponents;
+- Hadamard's three lines theorem in place of Hirschman's;
+- the boundedness of `tr (X (z)ᴴ Ψ (z))` from the entries;
+- any point of the closed strip.
+
+Bourin–Zhang (2026), departures and completions:
+
+- real `m × n` matrices, complex ones by realification;
+- von Neumann's inequality, quoted there, is proved by Peierls's argument (its Jensen step is in the
+  proof of Fehr (2021), Thm 7.1).
+
+Cited for a statement or its origin, with another argument here:
+
+- Maurey (1974–75);
+- Burkholder (1984);
+- Kahane (1964);
+- Bonami (1970);
+- Gohberg–Krein (1965);
+- Lust-Piquard (1986);
+- Lust-Piquard–Pisier (1991), for the Khintchine inequality;
+- Pisier–Xu (2003), which states its Theorem 6.1 without proof;
+- Pisier (2011, lecture notes), Cor 8.19, proved here on Paley–Walsh martingales.
+
+Burkholder (1986) is followed through HNVW I. Not used: Bhatia (1997) and Carlen (2010), the usual
+references for the triangle inequality, Weyl's inequalities and Peierls's inequality. Not obtained:
+Gross (1975) and Beckner (1975), which Borell cites.
 
 ## Literature
 
@@ -217,28 +394,79 @@ their authors.
 
 | Result | Origin | State of the question |
 | --- | --- | --- |
-| Burkholder's inequality | Burkholder 1966 (martingale transforms), 1984 (sharp constant, real martingales), 1988 (Hilbert-valued, differential subordination); Osękowski 2012 (monograph) | `p* − 1` is best possible; in the square function inequality it is best possible in two of the four cases, and in the other two the best constants were unknown in 1988 (Burkholder, Rem. 3.1) and in 2012 (Osękowski, Thm 8.6) |
-| UMD constants | Maurey 1974–75 (Paley–Walsh martingales), Burkholder 1981 (geometric characterization), Bourgain 1983 (Hilbert transform); monographs: HNVW 2016, 2017, 2023, Pisier 2016 | whether `UMD_p = UMD_{ℂ,p}` was an open question in 2018 (Yaroslavtsev); linear bounds between the UMD constant and the norm of the Hilbert transform fail in both directions, according to a 2026 preprint of Lorist and van Neerven ([REFERENCES](docs/REFERENCES.md)) |
-| Kahane–Khintchine, hypercontractivity | Kahane 1964; Bonami 1970, Beckner 1975; Borell 1979 | scalar best constants: Haagerup 1981; the best `L²`–`L¹` constant in normed spaces is `√2` (Latała–Oleszkiewicz 1994); the constants here are not claimed to be sharp |
+| Burkholder's inequality | Burkholder 1966, 1984, 1988; Osękowski 2012 (below) | `p* − 1` is best possible; the square function inequality (below) |
+| UMD constants | Maurey 1974–75, Burkholder 1981, Bourgain 1983; monographs (below) | the question `UMD_p = UMD_{ℂ,p}`; the Hilbert transform (below) |
+| Kahane–Khintchine, hypercontractivity | Kahane 1964; Bonami 1970, Beckner 1975; Borell 1979 | scalar and `L²`–`L¹` best constants; the constants here (below) |
 | UMD of Schatten classes | Pisier–Xu 1997 (noncommutative martingale inequalities); Randrianantoanina 2002 (weak type `(1, 1)`, optimal order in `p`) | no exact value of `UMD_p (S_p)` was found |
-| Noncommutative Khintchine | Lust-Piquard 1986; Lust-Piquard–Pisier 1991 (`p = 1`); Buchholz 2001, 2005; Mackey et al. 2014 | best constants known for even `q` (Buchholz); `√(q − 1)`, proved by Mackey et al. for `q = 2` and `q ≥ 3`, is within a factor `√e` of them; a sharp `p = 1` Rademacher constant is claimed in a preprint of Chuah, Liu and Mei ([REFERENCES](docs/REFERENCES.md)) |
+| Noncommutative Khintchine | Lust-Piquard 1986; Lust-Piquard–Pisier 1991 (`p = 1`); Buchholz 2001, 2005; Mackey et al. 2014 | best constants for even `q`; the constant `√(q − 1)`; the case `p = 1` (below) |
+
+Burkholder's inequality, origin:
+
+- Burkholder:
+  - 1966 (martingale transforms);
+  - 1984 (sharp constant, real martingales);
+  - 1988 (Hilbert-valued, differential subordination);
+- Osękowski 2012 (monograph).
+
+Burkholder's inequality, state of the question:
+
+- `p* − 1` is best possible;
+- in the square function inequality it is best possible in two of the four cases, and in the other
+  two the best constants were unknown in 1988 (Burkholder, Rem. 3.1) and in 2012 (Osękowski,
+  Thm 8.6).
+
+UMD constants, origin:
+
+- Maurey 1974–75 (Paley–Walsh martingales);
+- Burkholder 1981 (geometric characterization);
+- Bourgain 1983 (Hilbert transform);
+- monographs: HNVW 2016, 2017, 2023, Pisier 2016.
+
+UMD constants, state of the question:
+
+- whether `UMD_p = UMD_{ℂ,p}` was an open question in 2018 (Yaroslavtsev);
+- linear bounds between the UMD constant and the norm of the Hilbert transform fail in both
+  directions, according to a 2026 preprint of Lorist and van Neerven
+  ([REFERENCES](docs/REFERENCES.md)).
+
+Kahane–Khintchine, hypercontractivity, state of the question:
+
+- scalar best constants: Haagerup 1981;
+- the best `L²`–`L¹` constant in normed spaces is `√2` (Latała–Oleszkiewicz 1994);
+- the constants here are not claimed to be sharp.
+
+Noncommutative Khintchine, state of the question:
+
+- best constants known for even `q` (Buchholz);
+- `√(q − 1)`, proved by Mackey et al. for `q = 2` and `q ≥ 3`, is within a factor `√e` of them;
+- a sharp `p = 1` Rademacher constant is claimed in a preprint of Chuah, Liu and Mei
+  ([REFERENCES](docs/REFERENCES.md)).
 
 ### Related formalizations
 
-Searched on 2026-11-22: GitHub repository and code search, the Mathlib source, Loogle, the
-Palomar registry, the Archive of Formal Proofs, Rocq and HOL4 libraries, Lean Zulip topic titles, and
-arXiv. Third-party code was read as text; none of it was built or audited. The projects are in Lean
-unless said otherwise.
+Searched on 2026-11-22:
+
+- GitHub repository and code search;
+- the Mathlib source;
+- Loogle;
+- the Palomar registry;
+- the Archive of Formal Proofs;
+- Rocq and HOL4 libraries;
+- Lean Zulip topic titles;
+- arXiv.
+
+Third-party code was read as text; none of it was built or audited. The projects are in Lean unless
+said otherwise.
 
 | Project | Overlap | Not seen there |
 | --- | --- | --- |
 | [SmaniaD/Burkholder](https://github.com/SmaniaD/Burkholder) | `‖w ⋆ f‖_p ≤ (p* − 1) ‖f‖_p` for real martingales on finite measure spaces and predictable `\|w\| ≤ 1` | Hilbert-valued martingales, differential subordination, square function, sharpness |
-| [elorist/UMD_Hilberttransform](https://github.com/elorist/UMD_Hilberttransform) | a UMD constant (σ-finite filtrations), the dyadic reduction at `p = 2`, Burkholder's inequality at `p = 3` for dyadic Hilbert-valued martingales | other `p`, extrapolation, decoupling, `UMD_ℂ ≤ (π/2) UMD`, zig-zag functions, `L^p (B)` |
-| [TauCetiProject/TauCeti](https://github.com/TauCetiProject/TauCeti) | Kahane–Khintchine for all exponents `p, q > 0` in real normed spaces; `p* − 1` for real signed Haar sums; the Schatten triangle inequality; Doob's `L^p` inequality for Banach-valued martingales with `p/(p − 1)` | UMD constants, differential subordination, noncommutative Khintchine, vector-valued hypercontractivity |
-| [openai/math](https://github.com/openai/math), [AxiomMath/BandMatrixQUE](https://github.com/AxiomMath/BandMatrixQUE), [formal-applied-math/formal-mathfin](https://github.com/formal-applied-math/formal-mathfin), [facebookresearch/atlas-lean](https://github.com/facebookresearch/atlas-lean) | Banach-valued Khintchine `L²`–`L¹` with constant `4`, type `p > 1` ⇒ K-convex (Pisier's theorem), Schatten triangle and Hölder at even exponents; Doob's `L^p` inequality; Doob's `L²` inequality, type and cotype 2 of Hilbert spaces | the other exponents and the UMD theory |
-| [Polarnova/FABL](https://github.com/Polarnova/FABL) | Kahane–Khintchine `L²`–`L¹` in real normed spaces with the sharp `√2`, which this package does not have; scalar Khintchine; scalar hypercontractivity for `1 ≤ p ≤ 2 ≤ q`, and two-function forms on product spaces | vector-valued sums for other exponents |
+| [elorist/UMD_Hilberttransform](https://github.com/elorist/UMD_Hilberttransform) | a UMD constant; the dyadic reduction; Burkholder's inequality at `p = 3` (below) | other `p`, extrapolation, decoupling, `UMD_ℂ ≤ (π/2) UMD`, zig-zag functions, `L^p (B)` |
+| [TauCetiProject/TauCeti](https://github.com/TauCetiProject/TauCeti) | Kahane–Khintchine, signed Haar sums, Schatten triangle, Doob (below) | UMD constants, differential subordination, noncommutative Khintchine, vector-valued hypercontractivity |
+| [openai/math](https://github.com/openai/math), [AxiomMath/BandMatrixQUE](https://github.com/AxiomMath/BandMatrixQUE), [formal-applied-math/formal-mathfin](https://github.com/formal-applied-math/formal-mathfin), [facebookresearch/atlas-lean](https://github.com/facebookresearch/atlas-lean) | Khintchine, K-convexity, Schatten triangle and Hölder, Doob (below) | the other exponents and the UMD theory |
+| [Polarnova/FABL](https://github.com/Polarnova/FABL) | Kahane–Khintchine with the sharp `√2`, scalar Khintchine and hypercontractivity (below) | vector-valued sums for other exponents |
 | [Shilun-Allan-Li/tcslib](https://github.com/Shilun-Allan-Li/tcslib) | scalar hypercontractivity on the cube for `1 ≤ p ≤ q`, and two-function, reverse, Gaussian and product-space forms | vector-valued statements |
-| [roos-j/lean-trilinearht](https://github.com/roos-j/lean-trilinearht), [ZephyrZhng/khintchine-lean](https://github.com/ZephyrZhng/khintchine-lean), [leanprover-community/add-combi](https://github.com/leanprover-community/add-combi) | Khintchine's upper bound in Hilbert spaces; sharp scalar `L^p`–`L¹` constants; Marcinkiewicz–Zygmund for independent variables in inner product spaces | general normed spaces |
+| [roos-j/lean-trilinearht](https://github.com/roos-j/lean-trilinearht), [ZephyrZhng/khintchine-lean](https://github.com/ZephyrZhng/khintchine-lean), [leanprover-community/add-combi](https://github.com/leanprover-community/add-combi) | Khintchine's upper bound; sharp scalar constants; Marcinkiewicz–Zygmund (below) | general normed spaces |
 | [tchen-research/NLAlib](https://github.com/tchen-research/NLAlib) | noncommutative Khintchine, upper bound in `S_{2p}`, `p ∈ ℕ`, with `√(2p − 1)`, for complex Hermitian matrices, signs or Gaussians; 2-uniform smoothness of `S_{2r}` | other exponents, non-Hermitian matrices, the lower bound |
 | [BuxinSu/LearningTheoryFormalizations](https://github.com/BuxinSu/LearningTheoryFormalizations), [xf-shi/Tensor_Norm](https://github.com/xf-shi/Tensor_Norm) | matrix Khintchine in operator norm with a factor `√log` of the dimension; an `L¹` noncommutative Khintchine inequality with Haar unitary coefficients | the dimension-free Rademacher inequality in `S_q` |
 | [Timeroot/Lean-QuantumInfo](https://github.com/Timeroot/Lean-QuantumInfo), [savarin/hlawka-schatten](https://github.com/savarin/hlawka-schatten) | Schatten norms of complex square matrices with Hölder, and the trace norm; Schatten norms of linear maps and the Hermitian dilation | in the first, the triangle inequality of `S_q` for all `q` |
@@ -246,12 +474,51 @@ unless said otherwise.
 | Mathlib | martingales, Doob's weak maximal inequality, Hoeffding, Azuma | no declaration for Khintchine, UMD, Burkholder, hypercontractivity, Schatten norms or Doob's `L^p` inequality |
 | [Archive of Formal Proofs](https://www.isa-afp.org) (Isabelle); [FormalML](https://github.com/IBM/FormalML), [MathComp-Analysis](https://github.com/math-comp/analysis) (Rocq); [HOL4](https://github.com/HOL-Theorem-Prover/HOL) | martingales and their convergence, optional stopping, concentration inequalities | none of the results above was found |
 
+elorist/UMD_Hilberttransform, overlap:
+
+- a UMD constant (σ-finite filtrations);
+- the dyadic reduction at `p = 2`;
+- Burkholder's inequality at `p = 3` for dyadic Hilbert-valued martingales.
+
+TauCetiProject/TauCeti, overlap:
+
+- Kahane–Khintchine for all exponents `p, q > 0` in real normed spaces;
+- `p* − 1` for real signed Haar sums;
+- the Schatten triangle inequality;
+- Doob's `L^p` inequality for Banach-valued martingales with `p/(p − 1)`.
+
+openai/math, AxiomMath/BandMatrixQUE, formal-applied-math/formal-mathfin and
+facebookresearch/atlas-lean, overlap:
+
+- Banach-valued Khintchine `L²`–`L¹` with constant `4`, type `p > 1` ⇒ K-convex (Pisier's theorem),
+  Schatten triangle and Hölder at even exponents;
+- Doob's `L^p` inequality;
+- Doob's `L²` inequality, type and cotype 2 of Hilbert spaces.
+
+Polarnova/FABL, overlap:
+
+- Kahane–Khintchine `L²`–`L¹` in real normed spaces with the sharp `√2`, which this package does not
+  have;
+- scalar Khintchine;
+- scalar hypercontractivity for `1 ≤ p ≤ 2 ≤ q`, and two-function forms on product spaces.
+
+roos-j/lean-trilinearht, ZephyrZhng/khintchine-lean and leanprover-community/add-combi, overlap:
+
+- Khintchine's upper bound in Hilbert spaces;
+- sharp scalar `L^p`–`L¹` constants;
+- Marcinkiewicz–Zygmund for independent variables in inner product spaces.
+
 ## Shorter proofs
 
 Shorter arguments than the sources' were noticed for some of the results. They are in
-[docs/SHORTER_PROOFS.md](docs/SHORTER_PROOFS.md), each with a sketch, its scope and its status: in the
-library, checked in Lean (in a file outside the library, at the commit named), or on paper. The main
-ones:
+[docs/SHORTER_PROOFS.md](docs/SHORTER_PROOFS.md), each with a sketch, its scope and its
+status, one of:
+
+- in the library;
+- checked in Lean (in a file outside the library, at the commit named);
+- on paper.
+
+The main ones:
 
 | Result | Shorter proof | Status |
 | --- | --- | --- |
@@ -289,6 +556,7 @@ and [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Pre
 | [`RandomSums/`](BanachProbability/RandomSums), [`TypeTwo/`](BanachProbability/TypeTwo), [`KConvexity/`](BanachProbability/KConvexity) | the contraction principle; type 2, the Schatten classes; Gaussian type 2, K-convexity, the Rademacher projection on `L^q (S_q)` |
 | [`NoncommutativeKhintchine/`](BanachProbability/NoncommutativeKhintchine), [`Noncommutative/`](BanachProbability/Noncommutative) | the noncommutative Khintchine inequality; conditional expectations, Cuculescu's projections, transforms, interpolation, Schatten UMD |
 | [`palomar/`](palomar) | the Palomar entries |
+
 
 ## Credits
 

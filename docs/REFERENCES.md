@@ -48,11 +48,13 @@ Works cited in the README, in [SHORTER_PROOFS.md](SHORTER_PROOFS.md) and in the 
   https://doi.org/10.4064/sm-70-3-231-283
 - P. Hitczenko, *On tangent sequences of UMD-space valued random vectors*, unpublished manuscript (as
   cited by Cox–Veraar (2007), without a year).
-- T. Hytönen, J. van Neerven, M. Veraar, L. Weis (HNVW), *Analysis in Banach Spaces*, Springer. *Volume
-  I: Martingales and Littlewood–Paley Theory* (2016), https://doi.org/10.1007/978-3-319-48520-1;
-  *Volume II: Probabilistic Methods and Operator Theory* (2017),
-  https://doi.org/10.1007/978-3-319-69808-3; *Volume III: Harmonic Analysis and Spectral Theory* (2023),
-  https://doi.org/10.1007/978-3-031-46598-7
+- T. Hytönen, J. van Neerven, M. Veraar, L. Weis (HNVW), *Analysis in Banach Spaces*, Springer:
+  - *Volume I: Martingales and Littlewood–Paley Theory* (2016),
+    https://doi.org/10.1007/978-3-319-48520-1;
+  - *Volume II: Probabilistic Methods and Operator Theory* (2017),
+    https://doi.org/10.1007/978-3-319-69808-3;
+  - *Volume III: Harmonic Analysis and Spectral Theory* (2023),
+    https://doi.org/10.1007/978-3-031-46598-7
 - S. Janson, *Gaussian Hilbert Spaces*, Cambridge University Press (1997).
   https://doi.org/10.1017/CBO9780511526169
 - J.-P. Kahane, *Sur les sommes vectorielles `Σ ±u_n`*, C. R. Acad. Sci. Paris 259 (1964) 2577–2580.
