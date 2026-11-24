@@ -23,7 +23,7 @@ project:
 
 classification:
   arxiv: ["math.FA", "math.PR", "math.OA"]
-  msc2020: ["46L53", "47B10", "15A60", "60B20", "60E15", "68V20"]
+  msc2020: ["46L53", "47B10", "15A60", "60B20", "60E15"]
 
 sources:
   - title: "Matrix concentration inequalities via the method of exchangeable pairs"

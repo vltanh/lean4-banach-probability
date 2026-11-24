@@ -24,7 +24,7 @@ project:
 
 classification:
   arxiv: ["math.PR", "math.FA"]
-  msc2020: ["60G42", "60G46", "60E15", "68V20"]
+  msc2020: ["60G42", "60G46", "60E15"]
 
 sources:
   - title: "Sharp Martingale and Semimartingale Inequalities"

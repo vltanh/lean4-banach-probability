@@ -24,7 +24,7 @@ project:
 
 classification:
   arxiv: ["math.OA", "math.FA", "math.PR"]
-  msc2020: ["46L53", "46L52", "47B10", "15A18", "15A60", "60G42", "68V20"]
+  msc2020: ["46L53", "46L52", "47B10", "15A18", "15A60", "60G42"]
 
 sources:
   - title: "Non-commutative martingale transforms"
